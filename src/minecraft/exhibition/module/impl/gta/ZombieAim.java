@@ -1,9 +1,11 @@
 package exhibition.module.impl.gta;
 
+import exhibition.Client;
 import exhibition.event.Event;
 import exhibition.event.RegisterEvent;
 import exhibition.event.impl.*;
 import exhibition.management.ColorManager;
+import exhibition.management.font.TTFFontRenderer;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.Options;
@@ -44,7 +46,9 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 
 /**
@@ -71,6 +75,7 @@ public class ZombieAim extends Module {
     private final Setting<Boolean> showFOV = new Setting<>("SHOW FOV", true, "Renders your FOV on your screen.");
     private final Setting<Boolean> autoHeal = new Setting<>("AUTO-HEAL", true, "Auto uses Heal ability.");
     private final Setting<Boolean> autoRevive = new Setting<>("AUTO-REVIVE", true, "Auto sneaks near downed players.");
+    private final Setting<Boolean> hud = new Setting<>("HUD", true, "Shows your health, ammo, and skill cool-down.");
 
     private final Setting<Number> predictionScale = new Setting<>("PRED SCALE", 1, "Amount of prediction to be applied.", 0.05, 0, 2);
     private final Setting<Number> predictionTicks = new Setting<>("PRED TICKS", 2, "Ticks to predict. (50 ms latency per tick)", 1, 0, 10);
@@ -97,6 +102,7 @@ public class ZombieAim extends Module {
         addSetting(autoHeal);
         addSetting(autoRevive);
         addSetting(showFOV);
+        addSetting(hud);
 
         addSetting(predictionTicks);
         addSetting(predictionScale);
@@ -153,6 +159,26 @@ public class ZombieAim extends Module {
 
                 RenderingUtil.drawCircle((float) width / 2, (float) height / 2, (float) bruh, 12, ColorManager.hudColor.getColorHex());
 
+            }
+            /*
+            HUD
+             */
+            if (hud.getValue()) {
+                int currentHealth = (int) mc.thePlayer.getHealth() * 5;
+
+                ScaledResolution scaledRes = new ScaledResolution(mc);
+                TTFFontRenderer smallFont = Client.fonts[0];
+
+                if (isHoldingWeapon()){
+                    int currentAmmo = mc.thePlayer.getCurrentEquippedItem().stackSize;
+                    if (isReloading() && mc.thePlayer.getCurrentEquippedItem().stackSize == 1){
+                        currentAmmo = 0;
+                    }
+                    smallFont.drawBorderedString(currentAmmo + "/" + (mc.thePlayer.experienceLevel - currentAmmo), scaledRes.getScaledWidth() / 2D - 15 - (int) smallFont.getWidth("30/30"), scaledRes.getScaledHeight_double() / 2 - 0.5, -1, Colors.getColor(0, 200));
+                }
+                smallFont.drawBorderedString(currentHealth + "HP", scaledRes.getScaledWidth() / 2D + 15, scaledRes.getScaledHeight_double() / 2 - 0.5, -1, Colors.getColor(0, 200));
+                if (isReloading())
+                smallFont.drawBorderedString("Reloading", scaledRes.getScaledWidth() / 2D - (int) smallFont.getWidth("Reloading") / 2, scaledRes.getScaledHeight_double() / 2 + 15, Colors.getColor(91,255,51), Colors.getColor(0, 200));
             }
         }
 
