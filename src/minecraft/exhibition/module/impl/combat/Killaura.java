@@ -81,7 +81,7 @@ public class Killaura extends Module {
     private Setting<Boolean> antiLag = new Setting<>("ANTI-LAG", true, "Prevents the Killaura from flagging you when lagging.");
     private Setting<Boolean> reduce = new Setting<>("REDUCE", false, "Reduces your rotations to prevent flags.");
     private Setting<Boolean> prediction = new Setting<>("PREDICTION", true, "Predicts where the player will be on server side.");
-    private Setting<Number> predictionTicks = new Setting<>("PTICKS", 1, "The amount of ticks to predict. 1 tick = 50ms", 1, 1, 5);
+    private Setting<Number> predictionTicks = new Setting<>("PTICKS", 1, "The amount of ticks to predict. 1 tick = 50ms", 1, 1, 10);
     private Setting<Number> predictionScale = new Setting<>("PSCALE", 1.0, "The scale of how much prediction is applied.", 0.05, 0, 2);
     private Setting<Number> maxTargets = new Setting<>("SWITCH-SIZE", 4, "The maximum amount of targets to switch through.", 1, 1, 10);
 

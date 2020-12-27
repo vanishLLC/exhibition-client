@@ -54,7 +54,7 @@ public class ZombieAim extends Module {
     private final Setting<Boolean> autoHeal = new Setting<>("AUTO-HEAL", true, "Auto uses Heal ability.");
 
     private final Setting<Number> predictionScale = new Setting<>("PRED SCALE", 1, "Amount of prediction to be applied.", 0.05, 0, 2);
-    private final Setting<Number> predictionTicks = new Setting<>("PRED TICKS", 2, "Ticks to predict. (50 ms latency per tick)", 1, 0, 5);
+    private final Setting<Number> predictionTicks = new Setting<>("PRED TICKS", 2, "Ticks to predict. (50 ms latency per tick)", 1, 0, 10);
 
     private final Setting<Number> delay = new Setting<>("DELAY", 4, "Tick delay before firing again. 0 = Auto weapon fire rate delay", 1, 0, 20);
     private final Setting<Number> bufferSize = new Setting<>("BUFFER", 3, "Prediction buffer size. The higher the value the higher the smoothing.", 1, 1, 10);

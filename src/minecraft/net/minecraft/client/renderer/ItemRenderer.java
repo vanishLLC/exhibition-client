@@ -3,6 +3,8 @@ package net.minecraft.client.renderer;
 import exhibition.Client;
 import exhibition.management.ColorManager;
 import exhibition.module.data.Options;
+import exhibition.module.impl.gta.Aimbot;
+import exhibition.module.impl.gta.ZombieAim;
 import exhibition.module.impl.other.Animations;
 import exhibition.module.impl.render.Chams;
 import exhibition.util.RenderingUtil;
@@ -389,20 +391,19 @@ public class ItemRenderer
             else if (entityplayersp.getItemInUseCount() > 0)
             {
                 EnumAction enumaction = this.itemToRender.getItemUseAction();
-
-                switch (ItemRenderer.ItemRenderer$1.field_178094_a[enumaction.ordinal()])
+                switch (enumaction)
                 {
-                    case 1:
+                    case NONE:
                         this.transformFirstPersonItem(f, 0.0F);
                         break;
 
-                    case 2:
-                    case 3:
+                    case EAT:
+                    case DRINK:
                         this.func_178104_a(entityplayersp, partialTicks);
                         this.transformFirstPersonItem(f, 0.0F);
                         break;
 
-                    case 4:
+                    case BLOCK:
                         /**/
                         GL11.glTranslated(-0.1, 0.15, 0);
                         Animations animations = (Animations) Client.getModuleManager().get(Animations.class);
@@ -458,10 +459,6 @@ public class ItemRenderer
                         }
 
                         this.func_178103_d();
-                        if (enumaction != EnumAction.BLOCK) {
-                            break;
-                        }
-
 //                        GL11.glRotatef(50.0F, 0.0F, 0.0F, 1.0F);
 //                        GL11.glRotatef(20.0F, 1.0F, 0.0F, 0.0F);
 //                        GL11.glRotatef(30.0F, 0.0F, 1.0F, 0.0F);
@@ -469,7 +466,7 @@ public class ItemRenderer
 
                         break;
 
-                    case 5:
+                    case BOW:
                         this.transformFirstPersonItem(f, 0.0F);
                         this.func_178098_a(partialTicks, entityplayersp);
                 }
@@ -477,7 +474,27 @@ public class ItemRenderer
             else
             {
                 this.func_178105_d(f1);
-                this.transformFirstPersonItem(f, f1);
+
+                boolean allowBruh = (Client.getModuleManager().isEnabled(Aimbot.class) || Client.getModuleManager().isEnabled(ZombieAim.class)) && this.itemToRender != null && this.itemToRender.isItemStackDamageable();
+
+                if(allowBruh) {
+                    if(!this.itemToRender.isItemDamaged()) {
+                        GlStateManager.translate(0.56F, -0.52F, -0.71999997F);
+                        GlStateManager.translate(f * -0.05F, f * 0.075F, f * 0.2F);
+                        GlStateManager.rotate(45.0F, 0.0F, 1.0F, 0.0F);
+                        float f_ = MathHelper.sin(f1 * f1 * (float) Math.PI);
+                        float f1_ = MathHelper.sin(MathHelper.sqrt_float(f1) * (float) Math.PI);
+                        GlStateManager.rotate(f_ * -20.0F, 0.0F, 1.0F, 0.0F);
+                        GlStateManager.rotate(f1_ * -20.0F, 0.0F, 0.0F, 1.0F);
+                        GlStateManager.rotate(f1_ * -80.0F, 1.0F, 0.0F, 0.0F);
+                        GlStateManager.scale(0.4F, 0.4F, 0.4F);
+                    } else {
+                        GlStateManager.rotate(45.0F, 0.0F, 1.0F, 0.0F);
+                        this.transformFirstPersonItem(0.0F, 0.0F);
+                    }
+                } else {
+                    this.transformFirstPersonItem(f, 0.0F);
+                }
             }
 
             this.renderItem(entityplayersp, this.itemToRender, ItemCameraTransforms.TransformType.FIRST_PERSON);
