@@ -744,9 +744,10 @@ public class RenderingUtil {
         float x = r *= 2.0F;
         float y = 0.0F;
         enableGL2D();
+        GL11.glLineWidth(1.5F);
         GL11.glScalef(0.5F, 0.5F, 0.5F);
         GL11.glColor4f(f1, f2, f3, f);
-        GL11.glBegin(2);
+        GL11.glBegin(GL_LINE_LOOP);
         int ii = 0;
         while (ii < num_segments) {
             GL11.glVertex2f(x + cx, y + cy);

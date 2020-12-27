@@ -144,10 +144,10 @@ public class EntityRenderer implements IResourceManagerReloadListener
     private float smoothCamPartialTicks;
 
     /** FOV modifier hand */
-    private float fovModifierHand;
+    public float fovModifierHand;
 
     /** FOV modifier hand prev */
-    private float fovModifierHandPrev;
+    public float fovModifierHandPrev;
     private float bossColorModifier;
     private float bossColorModifierPrev;
 

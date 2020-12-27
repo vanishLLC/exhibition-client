@@ -4,6 +4,8 @@ import exhibition.event.Event;
 import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventMotionUpdate;
 import exhibition.event.impl.EventRender3D;
+import exhibition.event.impl.EventRenderGui;
+import exhibition.management.ColorManager;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.Options;
@@ -22,6 +24,7 @@ import net.minecraft.item.Item;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
+import optifine.Config;
 import org.lwjgl.opengl.GL11;
 
 import java.util.*;
@@ -40,13 +43,14 @@ public class ZombieAim extends Module {
 
     private final Setting<Boolean> silent = new Setting<>("SILENT", true, "Aims silently for you.");
     private final Setting<Boolean> showPrediction = new Setting<>("SHOW-PREDICTION", true, "Shows you target prediction.");
+    private final Setting<Boolean> showFOV = new Setting<>("SHOW FOV", true, "Renders your FOV on your screen.");
 
     private final Setting<Number> predictionScale = new Setting<>("PRED SCALE", 1, "Amount of prediction to be applied", 0.05, 0, 2);
     private final Setting<Number> predictionTicks = new Setting<>("PRED TICKS", 2, "Ticks to predict (50 ms latency per tick)", 1, 0, 5);
 
     private final Setting<Number> delay = new Setting<>("DELAY", 4, "Tick delay before firing again. 0 = Auto weapon fire rate delay", 1, 0, 20);
     private final Setting<Number> bufferSize = new Setting<>("BUFFER", 3, "Prediction buffer size. The higher the value the higher the smoothing.", 1, 1, 10);
-    private final Setting<Number> fov = new Setting<>("FOV", 90, "FOV check for the Aimbot.", 5, 1, 180);
+    private final Setting<Number> fov = new Setting<>("FOV", 90, "FOV check for the Aimbot.", 0.1, 1, 180);
 
     private final Options fireMode = new Options("Aimbot Mode", "Auto Fire", "Auto Fire", "On Held");
 
@@ -56,6 +60,7 @@ public class ZombieAim extends Module {
         addSetting(new Setting<>("MODE", fireMode, "Aimbot behaviour mode."));
         addSetting(silent);
         addSetting(showPrediction);
+        addSetting(showFOV);
 
         addSetting(predictionTicks);
         addSetting(predictionScale);
@@ -71,7 +76,7 @@ public class ZombieAim extends Module {
 
     private boolean isInFOV(Entity entity) {
         int fov = this.fov.getValue().intValue();
-        return Math.round(Math.abs(RotationUtils.getYawChange(entity.posX, entity.posZ))) <= fov;
+        return Math.hypot(RotationUtils.getYawChange(entity.posX, entity.posZ), RotationUtils.getPitchChangeGiven(entity, entity.posY)) <= fov;
     }
 
     @Override
@@ -81,10 +86,41 @@ public class ZombieAim extends Module {
         target = null;
     }
 
-    @RegisterEvent(events = {EventMotionUpdate.class, EventRender3D.class})
+    @RegisterEvent(events = {EventMotionUpdate.class, EventRender3D.class, EventRenderGui.class})
     public void onEvent(Event event) {
-        if (mc.thePlayer == null || mc.theWorld == null || !HypixelUtil.isInGame("ZOMBIES")) {
-            return;
+
+//        if (mc.thePlayer == null || mc.theWorld == null || !HypixelUtil.isInGame("ZOMBIES")) {
+//            return;
+//        }
+//
+
+        if (event instanceof EventRenderGui) {
+            EventRenderGui er = event.cast();
+            if (showFOV.getValue()) {
+
+                float screen_fov = this.mc.gameSettings.fovSetting;
+
+                if (Config.isDynamicFov()) {
+                    screen_fov *= mc.entityRenderer.fovModifierHandPrev + (mc.entityRenderer.fovModifierHand - mc.entityRenderer.fovModifierHandPrev) * mc.timer.renderPartialTicks;
+                }
+
+                if (Config.zoomMode)
+                {
+                    screen_fov /= 4.0F;
+                }
+
+                float aimbot_fov = fov.getValue().floatValue();
+
+                double width = er.getResolution().getScaledWidth_double();
+                double height = er.getResolution().getScaledHeight_double();
+
+                float ratio =  (float)(Math.tan( Math.toRadians(aimbot_fov / 2) ) * 0.05F / ( Math.tan( Math.toRadians(screen_fov / 2) ) * 0.05F ));
+
+                double bruh = width / 2 * ratio;
+
+                RenderingUtil.drawCircle((float)width / 2, (float)height / 2, (float)bruh, 12, ColorManager.hudColor.getColorHex());
+
+            }
         }
 
         if (event instanceof EventRender3D && showPrediction.getValue()) {
@@ -112,7 +148,7 @@ public class ZombieAim extends Module {
                     AxisAlignedBB var11 = player.getEntityBoundingBox().expand(collisSize, collisSize, collisSize);
                     AxisAlignedBB var12 = new AxisAlignedBB(var11.minX - player.posX + 0.2, var11.minY + player.getEyeHeight() - 0.2 - player.posY, var11.minZ - player.posZ + 0.2, var11.maxX - player.posX - 0.2, var11.minY + player.getEyeHeight() + 0.2 - player.posY, var11.maxZ - player.posZ - 0.2);
 
-                    RenderingUtil.glColor(player == target ? Colors.getColor(41, 255, 41, 200) : Colors.getColor(255, 255, 41, 150));
+                    RenderingUtil.glColor(player == target ? Colors.getColor(41, 255, 41, 200) : isInFOV(player) ? Colors.getColor(255, 255, 255, 150) : Colors.getColor(255, 255, 41, 150));
                     RenderingUtil.drawBoundingBox(var12);
 
                     RenderingUtil.post3D();

@@ -100,12 +100,13 @@ public class RotationUtils {
     }
 
     public static float getPitchChangeGiven(Entity entity, double posY) {
-        double deltaX = entity.posX - Minecraft.getMinecraft().thePlayer.posX;
-        double deltaZ = entity.posZ - Minecraft.getMinecraft().thePlayer.posZ;
-        double deltaY = posY - 2.2D + entity.getEyeHeight() - Minecraft.getMinecraft().thePlayer.posY;
-        double distanceXZ = MathHelper.sqrt_double(deltaX * deltaX + deltaZ * deltaZ);
-        double pitchToEntity = -Math.toDegrees(Math.atan(deltaY / distanceXZ));
-        return -MathHelper.wrapAngleTo180_float(Minecraft.getMinecraft().thePlayer.rotationPitch - (float) pitchToEntity) - 2.5F;
+        double xDiff = entity.posX - Minecraft.getMinecraft().thePlayer.posX;
+        double yDiff = (entity.posY + entity.getEyeHeight()) - (Minecraft.getMinecraft().thePlayer.posY + Minecraft.getMinecraft().thePlayer.getEyeHeight());
+        double zDiff = entity.posZ - Minecraft.getMinecraft().thePlayer.posZ;
+
+        double dist = Math.hypot(xDiff, zDiff);
+        float pitch = (float) -(Math.atan2(yDiff, dist) * 180.0D / 3.141592653589793D);
+        return -MathHelper.wrapAngleTo180_float(Minecraft.getMinecraft().thePlayer.rotationPitch - pitch);
     }
 
     public static float getPitchChange(Entity entity, double posY) {
