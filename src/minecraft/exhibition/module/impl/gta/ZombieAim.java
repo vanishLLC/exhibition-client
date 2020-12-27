@@ -13,6 +13,7 @@ import exhibition.util.render.Colors;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.passive.IAnimals;
 import net.minecraft.item.Item;
 import net.minecraft.util.AxisAlignedBB;
@@ -207,7 +208,7 @@ public class ZombieAim extends Module {
     }
 
     private boolean isValidEntity(Entity entity) {
-        return entity instanceof IAnimals;
+        return entity instanceof IAnimals && !(entity instanceof EntityVillager);
     }
 
     private boolean isHoldingWeapon() {
