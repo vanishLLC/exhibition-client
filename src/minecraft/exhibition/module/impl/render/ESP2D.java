@@ -125,8 +125,8 @@ public class ESP2D extends Module {
             for (Map.Entry<Entity, ESP2D.Bruh> e : entityConvertedPointsMap.entrySet()) {
                 Entity ent = e.getKey();
                 boolean valid = renderAll || ((ent instanceof EntityPlayer && renderPlayers) ||
-                        (ent instanceof IAnimals && renderPassive) ||
-                        (ent instanceof IMob && renderMobs) ||
+                        ((ent instanceof EntityAnimal || ent instanceof EntitySnowman || ent instanceof EntitySquid) && renderPassive) ||
+                        ((ent instanceof EntityMob || ent instanceof EntitySlime || ent instanceof EntityGhast || ent instanceof EntityDragon) && renderMobs) ||
                         (ent instanceof EntityItem && renderItems) || (ent instanceof EntityVillager && renderVillagers) || (ent instanceof EntityGolem && renderGolems));
                 if (!valid) {
                     removal.add(ent);
