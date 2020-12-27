@@ -381,7 +381,6 @@ public class ItemRenderer
         GlStateManager.enableRescaleNormal();
         GlStateManager.pushMatrix();
 
-
         if (this.itemToRender != null)
         {
             if (this.itemToRender.getItem() instanceof ItemMap)
@@ -479,8 +478,18 @@ public class ItemRenderer
 
                 if(allowBruh) {
                     if(!this.itemToRender.isItemDamaged()) {
-                        GlStateManager.translate(0.56F, -0.52F, -0.71999997F);
-                        GlStateManager.translate(f * -0.05F, f * 0.075F, f * 0.2F);
+                        GlStateManager.translate(0.56F, -0.52F, -0.91999997F);
+                        if(this.itemToRender.getItem().isFull3D() && Item.getIdFromItem(this.itemToRender.getItem()) == 290) {
+                            GlStateManager.translate(-0.3,0.25,-0.21999997F);
+                            GlStateManager.rotate(85, 0,0,1);
+                        }
+
+                        GlStateManager.translate(f * -0.02F, f * 0.02F, f * 0.15F);
+                        if(this.itemToRender.getItem().isFull3D() && Item.getIdFromItem(this.itemToRender.getItem()) == 290)
+                            GlStateManager.rotate(f * 8F, 1,0,0);
+
+                        GlStateManager.rotate(f * 1F, 1,0,0);
+
                         GlStateManager.rotate(45.0F, 0.0F, 1.0F, 0.0F);
                         float f_ = MathHelper.sin(f1 * f1 * (float) Math.PI);
                         float f1_ = MathHelper.sin(MathHelper.sqrt_float(f1) * (float) Math.PI);

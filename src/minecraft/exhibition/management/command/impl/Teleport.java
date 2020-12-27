@@ -55,7 +55,7 @@ public class Teleport extends Command implements EventListener {
             return;
         }
 
-        if (!mc.thePlayer.isAllowEdit() && !HypixelUtil.isInGame("HOUSING")) {
+        if (!mc.thePlayer.isAllowEdit() && !HypixelUtil.isInGame("HOUSING") && !HypixelUtil.isInGame("ZOMBIES")) {
             Notifications.getManager().post("Cannot use here", "You must be in game to use Teleport.", Notifications.Type.NOTIFY);
             return;
         }

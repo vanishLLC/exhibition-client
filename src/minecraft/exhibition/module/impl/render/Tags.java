@@ -52,7 +52,9 @@ public class Tags extends Module {
             }
         }
         if (event instanceof EventNametagRender) {
-            event.setCancelled(true);
+            EventNametagRender er = event.cast();
+            if (er.getEntity() instanceof EntityPlayer)
+                event.setCancelled(true);
         }
     }
 

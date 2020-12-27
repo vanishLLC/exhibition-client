@@ -139,9 +139,11 @@ public class ESP2D extends Module {
             removal.forEach(e -> entityConvertedPointsMap.remove(e));
         }
 
-        if (event instanceof EventNametagRender && renderPlayers) {
-            if ((boolean) settings.get(NAME).getValue() || Client.getModuleManager().isEnabled(Nametags.class) || Client.getModuleManager().isEnabled(Tags.class))
-                event.setCancelled(true);
+        if (event instanceof EventNametagRender) {
+            EventNametagRender er = event.cast();
+            if (er.getEntity() instanceof EntityPlayer)
+                if ((boolean) settings.get(NAME).getValue() || Client.getModuleManager().isEnabled(Nametags.class) || Client.getModuleManager().isEnabled(Tags.class))
+                    event.setCancelled(true);
         }
         if (event instanceof EventRender3D) {
             mc.mcProfiler.startSection("esp2DWorld");

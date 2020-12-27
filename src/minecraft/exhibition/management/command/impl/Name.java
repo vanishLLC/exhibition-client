@@ -20,7 +20,7 @@ public class Name extends Command {
         if(mc.thePlayer != null) {
             GuiScreen.setClipboardString(mc.thePlayer.getName());
         }
-        ChatUtil.printChat(chatPrefix + "\2477copied name to clipboard!");
+        ChatUtil.printChat(chatPrefix + "\2477Copied name to clipboard!");
     }
 
 }

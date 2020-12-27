@@ -12,6 +12,7 @@ import exhibition.event.RegisterEvent;
 import exhibition.event.impl.*;
 import exhibition.management.PriorityManager;
 import exhibition.management.command.Command;
+import exhibition.management.notifications.dev.DevNotification;
 import exhibition.management.notifications.dev.DevNotifications;
 import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.Module;
@@ -110,7 +111,6 @@ public class AntiBot extends Module {
         boolean remove = (Boolean) settings.get(REMOVE).getValue();
         String currentSetting = ((Options) settings.get(MODE).getValue()).getSelected();
         if (event instanceof EventSpawnPlayer) {
-
             EventSpawnPlayer e = event.cast();
             if (e.getPlayer().getEntityId() == 69420) {
                 return;
@@ -134,7 +134,7 @@ public class AntiBot extends Module {
 
                     double roundedY = MathUtils.roundToPlace(player.posY, 6);
 
-                    if (Math.abs(distance) > 5 && mc.thePlayer.ticksExisted > 260 && spawnedSinceUpdate < 2) {
+                    if (Math.abs(distance) > 3 && mc.thePlayer.ticksExisted > 260 && spawnedSinceUpdate < 2) {
 //                        DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "------------------------------------------------------------------------");
 //                        DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "Illegal Spawn: " + player.getDisplayName().getFormattedText() + " \247a Distance: " + MathUtils.roundToPlace(distance, 3) +
 //                                " \247bDX: " + MathUtils.roundToPlace(var7, 3) +
@@ -154,6 +154,7 @@ public class AntiBot extends Module {
                             //DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " \247e" + "Weird bot spawn pos?");
                         }
 
+                        DevNotifications.getManager().post("Suspicions Spawn " + player.getName() + " " + player.getDisplayName());
                         //DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "------------------------------------------------------------------------");
                         player.illegalSpawn = true;
                     }
@@ -292,7 +293,7 @@ public class AntiBot extends Module {
                                 bruh = true;
                             }
 
-                            if (distance > 5 && distance < 400 && ent.illegalSpawn && (!mc.thePlayer.isInvisible() || mc.thePlayer.capabilities.allowFlying) && !ent.isRiding()) {
+                            if (distance > 2 && distance < 400 && ent.illegalSpawn && (!mc.thePlayer.isInvisible() || mc.thePlayer.capabilities.allowFlying) && !ent.isRiding()) {
 //                                DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "------------------------------------------------------------------------");
 //                                DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "Illegal TP: " + ent.getDisplayName().getFormattedText() + " \247aDelta: " + MathUtils.roundToPlace(distance, 6) + " \247bDist: " + mc.thePlayer.getDistanceToEntity(ent) + " \247c" + ent.ticksExisted);
 //                                DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "Teleported player pos \247a" + MathUtils.roundToPlace(ent.posX, 6) + " \247b" +
@@ -317,8 +318,7 @@ public class AntiBot extends Module {
 
                                 invalid.add(ent);
 
-                                int ticksOnGround = ticksOnGroundMap.getOrDefault(ent.getName(), 0);
-                                ticksOnGroundMap.put(ent.getName(), ticksOnGround - 20);
+                                ticksOnGroundMap.put(ent.getName(), -20);
                             }
                         }
 
@@ -453,7 +453,7 @@ public class AntiBot extends Module {
     }
 
     public static boolean isBot(Entity ent) {
-        if(!Client.getModuleManager().isEnabled(AntiBot.class))
+        if (!Client.getModuleManager().isEnabled(AntiBot.class))
             return false;
 
         if (ent instanceof EntityPlayer) {

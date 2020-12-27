@@ -15,6 +15,7 @@ import exhibition.event.impl.EventRenderGui;
 import exhibition.management.font.DynamicTTFFont;
 import exhibition.management.notifications.dev.DevNotifications;
 import exhibition.module.impl.hud.HUD;
+import exhibition.module.impl.other.StreamerMode;
 import exhibition.module.impl.render.Crosshair;
 import exhibition.util.render.Colors;
 import exhibition.util.security.AuthenticationUtil;
@@ -551,6 +552,9 @@ public class GuiIngame extends Gui {
     }
 
     private void renderScoreboard(ScoreObjective p_180475_1_, ScaledResolution p_180475_2_) {
+        if (Client.getModuleManager().isEnabled(StreamerMode.class) && StreamerMode.hideScore)
+            return;
+
         Scoreboard scoreboard = p_180475_1_.getScoreboard();
         Collection<Score> collection = scoreboard.getSortedScores(p_180475_1_);
         ArrayList<Score> arraylist = collection.stream().filter(p_apply_1_ -> p_apply_1_.getPlayerName() != null && !p_apply_1_.getPlayerName().startsWith("#")).collect(Collectors.toCollection(Lists::newArrayList));

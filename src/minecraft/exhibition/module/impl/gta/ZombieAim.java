@@ -3,6 +3,7 @@ package exhibition.module.impl.gta;
 import exhibition.event.Event;
 import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventMotionUpdate;
+import exhibition.event.impl.EventNametagRender;
 import exhibition.event.impl.EventRender3D;
 import exhibition.event.impl.EventRenderGui;
 import exhibition.management.ColorManager;
@@ -10,26 +11,31 @@ import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.Options;
 import exhibition.module.data.settings.Setting;
+import exhibition.module.impl.render.Nametags;
 import exhibition.util.*;
 import exhibition.util.Timer;
 import exhibition.util.render.Colors;
+import net.minecraft.block.Block;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.EntityWither;
+import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.passive.IAnimals;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
 import net.minecraft.network.play.client.C09PacketHeldItemChange;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.*;
 import optifine.Config;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import java.util.*;
@@ -40,9 +46,13 @@ import java.util.concurrent.ArrayBlockingQueue;
  */
 public class ZombieAim extends Module {
 
-    private final HashMap<Entity, ZombieAim.EntityDelta> deltaHashMap = new HashMap<>();
+    private final ResourceLocation reviveSymbol = new ResourceLocation("textures/revive.png");
 
-    public static Entity target;
+    private final HashMap<EntityArmorStand, ZombieAim.DownedData> downedPlayers = new HashMap<>();
+
+    private final HashMap<EntityLivingBase, ZombieAim.EntityDelta> deltaHashMap = new HashMap<>();
+
+    public static EntityLivingBase target;
 
     private Timer timer = new Timer();
 
@@ -52,6 +62,7 @@ public class ZombieAim extends Module {
     private final Setting<Boolean> showPrediction = new Setting<>("SHOW-PREDICTION", true, "Shows you target prediction.");
     private final Setting<Boolean> showFOV = new Setting<>("SHOW FOV", true, "Renders your FOV on your screen.");
     private final Setting<Boolean> autoHeal = new Setting<>("AUTO-HEAL", true, "Auto uses Heal ability.");
+    private final Setting<Boolean> autoRevive = new Setting<>("AUTO-REVIVE", true, "Auto sneaks near downed players.");
 
     private final Setting<Number> predictionScale = new Setting<>("PRED SCALE", 1, "Amount of prediction to be applied.", 0.05, 0, 2);
     private final Setting<Number> predictionTicks = new Setting<>("PRED TICKS", 2, "Ticks to predict. (50 ms latency per tick)", 1, 0, 10);
@@ -64,6 +75,11 @@ public class ZombieAim extends Module {
 
     private final Options fireMode = new Options("Aimbot Mode", "Auto Fire", "Auto Fire", "On Held");
 
+    private final Options hitbox = new Options("Hitbox", "Hitscan Head", "Hitscan Head", "Head", "Chest", "Leg");
+
+    private final Options priorityMode = new Options("Priority", "Closest", "Closest", "Max Health", "Lowest Health", "FOV");
+
+
     public ZombieAim(ModuleData data) {
         super(data);
 
@@ -71,6 +87,7 @@ public class ZombieAim extends Module {
         addSetting(silent);
         addSetting(showPrediction);
         addSetting(autoHeal);
+        addSetting(autoRevive);
         addSetting(showFOV);
 
         addSetting(predictionTicks);
@@ -79,6 +96,9 @@ public class ZombieAim extends Module {
         addSetting(delay);
         addSetting(fov);
         addSetting(health);
+
+        addSetting(new Setting<>("HITBOX", hitbox, "Where the Aimbot should aim."));
+        addSetting(new Setting<>("PRIORITY", priorityMode, "How the Aimbot should prioritize targets."));
     }
 
     @Override
@@ -98,12 +118,8 @@ public class ZombieAim extends Module {
         target = null;
     }
 
-    @RegisterEvent(events = {EventMotionUpdate.class, EventRender3D.class, EventRenderGui.class})
+    @RegisterEvent(events = {EventMotionUpdate.class, EventRender3D.class, EventRenderGui.class, EventNametagRender.class})
     public void onEvent(Event event) {
-        if (mc.thePlayer == null || mc.theWorld == null || !HypixelUtil.isInGame("ZOMBIES")) {
-            return;
-        }
-
         if (event instanceof EventRenderGui) {
             EventRenderGui er = event.cast();
             if (showFOV.getValue()) {
@@ -132,39 +148,122 @@ public class ZombieAim extends Module {
             }
         }
 
+        if (mc.thePlayer == null || mc.theWorld == null || !HypixelUtil.isInGame("ZOMBIES")) {
+            if (!deltaHashMap.isEmpty())
+                deltaHashMap.clear();
+            if (!downedPlayers.isEmpty())
+                downedPlayers.clear();
+            return;
+        }
+
+        if (event instanceof EventRenderGui) {
+            EventRenderGui er = event.cast();
+            if (autoRevive.getValue()) {
+                for (Map.Entry<EntityArmorStand, DownedData> data : downedPlayers.entrySet()) {
+                    if (mc.theWorld.getLoadedEntityList().contains(data.getKey())) {
+
+                        ScaledResolution scaledRes = er.getResolution();
+
+                        DownedData downedData = data.getValue();
+
+                        GlStateManager.pushMatrix();
+                        GlStateManager.enableAlpha();
+                        GlStateManager.enableBlend();
+
+                        mc.getTextureManager().bindTexture(reviveSymbol);
+
+                        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
+                        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
+
+                        GlStateManager.translate(downedData.getScreenRender().array[0] / scaledRes.getScaleFactor(), downedData.getScreenRender().array[1] / scaledRes.getScaleFactor(), 0);
+
+                        double ratio = downedData.getTime() / 25D;
+
+                        RenderingUtil.glColor(Colors.getColor(255, (int) (200 * (ratio)), 0));
+
+                        GlStateManager.scale(0.5, 0.5, 0.5);
+                        RenderingUtil.drawIcon(-32, -32, 0, 0, 64, 64, 64, 64);
+                        GL11.glColor4d(1, 1, 1, 1);
+                        GlStateManager.disableBlend();
+                        GlStateManager.disableAlpha();
+                        GlStateManager.popMatrix();
+                    }
+                }
+            }
+        }
+
+        if (event instanceof EventNametagRender) {
+            EventNametagRender er = event.cast();
+            if (er.getEntity() instanceof EntityArmorStand) {
+                String formatted = er.getEntity().getDisplayName().getFormattedText();
+                if (formatted.contains("\247c") && formatted.contains(".") && formatted.endsWith("s\247r")) {
+                    EntityArmorStand entityArmorStand = (EntityArmorStand) er.getEntity();
+
+                    double parsedTime = Double.parseDouble(StringUtils.stripControlCodes(formatted).replace("s", ""));
+
+                    Nametags.Bruh bruh = null;
+                    if (downedPlayers.containsKey(entityArmorStand)) {
+                        DownedData downedData = downedPlayers.get(entityArmorStand);
+                        bruh = downedData.getScreenRender();
+                        downedData.setTime(parsedTime);
+                    } else if(parsedTime > 15.0D) {
+                        bruh = new Nametags.Bruh(new double[3]);
+                        downedPlayers.put(entityArmorStand, new DownedData(parsedTime, bruh));
+                    }
+
+                    if(bruh == null)
+                        return;
+
+                    float pTicks = mc.timer.renderPartialTicks;
+                    double x = entityArmorStand.lastTickPosX + (entityArmorStand.posX - entityArmorStand.lastTickPosX) * pTicks - mc.getRenderManager().viewerPosX;
+                    double y = entityArmorStand.lastTickPosY + (entityArmorStand.posY - entityArmorStand.lastTickPosY) * pTicks - mc.getRenderManager().viewerPosY;
+                    double z = entityArmorStand.lastTickPosZ + (entityArmorStand.posZ - entityArmorStand.lastTickPosZ) * pTicks - mc.getRenderManager().viewerPosZ;
+
+                    RenderingUtil.worldToScreenOptimized(x, y + 1.5, z, bruh);
+
+                    if (bruh.array[0] == -1337 || (bruh.array[2] < 0.0D || bruh.array[2] > 1.0D)) {
+                        downedPlayers.remove(entityArmorStand);
+                    }
+                }
+            }
+        }
+
         if (event instanceof EventRender3D && showPrediction.getValue()) {
             EventRender3D er = event.cast();
 
-            for (Entity player : mc.theWorld.getLoadedEntityList()) {
-                if (isValidEntity(player)) {
-                    if (!deltaHashMap.containsKey(player)) {
-                        continue;
+            for (Entity e : mc.theWorld.getLoadedEntityList()) {
+                if (e instanceof EntityLivingBase) {
+                    EntityLivingBase player = (EntityLivingBase) e;
+                    if (isValidEntity(player)) {
+                        if (!deltaHashMap.containsKey(player)) {
+                            continue;
+                        }
+
+                        double[] p = getPrediction(player, predictionTicks.getValue().intValue(), predictionScale.getValue().floatValue());
+
+                        GL11.glPushMatrix();
+                        RenderingUtil.pre3D();
+                        mc.entityRenderer.setupCameraTransform(mc.timer.renderPartialTicks, 2);
+
+                        double x = (player.prevPosX + (player.posX - player.prevPosX) * er.renderPartialTicks) - RenderManager.renderPosX + p[0];
+                        double y = (player.prevPosY + (player.posY - player.prevPosY) * er.renderPartialTicks) - RenderManager.renderPosY + p[1];
+                        double z = (player.prevPosZ + (player.posZ - player.prevPosZ) * er.renderPartialTicks) - RenderManager.renderPosZ + p[2];
+                        GlStateManager.translate(x, y, z);
+                        // GlStateManager.rotate(-(player.prevRotationYawHead + (player.rotationYawHead - player.prevRotationYawHead) * er.renderPartialTicks), 0, 1, 0);
+                        float collisSize = player.getCollisionBorderSize();
+
+                        AxisAlignedBB var11 = player.getEntityBoundingBox().expand(collisSize, collisSize, collisSize);
+                        AxisAlignedBB var12 = new AxisAlignedBB(var11.minX - player.posX + 0.2, var11.minY + player.getEyeHeight() - 0.2 - player.posY, var11.minZ - player.posZ + 0.2, var11.maxX - player.posX - 0.2, var11.minY + player.getEyeHeight() + 0.2 - player.posY, var11.maxZ - player.posZ - 0.2);
+
+                        RenderingUtil.glColor(player == target ? Colors.getColor(41, 255, 41, 200) : isInFOV(player) ? Colors.getColor(255, 255, 255, 150) : Colors.getColor(255, 255, 41, 150));
+                        RenderingUtil.drawBoundingBox(var12);
+
+                        RenderingUtil.post3D();
+                        if (!GL11.glIsEnabled(GL11.GL_LIGHTING)) {
+                            GL11.glEnable(GL11.GL_LIGHTING);
+                        }
+                        GL11.glPopMatrix();
                     }
-
-                    double[] p = getPrediction(player, predictionTicks.getValue().intValue(), predictionScale.getValue().floatValue());
-
-                    GL11.glPushMatrix();
-                    RenderingUtil.pre3D();
-                    mc.entityRenderer.setupCameraTransform(mc.timer.renderPartialTicks, 2);
-
-                    double x = (player.prevPosX + (player.posX - player.prevPosX) * er.renderPartialTicks) - RenderManager.renderPosX + p[0];
-                    double y = (player.prevPosY + (player.posY - player.prevPosY) * er.renderPartialTicks) - RenderManager.renderPosY + p[1];
-                    double z = (player.prevPosZ + (player.posZ - player.prevPosZ) * er.renderPartialTicks) - RenderManager.renderPosZ + p[2];
-                    GlStateManager.translate(x, y, z);
-                    // GlStateManager.rotate(-(player.prevRotationYawHead + (player.rotationYawHead - player.prevRotationYawHead) * er.renderPartialTicks), 0, 1, 0);
-                    float collisSize = player.getCollisionBorderSize();
-
-                    AxisAlignedBB var11 = player.getEntityBoundingBox().expand(collisSize, collisSize, collisSize);
-                    AxisAlignedBB var12 = new AxisAlignedBB(var11.minX - player.posX + 0.2, var11.minY + player.getEyeHeight() - 0.2 - player.posY, var11.minZ - player.posZ + 0.2, var11.maxX - player.posX - 0.2, var11.minY + player.getEyeHeight() + 0.2 - player.posY, var11.maxZ - player.posZ - 0.2);
-
-                    RenderingUtil.glColor(player == target ? Colors.getColor(41, 255, 41, 200) : isInFOV(player) ? Colors.getColor(255, 255, 255, 150) : Colors.getColor(255, 255, 41, 150));
-                    RenderingUtil.drawBoundingBox(var12);
-
-                    RenderingUtil.post3D();
-                    if (!GL11.glIsEnabled(GL11.GL_LIGHTING)) {
-                        GL11.glEnable(GL11.GL_LIGHTING);
-                    }
-                    GL11.glPopMatrix();
                 }
             }
         }
@@ -174,19 +273,41 @@ public class ZombieAim extends Module {
             if (em.isPre()) {
                 shootDelay++;
 
-                for (Entity entity : mc.theWorld.getLoadedEntityList()) {
-                    if (isValidEntity(entity) && entity.ticksExisted > 5) {
-                        double xDelta = entity.posX - entity.lastTickPosX;
-                        double zDelta = entity.posZ - entity.lastTickPosZ;
+                for (Entity e : mc.theWorld.getLoadedEntityList()) {
+                    if (e instanceof EntityLivingBase) {
+                        EntityLivingBase entity = (EntityLivingBase) e;
+                        if (isValidEntity(entity) && entity.ticksExisted > 5) {
+                            double xDelta = entity.posX - entity.lastTickPosX;
+                            double zDelta = entity.posZ - entity.lastTickPosZ;
 
-                        if (Math.hypot(xDelta, zDelta) < 3) {
-                            deltaHashMap.putIfAbsent(entity, new ZombieAim.EntityDelta(xDelta, zDelta));
-                            if (deltaHashMap.containsKey(entity)) {
-                                deltaHashMap.get(entity).logDeltas(xDelta, zDelta, mc.thePlayer.ticksExisted);
+                            if (Math.hypot(xDelta, zDelta) < 3) {
+                                deltaHashMap.putIfAbsent(entity, new ZombieAim.EntityDelta(xDelta, zDelta));
+                                if (deltaHashMap.containsKey(entity)) {
+                                    deltaHashMap.get(entity).logDeltas(xDelta, zDelta, mc.thePlayer.ticksExisted);
+                                }
+                            }
+                        } else {
+                            deltaHashMap.remove(entity);
+                        }
+                    }
+                }
+
+                if (autoRevive.getValue()) {
+                    boolean shouldSneak = false;
+                    for (Map.Entry<EntityArmorStand, DownedData> data : downedPlayers.entrySet()) {
+                        if (mc.theWorld.getLoadedEntityList().contains(data.getKey())) {
+                            EntityArmorStand entityArmorStand = data.getKey();
+                            if(mc.thePlayer.getDistanceToEntity(entityArmorStand) < 2) {
+                                KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.getKeyCode(), true);
+                                KeyBinding.onTick(mc.gameSettings.keyBindSneak.getKeyCode());
+                                shouldSneak = true;
                             }
                         }
-                    } else {
-                        deltaHashMap.remove(entity);
+                    }
+
+                    if(!shouldSneak && mc.thePlayer.isSneaking() && !Keyboard.isKeyDown(mc.gameSettings.keyBindSneak.getKeyCode())) {
+                        KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.getKeyCode(), false);
+                        KeyBinding.onTick(mc.gameSettings.keyBindSneak.getKeyCode());
                     }
                 }
 
@@ -224,43 +345,58 @@ public class ZombieAim extends Module {
                 if (em.isPre()) {
                     target = null;
                     double targetWeight = Double.NEGATIVE_INFINITY;
-                    for (Entity entity : mc.theWorld.getLoadedEntityList()) {
-                        if (isValidEntity(entity)) {
-                            double[] prediction = getPrediction(entity, predictionTicks.getValue().intValue(), predictionScale.getValue().floatValue());
-                            if (entity.ticksExisted > 5 && isInFOV(entity) && canBeSeen(entity, prediction)) {
-                                if (target == null) {
-                                    target = entity;
-                                    targetWeight = getTargetWeight(entity);
-                                } else if (getTargetWeight(entity) > targetWeight) {
-                                    target = entity;
-                                    targetWeight = getTargetWeight(entity);
+
+                    Vec3 hitVec = null;
+
+                    for (Entity e : mc.theWorld.getLoadedEntityList()) {
+                        if (e instanceof EntityLivingBase) {
+                            EntityLivingBase entity = (EntityLivingBase) e;
+                            if (isValidEntity(entity)) {
+                                Vec3 tempVec;
+                                if (entity.ticksExisted > 5 && isInFOV(entity) && (tempVec = getHitVec(entity)) != null) {
+                                    if (target == null) {
+                                        target = entity;
+                                        hitVec = tempVec;
+                                        targetWeight = getTargetWeight(entity);
+                                    } else if (getTargetWeight(entity) > targetWeight) {
+                                        target = entity;
+                                        hitVec = tempVec;
+                                        targetWeight = getTargetWeight(entity);
+                                    }
                                 }
                             }
                         }
                     }
 
                     for (Object o : this.deltaHashMap.keySet().toArray()) {
-                        Entity player = (Entity) o;
+                        EntityLivingBase player = (EntityLivingBase) o;
                         if (!mc.theWorld.getLoadedEntityList().contains(player)) {
                             this.deltaHashMap.remove(player);
                         }
                     }
 
-                    if (target != null) {
+                    for (Object o : this.downedPlayers.keySet().toArray()) {
+                        EntityArmorStand downedPlayer = (EntityArmorStand) o;
+                        if (!mc.theWorld.getLoadedEntityList().contains(downedPlayer)) {
+                            this.downedPlayers.remove(downedPlayer);
+                        }
+                    }
+
+                    if (target != null && hitVec != null) {
                         double[] p = getPrediction(target, predictionTicks.getValue().intValue(), predictionScale.getValue().floatValue());
 
-                        double eyeLevel = target.getEyeHeight();
+                        double eyeLevel = 0;
 
                         if (target instanceof EntityZombie) {
                             EntityZombie temp = (EntityZombie) target;
                             if (temp.isChild()) {
-                                eyeLevel /= 2;
+                                eyeLevel = target.getEyeHeight() / 2;
                             }
                         }
 
-                        double xDiff = target.posX + p[0] - mc.thePlayer.posX;
-                        double yDiff = (target.posY + eyeLevel + p[1]) - (mc.thePlayer.posY + mc.thePlayer.getEyeHeight());
-                        double zDiff = target.posZ + p[2] - mc.thePlayer.posZ;
+                        double xDiff = hitVec.xCoord - mc.thePlayer.posX;
+                        double yDiff = hitVec.yCoord - eyeLevel - (mc.thePlayer.posY + mc.thePlayer.getEyeHeight());
+                        double zDiff = hitVec.zCoord - mc.thePlayer.posZ;
 
                         float yaw = RotationUtils.getYawChange(target.posX + p[0], target.posZ + p[2]);
 
@@ -291,8 +427,8 @@ public class ZombieAim extends Module {
         }
     }
 
-    private boolean isValidEntity(Entity entity) {
-        return entity instanceof IAnimals && !(entity instanceof EntityVillager) && !(entity instanceof EntityWither && entity.isInvisible()) && ((EntityLivingBase) entity).getHealth() > 0;
+    private boolean isValidEntity(EntityLivingBase entity) {
+        return entity instanceof IAnimals && !(entity instanceof EntityVillager) && !(entity instanceof EntityWither && entity.isInvisible()) && entity.getHealth() > 0;
     }
 
     private boolean isHoldingWeapon() {
@@ -307,21 +443,60 @@ public class ZombieAim extends Module {
         return mc.thePlayer.inventory.getCurrentItem() == null ? -1 : Item.getIdFromItem(mc.thePlayer.inventory.getCurrentItem().getItem());
     }
 
-    private boolean canBeSeen(Entity e, double[] p) {
-        return mc.theWorld.rayTraceBlocks(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY + (double) mc.thePlayer.getEyeHeight(), mc.thePlayer.posZ),
-                new Vec3(e.posX + p[0], e.posY + (double) e.getEyeHeight() + p[1], e.posZ + p[2])) == null;
+    private final Block[] ignoredBlocks = new Block[]{Blocks.barrier, Blocks.wooden_slab};
+
+    private Vec3 getHitVec(EntityLivingBase entity) {
+        double[] p = getPrediction(entity, predictionTicks.getValue().intValue(), predictionScale.getValue().floatValue());
+
+        double posX = entity.posX + p[0];
+        double posY = entity.posY + p[1];
+        double posZ = entity.posZ + p[2];
+
+        List<Vec3> points = new ArrayList<>();
+
+        boolean hitscan = hitbox.getSelected().contains("Hitscan");
+
+        if (hitscan || hitbox.getSelected().equals("Head"))
+            points.add(new Vec3(posX, posY + entity.getEyeHeight(), posZ));
+
+        if (hitscan || hitbox.getSelected().equals("Chest"))
+            points.add(new Vec3(posX, posY + entity.getEyeHeight() / 2, posZ));
+
+        if (hitscan || hitbox.getSelected().equals("Leg"))
+            points.add(new Vec3(posX, posY + entity.getEyeHeight() / 3, posZ));
+
+        for (Vec3 point : points) {
+            if (canBeSeen(point))
+                return point;
+        }
+        return null;
     }
 
-    private double getTargetWeight(Entity p) {
+    private boolean canBeSeen(Vec3 vec) {
+        return mc.theWorld.rayTraceBlocksIgnored(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY + (double) mc.thePlayer.getEyeHeight(), mc.thePlayer.posZ), vec, ignoredBlocks) == null;
+    }
+
+    private double getTargetWeight(EntityLivingBase p) {
         double weight = -mc.thePlayer.getDistanceToEntity(p);
         weight -= p.getDistanceToEntity(mc.thePlayer) / 5.0F;
+        switch (priorityMode.getSelected()) {
+            case "Max Health":
+                weight += p.getMaxHealth() / 5.0F;
+                break;
+            case "Lowest Health":
+                weight -= p.getHealth() / 5.0F;
+                break;
+            case "FOV":
+                weight -= Math.hypot(RotationUtils.getYawChange(p.posX, p.posZ), RotationUtils.getPitchChangeGiven(p, p.posY));
+                break;
+        }
         return weight;
     }
 
     private final double[] ZERO = new double[]{0, 0, 0};
 
-    private double[] getPrediction(Entity player, int ticks, double scale) {
-        if (!deltaHashMap.containsKey(player) || (player.lastTickPosX == player.posX && player.lastTickPosZ == player.posZ)) {
+    private double[] getPrediction(EntityLivingBase player, int ticks, double scale) {
+        if (!deltaHashMap.containsKey(player) || (player.lastTickPosX == player.posX && player.lastTickPosZ == player.posZ && player.lastTickPosY == player.posY)) {
             return ZERO;
         }
 
@@ -370,6 +545,31 @@ public class ZombieAim extends Module {
         }
 
         return new double[]{finalX * scale, finalY, finalZ * scale};
+    }
+
+    private class DownedData {
+
+        private double time;
+
+        private Nametags.Bruh screenRender;
+
+        public DownedData(double time, Nametags.Bruh bruh) {
+            this.time = time;
+            this.screenRender = bruh;
+        }
+
+        public double getTime() {
+            return this.time;
+        }
+
+        public void setTime(double time) {
+            this.time = time;
+        }
+
+        public Nametags.Bruh getScreenRender() {
+            return this.screenRender;
+        }
+
     }
 
     private class EntityDelta {

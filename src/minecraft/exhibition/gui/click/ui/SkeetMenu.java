@@ -56,8 +56,11 @@ import java.util.*;
  * Created by cool1 on 1/21/2017.
  */
 public class SkeetMenu extends UI {
+
+    private final boolean allowMinigames = Boolean.parseBoolean(System.getProperty("NEoBuMASs"));
+
     public static Opacity opacity = new Opacity(0);
-    private Minecraft mc = Minecraft.getMinecraft();
+    private final Minecraft mc = Minecraft.getMinecraft();
 
     @Override
     public void mainConstructor(ClickGui p0) {
@@ -260,6 +263,9 @@ public class SkeetMenu extends UI {
             mainPanel.typeButton.add(new CategoryButton(mainPanel, types.name(), x + 3, y + y1));
             y += 40;
         }
+        if (allowMinigames)
+            mainPanel.typeButton.add(new CategoryButton(mainPanel, ModuleData.Type.Minigames.name(), x + 3, y + y1));
+        y += 40;
         mainPanel.typeButton.add(new CategoryButton(mainPanel, "Colors", x + 3, y + y1));
         mainPanel.typeButton.get(0).enabled = true;
         mainPanel.typeButton.get(0).categoryPanel.visible = true;
@@ -354,6 +360,9 @@ public class SkeetMenu extends UI {
             case "Colors":
                 Client.badCache.drawCenteredString("H", (p0.x + 18.5F + p0.panel.dragX), (p0.y + 20 + p0.panel.dragY), color);
                 break;
+            case "Minigames":
+                Client.badCache.drawCenteredString("G", (p0.x + 18.5F + p0.panel.dragX), (p0.y + 20 + p0.panel.dragY), color);
+                break;
             default:
                 Client.f.drawStringWithShadow(p0.name.substring(0, 1), (p0.x + 12 + p0.panel.dragX), (p0.y + 13 + p0.panel.dragY), color);
                 break;
@@ -379,6 +388,121 @@ public class SkeetMenu extends UI {
     public void categoryPanelConstructor(CategoryPanel categoryPanel, CategoryButton categoryButton, float x, float y) {
         float xOff = 50 + categoryButton.panel.x;
         float yOff = 15 + categoryButton.panel.y;
+
+        if (categoryButton.name.equalsIgnoreCase("Minigames")) {
+            float biggestY = 18 + 16;
+            float noSets = 0;
+            for (Module module : Client.getModuleManager().getArray()) {
+                if (module.getType() == ModuleData.Type.Minigames) {
+                    y = 20;
+                    List<Setting> list = getSettings(module);
+                    if (getSettings(module) != null) {
+                        categoryPanel.buttons.add(new Button(categoryPanel, module.getName(), xOff + 0.5f, yOff + 10, module));
+                        float x1 = 0.5f;
+                        for (Setting setting : list) {
+                            if (setting.getValue() instanceof Boolean) {
+                                categoryPanel.checkboxes.add(new Checkbox(categoryPanel, setting.getName(), xOff + x1, yOff + y, setting));
+                                x1 += 44;
+                                if (x1 == 88.5f) {
+                                    x1 = 0.5f;
+                                    y += 10;
+                                }
+                            }
+                        }
+                        if (x1 == 44.5f) {
+                            y += 10;
+                        }
+                        x1 = 0.5f;
+                        int tY = 0;
+                        List<Setting> sliders = new ArrayList<>();
+                        list.forEach(setting -> {
+                            if (setting.getValue() instanceof Number) {
+                                sliders.add(setting);
+                            }
+                        });
+                        sliders.sort(Comparator.comparing(Setting::getName));
+                        for (Setting setting : sliders) {
+                            categoryPanel.sliders.add(new Slider(categoryPanel, xOff + x1 + 1, yOff + y + 4, setting));
+                            x1 += 44;
+                            tY = 10;
+                            if (x1 == 88.5f) {
+                                tY = 0;
+                                x1 = 0.5f;
+                                y += 12;
+                            }
+                        }
+                        for (Setting setting : getSettings(module)) {
+                            if (setting.getValue() instanceof Options || setting.getValue() instanceof MultiBool) {
+                                if (x1 == 44.5f) {
+                                    y += 14;
+                                }
+                                x1 = 0.5f;
+                            }
+                        }
+                        for (Setting setting : getSettings(module)) {
+                            if (setting.getValue() instanceof Options) {
+                                categoryPanel.dropdownBoxes.add(new DropdownBox(setting, xOff + x1, yOff + y + 4, categoryPanel));
+                                tY = 17;
+                                x1 += 44;
+                                if (x1 == 88.5f) {
+                                    y += 17;
+                                    tY = 0;
+                                    x1 = 0.5f;
+                                }
+                            }
+                            if (setting.getValue() instanceof MultiBool) {
+                                categoryPanel.multiDropdownBoxes.add(new MultiDropdownBox((MultiBool) setting.getValue(), setting, xOff + x1, yOff + y + 4, categoryPanel));
+                                tY = 17;
+                                x1 += 44;
+                                if (x1 == 88.5f) {
+                                    y += 17;
+                                    tY = 0;
+                                    x1 = 0.5f;
+                                }
+                            }
+                        }
+                        for (Setting setting : getSettings(module)) {
+                            if (setting.getValue().getClass().equals(String.class)) {
+                                if (x1 == 44.5f) {
+                                    y += 11;
+                                }
+                                x1 = 0.5f;
+                            }
+                        }
+                        for (Setting setting : getSettings(module)) {
+                            if (setting.getValue().getClass().equals(String.class)) {
+                                categoryPanel.textBoxes.add(new TextBox(setting, xOff + x1, yOff + y + 4, categoryPanel));
+                                tY = 16;
+                                x1 += 88;
+                                if (x1 == 88.5f) {
+                                    y += 15.5;
+                                    tY = 0;
+                                    x1 = 0.5f;
+                                }
+                            }
+                        }
+                        y += tY;
+                        categoryPanel.groupBoxes.add(new GroupBox(module.getName(), categoryPanel, xOff, yOff, y == 34 ? 40 : y - 11));
+                        xOff += 95;
+                        if (y >= biggestY) {
+                            biggestY = y;
+                        }
+                    } else {
+                        if (noSets >= 240) {
+                            categoryPanel.buttons.add(new Button(categoryPanel, module.getName(), 55 + categoryButton.panel.x + noSets - 240, 345, module));
+                        } else {
+                            categoryPanel.buttons.add(new Button(categoryPanel, module.getName(), 55 + categoryButton.panel.x + noSets, 330, module));
+                        }
+                        noSets += 40;
+                    }
+                    if (xOff > 20 + categoryButton.panel.y + 310) {
+                        xOff = 50 + categoryButton.panel.x;
+                        yOff += (y == 20 && biggestY == 20) ? 26 : biggestY;
+                    }
+                }
+            }
+        }
+
         if (categoryButton.name.equalsIgnoreCase("Combat")) {
             float biggestY = 18 + 16;
             float noSets = 0;
@@ -540,6 +664,9 @@ public class SkeetMenu extends UI {
                     if (module.getName().equalsIgnoreCase("AutoArmor")) {
                         xOff = 50 + categoryButton.panel.x + 95 * 2;
                         yOff = 158.0F;
+                    }
+                    if (module.getName().equalsIgnoreCase("StreamerMode")) {
+                        yOff += 45;
                     }
 
                     if (getSettings(module) != null) {
@@ -1195,7 +1322,7 @@ public class SkeetMenu extends UI {
         for (GroupBox groupBox : categoryPanel.groupBoxes) {
             groupBox.draw(x, y);
         }
-        if (!categoryPanel.categoryButton.name.equalsIgnoreCase("Colors") && !categoryPanel.categoryButton.name.equalsIgnoreCase("Combat")) {
+        if (!categoryPanel.categoryButton.name.equalsIgnoreCase("Colors") && !categoryPanel.categoryButton.name.equalsIgnoreCase("Combat") && !categoryPanel.categoryButton.name.equals("Minigames")) {
             float xOff = 100 + categoryPanel.categoryButton.panel.dragX - 2.5F;
             float yOff = 322 + categoryPanel.categoryButton.panel.dragY;
             RenderingUtil.rectangleBordered(xOff, yOff - 6, xOff + 280, yOff + 33, 0.5, Colors.getColor(0, 0), Colors.getColor(10, (int) opacity.getOpacity()));

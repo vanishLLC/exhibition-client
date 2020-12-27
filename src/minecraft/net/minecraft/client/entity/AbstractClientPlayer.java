@@ -2,6 +2,9 @@ package net.minecraft.client.entity;
 
 import com.mojang.authlib.GameProfile;
 import java.io.File;
+
+import exhibition.Client;
+import exhibition.module.impl.other.StreamerMode;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.client.renderer.ImageBufferDownload;
@@ -85,8 +88,9 @@ public abstract class AbstractClientPlayer extends EntityPlayer
     public ResourceLocation getLocationSkin()
     {
         NetworkPlayerInfo networkplayerinfo = this.getPlayerInfo();
-        return networkplayerinfo == null ? DefaultPlayerSkin.getDefaultSkin(this.getUniqueID()) : networkplayerinfo.getLocationSkin();
+        return (networkplayerinfo == null || (Client.getModuleManager().isEnabled(StreamerMode.class) && StreamerMode.spoofSkins)) ? DefaultPlayerSkin.getDefaultSkin(this.getUniqueID()) : networkplayerinfo.getLocationSkin();
     }
+
 
     public ResourceLocation getLocationCape()
     {

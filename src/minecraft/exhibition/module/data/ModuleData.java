@@ -56,7 +56,7 @@ public class ModuleData {
 
 	public static class Type {
 
-		public static Type Combat = new Type("Combat"), Player = new Type("Player"), Movement = new Type("Movement"), Visuals = new Type("Visuals"), Other = new Type("Other");
+		public static Type Combat = new Type("Combat"), Player = new Type("Player"), Movement = new Type("Movement"), Visuals = new Type("Visuals"), Other = new Type("Other"), Minigames = new Type("Minigames");
 
 		public Type(String name) {
 			this.name = name;

@@ -182,11 +182,11 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
                     add(new ChatFilter(new ModuleData(Other, "ChatFilter", "Filters the chat in The Pit.")));
 
                     if (Boolean.parseBoolean(System.getProperty("NEoBuMASs"))) {
-                        add(new Aimbot(new ModuleData(Combat, "Aimbot", "Cops n Crims aimbot.")));
+                        add(new Aimbot(new ModuleData(Minigames, "Aimbot", "Cops n Crims aimbot.")));
                     }
 
                     if (Boolean.parseBoolean(System.getProperty("NEoBuMASs")) && Boolean.parseBoolean(System.getProperty("nEoSuCKsBruhReallyNeighbor"))) {
-                        add(new ZombieAim(new ModuleData(Combat, "ZombieAim", "Aimbot for Hypixel Zombies.")));
+                        add(new ZombieAim(new ModuleData(Minigames, "ZombieAim", "Aimbot for Hypixel Zombies.")));
                     }
 
                     //add(new AutoSkin(new ModuleData(Other, "AutoSkin", "Automatically applies a skin when you log into an alt.")));
@@ -197,6 +197,7 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
                     //add(new StreamerMode(new ModuleData(Other, /*Streamer*/AuthenticationUtil.decodeByteArray(new byte[]{(byte) (0x98a6dee4 >>> 0x11), (byte) (0x2304574f >>> 0x4), (byte) (0x251191c9 >>> 0x2), (byte) (0x85348cb2 >>> 0x5), (byte) (0x898b56c2 >>> 0x1), (byte) (0x46d7cb9 >>> 0x10), (byte) (0x56508e69 >>> 0x14), (byte) (0xe3b976f0 >>> 0xf)}),/*Hides information that staff members can use to ban you while streaming.*/AuthenticationUtil.decodeByteArray(new byte[]{(byte) (0x430891b4 >>> 0x9), (byte) (0xd9a9534d >>> 0x3), (byte) (0x6404fed5 >>> 0x18), (byte) (0x4659788d >>> 0xe), (byte) (0x4e7fdf70 >>> 0x15), (byte) (0x1f4400de >>> 0xd), (byte) (0x35569b52 >>> 0xc), (byte) (0x320e22dc >>> 0x1), (byte) (0x439dd9b5 >>> 0x6), (byte) (0x7537ddd1 >>> 0xf), (byte) (0x1918e44a >>> 0x9), (byte) (0xf98db671 >>> 0xa), (byte) (0xb0d1f331 >>> 0x17), (byte) (0xdd08458d >>> 0x16), (byte) (0x365a6690 >>> 0x4), (byte) (0x1b792580 >>> 0x13), (byte) (0xc4f7b744 >>> 0x7), (byte) (0xb5429040 >>> 0x7), (byte) (0x88ba29e1 >>> 0xf), (byte) (0xcf868d04 >>> 0xc), (byte) (0x9f6c1308 >>> 0x3), (byte) (0x969d0f5d >>> 0xe), (byte) (0x1881d6fe >>> 0x12), (byte) (0x58624ae6 >>> 0x1), (byte) (0xc7ae8dea >>> 0xd), (byte) (0x861b1ce5 >>> 0x14), (byte) (0xf672ccc >>> 0x1), (byte) (0x29c72cde >>> 0x5), (byte) (0x41d4079 >>> 0x15), (byte) (0xa6ded924 >>> 0x14), (byte) (0x91d95671 >>> 0xe), (byte) (0x8db2cd7b >>> 0x15), (byte) (0x6415318b >>> 0x2), (byte) (0xf0c65a9e >>> 0xc), (byte) (0x7c717250 >>> 0x8), (byte) (0x1d2b9cb0 >>> 0xb), (byte) (0x10686cd9 >>> 0x17), (byte) (0x1d630fa2 >>> 0x10), (byte) (0x5aa75853 >>> 0x6), (byte) (0x406e2fc4 >>> 0x10), (byte) (0x1d827480 >>> 0x2), (byte) (0x11d403f8 >>> 0x12), (byte) (0xde239929 >>> 0xb), (byte) (0x1d95f8ad >>> 0x12), (byte) (0x7200de07 >>> 0x14), (byte) (0xd8fba366 >>> 0xb), (byte) (0xe932c9bc >>> 0x2), (byte) (0x2bf84839 >>> 0x6), (byte) (0xd88fe18d >>> 0x16), (byte) (0xb9f26161 >>> 0x8), (byte) (0x456e66eb >>> 0x4), (byte) (0x3c524162 >>> 0x9), (byte) (0xe87dbcf3 >>> 0x1), (byte) (0x6f1a6925 >>> 0x18), (byte) (0x1c97519e >>> 0xc), (byte) (0x905390f2 >>> 0x17), (byte) (0x64169df7 >>> 0x6), (byte) (0xe2a75a3a >>> 0x6), (byte) (0xef468d24 >>> 0x5), (byte) (0x447279b3 >>> 0x2), (byte) (0xf655d16 >>> 0x10), (byte) (0xf1076389 >>> 0x13), (byte) (0x2e8d4b9e >>> 0x3), (byte) (0xc7d5e740 >>> 0x4), (byte) (0xe3cee4e7 >>> 0x9), (byte) (0x4ca1bb7a >>> 0x15), (byte) (0x41ac2caa >>> 0xd), (byte) (0xf89d6d64 >>> 0x8), (byte) (0xb87234e9 >>> 0x7), (byte) (0xd226ed2e >>> 0xc), (byte) (0xab38c894 >>> 0x13), (byte) (0xa0974e19 >>> 0xf)}))));
 
                     add(new NetGraph(new ModuleData(Other, "NetGraph", "Shows incoming/outgoing network data.")));
+                    add(new StreamerMode(new ModuleData(Player, "StreamerMode", "Hides certain identifiable information.")));
 
                 }
             } catch (Exception e) {

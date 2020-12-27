@@ -76,24 +76,26 @@ public class Nametags extends Module {
     public void onEvent(Event event) {
         if (event instanceof EventNametagRender) {
             EventNametagRender er = event.cast();
-            EntityPlayer ent = er.getPlayer();
+            if (er.getEntity() instanceof EntityPlayer) {
+                EntityPlayer ent = (EntityPlayer) er.getEntity();
 
-            boolean ignorePit = HypixelUtil.isInGame("THE HYPIXEL PIT") && IGNORESPAWN.getValue();
+                boolean ignorePit = HypixelUtil.isInGame("THE HYPIXEL PIT") && IGNORESPAWN.getValue();
 
-            if (ignorePit && !TargetESP.isPriority(ent) && !FriendManager.isFriend(ent.getName())) {
-                double x = ent.posX;
-                double y = ent.posY;
-                double z = ent.posZ;
-                if (y > 86 && x < 30 && x > -30 && z < 30 && z > -30) {
+                if (ignorePit && !TargetESP.isPriority(ent) && !FriendManager.isFriend(ent.getName())) {
+                    double x = ent.posX;
+                    double y = ent.posY;
+                    double z = ent.posZ;
+                    if (y > 86 && x < 30 && x > -30 && z < 30 && z > -30) {
+                        return;
+                    }
+                }
+
+                if (priorityOnly.getValue() && !TargetESP.isPriority(ent) && !FriendManager.isFriend(ent.getName())) {
                     return;
                 }
-            }
 
-            if (priorityOnly.getValue() && !TargetESP.isPriority(ent) && !FriendManager.isFriend(ent.getName())) {
-                return;
+                event.setCancelled(true);
             }
-
-            event.setCancelled(true);
         }
         if (event instanceof EventRender3D) {
             try {
@@ -112,7 +114,6 @@ public class Nametags extends Module {
                     int dist = (int) mc.thePlayer.getDistanceToEntity(ent);
 
                     {
-                        GlStateManager.pushMatrix();
                         boolean isPriority = ((TargetESP.isPriority(ent))) || FriendManager.isFriend(ent.getName());
 
                         String playerName = isPriority ? ent.getDisplayName().getFormattedText() : ent.getDisplayName().getFormattedText();
@@ -131,10 +132,11 @@ public class Nametags extends Module {
 
                         double[] renderPositions = entityPositions.getOrDefault(ent, defaultTo).array;
 
-                        if ((renderPositions[3] < 0.0D) || (renderPositions[3] >= 1.0D)) {
-                            GlStateManager.popMatrix();
+                        if ((renderPositions[2] < 0.0D) || (renderPositions[2] >= 1.0D)) {
                             continue;
                         }
+
+                        GlStateManager.pushMatrix();
 
                         TTFFontRenderer font = Client.fonts[3];
 
@@ -169,7 +171,7 @@ public class Nametags extends Module {
 
                             double mouseDist = Math.hypot(diffX, diffY);
 
-                            if(mouseDist < 20) {
+                            if (mouseDist < 20) {
                                 double percentage = (20 - mouseDist) / 15D;
                                 percentage = Math.max(Math.min(percentage, 1), 0);
                                 GlStateManager.scale(1 + (0.1 * percentage), 1 + (0.1 * percentage), 1 + (0.1 * percentage));
@@ -457,7 +459,7 @@ public class Nametags extends Module {
         public FloatBuffer modelView = BufferUtils.createFloatBuffer(16);
         public FloatBuffer projection = BufferUtils.createFloatBuffer(16);
 
-        public double[] array = new double[4];
+        public double[] array = new double[3];
 
         double opacity = -1;
 

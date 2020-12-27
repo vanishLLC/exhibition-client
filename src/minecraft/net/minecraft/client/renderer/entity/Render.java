@@ -62,6 +62,12 @@ public abstract class Render<T extends Entity> {
     }
 
     protected void renderName(T entity, double x, double y, double z) {
+//        EventNametagRender event = EventSystem.getInstance(EventNametagRender.class).cast();
+//        event.fire(entity);
+//        if (event.isCancelled()) {
+//            return;
+//        }
+
         if (this.canRenderName(entity)) {
             this.renderLivingLabel(entity, entity.getDisplayName().getFormattedText(), x, y, z, 64);
         }
@@ -309,12 +315,10 @@ public abstract class Render<T extends Entity> {
      */
     protected void renderLivingLabel(T entityIn, String str, double x, double y, double z, int maxDistance) {
         double d0 = entityIn.getDistanceSqToEntity(this.renderManager.livingPlayer);
-        if ((entityIn instanceof EntityPlayer)) {
-            EventNametagRender event = EventSystem.getInstance(EventNametagRender.class).cast();
-            event.fire((EntityPlayer) entityIn);
-            if (event.isCancelled()) {
-                return;
-            }
+        EventNametagRender event = EventSystem.getInstance(EventNametagRender.class).cast();
+        event.fire(entityIn, x, y, z);
+        if (event.isCancelled()) {
+            return;
         }
         if (d0 <= (double) (maxDistance * maxDistance)) {
             FontRenderer fontrenderer = this.getFontRendererFromRenderManager();

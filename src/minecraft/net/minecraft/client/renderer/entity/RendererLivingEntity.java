@@ -506,13 +506,6 @@ public abstract class RendererLivingEntity<T extends EntityLivingBase> extends R
 
     public void renderName(T entity, double x, double y, double z) {
         if (!Reflector.RenderLivingEvent_Specials_Pre_Constructor.exists() || !Reflector.postForgeBusEvent(Reflector.RenderLivingEvent_Specials_Pre_Constructor, entity, this, x, y, z)) {
-            if (entity instanceof EntityPlayer) {
-                EventNametagRender event = EventSystem.getInstance(EventNametagRender.class).cast();
-                event.fire((EntityPlayer) entity);
-                if (event.isCancelled()) {
-                    return;
-                }
-            }
 
             if (this.canRenderName(entity)) {
                 double d0 = entity.getDistanceSqToEntity(this.renderManager.livingPlayer);

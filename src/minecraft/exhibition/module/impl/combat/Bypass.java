@@ -172,8 +172,10 @@ public class Bypass extends Module {
             }
 
             if (p instanceof C00PacketKeepAlive) {
-                packetList.add(new BruhPacket(p, (long) ((Number) DELAY.getValue()).doubleValue()));
-                event.setCancelled(true);
+                if(DELAY.getValue().doubleValue() != 0) {
+                    packetList.add(new BruhPacket(p, (long) DELAY.getValue().doubleValue()));
+                    event.setCancelled(true);
+                }
             }
         }
         if (event instanceof EventRenderGui) {

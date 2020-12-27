@@ -3,6 +3,12 @@ package net.minecraft.util;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
+import exhibition.Client;
+import exhibition.management.friend.Friend;
+import exhibition.management.friend.FriendManager;
+import exhibition.module.impl.other.StreamerMode;
+import net.minecraft.client.Minecraft;
+
 import java.util.Iterator;
 import java.util.List;
 
@@ -95,7 +101,21 @@ public abstract class ChatComponentStyle implements IChatComponent
             stringbuilder.append((Object)EnumChatFormatting.RESET);
         }
 
-        return stringbuilder.toString();
+        String s = stringbuilder.toString();
+
+        if (Client.getModuleManager().isEnabled(StreamerMode.class) && (boolean) Client.getModuleManager().get(StreamerMode.class).getSetting("PROTECT").getValue() && Minecraft.getMinecraft().thePlayer != null) {
+            if (getUnformattedText().contains(Minecraft.getMinecraft().session.getProfile().getName())) {
+                s = s.replaceAll(Minecraft.getMinecraft().session.getProfile().getName(), "\2479" + Client.getAuthUser().getDecryptedUsername());
+            }
+
+            for (Friend friend : FriendManager.friendsList) {
+                if (getUnformattedText().contains(friend.name)) {
+                    s = s.replaceAll(friend.name, "\2479" + friend.alias);
+                }
+            }
+        }
+
+        return s;
     }
 
     public static Iterator<IChatComponent> createDeepCopyIterator(Iterable<IChatComponent> components)

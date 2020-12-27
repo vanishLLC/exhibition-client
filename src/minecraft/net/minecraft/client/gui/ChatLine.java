@@ -6,7 +6,7 @@ public class ChatLine
 {
     /** GUI Update Counter value this Line was created at */
     private final int updateCounterCreated;
-    private final IChatComponent lineString;
+    private IChatComponent lineString;
 
     /**
      * int value to refer to existing Chat Lines, can be 0 which means unreferrable
@@ -23,6 +23,10 @@ public class ChatLine
     public IChatComponent getChatComponent()
     {
         return this.lineString;
+    }
+
+    public void setChatComponent(IChatComponent lineString) {
+        this.lineString = lineString;
     }
 
     public int getUpdatedCounter()
