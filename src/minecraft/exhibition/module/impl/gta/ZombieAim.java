@@ -176,10 +176,10 @@ public class ZombieAim extends Module {
                         double[] p = getPrediction(target, predictionTicks.getValue().intValue(), predictionScale.getValue().floatValue());
 
                         double xDiff = target.posX + p[0] - mc.thePlayer.posX;
-                        double yDiff = (target.posY + target.getEyeHeight() + p[1]) - (mc.thePlayer.posY + mc.thePlayer.getEyeHeight());
-                        double zDiff = target.posZ + p[0] - mc.thePlayer.posZ;
+                        double yDiff = (target.posY + target.getEyeHeight() + p[1] + 0.1) - (mc.thePlayer.posY + mc.thePlayer.getEyeHeight());
+                        double zDiff = target.posZ + p[2] - mc.thePlayer.posZ;
 
-                        float yaw = RotationUtils.getYawChange(target.posX + p[0], target.posZ + p[0]);
+                        float yaw = RotationUtils.getYawChange(target.posX + p[0], target.posZ + p[2]);
 
                         double dist = Math.hypot(xDiff, zDiff);
                         float pitch = (float) -(Math.atan2(yDiff, dist) * 180.0D / 3.141592653589793D);
