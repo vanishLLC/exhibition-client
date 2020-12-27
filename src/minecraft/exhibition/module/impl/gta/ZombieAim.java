@@ -49,6 +49,8 @@ public class ZombieAim extends Module {
 
     public ZombieAim(ModuleData data) {
         super(data);
+
+        addSetting(new Setting<>("MODE", fireMode, "Aimbot behaviour mode."));
         addSetting(silent);
         addSetting(showPrediction);
 
