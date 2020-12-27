@@ -40,7 +40,9 @@ import net.minecraft.entity.boss.EntityDragon;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.monster.*;
 import net.minecraft.entity.passive.EntityAnimal;
+import net.minecraft.entity.passive.EntitySquid;
 import net.minecraft.entity.passive.EntityVillager;
+import net.minecraft.entity.passive.IAnimals;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
@@ -123,8 +125,8 @@ public class ESP2D extends Module {
             for (Map.Entry<Entity, ESP2D.Bruh> e : entityConvertedPointsMap.entrySet()) {
                 Entity ent = e.getKey();
                 boolean valid = renderAll || ((ent instanceof EntityPlayer && renderPlayers) ||
-                        ((ent instanceof EntityAnimal || ent instanceof EntitySnowman) && renderPassive) ||
-                        ((ent instanceof EntityMob || ent instanceof EntitySlime || ent instanceof EntityGhast || ent instanceof EntityDragon) && renderMobs) ||
+                        (ent instanceof IAnimals && renderPassive) ||
+                        (ent instanceof IMob && renderMobs) ||
                         (ent instanceof EntityItem && renderItems) || (ent instanceof EntityVillager && renderVillagers) || (ent instanceof EntityGolem && renderGolems));
                 if (!valid) {
                     removal.add(ent);
@@ -155,8 +157,8 @@ public class ESP2D extends Module {
             GlStateManager.scale(twoDscale, twoDscale, twoDscale);
             for (Entity ent : mc.theWorld.getLoadedEntityList()) {
                 boolean valid = renderAll || ((ent instanceof EntityPlayer && renderPlayers) ||
-                        ((ent instanceof EntityAnimal || ent instanceof EntitySnowman) && renderPassive) ||
-                        ((ent instanceof EntityMob || ent instanceof EntitySlime || ent instanceof EntityGhast || ent instanceof EntityDragon) && renderMobs) ||
+                        (ent instanceof IAnimals && renderPassive) ||
+                        (ent instanceof IMob && renderMobs) ||
                         (ent instanceof EntityItem && renderItems) || (ent instanceof EntityVillager && renderVillagers) || (ent instanceof EntityGolem && renderGolems));
                 if (!valid)
                     continue;
@@ -834,7 +836,7 @@ public class ESP2D extends Module {
             double y = ent.lastTickPosY + (ent.posY - ent.lastTickPosY) * pTicks - mc.getRenderManager().viewerPosY;
             double z = ent.lastTickPosZ + (ent.posZ - ent.lastTickPosZ) * pTicks - mc.getRenderManager().viewerPosZ;
             if (renderAll || ((ent instanceof EntityPlayer && renderPlayers) ||
-                    ((ent instanceof EntityAnimal || ent instanceof EntitySnowman) && renderPassive) ||
+                    ((ent instanceof EntityAnimal || ent instanceof EntitySnowman || ent instanceof EntitySquid) && renderPassive) ||
                     ((ent instanceof EntityMob || ent instanceof EntitySlime || ent instanceof EntityGhast || ent instanceof EntityDragon) && renderMobs) ||
                     (ent instanceof EntityItem && renderItems) || (ent instanceof EntityVillager && renderVillagers) || (ent instanceof EntityGolem && renderGolems))) {
                 if (ent != mc.thePlayer) {

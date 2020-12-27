@@ -36,6 +36,7 @@ import net.minecraft.entity.boss.EntityDragon;
 import net.minecraft.entity.boss.EntityWither;
 import net.minecraft.entity.monster.*;
 import net.minecraft.entity.passive.EntityAnimal;
+import net.minecraft.entity.passive.EntitySquid;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemSword;
@@ -1016,9 +1017,11 @@ public class Killaura extends Module {
                     return !(TeamUtils.isTeam(mc.thePlayer, ent) && teams) && !(ent.isInvisible() && !invis) && !(armor && !hasArmor(ent)) && (friends || !FriendManager.isFriend(ent.getName()));
                 }
                 if (mobs && entity instanceof EntityWither && teams) {
-                    return TeamUtils.isTeam(mc.thePlayer, entity);
+                    return !TeamUtils.isTeam(mc.thePlayer, entity);
                 }
-                return (entity instanceof EntityMob || entity instanceof EntitySlime || entity instanceof EntityGhast || entity instanceof EntityDragon) && mobs || ((entity instanceof EntityAnimal || entity instanceof EntitySnowman) && animals) || (entity instanceof EntityVillager && villager) || (entity instanceof EntityGolem && golems);
+                return (entity instanceof EntityMob || entity instanceof EntitySlime || entity instanceof EntityGhast || entity instanceof EntityDragon) && mobs ||
+                        ((entity instanceof EntityAnimal || entity instanceof EntitySnowman || entity instanceof EntitySquid) && animals) ||
+                        (entity instanceof EntityVillager && villager) || (entity instanceof EntityGolem && golems);
             }
         }
         return false;
