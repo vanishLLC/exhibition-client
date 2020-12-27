@@ -226,7 +226,6 @@ public class Killaura extends Module {
 
     private int critWaitTicks;
 
-    private final Timer packetTimer = new Timer();
 
     @RegisterEvent(events = {EventMotionUpdate.class, EventPacket.class, EventStep.class, EventRender3D.class})
     public void onEvent(Event event) {
@@ -238,11 +237,6 @@ public class Killaura extends Module {
 
         if (event instanceof EventPacket) {
             EventPacket e = event.cast();
-
-            if (e.isIncoming()) {
-                packetTimer.reset();
-            }
-
             Packet packet = e.getPacket();
             boolean attacking = isEnabled() && new ArrayList<>(Killaura.loaded).size() > 0 && (boolean) getSetting("AUTOBLOCK").getValue();
             if (attacking) {
@@ -657,7 +651,7 @@ public class Killaura extends Module {
                 }
 
 
-                if (isAttacking && !isBlocking && (!antiLag.getValue() || !packetTimer.roundDelay(250))) {
+                if (isAttacking && !isBlocking && (!antiLag.getValue() || !Client.instance.isLagging())) {
                     Vec3 v = getDirection(em.getYaw(), em.getPitch());
                     double off = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), v, target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height, HypixelUtil.isInGame("DUEL") ? Direction.DIRECT_PRECISION : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.5 : 1.2);
 

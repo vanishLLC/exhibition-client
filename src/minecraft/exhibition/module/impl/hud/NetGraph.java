@@ -42,8 +42,6 @@ public class NetGraph extends Module {
     private Setting<Boolean> showGraph = new Setting<>("GRAPH", true, "Shows Incoming/Outgoing packets.");
     private Setting<Boolean> showLag = new Setting<>("LAG", true, "Shows an icon if the server is lagging.");
 
-    private final Timer packetTimer = new Timer();
-
     private final Timer bruhCounter = new Timer();
 
     public NetGraph(ModuleData data) {
@@ -68,7 +66,6 @@ public class NetGraph extends Module {
             if (event.isCancelled() || mc.getIntegratedServer() != null)
                 return;
             if (eventPacket.isIncoming()) {
-                packetTimer.reset();
                 incomingPackets.add(eventPacket.getPacket());
                 incomingCounter++;
             } else {
@@ -91,7 +88,7 @@ public class NetGraph extends Module {
 
             EventRenderGui e = event.cast();
 
-            if (showLag.getValue() && packetTimer.roundDelay(200) && HypixelUtil.scoreboardContains("hypixel")) {
+            if (showLag.getValue() && Client.instance.isLagging() && HypixelUtil.scoreboardContains("hypixel")) {
                 if (bruhCounter.delay(1000)) {
                     bruhCounter.reset();
                 }

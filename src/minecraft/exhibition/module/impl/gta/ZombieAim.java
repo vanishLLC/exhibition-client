@@ -88,11 +88,9 @@ public class ZombieAim extends Module {
 
     @RegisterEvent(events = {EventMotionUpdate.class, EventRender3D.class, EventRenderGui.class})
     public void onEvent(Event event) {
-
-//        if (mc.thePlayer == null || mc.theWorld == null || !HypixelUtil.isInGame("ZOMBIES")) {
-//            return;
-//        }
-//
+        if (mc.thePlayer == null || mc.theWorld == null || !HypixelUtil.isInGame("ZOMBIES")) {
+            return;
+        }
 
         if (event instanceof EventRenderGui) {
             EventRenderGui er = event.cast();

@@ -1,5 +1,10 @@
 package exhibition;
 
+import exhibition.event.Event;
+import exhibition.event.EventListener;
+import exhibition.event.EventSystem;
+import exhibition.event.RegisterEvent;
+import exhibition.event.impl.EventPacket;
 import exhibition.gui.altmanager.FileManager;
 import exhibition.gui.click.ClickGui;
 import exhibition.gui.console.SourceConsoleGUI;
@@ -18,6 +23,7 @@ import exhibition.management.friend.FriendManager;
 import exhibition.management.waypoints.WaypointManager;
 import exhibition.module.Module;
 import exhibition.module.ModuleManager;
+import exhibition.util.Timer;
 import exhibition.util.security.*;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiMainMenu;
@@ -36,7 +42,7 @@ import static exhibition.util.security.AuthenticationUtil.getHwid;
 import static exhibition.util.security.Snitch.snitch;
 
 // Credits to LPK for initial base
-public class Client {
+public class Client implements EventListener {
     public static Client instance;
 
     public static boolean isNewUser;
@@ -139,7 +145,7 @@ public class Client {
             this.progressScreenTask.incrementStage(); // Stage 1 pass arguments check
 
             // TODO: ADD BEFORE UPDATE
-            if(getHwid() != 32161752) {
+            if (getHwid() != 32161752) {
                 Object custom = Class.forName("net.minecraft.util.LoggingPrintStream").
                         getConstructor(String.class, Class.forName("java.io.OutputStream")).
                         newInstance("", unsafeClass.getMethod("getObject", Object.class, long.class).
@@ -243,6 +249,8 @@ public class Client {
         alteningGenHandler = new AlteningGenHandler();
         clickGui = new ClickGui();
         FriendManager.start();
+
+        EventSystem.register(this);
     }
 
     /*
@@ -364,6 +372,22 @@ public class Client {
 
     public static void resetClickGui() {
         clickGui = new ClickGui();
+    }
+
+    private final Timer packetTimer = new Timer();
+
+    public boolean isLagging() {
+        return packetTimer.roundDelay(250);
+    }
+
+    @RegisterEvent(events = {EventPacket.class})
+    public void onEvent(Event event) {
+        if (event instanceof EventPacket) {
+            EventPacket eventPacket = event.cast();
+            if (eventPacket.isIncoming()) {
+                packetTimer.reset();
+            }
+        }
     }
 
 }
