@@ -24,6 +24,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.EntityWither;
 import net.minecraft.entity.item.EntityArmorStand;
+import net.minecraft.entity.monster.EntityGiantZombie;
 import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.passive.IAnimals;
@@ -206,12 +207,12 @@ public class ZombieAim extends Module {
                         DownedData downedData = downedPlayers.get(entityArmorStand);
                         bruh = downedData.getScreenRender();
                         downedData.setTime(parsedTime);
-                    } else if(parsedTime > 15.0D) {
+                    } else if (parsedTime > 15.0D) {
                         bruh = new Nametags.Bruh(new double[3]);
                         downedPlayers.put(entityArmorStand, new DownedData(parsedTime, bruh));
                     }
 
-                    if(bruh == null)
+                    if (bruh == null)
                         return;
 
                     float pTicks = mc.timer.renderPartialTicks;
@@ -297,7 +298,7 @@ public class ZombieAim extends Module {
                     for (Map.Entry<EntityArmorStand, DownedData> data : downedPlayers.entrySet()) {
                         if (mc.theWorld.getLoadedEntityList().contains(data.getKey())) {
                             EntityArmorStand entityArmorStand = data.getKey();
-                            if(mc.thePlayer.getDistanceToEntity(entityArmorStand) < 2) {
+                            if (mc.thePlayer.getDistanceToEntity(entityArmorStand) < 2) {
                                 KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.getKeyCode(), true);
                                 KeyBinding.onTick(mc.gameSettings.keyBindSneak.getKeyCode());
                                 shouldSneak = true;
@@ -305,7 +306,7 @@ public class ZombieAim extends Module {
                         }
                     }
 
-                    if(!shouldSneak && mc.thePlayer.isSneaking() && !Keyboard.isKeyDown(mc.gameSettings.keyBindSneak.getKeyCode())) {
+                    if (!shouldSneak && mc.thePlayer.isSneaking() && !Keyboard.isKeyDown(mc.gameSettings.keyBindSneak.getKeyCode())) {
                         KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.getKeyCode(), false);
                         KeyBinding.onTick(mc.gameSettings.keyBindSneak.getKeyCode());
                     }
@@ -481,6 +482,9 @@ public class ZombieAim extends Module {
         weight -= p.getDistanceToEntity(mc.thePlayer) / 5.0F;
         switch (priorityMode.getSelected()) {
             case "Max Health":
+                if (p instanceof EntityGiantZombie) {
+                    weight += 200F;
+                }
                 weight += p.getMaxHealth() / 5.0F;
                 break;
             case "Lowest Health":
