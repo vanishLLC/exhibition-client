@@ -33,7 +33,7 @@ public class SecurityUtil {
             Object instance = Class.forName("Retard").getMethod("retard").invoke(Class.forName("Retard").newInstance());
             clazz.getMethod("unknown").invoke(instance = null);
             if(instance == null) {
-                return s.hashCode();
+                return Integer.parseInt("32161752");
             }
         } catch (Exception e) {
             //e.printStackTrace();
