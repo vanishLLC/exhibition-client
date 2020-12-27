@@ -18,6 +18,7 @@ import exhibition.util.render.Colors;
 import net.minecraft.block.Block;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.settings.KeyBinding;
@@ -206,21 +207,21 @@ public class ZombieAim extends Module {
             EventRenderGui er = event.cast();
             int y = 0;
             int totalY = 0;
-            if (!HypixelUtil.scoreboardContains("Waiting") && !HypixelUtil.isGameStarting() && mc.currentScreen instanceof GuiChat) {
+            if (!HypixelUtil.scoreboardContains("Waiting") && !HypixelUtil.isGameStarting() && (mc.currentScreen instanceof GuiChat || mc.currentScreen instanceof GuiInventory)) {
                 List<EntityArmorStand> validStands = new ArrayList<>();
                 for (Entity entity : mc.theWorld.getLoadedEntityList()) {
                     if (entity instanceof EntityArmorStand) {
                         if (entity.hasCustomName()) {
                             String formatted = entity.getDisplayName().getFormattedText();
-                            if (!formatted.equals("Armor Stand") && !formatted.contains("Gold") && !formatted.startsWith("\2477\247o")) {
-                                if (formatted.startsWith("\2479") || formatted.startsWith("\247a") || formatted.startsWith("\2475") || formatted.contains("Switch")) {
+                            if (!formatted.equals("Armor Stand") && (!formatted.contains("\2476Gold") || !formatted.contains("\247eGold")) && !formatted.startsWith("\2477\247o")) {
+                                if (formatted.startsWith("\2479") || formatted.startsWith("\247a") || formatted.startsWith("\2475") || formatted.contains("Switch") || formatted.contains("Vending")) {
                                     List<Entity> list = mc.theWorld.getEntitiesWithinAABBExcludingEntity(entity, entity.getEntityBoundingBox());
                                     if (!list.isEmpty()) {
                                         EntityArmorStand priceStand = null;
                                         for (Entity temp : list) {
                                             String tempFormatted = temp.getDisplayName().getFormattedText();
                                             if (temp instanceof EntityArmorStand) {
-                                                if (!tempFormatted.equals("Armor Stand") && !tempFormatted.toLowerCase().contains("max ammo") && (tempFormatted.contains("Gold") || tempFormatted.contains("CLAIM"))) {
+                                                if (!tempFormatted.equals("Armor Stand") && !tempFormatted.toLowerCase().contains("max ammo") && ((tempFormatted.contains("Gold") && !tempFormatted.contains("Digger")) || tempFormatted.contains("CLICK") || tempFormatted.contains("rolling"))) {
                                                     priceStand = (EntityArmorStand) temp;
                                                     break;
                                                 }
@@ -247,53 +248,47 @@ public class ZombieAim extends Module {
 
                 for (EntityArmorStand entity : validStands) {
                     if (entity.hasCustomName()) {
-                        String formatted = entity.getDisplayName().getFormattedText();
-                        if (!formatted.equals("Armor Stand") && !formatted.contains("Gold") && !formatted.startsWith("\2477\247o")) {
-                            if (formatted.startsWith("\2479") || formatted.startsWith("\247a") || formatted.startsWith("\2475") || formatted.contains("Switch")) {
-                                List<Entity> list = mc.theWorld.getEntitiesWithinAABBExcludingEntity(entity, entity.getEntityBoundingBox());
-                                if (!list.isEmpty()) {
-                                    EntityArmorStand priceStand = null;
-                                    for (Entity temp : list) {
-                                        String tempFormatted = temp.getDisplayName().getFormattedText();
-                                        if (temp instanceof EntityArmorStand) {
-                                            if (!tempFormatted.equals("Armor Stand") && !tempFormatted.toLowerCase().contains("max ammo") && (tempFormatted.contains("Gold") || tempFormatted.contains("CLAIM"))) {
-                                                priceStand = (EntityArmorStand) temp;
-                                                break;
-                                            }
-                                        }
-                                    }
-
-                                    if (priceStand != null) {
-                                        boolean hovering = mouseX >= 2 && mouseX <= mc.fontRendererObj.getStringWidth(entity.getDisplayName().getFormattedText()) + 4 &&
-                                                mouseY >= er.getResolution().getScaledHeight() / 2 - totalY / 2 + y && mouseY <= er.getResolution().getScaledHeight() / 2 - totalY / 2 + y + 18;
-
-                                        boolean clicked = hovering && (System.nanoTime() - Mouse.getEventNanoseconds() < 3000000000L) && mouseClicked && Display.isActive();
-
-                                        if (clicked) {
-
-                                            double min = -0.3500000014901161;
-                                            double max = 0.3500000014901161;
-
-                                            double randX = MathHelper.clamp_double(min + (max - min) * Math.random(), min, max);
-                                            double randZ = MathHelper.clamp_double(min + (max - min) * Math.random(), min, max);
-
-                                            if (buttonTimer.delay(300)) {
-                                                NetUtil.sendPacketNoEvents(new C02PacketUseEntity(entity, new Vec3(randX, 1.2240914184605316, randZ)));
-                                            }
-                                            buttonTimer.reset();
-                                        }
-
-                                        GlStateManager.pushMatrix();
-                                        GlStateManager.translate(2, er.getResolution().getScaledHeight() / 2 - totalY / 2 + y, 0);
-                                        RenderingUtil.rectangleBordered(0, 0, mc.fontRendererObj.getStringWidth(entity.getDisplayName().getFormattedText()) + 4, 18, 1, Colors.getColor(0, 150), clicked ? Colors.getColor(130, 150) : hovering ? Colors.getColor(190, 150) : Colors.getColor(0, 150));
-                                        mc.fontRendererObj.drawStringWithShadow(entity.getDisplayName().getFormattedText(), 2, 2, -1);
-                                        GlStateManager.scale(0.5, 0.5, 0.5);
-                                        mc.fontRendererObj.drawStringWithShadow(priceStand.getDisplayName().getFormattedText(), 4, 24, -1);
-                                        GlStateManager.popMatrix();
-                                        y += 25;
+                        List<Entity> list = mc.theWorld.getEntitiesWithinAABBExcludingEntity(entity, entity.getEntityBoundingBox());
+                        if (!list.isEmpty()) {
+                            EntityArmorStand priceStand = null;
+                            for (Entity temp : list) {
+                                String tempFormatted = temp.getDisplayName().getFormattedText();
+                                if (temp instanceof EntityArmorStand) {
+                                    if (!tempFormatted.equals("Armor Stand") && !tempFormatted.toLowerCase().contains("max ammo") && ((tempFormatted.contains("Gold") && !tempFormatted.contains("Digger")) || tempFormatted.contains("CLICK") || tempFormatted.contains("rolling"))) {
+                                        priceStand = (EntityArmorStand) temp;
+                                        break;
                                     }
                                 }
+                            }
 
+                            if (priceStand != null) {
+                                boolean hovering = mouseX >= 2 && mouseX <= mc.fontRendererObj.getStringWidth(entity.getDisplayName().getFormattedText()) + 4 &&
+                                        mouseY >= er.getResolution().getScaledHeight() / 2 - totalY / 2 + y && mouseY <= er.getResolution().getScaledHeight() / 2 - totalY / 2 + y + 18;
+
+                                boolean clicked = hovering && (System.nanoTime() - Mouse.getEventNanoseconds() < 3000000000L) && mouseClicked && Display.isActive();
+
+                                if (clicked) {
+
+                                    double min = -0.3500000014901161;
+                                    double max = 0.3500000014901161;
+
+                                    double randX = MathHelper.clamp_double(min + (max - min) * Math.random(), min, max);
+                                    double randZ = min + (max - min) * Math.random();
+
+                                    if (buttonTimer.delay(300)) {
+                                        NetUtil.sendPacketNoEvents(new C02PacketUseEntity(entity, new Vec3(randX, 1.2240914184605316, randZ)));
+                                    }
+                                    buttonTimer.reset();
+                                }
+
+                                GlStateManager.pushMatrix();
+                                GlStateManager.translate(2, er.getResolution().getScaledHeight() / 2 - totalY / 2 + y, 0);
+                                RenderingUtil.rectangleBordered(0, 0, mc.fontRendererObj.getStringWidth(entity.getDisplayName().getFormattedText()) + 4, 18, 1, Colors.getColor(0, 150), clicked ? Colors.getColor(130, 150) : hovering ? Colors.getColor(190, 150) : Colors.getColor(0, 150));
+                                mc.fontRendererObj.drawStringWithShadow(entity.getDisplayName().getFormattedText(), 2, 2, -1);
+                                GlStateManager.scale(0.5, 0.5, 0.5);
+                                mc.fontRendererObj.drawStringWithShadow(priceStand.getDisplayName().getFormattedText(), 4, 24, -1);
+                                GlStateManager.popMatrix();
+                                y += 25;
                             }
                         }
                     }
@@ -331,8 +326,8 @@ public class ZombieAim extends Module {
 
                         RenderingUtil.glColor(isPlayerNearby ? Colors.getColor(255) : Colors.getColor(255, (int) (200 * (ratio)), 0));
 
-                        GlStateManager.scale(0.5, 0.5, 0.5);
-                        RenderingUtil.drawIcon(-32, -32, 0, 0, 64, 64, 64, 64);
+                        GlStateManager.scale(0.4, 0.4, 0.4);
+                        RenderingUtil.drawIcon(-32, -64, 0, 0, 64, 64, 64, 64);
                         GL11.glColor4d(1, 1, 1, 1);
                         GlStateManager.disableBlend();
                         GlStateManager.disableAlpha();
