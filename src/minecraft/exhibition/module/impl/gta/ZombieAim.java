@@ -13,6 +13,7 @@ import exhibition.util.render.Colors;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.EntityWither;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.passive.IAnimals;
@@ -209,7 +210,7 @@ public class ZombieAim extends Module {
     }
 
     private boolean isValidEntity(Entity entity) {
-        return entity instanceof IAnimals && !(entity instanceof EntityVillager) && !(entity instanceof EntityWither && entity.isInvisible()) && !entity.isDead;
+        return entity instanceof IAnimals && !(entity instanceof EntityVillager) && !(entity instanceof EntityWither && entity.isInvisible()) && ((EntityLivingBase)entity).getHealth() > 0;
     }
 
     private boolean isHoldingWeapon() {
@@ -299,19 +300,9 @@ public class ZombieAim extends Module {
         }
 
         private void logDeltas(double deltaX, double deltaY, int currentTick) {
-            if (Math.hypot(deltaX, deltaY) > 1) {
-                deltas.clear();
-                return;
-            }
-
-            if (Math.hypot(deltaX, deltaY) == 0) {
-                deltas.clear();
-                return;
-            }
-
             int tickDelay = (currentTick - lastUpdatedTick);
 
-            if (currentTick - lastUpdatedTick > 2) {
+            if (currentTick - lastUpdatedTick > 3) {
                 deltas.clear();
             }
 
@@ -322,7 +313,7 @@ public class ZombieAim extends Module {
             float newHeading = RotationUtils.getYawChangeGiven(deltaX, deltaY, headingYaw);
             headingYaw += newHeading;
 
-            if (newHeading >= 15) {
+            if (newHeading >= 45) {
                 while (deltas.size() >= 2) {
                     deltas.remove();
                 }
