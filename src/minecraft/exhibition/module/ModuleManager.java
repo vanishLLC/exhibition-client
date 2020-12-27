@@ -15,6 +15,7 @@ import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.combat.*;
 import exhibition.module.impl.gta.Aimbot;
 import exhibition.module.impl.gta.AntiAim;
+import exhibition.module.impl.gta.ZombieAim;
 import exhibition.module.impl.hud.*;
 import exhibition.module.impl.movement.*;
 import exhibition.module.impl.other.*;
@@ -180,8 +181,13 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
                     add(new ClickTP(new ModuleData(Player, "ClickTP", "Teleports to your clicked position.")));
                     add(new ChatFilter(new ModuleData(Other, "ChatFilter", "Filters the chat in The Pit.")));
 
-                    if (Boolean.parseBoolean(System.getProperty("NEoBuMASs")))
+                    if (Boolean.parseBoolean(System.getProperty("NEoBuMASs"))) {
                         add(new Aimbot(new ModuleData(Combat, "Aimbot", "Cops n Crims aimbot.")));
+                    }
+
+                    if (Boolean.parseBoolean(System.getProperty("")) && Boolean.parseBoolean(System.getProperty(""))) {
+                        add(new ZombieAim(new ModuleData(Combat, "ZombieAim", "Aimbot for Hypixel Zombies.")));
+                    }
 
                     //add(new AutoSkin(new ModuleData(Other, "AutoSkin", "Automatically applies a skin when you log into an alt.")));
                     //add(new LagExploit(new ModuleData(Movement, "LagExploit", "")));
