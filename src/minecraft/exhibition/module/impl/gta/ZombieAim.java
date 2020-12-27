@@ -231,9 +231,6 @@ public class ZombieAim extends Module {
 
     private double getTargetWeight(Entity p) {
         double weight = -mc.thePlayer.getDistanceToEntity(p);
-        if ((p.lastTickPosX == p.posX) && (p.lastTickPosY == p.posY) && (p.lastTickPosZ == p.posZ)) {
-            weight += 200.0D;
-        }
         weight -= p.getDistanceToEntity(mc.thePlayer) / 5.0F;
         return weight;
     }
