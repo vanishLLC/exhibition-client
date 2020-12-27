@@ -12,9 +12,7 @@ import exhibition.module.data.Options;
 import exhibition.module.data.settings.Setting;
 import exhibition.util.*;
 import exhibition.util.Timer;
-import exhibition.util.misc.ChatUtil;
 import exhibition.util.render.Colors;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
@@ -28,7 +26,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
 import net.minecraft.network.play.client.C09PacketHeldItemChange;
-import net.minecraft.potion.Potion;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
@@ -205,7 +202,7 @@ public class ZombieAim extends Module {
                     boolean shouldHeal = mc.thePlayer.getMaxHealth() == 20 ? mc.thePlayer.getHealth() <= minHealth : (mc.thePlayer.getHealth() / mc.thePlayer.getMaxHealth()) <= minimumPercent;
 
                     if (shouldHeal && timer.delay(350)) {
-                        int abilitySlot = 5;
+                        int abilitySlot = 4;
                         ItemStack stack = mc.thePlayer.inventoryContainer.getSlot(36 + abilitySlot).getStack();
                         if (stack != null) {
                             if (Item.getIdFromItem(stack.getItem()) == Item.getIdFromItem(Items.golden_apple)) {
@@ -215,7 +212,6 @@ public class ZombieAim extends Module {
                                 mc.getNetHandler().addToSendQueue(new C08PacketPlayerBlockPlacement(mc.thePlayer.inventory.getCurrentItem()));
                                 mc.getNetHandler().addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem = currentItem));
                                 timer.reset();
-                                ChatUtil.debug("Trying to heal.");
                             }
                         }
                     }
