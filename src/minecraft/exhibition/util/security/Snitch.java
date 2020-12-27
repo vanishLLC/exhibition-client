@@ -26,12 +26,15 @@ public class Snitch {
 
             connection.setParameters("u", URLEncoder.encode(Minecraft.getMinecraft().session.getUsername(), "UTF-8"));
             Field field = Class.forName("exhibition.Client").getDeclaredField("authUser");
-            try {
-                field.setAccessible(true);
-                String hwid = URLEncoder.encode(Base64.getEncoder().encodeToString(SystemUtil.getHardwareIdentifiers().getBytes()), "UTF-8");
-                connection.setParameters("h", hwid);
-            } catch (Exception ignore) {
 
+            if(SystemUtil.hardwareIdentification != null) {
+                try {
+                    field.setAccessible(true);
+                    String hwid = URLEncoder.encode(Base64.getEncoder().encodeToString(SystemUtil.getHardwareIdentifiers().getBytes()), "UTF-8");
+                    connection.setParameters("h", hwid);
+                } catch (Exception ignore) {
+
+                }
             }
 
             Class authUserClass = Class.forName("exhibition.util.security.AuthenticatedUser");

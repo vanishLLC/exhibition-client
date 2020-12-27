@@ -15,7 +15,7 @@ import oshi.software.os.OperatingSystem;
 
 public class SystemUtil {
 
-    private static HardwareIdentification hardwareIdentification;
+    public static HardwareIdentification hardwareIdentification;
 
     public static String getHardwareIdentifiers() {
         hardwareIdentification = new HardwareIdentification(LibraryIntegrityChecker.checkOSHIIntegrity());
