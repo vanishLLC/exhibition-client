@@ -185,7 +185,7 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
                         add(new Aimbot(new ModuleData(Combat, "Aimbot", "Cops n Crims aimbot.")));
                     }
 
-                    if (Boolean.parseBoolean(System.getProperty("")) && Boolean.parseBoolean(System.getProperty(""))) {
+                    if (Boolean.parseBoolean(System.getProperty("NEoBuMASs")) && Boolean.parseBoolean(System.getProperty("nEoSuCKsBruhReallyNeighbor"))) {
                         add(new ZombieAim(new ModuleData(Combat, "ZombieAim", "Aimbot for Hypixel Zombies.")));
                     }
 
