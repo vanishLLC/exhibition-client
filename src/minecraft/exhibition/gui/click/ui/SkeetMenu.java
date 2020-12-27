@@ -392,8 +392,12 @@ public class SkeetMenu extends UI {
                         xOff += 95;
                     }
                     if (module.getName().equalsIgnoreCase("AimBot")) {
-                        yOff -= 95 + 53;
+                        yOff -= 95 + 56;
                         xOff += 95;
+                    }
+
+                    if (module.getName().equalsIgnoreCase("ZombieAim")) {
+                        yOff += 13;
                     }
                     if (module.getName().equalsIgnoreCase("AutoPot")) {
                         yOff -= 5;
