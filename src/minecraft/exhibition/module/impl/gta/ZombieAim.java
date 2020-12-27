@@ -15,6 +15,7 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.EntityWither;
+import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.passive.IAnimals;
 import net.minecraft.item.Item;
@@ -176,8 +177,17 @@ public class ZombieAim extends Module {
                     if (target != null) {
                         double[] p = getPrediction(target, predictionTicks.getValue().intValue(), predictionScale.getValue().floatValue());
 
+                        double eyeLevel = target.getEyeHeight();
+
+                        if (target instanceof EntityZombie) {
+                            EntityZombie temp = (EntityZombie) target;
+                            if (temp.isChild()) {
+                                eyeLevel /= 2;
+                            }
+                        }
+
                         double xDiff = target.posX + p[0] - mc.thePlayer.posX;
-                        double yDiff = (target.posY + target.getEyeHeight() + p[1] + 0.1) - (mc.thePlayer.posY + mc.thePlayer.getEyeHeight());
+                        double yDiff = (target.posY + eyeLevel + p[1]) - (mc.thePlayer.posY + mc.thePlayer.getEyeHeight());
                         double zDiff = target.posZ + p[2] - mc.thePlayer.posZ;
 
                         float yaw = RotationUtils.getYawChange(target.posX + p[0], target.posZ + p[2]);
@@ -210,7 +220,7 @@ public class ZombieAim extends Module {
     }
 
     private boolean isValidEntity(Entity entity) {
-        return entity instanceof IAnimals && !(entity instanceof EntityVillager) && !(entity instanceof EntityWither && entity.isInvisible()) && ((EntityLivingBase)entity).getHealth() > 0;
+        return entity instanceof IAnimals && !(entity instanceof EntityVillager) && !(entity instanceof EntityWither && entity.isInvisible()) && ((EntityLivingBase) entity).getHealth() > 0;
     }
 
     private boolean isHoldingWeapon() {
