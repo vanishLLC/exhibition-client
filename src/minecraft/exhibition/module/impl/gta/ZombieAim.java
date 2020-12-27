@@ -322,10 +322,6 @@ public class ZombieAim extends Module {
         return weight;
     }
 
-    protected void swap(int slot, int hotbarNum) {
-        mc.playerController.windowClick(mc.thePlayer.inventoryContainer.windowId, slot, hotbarNum, 2, mc.thePlayer);
-    }
-
     private final double[] ZERO = new double[]{0, 0, 0};
 
     private double[] getPrediction(Entity player, int ticks, double scale) {
