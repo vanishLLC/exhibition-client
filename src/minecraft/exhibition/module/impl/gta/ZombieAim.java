@@ -209,7 +209,7 @@ public class ZombieAim extends Module {
     }
 
     private boolean isValidEntity(Entity entity) {
-        return entity instanceof IAnimals && !(entity instanceof EntityVillager) && !(entity instanceof EntityWither && entity.isInvisible());
+        return entity instanceof IAnimals && !(entity instanceof EntityVillager) && !(entity instanceof EntityWither && entity.isInvisible()) && !entity.isDead;
     }
 
     private boolean isHoldingWeapon() {
