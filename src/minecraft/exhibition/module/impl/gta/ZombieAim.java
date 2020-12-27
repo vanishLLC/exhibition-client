@@ -11,7 +11,10 @@ import exhibition.module.data.ModuleData;
 import exhibition.module.data.Options;
 import exhibition.module.data.settings.Setting;
 import exhibition.util.*;
+import exhibition.util.Timer;
+import exhibition.util.misc.ChatUtil;
 import exhibition.util.render.Colors;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
@@ -20,7 +23,12 @@ import net.minecraft.entity.boss.EntityWither;
 import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.passive.IAnimals;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
+import net.minecraft.network.play.client.C09PacketHeldItemChange;
+import net.minecraft.potion.Potion;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
@@ -39,18 +47,24 @@ public class ZombieAim extends Module {
 
     public static Entity target;
 
+    private Timer timer = new Timer();
+    public static boolean isHealing = false;
+
     private int shootDelay = 0;
 
     private final Setting<Boolean> silent = new Setting<>("SILENT", true, "Aims silently for you.");
     private final Setting<Boolean> showPrediction = new Setting<>("SHOW-PREDICTION", true, "Shows you target prediction.");
     private final Setting<Boolean> showFOV = new Setting<>("SHOW FOV", true, "Renders your FOV on your screen.");
+    private final Setting<Boolean> autoHeal = new Setting<>("AUTO-HEAL", true, "Auto uses Heal ability.");
 
-    private final Setting<Number> predictionScale = new Setting<>("PRED SCALE", 1, "Amount of prediction to be applied", 0.05, 0, 2);
-    private final Setting<Number> predictionTicks = new Setting<>("PRED TICKS", 2, "Ticks to predict (50 ms latency per tick)", 1, 0, 5);
+    private final Setting<Number> predictionScale = new Setting<>("PRED SCALE", 1, "Amount of prediction to be applied.", 0.05, 0, 2);
+    private final Setting<Number> predictionTicks = new Setting<>("PRED TICKS", 2, "Ticks to predict. (50 ms latency per tick)", 1, 0, 5);
 
     private final Setting<Number> delay = new Setting<>("DELAY", 4, "Tick delay before firing again. 0 = Auto weapon fire rate delay", 1, 0, 20);
     private final Setting<Number> bufferSize = new Setting<>("BUFFER", 3, "Prediction buffer size. The higher the value the higher the smoothing.", 1, 1, 10);
     private final Setting<Number> fov = new Setting<>("FOV", 90, "FOV check for the Aimbot.", 0.1, 1, 180);
+
+    private final Setting<Number> health = new Setting<>("HEALTH", 3, "What health to use the heal ability at.", 1, 1, 20);
 
     private final Options fireMode = new Options("Aimbot Mode", "Auto Fire", "Auto Fire", "On Held");
 
@@ -60,6 +74,7 @@ public class ZombieAim extends Module {
         addSetting(new Setting<>("MODE", fireMode, "Aimbot behaviour mode."));
         addSetting(silent);
         addSetting(showPrediction);
+        addSetting(autoHeal);
         addSetting(showFOV);
 
         addSetting(predictionTicks);
@@ -67,6 +82,7 @@ public class ZombieAim extends Module {
         addSetting(bufferSize);
         addSetting(delay);
         addSetting(fov);
+        addSetting(health);
     }
 
     @Override
@@ -178,6 +194,40 @@ public class ZombieAim extends Module {
                         deltaHashMap.remove(entity);
                     }
                 }
+
+
+
+
+
+                /*
+                Retarded autoheal
+                 */
+                int appleSlot = getAppleFromInvetory();
+
+                float minHealth = health.getValue().floatValue();
+
+                double minimumPercent = minHealth / 20F;
+
+                boolean shouldHeal = mc.thePlayer.getMaxHealth() == 20 ? mc.thePlayer.getHealth() <= minHealth : (mc.thePlayer.getHealth() / mc.thePlayer.getMaxHealth()) <= minimumPercent;
+
+                if (appleSlot != -1 && shouldHeal && timer.delay(350)) {
+                    int swapTo = 5;
+                    if (appleSlot > 36)
+                        swapTo = appleSlot - 36;
+                    else
+                        swap(appleSlot, 5);
+
+                    int currentItem = mc.thePlayer.inventory.currentItem;
+                    mc.getNetHandler().addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem = swapTo));
+
+                    mc.getNetHandler().addToSendQueue(new C08PacketPlayerBlockPlacement(mc.thePlayer.inventory.getCurrentItem()));
+                    mc.getNetHandler().addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem = currentItem));
+                    timer.reset();
+                    isHealing = true;
+                    ChatUtil.debug("Trying to heal.");
+                } else {
+                    isHealing = false;
+                }
             }
 
             boolean shouldAim = fireMode.getSelected().equals("Auto Fire") || (fireMode.getSelected().equals("On Held") && mc.gameSettings.keyBindUseItem.getIsKeyPressed());
@@ -278,6 +328,27 @@ public class ZombieAim extends Module {
         double weight = -mc.thePlayer.getDistanceToEntity(p);
         weight -= p.getDistanceToEntity(mc.thePlayer) / 5.0F;
         return weight;
+    }
+
+    protected void swap(int slot, int hotbarNum) {
+        mc.playerController.windowClick(mc.thePlayer.inventoryContainer.windowId, slot, hotbarNum, 2, mc.thePlayer);
+    }
+
+    private int getAppleFromInvetory() {
+        Minecraft mc = Minecraft.getMinecraft();
+        int apple = -1;
+        for (int i = 9; i < 45; i++) {
+            if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
+                ItemStack is = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
+                Item item = is.getItem();
+
+                boolean shouldApple = (autoHeal.getValue() && (((Item.getIdFromItem(item) == Item.getIdFromItem(Items.golden_apple)))));
+                if (Item.getIdFromItem(item) == 282 || shouldApple) {
+                    apple = i;
+                }
+            }
+        }
+        return apple;
     }
 
     private final double[] ZERO = new double[]{0, 0, 0};
