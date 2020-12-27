@@ -48,7 +48,6 @@ public class ZombieAim extends Module {
     public static Entity target;
 
     private Timer timer = new Timer();
-    public static boolean isHealing = false;
 
     private int shootDelay = 0;
 
@@ -118,8 +117,7 @@ public class ZombieAim extends Module {
                     screen_fov *= mc.entityRenderer.fovModifierHandPrev + (mc.entityRenderer.fovModifierHand - mc.entityRenderer.fovModifierHandPrev) * mc.timer.renderPartialTicks;
                 }
 
-                if (Config.zoomMode)
-                {
+                if (Config.zoomMode) {
                     screen_fov /= 4.0F;
                 }
 
@@ -128,11 +126,11 @@ public class ZombieAim extends Module {
                 double width = er.getResolution().getScaledWidth_double();
                 double height = er.getResolution().getScaledHeight_double();
 
-                float ratio =  (float)(Math.tan( Math.toRadians(aimbot_fov / 2) ) * 0.05F / ( Math.tan( Math.toRadians(screen_fov / 2) ) * 0.05F ));
+                float ratio = (float) (Math.tan(Math.toRadians(aimbot_fov / 2)) * 0.05F / (Math.tan(Math.toRadians(screen_fov / 2)) * 0.05F));
 
                 double bruh = width / 2 * ratio;
 
-                RenderingUtil.drawCircle((float)width / 2, (float)height / 2, (float)bruh, 12, ColorManager.hudColor.getColorHex());
+                RenderingUtil.drawCircle((float) width / 2, (float) height / 2, (float) bruh, 12, ColorManager.hudColor.getColorHex());
 
             }
         }
@@ -195,38 +193,32 @@ public class ZombieAim extends Module {
                     }
                 }
 
-
-
-
-
                 /*
                 Retarded autoheal
                  */
-                int appleSlot = getAppleFromInvetory();
 
-                float minHealth = health.getValue().floatValue();
+                if (autoHeal.getValue()) {
+                    float minHealth = health.getValue().floatValue();
 
-                double minimumPercent = minHealth / 20F;
+                    float minimumPercent = minHealth / 20F;
 
-                boolean shouldHeal = mc.thePlayer.getMaxHealth() == 20 ? mc.thePlayer.getHealth() <= minHealth : (mc.thePlayer.getHealth() / mc.thePlayer.getMaxHealth()) <= minimumPercent;
+                    boolean shouldHeal = mc.thePlayer.getMaxHealth() == 20 ? mc.thePlayer.getHealth() <= minHealth : (mc.thePlayer.getHealth() / mc.thePlayer.getMaxHealth()) <= minimumPercent;
 
-                if (appleSlot != -1 && shouldHeal && timer.delay(350)) {
-                    int swapTo = 5;
-                    if (appleSlot > 36)
-                        swapTo = appleSlot - 36;
-                    else
-                        swap(appleSlot, 5);
+                    if (shouldHeal && timer.delay(350)) {
+                        int abilitySlot = 5;
+                        ItemStack stack = mc.thePlayer.inventoryContainer.getSlot(36 + abilitySlot).getStack();
+                        if (stack != null) {
+                            if (Item.getIdFromItem(stack.getItem()) == Item.getIdFromItem(Items.golden_apple)) {
+                                int currentItem = mc.thePlayer.inventory.currentItem;
+                                mc.getNetHandler().addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem = abilitySlot));
 
-                    int currentItem = mc.thePlayer.inventory.currentItem;
-                    mc.getNetHandler().addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem = swapTo));
-
-                    mc.getNetHandler().addToSendQueue(new C08PacketPlayerBlockPlacement(mc.thePlayer.inventory.getCurrentItem()));
-                    mc.getNetHandler().addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem = currentItem));
-                    timer.reset();
-                    isHealing = true;
-                    ChatUtil.debug("Trying to heal.");
-                } else {
-                    isHealing = false;
+                                mc.getNetHandler().addToSendQueue(new C08PacketPlayerBlockPlacement(mc.thePlayer.inventory.getCurrentItem()));
+                                mc.getNetHandler().addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem = currentItem));
+                                timer.reset();
+                                ChatUtil.debug("Trying to heal.");
+                            }
+                        }
+                    }
                 }
             }
 
@@ -332,23 +324,6 @@ public class ZombieAim extends Module {
 
     protected void swap(int slot, int hotbarNum) {
         mc.playerController.windowClick(mc.thePlayer.inventoryContainer.windowId, slot, hotbarNum, 2, mc.thePlayer);
-    }
-
-    private int getAppleFromInvetory() {
-        Minecraft mc = Minecraft.getMinecraft();
-        int apple = -1;
-        for (int i = 9; i < 45; i++) {
-            if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
-                ItemStack is = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
-                Item item = is.getItem();
-
-                boolean shouldApple = (autoHeal.getValue() && (((Item.getIdFromItem(item) == Item.getIdFromItem(Items.golden_apple)))));
-                if (Item.getIdFromItem(item) == 282 || shouldApple) {
-                    apple = i;
-                }
-            }
-        }
-        return apple;
     }
 
     private final double[] ZERO = new double[]{0, 0, 0};
