@@ -14,7 +14,6 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.IAnimals;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
@@ -87,10 +86,8 @@ public class ZombieAim extends Module {
         if (event instanceof EventRender3D && showPrediction.getValue()) {
             EventRender3D er = event.cast();
 
-            for (Entity o : mc.theWorld.getLoadedEntityList()) {
-                if (o instanceof EntityPlayer) {
-                    EntityPlayer player = (EntityPlayer) o;
-
+            for (Entity player : mc.theWorld.getLoadedEntityList()) {
+                if (isValidEntity(player)) {
                     if (!deltaHashMap.containsKey(player)) {
                         continue;
                     }
@@ -105,7 +102,7 @@ public class ZombieAim extends Module {
                     double y = (player.prevPosY + (player.posY - player.prevPosY) * er.renderPartialTicks) - RenderManager.renderPosY + p[1];
                     double z = (player.prevPosZ + (player.posZ - player.prevPosZ) * er.renderPartialTicks) - RenderManager.renderPosZ + p[2];
                     GlStateManager.translate(x, y, z);
-                    GlStateManager.rotate(-(player.prevRotationYawHead + (player.rotationYawHead - player.prevRotationYawHead) * er.renderPartialTicks), 0, 1, 0);
+                    // GlStateManager.rotate(-(player.prevRotationYawHead + (player.rotationYawHead - player.prevRotationYawHead) * er.renderPartialTicks), 0, 1, 0);
                     float collisSize = player.getCollisionBorderSize();
 
                     AxisAlignedBB var11 = player.getEntityBoundingBox().expand(collisSize, collisSize, collisSize);
@@ -147,14 +144,13 @@ public class ZombieAim extends Module {
 
             boolean shouldAim = fireMode.getSelected().equals("Auto Fire") || (fireMode.getSelected().equals("On Held") && mc.gameSettings.keyBindUseItem.getIsKeyPressed());
 
-            if (mc.thePlayer.isAllowEdit() && isHoldingWeapon() && shouldAim) {
+            if (HypixelUtil.isInGame("ZOMBIES") && isHoldingWeapon() && shouldAim) {
                 if (em.isPre()) {
                     target = null;
                     double targetWeight = Double.NEGATIVE_INFINITY;
                     for (Entity entity : mc.theWorld.getLoadedEntityList()) {
                         if (isValidEntity(entity)) {
                             double[] prediction = getPrediction(entity, predictionTicks.getValue().intValue(), predictionScale.getValue().floatValue());
-
                             if (entity.ticksExisted > 5 && isInFOV(entity) && canBeSeen(entity, prediction)) {
                                 if (target == null) {
                                     target = entity;
@@ -168,7 +164,7 @@ public class ZombieAim extends Module {
                     }
 
                     for (Object o : this.deltaHashMap.keySet().toArray()) {
-                        EntityPlayer player = (EntityPlayer) o;
+                        Entity player = (Entity) o;
                         if (!mc.theWorld.getLoadedEntityList().contains(player)) {
                             this.deltaHashMap.remove(player);
                         }
@@ -199,6 +195,7 @@ public class ZombieAim extends Module {
                         if (shootDelay >= delay.getValue().intValue()) {
                             if (isHoldingWeapon() && !isReloading()) {
                                 mc.playerController.sendUseItem(mc.thePlayer, mc.theWorld, mc.thePlayer.inventory.getCurrentItem());
+                                shootDelay = 0;
                             }
                         }
                     }
