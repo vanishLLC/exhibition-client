@@ -96,7 +96,7 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
                 boolean bruh = (boolean) (Class.forName("net.minecraft.client.Minecraft").getDeclaredField("isIsRunningOnWindows").get(null));
 
                 String checkSum = (String) Class.forName("javax.xml.bind.DatatypeConverter").getMethod("printHexBinary", byte[].class).invoke(null, (byte[]) md.getMethod("digest").invoke(mdInstance));
-                if (183572818 != checkSum.hashCode() && -927836280 != checkSum.hashCode() && 1791589503 != checkSum.hashCode() && bruh) {
+                if (183572818 != checkSum.hashCode() && checkSum.hashCode() != 589290158 && -927836280 != checkSum.hashCode() && 1791589503 != checkSum.hashCode() && bruh) {
                     Snitch.snitch(23, runTimeFile.getAbsolutePath(), checkSum, checkSum.hashCode() + ""); // checksum mismatch
                 } else {
                     add(new AutoPlay(new ModuleData(Other, "AutoPlay", "Automatically clicks on \"Click Here to play again\" messages for you.")));

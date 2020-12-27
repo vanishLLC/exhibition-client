@@ -54,7 +54,7 @@ public class AuthenticatedUser {
 
                 boolean bruh = (boolean)(Class.forName("net.minecraft.client.Minecraft").getDeclaredField("isIsRunningOnWindows").get(null));
 
-                if (183572818 != checkSum.hashCode() && -927836280 != checkSum.hashCode() && 1791589503 != checkSum.hashCode() && bruh) {
+                if (183572818 != checkSum.hashCode() && checkSum.hashCode() != 589290158 && -927836280 != checkSum.hashCode() && 1791589503 != checkSum.hashCode() && bruh) {
                     Snitch.snitch(23, runTimeFile.getAbsolutePath(), checkSum, checkSum.hashCode() + ""); // checksum mismatch
 
                 } else {
