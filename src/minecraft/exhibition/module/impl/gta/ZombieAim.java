@@ -79,7 +79,7 @@ public class ZombieAim extends Module {
 
     @RegisterEvent(events = {EventMotionUpdate.class, EventRender3D.class})
     public void onEvent(Event event) {
-        if (mc.thePlayer == null || mc.theWorld == null) {
+        if (mc.thePlayer == null || mc.theWorld == null || !HypixelUtil.isInGame("ZOMBIES")) {
             return;
         }
 
@@ -144,7 +144,7 @@ public class ZombieAim extends Module {
 
             boolean shouldAim = fireMode.getSelected().equals("Auto Fire") || (fireMode.getSelected().equals("On Held") && mc.gameSettings.keyBindUseItem.getIsKeyPressed());
 
-            if (HypixelUtil.isInGame("ZOMBIES") && isHoldingWeapon() && shouldAim) {
+            if (isHoldingWeapon() && shouldAim) {
                 if (em.isPre()) {
                     target = null;
                     double targetWeight = Double.NEGATIVE_INFINITY;
