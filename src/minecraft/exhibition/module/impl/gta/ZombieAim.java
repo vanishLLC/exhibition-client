@@ -166,19 +166,23 @@ public class ZombieAim extends Module {
              */
             if (hud.getValue()) {
                 int currentHealth = (int) mc.thePlayer.getHealth() * 5;
+                int currentAmmo = 0;
 
                 ScaledResolution scaledRes = new ScaledResolution(mc);
                 TTFFontRenderer smallFont = Client.fonts[0];
 
                 if (isHoldingWeapon()){
-                    int currentAmmo = mc.thePlayer.getCurrentEquippedItem().stackSize;
+                    currentAmmo = mc.thePlayer.getCurrentEquippedItem().stackSize;
                     if (isReloading() && mc.thePlayer.getCurrentEquippedItem().stackSize == 1){
                         currentAmmo = 0;
                     }
                     smallFont.drawBorderedString(currentAmmo + "/" + (mc.thePlayer.experienceLevel - currentAmmo), scaledRes.getScaledWidth() / 2D - 15 - (int) smallFont.getWidth("30/30"), scaledRes.getScaledHeight_double() / 2 - 0.5, -1, Colors.getColor(0, 200));
                 }
                 smallFont.drawBorderedString(currentHealth + "HP", scaledRes.getScaledWidth() / 2D + 15, scaledRes.getScaledHeight_double() / 2 - 0.5, -1, Colors.getColor(0, 200));
-                if (isReloading())
+                if (isReloading() && currentAmmo == 0 && mc.thePlayer.experienceLevel == 0){
+                    smallFont.drawBorderedString("No Ammo", scaledRes.getScaledWidth() / 2D - (int) smallFont.getWidth("No Ammo") / 2, scaledRes.getScaledHeight_double() / 2 + 15, Colors.getColor(255,122,122), Colors.getColor(0, 200));
+                }
+                else if (isReloading())
                 smallFont.drawBorderedString("Reloading", scaledRes.getScaledWidth() / 2D - (int) smallFont.getWidth("Reloading") / 2, scaledRes.getScaledHeight_double() / 2 + 15, Colors.getColor(91,255,51), Colors.getColor(0, 200));
             }
         }
