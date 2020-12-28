@@ -630,6 +630,14 @@ public class HUD extends Module {
         }
     }
 
+    public int getColor() {
+        String selected = ((Options) settings.get(COLOR).getValue()).getSelected();
+        final Color color2222 = Color.getHSBColor(hueThing.getOpacity() / 255.0f, 0.55f, 0.9f);
+        final int c2222 = color2222.getRGB();
+        int colorXD = selected.equalsIgnoreCase("Rainbow") ? c2222 : selected.equalsIgnoreCase("Fade") ? currentColor : Colors.getColor(ColorManager.hudColor.red, ColorManager.hudColor.green, ColorManager.hudColor.blue, 220);
+        return colorXD;
+    }
+
     private String getRenderName(Module module) {
         return String.format("%s" + ((module.getSuffix() != null && !module.getSuffix().equals("")) ? " \2477(%s)" : ""), module.getName(), module.getSuffix());
     }

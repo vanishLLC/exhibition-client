@@ -170,7 +170,7 @@ public class Spotify extends Module {
                 GlStateManager.disableAlpha();
                 GlStateManager.popMatrix();
 
-                boolean clicked = hovering && (System.nanoTime() - Mouse.getEventNanoseconds() < 3000000000L) && mouseClicked && Display.isActive();
+                boolean clicked = hovering && mouseClicked && Display.isActive();
 
                 if (clicked && timer.delay(300)) {
                     timer.reset();
@@ -205,7 +205,7 @@ public class Spotify extends Module {
                 GlStateManager.disableAlpha();
                 GlStateManager.popMatrix();
 
-                boolean clicked = hovering && (System.nanoTime() - Mouse.getEventNanoseconds() < 3000000000L) && mouseClicked && Display.isActive();
+                boolean clicked = hovering && mouseClicked && Display.isActive();
 
                 if (clicked && timer.delay(300)) {
                     timer.reset();
@@ -239,7 +239,7 @@ public class Spotify extends Module {
                 GlStateManager.disableAlpha();
                 GlStateManager.popMatrix();
 
-                boolean clicked = hovering && (System.nanoTime() - Mouse.getEventNanoseconds() < 3000000000L) && mouseClicked && Display.isActive();
+                boolean clicked = hovering && mouseClicked && Display.isActive();
 
                 if (clicked && timer.delay(300)) {
                     timer.reset();
@@ -272,7 +272,7 @@ public class Spotify extends Module {
                 GlStateManager.disableAlpha();
                 GlStateManager.popMatrix();
 
-                boolean clicked = hovering && (System.nanoTime() - Mouse.getEventNanoseconds() < 3000000000L) && mouseClicked && Display.isActive();
+                boolean clicked = hovering && mouseClicked && Display.isActive();
 
                 if (clicked && timer.delay(300)) {
                     timer.reset();
@@ -305,7 +305,7 @@ public class Spotify extends Module {
                 GlStateManager.disableAlpha();
                 GlStateManager.popMatrix();
 
-                boolean clicked = hovering && (System.nanoTime() - Mouse.getEventNanoseconds() < 3000000000L) && mouseClicked && Display.isActive();
+                boolean clicked = hovering && mouseClicked && Display.isActive();
 
                 if (clicked && timer.delay(300)) {
                     timer.reset();
@@ -369,7 +369,7 @@ public class Spotify extends Module {
 
         if (track != null) {
             boolean hovering = mouseX >= positionLineLeft - 1 && mouseX <= positionLineRight && mouseY >= positionLineTop && mouseY <= positionLineBottom && (mc.currentScreen instanceof GuiChat);
-            boolean clicked = hovering && (System.nanoTime() - Mouse.getEventNanoseconds() < 3000000000L) && mouseClicked && Display.isActive();
+            boolean clicked = hovering && mouseClicked && Display.isActive();
             if (hovering) {
                 double position = (mouseX - positionLineLeft) / (positionWidth);
 
@@ -433,7 +433,7 @@ public class Spotify extends Module {
             GlStateManager.popMatrix();
 
             boolean hovering = mouseX >= volumeLeft && mouseX <= volumeRight && mouseY >= volumeTop && mouseY <= volumeBottom && (mc.currentScreen instanceof GuiChat);
-            boolean clicked = hovering && (System.nanoTime() - Mouse.getEventNanoseconds() < 3000000000L) && mouseClicked && Display.isActive();
+            boolean clicked = hovering && mouseClicked && Display.isActive();
             if (hovering) {
                 double position = (mouseX - volumeLeft) / (volumeRight - volumeLeft);
                 int newVolume = Math.round((float) (100 * position));

@@ -1,56 +1,60 @@
 package net.minecraft.client.renderer.entity.layers;
 
+import exhibition.Client;
+import exhibition.management.ColorManager;
+import exhibition.management.friend.FriendManager;
+import exhibition.module.impl.hud.HUD;
+import exhibition.util.RenderingUtil;
+import exhibition.util.render.Colors;
 import net.minecraft.client.entity.AbstractClientPlayer;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EnumPlayerModelParts;
 import net.minecraft.util.MathHelper;
+import org.lwjgl.opengl.GL11;
 
-public class LayerCape implements LayerRenderer
-{
+import java.awt.*;
+
+public class LayerCape implements LayerRenderer {
     private final RenderPlayer playerRenderer;
     //private static final String __OBFID = "CL_00002425";
 
-    public LayerCape(RenderPlayer playerRendererIn)
-    {
+    public LayerCape(RenderPlayer playerRendererIn) {
         this.playerRenderer = playerRendererIn;
     }
 
-    public void doRenderLayer(AbstractClientPlayer entitylivingbaseIn, float p_177141_2_, float p_177141_3_, float partialTicks, float p_177141_5_, float p_177141_6_, float p_177141_7_, float scale)
-    {
-        if (entitylivingbaseIn.hasPlayerInfo() && !entitylivingbaseIn.isInvisible() && entitylivingbaseIn.isWearing(EnumPlayerModelParts.CAPE) && entitylivingbaseIn.getLocationCape() != null)
-        {
+    public void doRenderLayer(AbstractClientPlayer entitylivingbaseIn, float p_177141_2_, float p_177141_3_, float partialTicks, float p_177141_5_, float p_177141_6_, float p_177141_7_, float scale) {
+        if (entitylivingbaseIn.hasPlayerInfo() && !entitylivingbaseIn.isInvisible() && entitylivingbaseIn.isWearing(EnumPlayerModelParts.CAPE) && entitylivingbaseIn.getLocationCape() != null) {
+            boolean local = (entitylivingbaseIn instanceof EntityPlayerSP || FriendManager.isFriend(entitylivingbaseIn.getName()));
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             this.playerRenderer.bindTexture(entitylivingbaseIn.getLocationCape());
             GlStateManager.pushMatrix();
             GlStateManager.translate(0.0F, 0.0F, 0.125F);
-            double d0 = entitylivingbaseIn.prevChasingPosX + (entitylivingbaseIn.chasingPosX - entitylivingbaseIn.prevChasingPosX) * (double)partialTicks - (entitylivingbaseIn.prevPosX + (entitylivingbaseIn.posX - entitylivingbaseIn.prevPosX) * (double)partialTicks);
-            double d1 = entitylivingbaseIn.prevChasingPosY + (entitylivingbaseIn.chasingPosY - entitylivingbaseIn.prevChasingPosY) * (double)partialTicks - (entitylivingbaseIn.prevPosY + (entitylivingbaseIn.posY - entitylivingbaseIn.prevPosY) * (double)partialTicks);
-            double d2 = entitylivingbaseIn.prevChasingPosZ + (entitylivingbaseIn.chasingPosZ - entitylivingbaseIn.prevChasingPosZ) * (double)partialTicks - (entitylivingbaseIn.prevPosZ + (entitylivingbaseIn.posZ - entitylivingbaseIn.prevPosZ) * (double)partialTicks);
+            double d0 = entitylivingbaseIn.prevChasingPosX + (entitylivingbaseIn.chasingPosX - entitylivingbaseIn.prevChasingPosX) * (double) partialTicks - (entitylivingbaseIn.prevPosX + (entitylivingbaseIn.posX - entitylivingbaseIn.prevPosX) * (double) partialTicks);
+            double d1 = entitylivingbaseIn.prevChasingPosY + (entitylivingbaseIn.chasingPosY - entitylivingbaseIn.prevChasingPosY) * (double) partialTicks - (entitylivingbaseIn.prevPosY + (entitylivingbaseIn.posY - entitylivingbaseIn.prevPosY) * (double) partialTicks);
+            double d2 = entitylivingbaseIn.prevChasingPosZ + (entitylivingbaseIn.chasingPosZ - entitylivingbaseIn.prevChasingPosZ) * (double) partialTicks - (entitylivingbaseIn.prevPosZ + (entitylivingbaseIn.posZ - entitylivingbaseIn.prevPosZ) * (double) partialTicks);
             float f = entitylivingbaseIn.prevRenderYawOffset + (entitylivingbaseIn.renderYawOffset - entitylivingbaseIn.prevRenderYawOffset) * partialTicks;
-            double d3 = (double)MathHelper.sin(f * (float)Math.PI / 180.0F);
-            double d4 = (double)(-MathHelper.cos(f * (float)Math.PI / 180.0F));
-            float f1 = (float)d1 * 10.0F;
+            double d3 = (double) MathHelper.sin(f * (float) Math.PI / 180.0F);
+            double d4 = (double) (-MathHelper.cos(f * (float) Math.PI / 180.0F));
+            float f1 = (float) d1 * 10.0F;
             f1 = MathHelper.clamp_float(f1, -6.0F, 32.0F);
-            float f2 = (float)(d0 * d3 + d2 * d4) * 100.0F;
-            float f3 = (float)(d0 * d4 - d2 * d3) * 100.0F;
+            float f2 = (float) (d0 * d3 + d2 * d4) * 100.0F;
+            float f3 = (float) (d0 * d4 - d2 * d3) * 100.0F;
 
-            if (f2 < 0.0F)
-            {
+            if (f2 < 0.0F) {
                 f2 = 0.0F;
             }
 
-            if (f2 > 165.0F)
-            {
+            if (f2 > 165.0F) {
                 f2 = 165.0F;
             }
 
             float f4 = entitylivingbaseIn.prevCameraYaw + (entitylivingbaseIn.cameraYaw - entitylivingbaseIn.prevCameraYaw) * partialTicks;
             f1 = f1 + MathHelper.sin((entitylivingbaseIn.prevDistanceWalkedModified + (entitylivingbaseIn.distanceWalkedModified - entitylivingbaseIn.prevDistanceWalkedModified) * partialTicks) * 6.0F) * 32.0F * f4;
 
-            if (entitylivingbaseIn.isSneaking())
-            {
+            if (entitylivingbaseIn.isSneaking()) {
                 f1 += 25.0F;
                 GlStateManager.translate(0.0F, 0.142F, -0.0178F);
             }
@@ -60,17 +64,31 @@ public class LayerCape implements LayerRenderer
             GlStateManager.rotate(-f3 / 2.0F, 0.0F, 1.0F, 0.0F);
             GlStateManager.rotate(180.0F, 0.0F, 1.0F, 0.0F);
             this.playerRenderer.getMainModel().renderCape(0.0625F);
+
+            if (local) {
+                boolean oldBruh = GL11.glIsEnabled(GL11.GL_BLEND);
+
+                if (!oldBruh)
+                    GlStateManager.enableBlend();
+                RenderingUtil.glColor(((HUD) Client.getModuleManager().get(HUD.class)).getColor());
+                this.playerRenderer.bindTexture(Client.overlayLocation);
+                this.playerRenderer.getMainModel().renderCape(0.0625F);
+
+                if (!oldBruh)
+                    GlStateManager.disableBlend();
+
+                GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+
+            }
             GlStateManager.popMatrix();
         }
     }
 
-    public boolean shouldCombineTextures()
-    {
+    public boolean shouldCombineTextures() {
         return false;
     }
 
-    public void doRenderLayer(EntityLivingBase entitylivingbaseIn, float p_177141_2_, float p_177141_3_, float partialTicks, float p_177141_5_, float p_177141_6_, float p_177141_7_, float scale)
-    {
-        this.doRenderLayer((AbstractClientPlayer)entitylivingbaseIn, p_177141_2_, p_177141_3_, partialTicks, p_177141_5_, p_177141_6_, p_177141_7_, scale);
+    public void doRenderLayer(EntityLivingBase entitylivingbaseIn, float p_177141_2_, float p_177141_3_, float partialTicks, float p_177141_5_, float p_177141_6_, float p_177141_7_, float scale) {
+        this.doRenderLayer((AbstractClientPlayer) entitylivingbaseIn, p_177141_2_, p_177141_3_, partialTicks, p_177141_5_, p_177141_6_, p_177141_7_, scale);
     }
 }

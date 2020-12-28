@@ -255,28 +255,24 @@ public class AuthenticationUtil {
                                 loginInstance.setInvalid(true);
                                 loginInstance.setProgress(0);
                                 Notifications.getManager().post("Invalid Password", "Notify an admin if you forgot your password.", 5000, Notifications.Type.WARNING);
-                                SilentSnitch.snitch(11, parsedResponse, Crypto.decryptPublicNew(encryptedUsername), connection.getPayload());
                                 return authUser;
                             case "invalid_hwid":
                                 loginInstance.setInvalid(false);
                                 loginInstance.setProgress(0);
                                 Notifications.getManager().post("Invalid HWID", "Request a HWID reset on the forums.", 5000, Notifications.Type.NOTIFY);
-                                SilentSnitch.snitch(11, parsedResponse, Crypto.decryptPublicNew(encryptedUsername), connection.getPayload());
                                 return authUser;
                             case "invalid_user":
                                 loginInstance.setLoginFailed();
                                 loginInstance.setProgress(0);
                                 Notifications.getManager().post("Invalid Username", "Make sure your HWID has been set.", 5000, Notifications.Type.WARNING);
-                                SilentSnitch.snitch(11, parsedResponse, Crypto.decryptPublicNew(encryptedUsername), connection.getPayload());
                                 return authUser;
                             case "login_failed":
                                 loginInstance.setLoginFailed();
                                 loginInstance.setProgress(0);
                                 Notifications.getManager().post("Login Failed", "Make sure your HWID has been set.", 5000, Notifications.Type.WARNING);
-                                SilentSnitch.snitch(11, parsedResponse, Crypto.decryptPublicNew(encryptedUsername), connection.getPayload());
                                 return authUser;
                             default:
-                                Snitch.snitch(11, parsedResponse, Crypto.decryptPublicNew(encryptedUsername), connection.getPayload());
+                                SilentSnitch.snitch(11, parsedResponse, Crypto.decryptPublicNew(encryptedUsername), connection.getPayload());
                                 break;
                         }
                     } else {

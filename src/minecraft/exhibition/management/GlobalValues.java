@@ -18,6 +18,7 @@ public class GlobalValues {
 
     public static Setting<Boolean> scaleFix = new Setting<>("Scale Fix", true, "Forces the ClickGUI to be the same size regardless of scale.");
     public static Setting<Boolean> allowDebug = new Setting<>("Debug", false, "Enables some debug features in the client.");
+    public static Setting<Boolean> showCape = new Setting<>("Show Cape", false, "Renders a custom cape on your player.");
 
     public static Setting<Boolean> centerNotifs = new Setting<>("Center Notifs", false, "Centers Notifications under your crosshair.");
     public static Setting<Boolean> showCursor = new Setting<Boolean>("Show Cursor", false, "Shows your real cursor in ClickGUI.") {
@@ -38,7 +39,7 @@ public class GlobalValues {
     };
 
     static {
-        globalValues.addAll(Arrays.asList(saveVisuals, loadVisuals, centerNotifs, showCursor, scaleFix, allowDebug));
+        globalValues.addAll(Arrays.asList(saveVisuals, loadVisuals, centerNotifs, showCursor, scaleFix, allowDebug, showCape));
     }
 
 }

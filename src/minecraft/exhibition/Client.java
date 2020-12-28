@@ -43,6 +43,8 @@ import static exhibition.util.security.Snitch.snitch;
 
 // Credits to LPK for initial base
 public class Client implements EventListener {
+
+
     public static Client instance;
 
     public static boolean isNewUser;
@@ -81,6 +83,8 @@ public class Client implements EventListener {
     public static long loginTime = -1;
 
     public static ResourceLocation chainmailTexture = new ResourceLocation("textures/skeetchainmail.png");
+    public static ResourceLocation capeLocation = new ResourceLocation("textures/cape.png");
+    public static ResourceLocation overlayLocation = new ResourceLocation("textures/overlay.png");
 
     // Auth
     private static AuthenticatedUser authUser;

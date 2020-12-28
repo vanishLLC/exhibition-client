@@ -1112,8 +1112,8 @@ public class SkeetMenu extends UI {
                             yOff -= 52.5 - 4;
                         }
                         if (module.getName().equalsIgnoreCase("NetGraph")) {
-                            xOff = 50 + categoryButton.panel.x + 95;
-                            yOff += 37;
+                            //xOff = 50 + categoryButton.panel.x + 95;
+                            yOff -= 38;
                         }
                         categoryPanel.buttons.add(new Button(categoryPanel, module.getName(), xOff + 0.5f, yOff + 10, module));
                         float x1 = 0.5f;
@@ -1220,11 +1220,13 @@ public class SkeetMenu extends UI {
                     }
                 }
             }
-            float globalsOffsetX = 290, globalsOffsetY = 178;
-            categoryPanel.groupBoxes.add(new GroupBox("Client Settings", categoryPanel, globalsOffsetX, globalsOffsetY, 20, true));
+            float globalsOffsetX = 290 - 95, globalsOffsetY = 178 + 75;
+            categoryPanel.groupBoxes.add(new GroupBox("Client Settings", categoryPanel, globalsOffsetX, globalsOffsetY, 30.5F, true));
             categoryPanel.checkboxes.add(new Checkbox(categoryPanel, globalsOffsetX + 0.5F, globalsOffsetY + 10, GlobalValues.centerNotifs));
-            categoryPanel.checkboxes.add(new Checkbox(categoryPanel, globalsOffsetX + 44.5F, globalsOffsetY + 10, GlobalValues.showCursor));
             categoryPanel.checkboxes.add(new Checkbox(categoryPanel, globalsOffsetX + 0.5F, globalsOffsetY + 20, GlobalValues.scaleFix));
+            categoryPanel.checkboxes.add(new Checkbox(categoryPanel, globalsOffsetX + 0.5F, globalsOffsetY + 30, GlobalValues.showCape));
+
+            categoryPanel.checkboxes.add(new Checkbox(categoryPanel, globalsOffsetX + 44.5F, globalsOffsetY + 10, GlobalValues.showCursor));
             categoryPanel.checkboxes.add(new Checkbox(categoryPanel, globalsOffsetX + 44.5F, globalsOffsetY + 20, GlobalValues.allowDebug));
 
 

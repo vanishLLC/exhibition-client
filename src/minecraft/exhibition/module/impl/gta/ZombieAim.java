@@ -76,6 +76,7 @@ public class ZombieAim extends Module {
     private final Setting<Boolean> showFOV = new Setting<>("SHOW FOV", true, "Renders your FOV on your screen.");
     private final Setting<Boolean> autoHeal = new Setting<>("AUTO-HEAL", true, "Auto uses Heal ability.");
     private final Setting<Boolean> autoRevive = new Setting<>("AUTO-REVIVE", true, "Auto sneaks near downed players.");
+    private final Setting<Boolean> autoAmmo = new Setting<>("AUTO-AMMO", false, "Automaticcally rebuys ammo for you.");
     private final Setting<Boolean> hud = new Setting<>("HUD", true, "Shows your health, ammo, and skill cool-down.");
 
     private final Setting<Number> predictionScale = new Setting<>("PRED SCALE", 1, "Amount of prediction to be applied.", 0.05, 0, 2);
@@ -98,10 +99,11 @@ public class ZombieAim extends Module {
         super(data);
 
         addSetting(new Setting<>("MODE", fireMode, "Aimbot behaviour mode."));
-        addSetting(silent);
-        addSetting(showPrediction);
         addSetting(autoHeal);
         addSetting(autoRevive);
+        addSetting(silent);
+        addSetting(showPrediction);
+
         addSetting(showFOV);
         addSetting(hud);
 
@@ -241,7 +243,7 @@ public class ZombieAim extends Module {
                     }
                 }
 
-                boolean mouseClicked = Mouse.getEventButton() == 0 && Mouse.getEventButtonState();
+                boolean mouseClicked = Mouse.isButtonDown(0);
 
                 int var141 = er.getResolution().getScaledWidth();
                 int var151 = er.getResolution().getScaledHeight();
@@ -267,7 +269,7 @@ public class ZombieAim extends Module {
                                 boolean hovering = mouseX >= 2 && mouseX <= mc.fontRendererObj.getStringWidth(entity.getDisplayName().getFormattedText()) + 4 &&
                                         mouseY >= er.getResolution().getScaledHeight() / 2 - totalY / 2 + y && mouseY <= er.getResolution().getScaledHeight() / 2 - totalY / 2 + y + 18;
 
-                                boolean clicked = hovering && (System.nanoTime() - Mouse.getEventNanoseconds() < 3000000000L) && mouseClicked && Display.isActive();
+                                boolean clicked = hovering && mouseClicked && Display.isActive();
 
                                 if (clicked) {
                                     double min = -0.3500000014901161;
@@ -309,7 +311,7 @@ public class ZombieAim extends Module {
                         boolean isPlayerNearby = false;
 
                         for (Entity entity : mc.theWorld.getLoadedEntityList()) {
-                            if (entity instanceof EntityPlayer && entity.isSneaking() && !entity.isInvisible() && entity.getDistanceToEntity(data.getKey()) < 2) {
+                            if (entity instanceof EntityPlayer && entity.isSneaking() && !entity.isInvisible() && entity.getDistanceToEntity(data.getKey()) < 2.5) {
                                 isPlayerNearby = true;
                             }
                         }
@@ -449,7 +451,7 @@ public class ZombieAim extends Module {
                     for (Map.Entry<EntityArmorStand, DownedData> data : downedPlayers.entrySet()) {
                         if (mc.theWorld.getLoadedEntityList().contains(data.getKey())) {
                             EntityArmorStand entityArmorStand = data.getKey();
-                            if (mc.thePlayer.getDistanceToEntity(entityArmorStand) < 2) {
+                            if (mc.thePlayer.getDistanceToEntity(entityArmorStand) < 2.5) {
                                 KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.getKeyCode(), true);
                                 KeyBinding.onTick(mc.gameSettings.keyBindSneak.getKeyCode());
                                 shouldSneak = true;
@@ -595,7 +597,7 @@ public class ZombieAim extends Module {
         return mc.thePlayer.inventory.getCurrentItem() == null ? -1 : Item.getIdFromItem(mc.thePlayer.inventory.getCurrentItem().getItem());
     }
 
-    private final Block[] ignoredBlocks = new Block[]{Blocks.barrier, Blocks.wooden_slab, Blocks.iron_bars};
+    private final Block[] ignoredBlocks = new Block[]{Blocks.barrier, Blocks.wooden_slab, Blocks.iron_bars, Blocks.glass_pane, Blocks.stained_glass_pane};
 
     private Vec3 getHitVec(EntityLivingBase entity) {
         double[] p = getPrediction(entity, predictionTicks.getValue().intValue(), predictionScale.getValue().floatValue());
