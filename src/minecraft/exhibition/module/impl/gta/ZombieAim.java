@@ -133,7 +133,7 @@ public class ZombieAim extends Module {
         target = null;
     }
 
-    @RegisterEvent(events = {EventMotionUpdate.class, EventRender3D.class, EventRenderGui.class, EventNametagRender.class, EventPacket.class})
+    @RegisterEvent(events = {EventMotionUpdate.class, EventRender3D.class, EventRenderGui.class, EventNametagRender.class, EventPacket.class, EventRenderGuiLast.class})
     public void onEvent(Event event) {
         if (event instanceof EventRenderGui) {
             EventRenderGui er = event.cast();
@@ -171,19 +171,18 @@ public class ZombieAim extends Module {
                 ScaledResolution scaledRes = new ScaledResolution(mc);
                 TTFFontRenderer smallFont = Client.fonts[0];
 
-                if (isHoldingWeapon()){
+                if (isHoldingWeapon()) {
                     currentAmmo = mc.thePlayer.getCurrentEquippedItem().stackSize;
-                    if (isReloading() && mc.thePlayer.getCurrentEquippedItem().stackSize == 1){
+                    if (isReloading() && mc.thePlayer.getCurrentEquippedItem().stackSize == 1) {
                         currentAmmo = 0;
                     }
                     smallFont.drawBorderedString(currentAmmo + "/" + (mc.thePlayer.experienceLevel - currentAmmo), scaledRes.getScaledWidth() / 2D - 15 - (int) smallFont.getWidth("30/30"), scaledRes.getScaledHeight_double() / 2 - 0.5, -1, Colors.getColor(0, 200));
                 }
                 smallFont.drawBorderedString(currentHealth + "HP", scaledRes.getScaledWidth() / 2D + 15, scaledRes.getScaledHeight_double() / 2 - 0.5, -1, Colors.getColor(0, 200));
-                if (isReloading() && currentAmmo == 0 && mc.thePlayer.experienceLevel == 0){
-                    smallFont.drawBorderedString("No Ammo", scaledRes.getScaledWidth() / 2D - (int) smallFont.getWidth("No Ammo") / 2, scaledRes.getScaledHeight_double() / 2 + 15, Colors.getColor(255,122,122), Colors.getColor(0, 200));
-                }
-                else if (isReloading())
-                smallFont.drawBorderedString("Reloading", scaledRes.getScaledWidth() / 2D - (int) smallFont.getWidth("Reloading") / 2, scaledRes.getScaledHeight_double() / 2 + 15, Colors.getColor(91,255,51), Colors.getColor(0, 200));
+                if (isReloading() && currentAmmo == 0 && mc.thePlayer.experienceLevel == 0) {
+                    smallFont.drawBorderedString("No Ammo", scaledRes.getScaledWidth() / 2D - (int) smallFont.getWidth("No Ammo") / 2, scaledRes.getScaledHeight_double() / 2 + 15, Colors.getColor(255, 122, 122), Colors.getColor(0, 200));
+                } else if (isReloading())
+                    smallFont.drawBorderedString("Reloading", scaledRes.getScaledWidth() / 2D - (int) smallFont.getWidth("Reloading") / 2, scaledRes.getScaledHeight_double() / 2 + 15, Colors.getColor(91, 255, 51), Colors.getColor(0, 200));
             }
         }
 
@@ -207,8 +206,8 @@ public class ZombieAim extends Module {
             }
         }
 
-        if (event instanceof EventRenderGui) {
-            EventRenderGui er = event.cast();
+        if (event instanceof EventRenderGuiLast) {
+            EventRenderGuiLast er = event.cast();
             int y = 0;
             int totalY = 0;
             if (!HypixelUtil.scoreboardContains("Waiting") && !HypixelUtil.isGameStarting() && (mc.currentScreen instanceof GuiChat || mc.currentScreen instanceof GuiInventory)) {
@@ -244,7 +243,6 @@ public class ZombieAim extends Module {
 
                 boolean mouseClicked = Mouse.getEventButton() == 0 && Mouse.getEventButtonState();
 
-
                 int var141 = er.getResolution().getScaledWidth();
                 int var151 = er.getResolution().getScaledHeight();
                 final int mouseX = Mouse.getX() * var141 / this.mc.displayWidth;
@@ -272,15 +270,16 @@ public class ZombieAim extends Module {
                                 boolean clicked = hovering && (System.nanoTime() - Mouse.getEventNanoseconds() < 3000000000L) && mouseClicked && Display.isActive();
 
                                 if (clicked) {
-
                                     double min = -0.3500000014901161;
                                     double max = 0.3500000014901161;
 
                                     double randX = MathHelper.clamp_double(min + (max - min) * Math.random(), min, max);
-                                    double randZ = min + (max - min) * Math.random();
+                                    double randZ = MathHelper.clamp_double(min + (max - min) * Math.random(), min, max);
+
+                                    boolean normalX = Math.random() > 0.5;
 
                                     if (buttonTimer.delay(300)) {
-                                        NetUtil.sendPacketNoEvents(new C02PacketUseEntity(entity, new Vec3(randX, 1.2240914184605316, randZ)));
+                                        NetUtil.sendPacketNoEvents(new C02PacketUseEntity(entity, new Vec3(normalX ? max : randX, 1.2240914184605316, normalX ? randZ : min)));
                                     }
                                     buttonTimer.reset();
                                 }
@@ -298,6 +297,10 @@ public class ZombieAim extends Module {
                     }
                 }
             }
+        }
+
+        if (event instanceof EventRenderGui) {
+            EventRenderGui er = event.cast();
 
             if (autoRevive.getValue()) {
                 for (Map.Entry<EntityArmorStand, DownedData> data : downedPlayers.entrySet()) {

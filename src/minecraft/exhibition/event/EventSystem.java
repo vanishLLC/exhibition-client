@@ -48,6 +48,7 @@ public class EventSystem {
         EventSystem.instances.put(EventRenderEntity.class, new EventRenderEntity());
         EventSystem.instances.put(EventSpawnEntity.class, new EventSpawnEntity());
         EventSystem.instances.put(EventSpawnPlayer.class, new EventSpawnPlayer());
+        EventSystem.instances.put(EventRenderGuiLast.class, new EventRenderGuiLast());
     }
 
     /**

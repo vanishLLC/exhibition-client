@@ -14,6 +14,8 @@ import java.util.concurrent.Callable;
 import exhibition.Client;
 import exhibition.event.EventSystem;
 import exhibition.event.impl.EventRender3D;
+import exhibition.event.impl.EventRenderGui;
+import exhibition.event.impl.EventRenderGuiLast;
 import exhibition.gui.click.ClickGui;
 import exhibition.gui.console.SourceConsoleGUI;
 import exhibition.management.notifications.usernotification.Notifications;
@@ -1400,12 +1402,17 @@ public class EntityRenderer implements IResourceManagerReloadListener
                 }
             }
 
+            // Called last but before Menu/Notifs, use this event to render over screens
+            ((EventRenderGuiLast) EventSystem.getInstance(EventRenderGuiLast.class)).fire(scaledresolution);
+
             if (!this.mc.gameSettings.hideGUI && (mc.currentScreen == null || mc.currentScreen instanceof ClickGui || mc.currentScreen instanceof SourceConsoleGUI)) {
                 Client.getClickGui().drawMenu(j1, k1);
             }
             GlStateManager.translate(0,0,100);
             Notifications.getManager().updateAndRender();
             GlStateManager.translate(0,0,-100);
+
+
         }
 
         this.frameFinish();

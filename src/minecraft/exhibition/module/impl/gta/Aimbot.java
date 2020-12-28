@@ -30,6 +30,7 @@ import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
 import net.minecraft.network.play.client.C09PacketHeldItemChange;
 import net.minecraft.network.play.client.C0BPacketEntityAction;
+import net.minecraft.network.play.server.S02PacketChat;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
@@ -916,6 +917,16 @@ public class Aimbot extends Module {
                         counter++;
                         event.setCancelled(true);
                         packetList.add(p);
+                    }
+                }
+
+                if (p instanceof S02PacketChat) {
+                    S02PacketChat packetChat = (S02PacketChat) p;
+                    if (packetChat.getChatComponent().getFormattedText().startsWith("\247r\2476+")) {
+                        event.setCancelled(true);
+                    }
+                    if (packetChat.getChatComponent().getFormattedText().startsWith("\247r\247b+")) {
+                        event.setCancelled(true);
                     }
                 }
 
