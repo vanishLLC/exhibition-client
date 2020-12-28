@@ -13,7 +13,6 @@ import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.render.Nametags;
 import exhibition.util.*;
 import exhibition.util.Timer;
-import exhibition.util.misc.ChatUtil;
 import exhibition.util.render.Colors;
 import net.minecraft.block.Block;
 import net.minecraft.client.gui.GuiChat;
@@ -181,7 +180,7 @@ public class ZombieAim extends Module {
                     smallFont.drawBorderedString(currentAmmo + "/" + (mc.thePlayer.experienceLevel - currentAmmo), scaledRes.getScaledWidth() / 2D - 15 - (int) smallFont.getWidth("30/30"), scaledRes.getScaledHeight_double() / 2 - 0.5, -1, Colors.getColor(0, 200));
                 }
                 smallFont.drawBorderedString(currentHealth + "HP", scaledRes.getScaledWidth() / 2D + 15, scaledRes.getScaledHeight_double() / 2 - 0.5, -1, Colors.getColor(0, 200));
-                if (isReloading() && currentAmmo == 0 && mc.thePlayer.experienceLevel == 0) {
+                if (isReloading() && currentAmmo == 0 && mc.thePlayer.experienceLevel <= 0) {
                     smallFont.drawBorderedString("No Ammo", scaledRes.getScaledWidth() / 2D - (int) smallFont.getWidth("No Ammo") / 2, scaledRes.getScaledHeight_double() / 2 + 15, Colors.getColor(255, 122, 122), Colors.getColor(0, 200));
                 } else if (isReloading())
                     smallFont.drawBorderedString("Reloading", scaledRes.getScaledWidth() / 2D - (int) smallFont.getWidth("Reloading") / 2, scaledRes.getScaledHeight_double() / 2 + 15, Colors.getColor(91, 255, 51), Colors.getColor(0, 200));
@@ -272,6 +271,7 @@ public class ZombieAim extends Module {
                                 boolean clicked = hovering && mouseClicked && Display.isActive();
 
                                 if (clicked) {
+
                                     double min = -0.3500000014901161;
                                     double max = 0.3500000014901161;
 
