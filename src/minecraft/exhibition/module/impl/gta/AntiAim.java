@@ -40,8 +40,8 @@ public class AntiAim extends Module {
 
     public AntiAim(ModuleData data) {
         super(data);
-        settings.put(AAYAW, new Setting<>(AAYAW, new Options("AA Yaw", "FakeJitter", new String[]{"Reverse", "Jitter", "Lisp", "SpinSlow", "SpinFast", "Sideways", "FakeJitter", "FakeHead", "Freestanding", "180樹屋"}), "AA Yaw."));
-        settings.put(AAPITCH, new Setting<>(AAPITCH, new Options("AA Pitch", "HalfDown", new String[]{"Normal", "HalfDown", "Zero", "Up", "Stutter", "Reverse", "Meme"}), "AA Pitch."));
+        settings.put(AAYAW, new Setting<>(AAYAW, new Options("AA Yaw", "FakeJitter", "Legit", "Reverse", "Jitter", "Lisp", "SpinSlow", "SpinFast", "Sideways", "FakeJitter", "FakeHead", "Freestanding", "180樹屋"), "AA Yaw."));
+        settings.put(AAPITCH, new Setting<>(AAPITCH, new Options("AA Pitch", "HalfDown", "Normal", "HalfDown", "Zero", "Up", "Stutter", "Reverse", "Meme"), "AA Pitch."));
         settings.put(ANTIUNTRUST, new Setting<>(ANTIUNTRUST, true, "So you don't get watchdog banned like a retard."));
         addSetting(matchOnly);
     }
@@ -90,6 +90,8 @@ public class AntiAim extends Module {
 
                 fake = !fake;
                 switch (((Options) settings.get(AAYAW).getValue()).getSelected()) {
+                    case "Legit":
+                        break;
                     case "Jitter":
                         em.setYaw(em.getYaw() + (mc.thePlayer.ticksExisted % 2 == 0 ? -45 : 135));
                         lastAngles = new float[]{em.getYaw(), lastAngles[1]};
@@ -147,11 +149,10 @@ public class AntiAim extends Module {
                         lastAngles = new float[]{yawSpinSlow, lastAngles[1]};
                         em.setYaw(yawSpinSlow);
                         break;
-                    default:
-                        break;
-
                 }
                 switch (((Options) settings.get(AAPITCH).getValue()).getSelected()) {
+                    case "Normal":
+                        break;
                     case "HalfDown":
                         float pitchDown = 90;
                         lastAngles = new float[]{lastAngles[0], pitchDown};
@@ -165,8 +166,6 @@ public class AntiAim extends Module {
                         }
                         lastAngles = new float[]{lastAngles[0], lastMeme};
                         em.setPitch(lastMeme);
-                        break;
-                    case "Normal":
                         break;
                     case "Reverse":
                         float reverse = mc.thePlayer.rotationPitch + 180;
@@ -191,8 +190,6 @@ public class AntiAim extends Module {
                     case "Zero":
                         lastAngles = new float[]{lastAngles[0], -179};
                         em.setPitch(-180);
-                        break;
-                    default:
                         break;
                 }
                 if ((Boolean) settings.get(ANTIUNTRUST).getValue())
