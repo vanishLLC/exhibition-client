@@ -502,7 +502,7 @@ public class ItemRenderer
                         this.transformFirstPersonItem(0.0F, 0.0F);
                     }
                 } else {
-                    this.transformFirstPersonItem(f, 0.0F);
+                    this.transformFirstPersonItem(f, f1);
                 }
             }
 

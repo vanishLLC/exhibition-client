@@ -271,7 +271,7 @@ public class GuiDisconnected extends GuiScreen {
             }
         }
 
-        String str = "Current Alt: " + (Client.getModuleManager().isEnabled(StreamerMode.class) ? Minecraft.getMinecraft().session.getUsername().substring(0, 3) : currentAlt);
+        String str = "Current Alt: " + (Client.getModuleManager().isEnabled(StreamerMode.class) ? Minecraft.getMinecraft().session.getUsername().substring(0, Math.min(Minecraft.getMinecraft().session.getUsername().length(), 3)) : currentAlt);
         fontRendererObj.drawStringWithShadow(str, this.width / 2F - fontRendererObj.getStringWidth(str) - 5, this.height / 2F + this.field_175353_i / 2F + this.fontRendererObj.FONT_HEIGHT + 56, -1);
 
         if (timeDifference != -1 && this.message.getUnformattedText().contains("ban")) {

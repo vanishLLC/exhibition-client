@@ -43,19 +43,14 @@ public class Bind extends Command {
             String bindStr = args[1];
             boolean isMouseInput = bindStr.equalsIgnoreCase("mouse3") || bindStr.equalsIgnoreCase("mouse4") || bindStr.equalsIgnoreCase("mouse5");
 
-            if(!isMouseInput) {
+            if (!isMouseInput) {
                 int keyIndex = Keyboard.getKeyIndex(bindStr.toUpperCase());
-                if (keyIndex != 0) {
+                if (keyIndex != 0 || bindStr.equalsIgnoreCase("none")) {
                     Keybind keybind = new Keybind(module, keyIndex);
                     module.setKeybind(keybind);
                     Keybind key = module.getKeybind();
                     ChatUtil.printChat(chatPrefix + "Set " + module.getName() + " to " + key.getKeyStr());
 
-                } else if (bindStr.equalsIgnoreCase("none")){
-                    Keybind keybind = new Keybind(module, Keyboard.getKeyIndex("NONE"));
-                    module.setKeybind(keybind);
-                    Keybind key = module.getKeybind();
-                    ChatUtil.printChat(chatPrefix + "Set " + module.getName() + " to " + key.getKeyStr());
                 } else {
                     ChatUtil.printChat(chatPrefix + "\"" + bindStr + "\" is not a valid bind.");
                 }
@@ -75,7 +70,7 @@ public class Bind extends Command {
                         break;
                     }
                 }
-                if(keyIndex != 100) {
+                if (keyIndex != 100) {
                     Keybind keybind = new Keybind(module, keyIndex, KeyMask.None, true);
                     module.setKeybind(keybind);
                     Keybind key = module.getKeybind();

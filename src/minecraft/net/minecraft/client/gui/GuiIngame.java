@@ -211,15 +211,16 @@ public class GuiIngame extends Gui {
             font = hud.getFont();
 
         if (build == null)
-            build = "\2477" + ((username.equals("Arithmo") || username.equals("Neohack"))  ? "Developer Build" :
-                    (username.equals("eZeeWin") || username.equals("Incognito")) ? "Special ED Build" :
-                            username.equals("Koala") ? "Loser Build" :
-                                    username.equals("peh") ? "Public Servant Build" :
-                                            username.equals("Luca") ? "Watchdog Pass Build" :
-                                                    username.equals("jungy") ? "Jungy Build" :
-                                                            username.equals("Cygnus") ||
-                                                                    username.equals("Kaxon") ||
-                                                                    username.equals("Latch") ? "\247dFurfag Build" : Client.isBeta() ? "Beta Build" : "Release Build");
+            build = "\2477" + ((username.equals("Arithmo")) ? "Developer Build" :
+                    username.equals("Neohack") ? "Special ED Developer Build" :
+                            (username.equals("eZeeWin") || username.equals("Incognito")) ? "Special ED Build" :
+                                    username.equals("Koala") ? "Loser Build" :
+                                            username.equals("peh") ? "Public Servant Build" :
+                                                    username.equals("Luca") ? "Watchdog Pass Build" :
+                                                            username.equals("jungy") ? "Jungy Build" :
+                                                                    username.equals("Cygnus") ||
+                                                                            username.equals("Kaxon") ||
+                                                                            username.equals("Latch") ? "\247dFurfag Build" : Client.isBeta() ? "Beta Build" : "Release Build");
 
         String xd = build + " \247l- \247f\247l" + Client.version + " \2477\247l- \247l" + (hud.showUID() ? "UID " + Client.getAuthUser().getUserID() : username);
         font.drawStringWithShadow(xd, scaledresolution.getScaledWidth() - font.getWidth(xd) + (font.renderMC ? -1 : 0), scaledresolution.getScaledHeight() - ((mc.currentScreen instanceof GuiChat) ? 16 + font.getHeight(xd) : font.getHeight(xd)), Colors.getColor(255, 220));
