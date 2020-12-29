@@ -50,6 +50,12 @@ public class Bind extends Command {
                     module.setKeybind(keybind);
                     Keybind key = module.getKeybind();
                     ChatUtil.printChat(chatPrefix + "Set " + module.getName() + " to " + key.getKeyStr());
+
+                } else if (bindStr.equalsIgnoreCase("none")){
+                    Keybind keybind = new Keybind(module, Keyboard.getKeyIndex("NONE"));
+                    module.setKeybind(keybind);
+                    Keybind key = module.getKeybind();
+                    ChatUtil.printChat(chatPrefix + "Set " + module.getName() + " to " + key.getKeyStr());
                 } else {
                     ChatUtil.printChat(chatPrefix + "\"" + bindStr + "\" is not a valid bind.");
                 }

@@ -481,7 +481,6 @@ public class HUD extends Module {
             SimpleDateFormat sdfDate = simpleDateFormat;
             Date now = new Date();
             String strDate = sdfDate.format(now);
-            String extra = username.equalsIgnoreCase("Neohack") ? " - Autism PRO++" : "";
             if (drawTime)
                 ok += " \2477[\247r" + (font.renderMC ? "" : "\247l") + strDate + "\2477]\247f";
             if (fpsTime)
@@ -493,7 +492,7 @@ public class HUD extends Module {
             GlStateManager.translate(2, 2, 0);
             font.drawStringWithShadow(prefix, 0, 0, colorXD);
             float weirdFix = clientName.length() >= 2 ? font.getWidth(prefix + "\247r" + clientName.substring(1, 2)) - font.getWidth(prefix) - font.getWidth(clientName.substring(1, 2)) : 0;
-            font.drawStringWithShadow((font.renderMC ? "" : "\247l") + ok + extra, font.getWidth(prefix) + weirdFix, 0, Colors.getColor(255, 220));
+            font.drawStringWithShadow((font.renderMC ? "" : "\247l") + ok, font.getWidth(prefix) + weirdFix, 0, Colors.getColor(255, 220));
 
             GlStateManager.popMatrix();
 

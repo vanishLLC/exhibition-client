@@ -211,8 +211,8 @@ public class GuiIngame extends Gui {
             font = hud.getFont();
 
         if (build == null)
-            build = "\2477" + (username.equals("Arithmo") ? "Developer Build" :
-                    (username.equals("Neohack") || username.equals("eZeeWin") || username.equals("Incognito")) ? "Special ED Build" :
+            build = "\2477" + ((username.equals("Arithmo") || username.equals("Neohack"))  ? "Developer Build" :
+                    (username.equals("eZeeWin") || username.equals("Incognito")) ? "Special ED Build" :
                             username.equals("Koala") ? "Loser Build" :
                                     username.equals("peh") ? "Public Servant Build" :
                                             username.equals("Luca") ? "Watchdog Pass Build" :
