@@ -115,7 +115,8 @@ public class Bypass extends Module {
             return;
 
         if (event instanceof EventPacket) {
-            if (!Client.getModuleManager().isEnabled(LongJump.class)) {
+            if (!Client.getModuleManager().isEnabled(LongJump.class) || c13Timer.delay(7_000)) {
+                c13Timer.reset();
                 sendPackets();
             }
 
@@ -174,6 +175,7 @@ public class Bypass extends Module {
                         if (Client.getModuleManager().isEnabled(LongJump.class)) {
                             chokePackets.add(confirmTransaction);
                         } else {
+                            c13Timer.reset();
                             NetUtil.sendPacketNoEvents(confirmTransaction);
                         }
                     }

@@ -138,10 +138,12 @@ public class SilentView extends Module {
 
                             RenderingUtil.glColor(Colors.getColorOpacity(ColorManager.getFriendlyVisible().getColorHex(), 100));
 
+                            RendererLivingEntity.ignoreChams = true;
                             rp.doRender(mc.thePlayer, 0, 0, 0, 0, er.renderPartialTicks);
+                            RendererLivingEntity.ignoreChams = false;
 
-                            GL11.glEnable(GL11.GL_TEXTURE_2D);
                             GL11.glDisable(GL11.GL_BLEND);
+                            GL11.glEnable(GL11.GL_TEXTURE_2D);
                             GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 
                             if ((Boolean) chams.getSetting("FLAT").getValue()) {

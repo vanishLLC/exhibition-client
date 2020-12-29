@@ -308,7 +308,7 @@ public abstract class RendererLivingEntity<T extends EntityLivingBase> extends R
         float f = entitylivingbaseIn.getBrightness(partialTicks);
         int i = this.getColorMultiplier(entitylivingbaseIn, f, partialTicks);
         boolean flag = (i >> 24 & 255) > 0;
-        boolean flag1 = entitylivingbaseIn.hurtTime > 0 || entitylivingbaseIn.deathTime > 0;
+        boolean flag1 = (entitylivingbaseIn.hurtTime > 0 || entitylivingbaseIn.deathTime > 0) && !ignoreChams;
 
         if (!flag && !flag1) {
             return false;
