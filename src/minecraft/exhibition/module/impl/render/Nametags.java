@@ -264,7 +264,7 @@ public class Nametags extends Module {
                             }
                         }
 
-                        if (armor || hovered && selectArmor.equals("Hover")) {
+                        if (armor || hovered && selectArmor.equals("Hover") || isPriority) {
                             List<ItemStack> itemsToRender = new ArrayList<>();
                             for (int i = 0; i < 5; i++) {
                                 ItemStack stack = ((EntityPlayer) ent).getEquipmentInSlot(i);

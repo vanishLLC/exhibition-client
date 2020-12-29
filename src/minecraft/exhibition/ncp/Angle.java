@@ -264,7 +264,7 @@ public class Angle {
 
         // Is the violation is superior to the threshold defined in the configuration?
         if (violation > 50) {
-            ChatUtil.printChat("\2474[\247cNCP\2474] \247fFIGHT_ANGLE VL: \2477" + MathUtils.roundToPlace(violation, 1) +
+            ChatUtil.printChat("\2474[\247cExhi NCP\2474] \247fFIGHT_ANGLE VL: \2477" + MathUtils.roundToPlace(violation, 1) +
                     " \2478|\247f M: \2477" + MathUtils.roundToPlace(moveFlag, 1) +
                     " \2478|\247f T: \2477" + MathUtils.roundToPlace(timeFlag, 1) +
                     " \2478|\247f Y: \2477" + MathUtils.roundToPlace(yawFlag, 1) +

@@ -636,9 +636,9 @@ public class RenderingUtil {
         GL11.glDisable(GL11.GL_BLEND);
         GL11.glPopMatrix();
         GL11.glColor4f(1, 1, 1, 1);
-        if (!GL11.glIsEnabled(GL11.GL_LIGHTING)) {
-            GL11.glEnable(GL11.GL_LIGHTING);
-        }
+//        if (!GL11.glIsEnabled(GL11.GL_LIGHTING)) {
+//            GL11.glEnable(GL11.GL_LIGHTING);
+//        }
     }
 
     public static void glColor(float alpha, int redRGB, int greenRGB, int blueRGB) {

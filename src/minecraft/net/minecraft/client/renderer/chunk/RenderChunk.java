@@ -7,6 +7,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
+
+import exhibition.Client;
+import exhibition.module.impl.render.Xray;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCactus;
 import net.minecraft.block.BlockRedstoneWire;
@@ -211,6 +214,12 @@ public class RenderChunk
                 {
                     aenumworldblocklayer = this.blockLayersSingle;
                     aenumworldblocklayer[0] = block.getBlockLayer();
+
+                    Xray xray = (Xray) Client.getModuleManager().get(Xray.class);
+                    if (xray.isEnabled()){
+                        aenumworldblocklayer[0] = xray.containsID(Block.getIdFromBlock(block)) ? EnumWorldBlockLayer.SOLID : EnumWorldBlockLayer.TRANSLUCENT;
+                    }
+
                 }
 
                 for (int i = 0; i < aenumworldblocklayer.length; ++i)

@@ -48,14 +48,12 @@ public class ChestESP extends Module {
                 RenderingUtil.glColor(Colors.getColor(150, 0, 252, 75));
 
                 RenderingUtil.drawBoundingBox(new AxisAlignedBB(vec.xCoord - RenderManager.renderPosX, vec.yCoord - RenderManager.renderPosY, vec.zCoord - RenderManager.renderPosZ, vec2.xCoord - RenderManager.renderPosX, vec2.yCoord - RenderManager.renderPosY, vec2.zCoord - RenderManager.renderPosZ));
-                GL11.glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+                GL11.glColor4f(1, 1, 1, 1);
             }
         }
         RenderingUtil.post3D();
         GL11.glPopMatrix();
-        if (!GL11.glIsEnabled(GL11.GL_LIGHTING)) {
-            GL11.glEnable(GL11.GL_LIGHTING);
-        }
+
     }
 
     public void drawESPOnStorage(final TileEntityLockable storage, final double x, final double y, final double z) {
@@ -87,7 +85,7 @@ public class ChestESP extends Module {
 
 
         RenderingUtil.drawBoundingBox(new AxisAlignedBB(vec.xCoord - RenderManager.renderPosX, vec.yCoord - RenderManager.renderPosY, vec.zCoord - RenderManager.renderPosZ, vec2.xCoord - RenderManager.renderPosX, vec2.yCoord - RenderManager.renderPosY, vec2.zCoord - RenderManager.renderPosZ));
-        GL11.glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+        GL11.glColor4f(1, 1, 1, 1);
 
     }
 

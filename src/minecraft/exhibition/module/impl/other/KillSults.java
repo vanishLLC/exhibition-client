@@ -33,12 +33,16 @@ public class KillSults extends Module {
 
     public KillSults(ModuleData data) {
         super(data);
-        loadInsults();
         this.addSetting("SHOUT", shout);
     }
 
     public void resetTimer() {
         chatDelay.reset();
+    }
+
+    @Override
+    public void onEnable() {
+        loadInsults();
     }
 
     @RegisterEvent(events = {EventPacket.class})
@@ -73,6 +77,7 @@ public class KillSults extends Module {
     }
 
     public void loadInsults() {
+        insults.clear();
         File saveFile = getInsultsFile();
         if (saveFile.exists()) {
             try {

@@ -4,6 +4,7 @@ import exhibition.Client;
 import exhibition.management.ColorManager;
 import exhibition.management.friend.FriendManager;
 import exhibition.module.impl.hud.HUD;
+import exhibition.module.impl.render.SilentView;
 import exhibition.util.RenderingUtil;
 import exhibition.util.render.Colors;
 import net.minecraft.client.entity.AbstractClientPlayer;
@@ -18,6 +19,9 @@ import org.lwjgl.opengl.GL11;
 import java.awt.*;
 
 public class LayerCape implements LayerRenderer {
+
+    private static SilentView silentView;
+
     private final RenderPlayer playerRenderer;
     //private static final String __OBFID = "CL_00002425";
 
@@ -35,7 +39,14 @@ public class LayerCape implements LayerRenderer {
             double d0 = entitylivingbaseIn.prevChasingPosX + (entitylivingbaseIn.chasingPosX - entitylivingbaseIn.prevChasingPosX) * (double) partialTicks - (entitylivingbaseIn.prevPosX + (entitylivingbaseIn.posX - entitylivingbaseIn.prevPosX) * (double) partialTicks);
             double d1 = entitylivingbaseIn.prevChasingPosY + (entitylivingbaseIn.chasingPosY - entitylivingbaseIn.prevChasingPosY) * (double) partialTicks - (entitylivingbaseIn.prevPosY + (entitylivingbaseIn.posY - entitylivingbaseIn.prevPosY) * (double) partialTicks);
             double d2 = entitylivingbaseIn.prevChasingPosZ + (entitylivingbaseIn.chasingPosZ - entitylivingbaseIn.prevChasingPosZ) * (double) partialTicks - (entitylivingbaseIn.prevPosZ + (entitylivingbaseIn.posZ - entitylivingbaseIn.prevPosZ) * (double) partialTicks);
-            float f = entitylivingbaseIn.prevRenderYawOffset + (entitylivingbaseIn.renderYawOffset - entitylivingbaseIn.prevRenderYawOffset) * partialTicks;
+
+            if (silentView == null)
+                silentView = (SilentView) Client.getModuleManager().get(SilentView.class);
+
+            boolean bruh = silentView.silent() && entitylivingbaseIn instanceof EntityPlayerSP;
+
+            float f = bruh ? silentView.interpolatedYaw(partialTicks) : (entitylivingbaseIn.prevRenderYawOffset + (entitylivingbaseIn.renderYawOffset - entitylivingbaseIn.prevRenderYawOffset) * partialTicks);
+
             double d3 = (double) MathHelper.sin(f * (float) Math.PI / 180.0F);
             double d4 = (double) (-MathHelper.cos(f * (float) Math.PI / 180.0F));
             float f1 = (float) d1 * 10.0F;

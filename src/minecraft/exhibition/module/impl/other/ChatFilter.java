@@ -21,7 +21,7 @@ public class ChatFilter extends Module {
 
     public ChatFilter(ModuleData data) {
         super(data);
-        MultiBool filters = new MultiBool("Filters", kills, assists, streaks, bounty);
+        MultiBool filters = new MultiBool("Filters", kills, assists, streaks, bounty, levelUp);
         settings.put("FILTERS", new Setting<>("FILTERS", filters, "The messages that should be blocked from chat."));
     }
 
@@ -59,7 +59,7 @@ public class ChatFilter extends Module {
                 }
             }
 
-            if (chatMessage.startsWith("\247a\247l")) {
+            if (chatMessage.startsWith("\247b\247l")) {
                 String message = chatMessage.substring(4);
                 if (message.contains("LEVEL") && levelUp.getValue()) {
                     event.setCancelled(true);

@@ -22,6 +22,7 @@ import exhibition.util.HypixelUtil;
 import exhibition.util.MathUtils;
 import exhibition.util.misc.ChatUtil;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -78,7 +79,18 @@ public class HackerDetect extends Module {
             Packet packet = ep.getPacket();
             if (packet instanceof S08PacketPlayerPosLook) {
                 S08PacketPlayerPosLook posLook = (S08PacketPlayerPosLook) packet;
-                if (mc.thePlayer.ticksExisted <= 5 && Math.abs((int) posLook.getX() - posLook.getX()) == 0.5 && Math.abs((int) posLook.getZ() - posLook.getZ()) == 0.5) {
+                boolean isOverGlass = false;
+
+                for (int i = 0; i < 4; i++) {
+                    IBlockState bruh = mc.theWorld.getBlockState(new BlockPos(posLook.getX(), (int) posLook.getY() - (i + 1), posLook.getZ()));
+
+                    if(bruh.getBlock().getMaterial() == Material.glass || bruh.getBlock() == Blocks.stained_glass || bruh.getBlock() == Blocks.glass) {
+                        isOverGlass = true;
+                        break;
+                    }
+                }
+
+                if (mc.thePlayer.ticksExisted <= 5 && Math.abs((int) posLook.getX() - posLook.getX()) == 0.5 && Math.abs((int) posLook.getZ() - posLook.getZ()) == 0.5 && isOverGlass) {
                     teleported = new Vec3(posLook.getX(), posLook.getY(), posLook.getZ());
                 }
             }
@@ -136,7 +148,6 @@ public class HackerDetect extends Module {
             if (teleported != null && (HypixelUtil.isInGame("SKYWARS") && HypixelUtil.isGameActive())) {
                 teleported = null;
             }
-
 
             List<Entity> validPlayers = mc.theWorld.getLoadedEntityList().stream().filter(o -> o instanceof EntityPlayer && o != mc.thePlayer && !AntiBot.isBot(o)).collect(Collectors.toList());
             for (Entity entityPlayer : validPlayers) {

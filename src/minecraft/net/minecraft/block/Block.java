@@ -841,10 +841,6 @@ public class Block
 
     public EnumWorldBlockLayer getBlockLayer()
     {
-        Xray x = (Xray) Client.getModuleManager().get(Xray.class);
-        if (x.isEnabled()){
-            return x.containsID(getIdFromBlock(this)) ? EnumWorldBlockLayer.SOLID : EnumWorldBlockLayer.TRANSLUCENT;
-        }
         return EnumWorldBlockLayer.SOLID;
     }
 

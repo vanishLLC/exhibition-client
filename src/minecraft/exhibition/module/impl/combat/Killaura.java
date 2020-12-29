@@ -478,23 +478,25 @@ public class Killaura extends Module {
 
                                 if (distance <= (HypixelUtil.isInGame("DUEL") ? 1.35 : 0.75) && yDifference <= 1.5) {
                                     em.setYaw(lastAngles.x);
-                                    em.setPitch(MathHelper.clamp_float(88.9F + (float) (0.5F * Math.random()), -90, 90));
+                                    em.setPitch(MathHelper.clamp_float(88.9F + (float) (0.5F * Math.random()), -89.5F, 89.5F));
                                 } else {
-                                    em.setPitch(MathHelper.clamp_float(pitch / 1.1F, -90, 90));
+                                    em.setPitch(MathHelper.clamp_float(pitch / 1.1F, -89.5F, 89.5F));
 
                                     Vec3 v = getDirection(lastAngles.x, em.getPitch());
                                     double off = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), v, target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height, HypixelUtil.isInGame("DUEL") ? Direction.DIRECT_PRECISION : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.5 : 1.25);
 
-                                    float tempNewYaw = (float) MathUtils.getIncremental(lastAngles.x + (newYaw + targetYaw / 1.1F), 30);
+                                    float tempNewYaw = (float) MathUtils.getIncremental(lastAngles.x + (targetYaw / 1.1F), 30);
 
                                     boolean willViolate = target.waitTicks <= 0 && Angle.INSTANCE.willViolateYaw(new Location(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, tempNewYaw, 0), target);
 
                                     if ((angleTimer.roundDelay(1000) && off >= 0.11 && !willViolate) || (angleTimer.roundDelay(250) && !willViolate && off >= 0.2)) {
                                         newYaw += targetYaw / 1.1F;
                                         angleTimer.reset();
+                                        em.setYaw((float) MathUtils.getIncremental(lastAngles.x += (newYaw), 30) + (float) randomNumber(4, -4));
                                     }
 
-                                    em.setYaw((float) MathUtils.getIncremental(lastAngles.x += (newYaw), 30));
+                                    em.setYaw(lastAngles.x);
+
                                 }
                             } else {
                                 float pitch = (float) -(Math.atan2(yDiff, dist) * 180.0D / 3.141592653589793D);
@@ -617,7 +619,7 @@ public class Killaura extends Module {
                 }
             } else if (em.isPost() && (loaded.size() > 0) && (loaded.get(Math.min(loaded.size() - 1, index)) != null) && target != null && !disable) {
 
-                boolean alwaysCrit = (Client.getModuleManager().isEnabled(LongJump.class) ? false : (boolean) critModule.getSetting("ALWAYS-CRIT").getValue());
+                boolean alwaysCrit = (!Client.getModuleManager().isEnabled(LongJump.class) && (boolean) critModule.getSetting("ALWAYS-CRIT").getValue());
 
                 boolean canCrit = (mc.thePlayer.fallDistance > 0.0625F && !mc.thePlayer.onGround);
 
@@ -833,17 +835,16 @@ public class Killaura extends Module {
                 motionY = var18.calculateYOffset(tempBoundingBox, motionY);
             }
 
-            double y = (currentPos + motionY);
             currentPos += motionY;
+
+            finalX = motionX;
+            finalY = motionY;
+            finalZ = motionZ;
 
             motionY -= 0.08D;
             motionY *= 0.9800000190734863D;
 
             lastMotionY = motionY;
-
-            finalX = motionX;
-            finalY = motionY;
-            finalZ = motionZ;
         }
 
         return new double[]{finalX * scale, finalY * scale, finalZ * scale};

@@ -50,7 +50,7 @@ public class Fly extends Module {
     public Fly(ModuleData data) {
         super(data);
         settings.put(BYPASS, new Setting<>(BYPASS, true, "Blorps you in a zorp at blips and chitz. (Hypixel Fly)"));
-        settings.put(SPEED, new Setting<>(SPEED, 1.5F, "Movement speed.", 0.25, 1, 5));
+        settings.put(SPEED, new Setting<>(SPEED, 1.5F, "Movement speed.", 0.25, 1, 10));
         settings.put(BOOST, new Setting<>(BOOST, 2.0f, "Boost speed. 0 = no boost.", 0.25, 0, 3));
         settings.put(MODE, new Setting<>(MODE, new Options("Fly Mode", "Motion", "Vanilla", "Glide", "Motion"), "Fly method."));
         addSetting(c13packet);

@@ -56,7 +56,7 @@ public class AntiVelocity extends Module {
             if ((boolean) receiveKBAlert.getValue()) {
                 if(hurtDelay.delay(250) && mc.thePlayer.ticksExisted > 60) {
                     if(checkDamage && mc.thePlayer.hurtTime == 0 && mc.thePlayer.isAllowEdit()) {
-                        Notifications.getManager().post("Staff KB Check", "\247cYou have been KB checked by a moderator!", 5000, Notifications.Type.WARNING);
+                        Notifications.getManager().post("\247cSuspicious Knockback", "You may have been KB checked!", 5000, Notifications.Type.WARNING);
                         checkDamage = false;
                         mc.thePlayer.setVelocity(velocity.getX(), velocity.getY(), velocity.getZ());
                         velocity = null;
@@ -112,6 +112,11 @@ public class AntiVelocity extends Module {
                             }
                         }
                         if (!nearby && !projectileNearby) {
+                            if(!((LongJump) Client.getModuleManager().get(LongJump.class)).noShake() && ignore.delay(500)) {
+                                velocity = new Vec3((double)packet.getMotionX() / 8000.0D, (double)packet.getMotionY() / 8000.0D, (double)packet.getMotionZ() / 8000.0D);
+                                checkDamage = true;
+                                hurtDelay.reset();
+                            }
                             return;
                         }
                     }

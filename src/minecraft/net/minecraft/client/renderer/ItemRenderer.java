@@ -399,7 +399,7 @@ public class ItemRenderer
                     case EAT:
                     case DRINK:
                         this.func_178104_a(entityplayersp, partialTicks);
-                        this.transformFirstPersonItem(f, 0.0F);
+                        this.transformFirstPersonItem(f, f1);
                         break;
 
                     case BLOCK:
@@ -466,7 +466,7 @@ public class ItemRenderer
                         break;
 
                     case BOW:
-                        this.transformFirstPersonItem(f, 0.0F);
+                        this.transformFirstPersonItem(f, f1);
                         this.func_178098_a(partialTicks, entityplayersp);
                 }
             }
