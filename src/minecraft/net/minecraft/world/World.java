@@ -889,7 +889,7 @@ public abstract class World implements IBlockAccess {
                     if (movingobjectposition != null) {
                         boolean allowed = true;
                         if (movingobjectposition.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
-                            Block[] ignoreBlocks = new Block[]{Blocks.leaves, Blocks.leaves2, Blocks.stained_glass_pane, Blocks.glass_pane, Blocks.iron_bars, Blocks.oak_fence, Blocks.coal_ore, Blocks.emerald_ore, Blocks.iron_ore, Blocks.diamond_ore, Blocks.barrier};
+                            Block[] ignoreBlocks = new Block[]{Blocks.stained_glass_pane, Blocks.glass_pane, Blocks.iron_bars, Blocks.oak_fence, Blocks.coal_ore, Blocks.emerald_ore, Blocks.iron_ore, Blocks.diamond_ore, Blocks.barrier};
                             Block currentBlock = getBlockState(movingobjectposition.getBlockPos()).getBlock();
                             for (Block ignoreBlock : ignoreBlocks) {
                                 if (currentBlock == ignoreBlock) {
@@ -1018,7 +1018,7 @@ public abstract class World implements IBlockAccess {
                             boolean allowed = true;
                             if (movingobjectposition1 != null) {
                                 if (movingobjectposition1.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
-                                    Block[] ignoreBlocks = new Block[]{Blocks.leaves, Blocks.leaves2, Blocks.stained_glass_pane, Blocks.glass_pane, Blocks.iron_bars, Blocks.oak_fence, Blocks.coal_ore, Blocks.emerald_ore, Blocks.iron_ore, Blocks.diamond_ore, Blocks.barrier};
+                                    Block[] ignoreBlocks = new Block[]{Blocks.stained_glass_pane, Blocks.glass_pane, Blocks.iron_bars, Blocks.oak_fence, Blocks.coal_ore, Blocks.emerald_ore, Blocks.iron_ore, Blocks.diamond_ore, Blocks.barrier};
                                     Block currentBlock = getBlockState(movingobjectposition1.getBlockPos()).getBlock();
                                     for (Block ignoreBlock : ignoreBlocks) {
                                         if (currentBlock == ignoreBlock) {
@@ -1048,7 +1048,7 @@ public abstract class World implements IBlockAccess {
                 }
 
                 if (movingobjectposition2.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
-                    Block[] ignoreBlocks = new Block[]{Blocks.leaves, Blocks.leaves2, Blocks.stained_glass_pane, Blocks.glass_pane, Blocks.iron_bars, Blocks.oak_fence, Blocks.coal_ore, Blocks.emerald_ore, Blocks.iron_ore, Blocks.diamond_ore, Blocks.barrier};
+                    Block[] ignoreBlocks = new Block[]{Blocks.stained_glass_pane, Blocks.glass_pane, Blocks.iron_bars, Blocks.oak_fence, Blocks.coal_ore, Blocks.emerald_ore, Blocks.iron_ore, Blocks.diamond_ore, Blocks.barrier};
                     Block currentBlock = getBlockState(movingobjectposition2.getBlockPos()).getBlock();
                     for (Block ignoreBlock : ignoreBlocks) {
                         if (currentBlock == ignoreBlock) {
