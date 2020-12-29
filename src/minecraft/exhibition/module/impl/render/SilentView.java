@@ -95,11 +95,11 @@ public class SilentView extends Module {
                 float prevRotationPitch = mc.thePlayer.prevRotationPitch;
                 float rotationPitch = mc.thePlayer.rotationPitch;
 
-                mc.thePlayer.prevRotationYawHead = lastYaw;
-                mc.thePlayer.rotationYawHead = currentYaw;
+                mc.thePlayer.prevRotationYawHead = interpolatedYaw(er.renderPartialTicks);
+                mc.thePlayer.rotationYawHead = interpolatedYaw(er.renderPartialTicks);
 
-                mc.thePlayer.prevRenderYawOffset = lastYaw;
-                mc.thePlayer.renderYawOffset = currentYaw;
+                mc.thePlayer.prevRenderYawOffset = interpolatedYaw(er.renderPartialTicks);
+                mc.thePlayer.renderYawOffset = interpolatedYaw(er.renderPartialTicks);
 
                 mc.thePlayer.prevRotationPitch = interpolatedPitch(er.renderPartialTicks);
                 mc.thePlayer.rotationPitch = interpolatedPitch(er.renderPartialTicks);
