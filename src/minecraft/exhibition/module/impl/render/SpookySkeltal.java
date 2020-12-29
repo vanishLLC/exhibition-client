@@ -15,6 +15,7 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.Vec3;
+import org.lwjgl.opengl.GL11;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,9 +43,14 @@ public class SpookySkeltal extends Module {
 
         boolean g = Client.getModuleManager().get(HUD.class).getSetting("CLIENT-NAME").getValue().toString().equals("Genesis");
 
+        boolean lighting = glIsEnabled(GL_LIGHTING);
+
+        if(lighting) {
+            glDisable(GL_LIGHTING);
+        }
+
         RenderingUtil.setupRender(true);
         glDisable(GL_LINE_SMOOTH);
-        GlStateManager.disableLighting();
         modelRotations.keySet().removeIf(player -> !mc.theWorld.loadedEntityList.contains(player));
         mc.theWorld.loadedEntityList.forEach(bruh -> {
             if (!(bruh instanceof EntityPlayer))
@@ -236,8 +242,11 @@ public class SpookySkeltal extends Module {
 
             glPopMatrix();
         });
-        GlStateManager.enableLighting();
         RenderingUtil.setupRender(false);
+
+        if(lighting) {
+            glEnable(GL_LIGHTING);
+        }
     }
 
     public static void updateModel(EntityPlayer player, ModelPlayer model) {
