@@ -11,8 +11,9 @@ import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
+import exhibition.module.impl.movement.LongJump;
 import exhibition.util.*;
-import exhibition.util.misc.ChatUtil;
+import exhibition.util.Timer;
 import exhibition.util.render.Colors;
 import net.minecraft.client.gui.GuiDisconnected;
 import net.minecraft.client.gui.GuiDownloadTerrain;
@@ -30,16 +31,15 @@ import net.minecraft.network.play.client.C0FPacketConfirmTransaction;
 import net.minecraft.network.play.client.C13PacketPlayerAbilities;
 import net.minecraft.network.play.server.S2DPacketOpenWindow;
 import net.minecraft.network.play.server.S30PacketWindowItems;
-import net.minecraft.network.play.server.S32PacketConfirmTransaction;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Bypass extends Module {
 
     private final ConcurrentLinkedQueue<BruhPacket> packetList = new ConcurrentLinkedQueue<>();
+
+    private final Queue<C0FPacketConfirmTransaction> chokePackets = new ConcurrentLinkedQueue<>();
 
     public Setting<Number> DELAY = new Setting<>("DELAY", 300, "Spoof offset. This should be 500 - (your ping).", 5, 0, 1000);
     public Setting<Boolean> AUTOBYPASS = new Setting<>("AUTOBYPASS", false, "Automatically detects optimal delay value.");
@@ -115,6 +115,9 @@ public class Bypass extends Module {
             return;
 
         if (event instanceof EventPacket) {
+            if (!Client.getModuleManager().isEnabled(LongJump.class)) {
+                sendPackets();
+            }
 
             List<BruhPacket> packetsToRemove = new ArrayList<>();
             for (BruhPacket bruhPacket : packetList) {
@@ -149,15 +152,16 @@ public class Bypass extends Module {
                     state = 2;
                     event.setCancelled(true);
                     NetUtil.sendPacketNoEvents(new C0DPacketCloseWindow(packetOpenWindow.getWindowId()));
+
                 }
             }
 
-            if (p instanceof S32PacketConfirmTransaction) {
-                S32PacketConfirmTransaction packet = (S32PacketConfirmTransaction) p;
-//                if (packet.getActionNumber() < 0) {
-//                    event.setCancelled(true);
-//                }
-            }
+//            if (p instanceof S32PacketConfirmTransaction) {
+//                S32PacketConfirmTransaction packet = (S32PacketConfirmTransaction) p;
+////                if (packet.getActionNumber() < 0) {
+////                    event.setCancelled(true);
+////                }
+//            }
 
             if (p instanceof C0FPacketConfirmTransaction) {
                 C0FPacketConfirmTransaction packet = (C0FPacketConfirmTransaction) p;
@@ -166,13 +170,18 @@ public class Bypass extends Module {
                     if (bruh > 6) {
                         event.setCancelled(true);
                         short s = (short) random.nextInt(32767);
-                        NetUtil.sendPacketNoEvents(new C0FPacketConfirmTransaction(0, s, packet.getAccepted()));
+                        C0FPacketConfirmTransaction confirmTransaction = new C0FPacketConfirmTransaction(0, s, packet.getAccepted());
+                        if (Client.getModuleManager().isEnabled(LongJump.class)) {
+                            chokePackets.add(confirmTransaction);
+                        } else {
+                            NetUtil.sendPacketNoEvents(confirmTransaction);
+                        }
                     }
                 }
             }
 
             if (p instanceof C00PacketKeepAlive) {
-                if(DELAY.getValue().doubleValue() != 0) {
+                if (DELAY.getValue().doubleValue() != 0) {
                     packetList.add(new BruhPacket(p, (long) DELAY.getValue().doubleValue()));
                     event.setCancelled(true);
                 }
@@ -224,6 +233,17 @@ public class Bypass extends Module {
                 packetList.clear();
             }
         }
+    }
+
+    public void sendPackets() {
+        while (chokePackets.peek() != null) {
+            NetUtil.sendPacketNoEvents(chokePackets.poll());
+        }
+        this.resetPackets();
+    }
+
+    public void resetPackets() {
+        this.chokePackets.clear();
     }
 
     public static class BruhPacket {
