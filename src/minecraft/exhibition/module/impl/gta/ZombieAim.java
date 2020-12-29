@@ -233,7 +233,7 @@ public class ZombieAim extends Module {
                                         }
                                         if (priceStand != null) {
                                             validStands.add((EntityArmorStand) entity);
-                                            totalY += 25;
+                                            totalY += 20;
                                         }
                                     }
                                 }
@@ -293,7 +293,7 @@ public class ZombieAim extends Module {
                                 GlStateManager.scale(0.5, 0.5, 0.5);
                                 mc.fontRendererObj.drawStringWithShadow(priceStand.getDisplayName().getFormattedText(), 4, 24, -1);
                                 GlStateManager.popMatrix();
-                                y += 25;
+                                y += 20;
                             }
                         }
                     }
@@ -397,6 +397,7 @@ public class ZombieAim extends Module {
 
                         GL11.glPushMatrix();
                         RenderingUtil.pre3D();
+
                         mc.entityRenderer.setupCameraTransform(mc.timer.renderPartialTicks, 2);
 
                         double x = (player.prevPosX + (player.posX - player.prevPosX) * er.renderPartialTicks) - RenderManager.renderPosX + p[0];
@@ -413,10 +414,8 @@ public class ZombieAim extends Module {
                         RenderingUtil.drawBoundingBox(var12);
 
                         RenderingUtil.post3D();
-                        if (!GL11.glIsEnabled(GL11.GL_LIGHTING)) {
-                            GL11.glEnable(GL11.GL_LIGHTING);
-                        }
                         GL11.glPopMatrix();
+
                     }
                 }
             }

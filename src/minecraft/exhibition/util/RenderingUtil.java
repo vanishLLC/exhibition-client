@@ -532,6 +532,7 @@ public class RenderingUtil {
         final Tessellator tessellator = Tessellator.getInstance();
         final WorldRenderer worldrender = Tessellator.getInstance().getWorldRenderer();
         GL11.glPushMatrix();
+
         GL11.glBegin(GL_QUADS);
         GL11.glVertex3d(axisalignedbb.minX, axisalignedbb.minY, axisalignedbb.minZ);
         GL11.glVertex3d(axisalignedbb.minX, axisalignedbb.maxY, axisalignedbb.minZ);
@@ -582,6 +583,9 @@ public class RenderingUtil {
         GL11.glVertex3d(axisalignedbb.maxX, axisalignedbb.maxY, axisalignedbb.maxZ);
         GL11.glVertex3d(axisalignedbb.maxX, axisalignedbb.minY, axisalignedbb.maxZ);
         GL11.glEnd();
+
+
+
         GL11.glPopMatrix();
     }
 
@@ -615,8 +619,13 @@ public class RenderingUtil {
         post3D();
     }
 
+    private static boolean lighting;
+
     public static void pre3D() {
         GL11.glPushMatrix();
+
+        lighting = glIsEnabled(GL_LIGHTING);
+
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         GL11.glShadeModel(GL11.GL_SMOOTH);
@@ -636,9 +645,10 @@ public class RenderingUtil {
         GL11.glDisable(GL11.GL_BLEND);
         GL11.glPopMatrix();
         GL11.glColor4f(1, 1, 1, 1);
-//        if (!GL11.glIsEnabled(GL11.GL_LIGHTING)) {
-//            GL11.glEnable(GL11.GL_LIGHTING);
-//        }
+        if (lighting && !GL11.glIsEnabled(GL11.GL_LIGHTING)) {
+            lighting = false;
+            GL11.glEnable(GL11.GL_LIGHTING);
+        }
     }
 
     public static void glColor(float alpha, int redRGB, int greenRGB, int blueRGB) {

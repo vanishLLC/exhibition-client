@@ -17,6 +17,8 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.Vec3;
 import org.lwjgl.opengl.GL11;
 
+import static org.lwjgl.opengl.GL11.GL_LIGHTING;
+
 public class ChestESP extends Module {
 
     public ChestESP(ModuleData data) {
@@ -27,8 +29,10 @@ public class ChestESP extends Module {
     @RegisterEvent(events = {EventRender3D.class})
     public void onEvent(Event event) {
         EventRender3D e = (EventRender3D) event;
+
         GL11.glPushMatrix();
         RenderingUtil.pre3D();
+
         mc.entityRenderer.setupCameraTransform(mc.timer.renderPartialTicks, 2);
         for (Object o : this.mc.theWorld.loadedTileEntityList) {
             if (o instanceof TileEntityChest) {
@@ -51,6 +55,7 @@ public class ChestESP extends Module {
                 GL11.glColor4f(1, 1, 1, 1);
             }
         }
+
         RenderingUtil.post3D();
         GL11.glPopMatrix();
 

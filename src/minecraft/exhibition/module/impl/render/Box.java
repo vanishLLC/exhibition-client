@@ -99,9 +99,6 @@ public class Box extends Module {
                 }
 
                 RenderingUtil.post3D();
-                if (!GL11.glIsEnabled(GL11.GL_LIGHTING)) {
-                    GL11.glEnable(GL11.GL_LIGHTING);
-                }
                 GL11.glPopMatrix();
             }
         }

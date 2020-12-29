@@ -122,7 +122,6 @@ public class SurvivalNuker extends Module {
                 return;
             GlStateManager.pushMatrix();
             RenderingUtil.pre3D();
-            boolean wasEnabled = GL11.glIsEnabled(GL11.GL_LIGHTING);
 
             mc.entityRenderer.setupCameraTransform(mc.timer.renderPartialTicks, 2);
             blocksToBreak.forEach(blockPos -> {
@@ -137,9 +136,6 @@ public class SurvivalNuker extends Module {
                 RenderingUtil.drawOutlinedBoundingBox(new AxisAlignedBB(x, y, z, x + 1, y + 1, z + 1));
             });
             RenderingUtil.post3D();
-            if (!GL11.glIsEnabled(GL11.GL_LIGHTING) && wasEnabled) {
-                GL11.glEnable(GL11.GL_LIGHTING);
-            }
             GlStateManager.popMatrix();
         }
     }
