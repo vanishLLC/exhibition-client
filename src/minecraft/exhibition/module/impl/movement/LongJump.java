@@ -175,7 +175,7 @@ public class LongJump extends Module {
         if ((boolean) settings.get(AUTISM).getValue()) {
             if (!mc.thePlayer.onGround && !mc.thePlayer.isCollidedVertically) {
                 Notifications.getManager().post("LongJump Disabled", "Disabled to prevent in air lagback.");
-            //    this.toggle();
+                this.toggle();
                 return;
             }
 
