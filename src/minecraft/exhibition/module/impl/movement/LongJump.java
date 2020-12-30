@@ -420,7 +420,7 @@ public class LongJump extends Module {
                             bruhTick++;
 
                             // Movement fix to make the movement > 0.00090D
-                            double var3 = mc.thePlayer.posX - mc.thePlayer.lastReportedPosX;
+/*                            double var3 = mc.thePlayer.posX - mc.thePlayer.lastReportedPosX;
                             double var5 = (em.getY() + bruh) - mc.thePlayer.lastReportedPosY;
                             double var7 = mc.thePlayer.posZ - mc.thePlayer.lastReportedPosZ;
 
@@ -439,7 +439,7 @@ public class LongJump extends Module {
                                 if (tickPassed == 4) {
                                     bruh = 0.000017F + (float) (min + (max - min) * Math.random()); // 0.0012
                                 }
-                            }
+                            }*/
 
                             if ((boolean) settings.get(C13PACKET).getValue() && bruhTick > 0 && (bruhTick % (20 * 6) == 0)) {
                                 sendC13Packet();
