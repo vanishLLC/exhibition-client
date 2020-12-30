@@ -6,7 +6,10 @@ import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventMotionUpdate;
 import exhibition.event.impl.EventPacket;
 import exhibition.event.impl.EventRender3D;
+import exhibition.event.impl.EventRenderGui;
+import exhibition.management.ColorManager;
 import exhibition.management.PriorityManager;
+import exhibition.management.font.TTFFontRenderer;
 import exhibition.management.friend.FriendManager;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
@@ -17,6 +20,7 @@ import exhibition.module.impl.combat.AntiBot;
 import exhibition.module.impl.combat.Killaura;
 import exhibition.util.*;
 import exhibition.util.render.Colors;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.settings.KeyBinding;
@@ -34,6 +38,7 @@ import net.minecraft.network.play.server.S02PacketChat;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
+import optifine.Config;
 import org.lwjgl.opengl.GL11;
 
 import java.util.*;
@@ -69,6 +74,7 @@ public class Aimbot extends Module {
     private final Setting<Boolean> antiRecoil = new Setting<>("ANTI-RECOIL", true, "Reduces weapon recoil.");
     private final Setting<Boolean> autoFire = new Setting<>("AUTO-FIRE", true, "Automatically fires for you.");
     private final Setting<Boolean> showPrediction = new Setting<>("SHOW-PREDICTION", true, "Shows you target prediction.");
+    private final Setting<Boolean> hud = new Setting<>("HUD", true, "Shows your health, ammo, and skill cool-down.");
 
     private final Setting<Boolean> noSpread = new Setting<>("NO-SPREAD", false, "Removes weapon spread.");
     private final Setting<Boolean> autoWall = new Setting<>("AUTO-WALL", false, "Automatically detects if you can penetrate walls.");
@@ -113,6 +119,7 @@ public class Aimbot extends Module {
             addSetting(noSpread);
             addSetting(autoWall);
             addSetting(penetrate);
+            addSetting(hud);
 
             addSetting(fakelag);
             addSetting(lagTicks);
@@ -177,10 +184,35 @@ public class Aimbot extends Module {
         counter = 0;
     }
 
-    @RegisterEvent(events = {EventMotionUpdate.class, EventPacket.class, EventRender3D.class})
+    @RegisterEvent(events = {EventMotionUpdate.class, EventPacket.class, EventRender3D.class, EventRenderGui.class})
     public void onEvent(Event event) {
         if (mc.thePlayer == null || mc.theWorld == null || !HypixelUtil.isVerifiedHypixel()) {
             return;
+        }
+
+        if (event instanceof EventRenderGui) {
+            EventRenderGui er = event.cast();
+            /*
+            HUD
+             */
+            if (hud.getValue()) {
+                int currentHealth = (int) mc.thePlayer.getHealth() * 5;
+                int currentAmmo = 0;
+
+                ScaledResolution scaledRes = new ScaledResolution(mc);
+                TTFFontRenderer smallFont = Client.fonts[0];
+
+                if (isHoldingWeapon()) {
+                    currentAmmo = mc.thePlayer.getCurrentEquippedItem().stackSize;
+                    if (isReloading() && mc.thePlayer.getCurrentEquippedItem().stackSize == 1) {
+                        currentAmmo = 0;
+                    }
+                    smallFont.drawBorderedString(currentAmmo + "/" + getMagSize(), scaledRes.getScaledWidth() / 2D - 15 - (int) smallFont.getWidth("30/30"), scaledRes.getScaledHeight_double() / 2 - 0.5, -1, Colors.getColor(0, 200));
+                }
+                smallFont.drawBorderedString(currentHealth + "HP", scaledRes.getScaledWidth() / 2D + 15, scaledRes.getScaledHeight_double() / 2 - 0.5, -1, Colors.getColor(0, 200));
+                if (isReloading())
+                    smallFont.drawBorderedString("Reloading", scaledRes.getScaledWidth() / 2D - (int) smallFont.getWidth("Reloading") / 2, scaledRes.getScaledHeight_double() / 2 + 15, Colors.getColor(91, 255, 51), Colors.getColor(0, 200));
+            }
         }
 
         if (event instanceof EventRender3D && showPrediction.getValue()) {
@@ -1489,6 +1521,14 @@ public class Aimbot extends Module {
 
     private boolean canFire() {
         return currentBullet < getMagSize() && fireDelay >= getFireDelay() && mc.thePlayer.inventory.getCurrentItem().isItemStackDamageable() && !mc.thePlayer.inventory.getCurrentItem().isItemDamaged();
+    }
+
+    private boolean isReloading() {
+        return mc.thePlayer.inventory.getCurrentItem() != null && mc.thePlayer.inventory.getCurrentItem().isItemDamaged();
+    }
+
+    private boolean isHoldingWeapon() {
+        return mc.thePlayer.inventory.getCurrentItem() != null && mc.thePlayer.inventory.getCurrentItem().isItemStackDamageable();
     }
 
     public double getTargetWeight(EntityPlayer p) {
