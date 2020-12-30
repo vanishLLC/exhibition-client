@@ -19,6 +19,7 @@ import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.combat.AutoPot;
 import exhibition.module.impl.player.Scaffold;
 import exhibition.util.*;
+import exhibition.util.misc.ChatUtil;
 import exhibition.util.render.Colors;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.entity.player.PlayerCapabilities;
@@ -174,7 +175,7 @@ public class LongJump extends Module {
         if ((boolean) settings.get(AUTISM).getValue()) {
             if (!mc.thePlayer.onGround && !mc.thePlayer.isCollidedVertically) {
                 Notifications.getManager().post("LongJump Disabled", "Disabled to prevent in air lagback.");
-                this.toggle();
+            //    this.toggle();
                 return;
             }
 
@@ -425,16 +426,18 @@ public class LongJump extends Module {
 
                             if (var3 * var3 + var5 * var5 + var7 * var7 <= 0.00090D) {
                                 if (tickPassed == 1) {
-                                    bruh += 0.00022F; // 0.00079
+                                    up = true;
+                                    bruh = 0.000024F + (float) (min + (max - min) * Math.random()); // 0.00079
                                 }
                                 if (tickPassed == 2) {
-                                    bruh -= 0.00061F; // -0.00031
+                                    bruh = 0.000014F + (float) (min + (max - min) * Math.random()); // -0.00031
                                 }
                                 if (tickPassed == 3) {
-                                    bruh += 0.00032F; // -0.00069
+                                    up = true;
+                                    bruh = 0.000024F + (float) (min + (max - min) * Math.random()); // -0.00069
                                 }
                                 if (tickPassed == 4) {
-                                    bruh -= 0.00032F;
+                                    bruh = 0.000017F + (float) (min + (max - min) * Math.random()); // 0.0012
                                 }
                             }
 

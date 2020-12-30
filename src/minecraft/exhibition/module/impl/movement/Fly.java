@@ -17,6 +17,7 @@ import exhibition.util.HypixelUtil;
 import exhibition.util.NetUtil;
 import exhibition.util.PlayerUtil;
 import exhibition.util.Timer;
+import exhibition.util.misc.ChatUtil;
 import net.minecraft.entity.player.PlayerCapabilities;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C03PacketPlayer;
@@ -229,7 +230,6 @@ public class Fly extends Module {
                     mc.thePlayer.posY = mc.thePlayer.posY - delta;
                     mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ);
                 }
-
                 double bruh = 0;
                 float min = 0.00000014F;
                 float max = 0.00000043F;

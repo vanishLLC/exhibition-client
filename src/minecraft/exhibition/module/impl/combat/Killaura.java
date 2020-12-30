@@ -616,7 +616,7 @@ public class Killaura extends Module {
                 }
             } else if (em.isPost() && (loaded.size() > 0) && (loaded.get(Math.min(loaded.size() - 1, index)) != null) && target != null && !disable) {
 
-                boolean alwaysCrit = (!Client.getModuleManager().isEnabled(LongJump.class) && (boolean) critModule.getSetting("ALWAYS-CRIT").getValue());
+                boolean alwaysCrit = (!Client.getModuleManager().isEnabled(LongJump.class) && !Client.getModuleManager().isEnabled(Fly.class) && (boolean) critModule.getSetting("ALWAYS-CRIT").getValue());
 
                 boolean canCrit = (mc.thePlayer.fallDistance > 0.0625F && !mc.thePlayer.onGround);
 
