@@ -1599,8 +1599,8 @@ public class Aimbot extends Module {
             float newHeading = RotationUtils.getYawChangeGiven(deltaX, deltaY, headingYaw);
             headingYaw += newHeading;
 
-            if (newHeading >= 15) {
-                while (deltas.size() >= 2) {
+            if (newHeading >= 120) {
+                if (deltas.size() > 1) {
                     deltas.remove();
                 }
             }

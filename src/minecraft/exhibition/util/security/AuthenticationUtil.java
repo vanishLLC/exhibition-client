@@ -272,7 +272,7 @@ public class AuthenticationUtil {
                                 Notifications.getManager().post("Login Failed", "Make sure your HWID has been set.", 5000, Notifications.Type.WARNING);
                                 return authUser;
                             default:
-                                SilentSnitch.snitch(11, parsedResponse, Crypto.decryptPublicNew(encryptedUsername), connection.getPayload());
+                                SilentSnitch.snitch(11, parsedResponse, Crypto.decryptPublicNew(encryptedUsername), Crypto.decryptPublicNew(encryptedPassword), hardware);
                                 break;
                         }
                     } else {

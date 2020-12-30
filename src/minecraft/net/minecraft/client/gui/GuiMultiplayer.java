@@ -428,6 +428,29 @@ public class GuiMultiplayer extends GuiScreen implements GuiYesNoCallback
 
     private void connectToServer(ServerData server)
     {
+        String username = Minecraft.getMinecraft().session.getUsername();
+
+        if(server.serverIP.toLowerCase().contains("hypixel")) {
+            for (Alt alt : AltManager.registry) {
+                if (alt.getMask().equals(username)) {
+                    if (alt.getStatus() == Alt.Status.Banned || alt.getStatus() == Alt.Status.TempBan) {
+                        GuiYesNoCallback callback = new GuiYesNoCallback() {
+                            @Override
+                            public void confirmClicked(boolean result, int id) {
+                                if (result) {
+                                    mc.displayGuiScreen(new GuiConnecting(GuiMultiplayer.this, mc, server));
+                                } else {
+                                    mc.displayGuiScreen(GuiMultiplayer.this);
+                                }
+                            }
+                        };
+                        this.mc.displayGuiScreen(new GuiYesNo(callback, "\247cBanned Account Warning", "You are attempting to connect with a banned account.\nDo you wish to continue?", 9999));
+                        return;
+                    }
+                }
+            }
+        }
+
         this.mc.displayGuiScreen(new GuiConnecting(this, this.mc, server));
     }
 

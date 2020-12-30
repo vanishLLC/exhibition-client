@@ -381,6 +381,8 @@ public class ItemRenderer
         GlStateManager.enableRescaleNormal();
         GlStateManager.pushMatrix();
 
+        boolean allowBruh = (Client.getModuleManager().isEnabled(Aimbot.class) || Client.getModuleManager().isEnabled(ZombieAim.class)) && this.itemToRender != null && this.itemToRender.isItemStackDamageable();
+
         if (this.itemToRender != null)
         {
             if (this.itemToRender.getItem() instanceof ItemMap)
@@ -472,9 +474,6 @@ public class ItemRenderer
             }
             else
             {
-                this.func_178105_d(f1);
-
-                boolean allowBruh = (Client.getModuleManager().isEnabled(Aimbot.class) || Client.getModuleManager().isEnabled(ZombieAim.class)) && this.itemToRender != null && this.itemToRender.isItemStackDamageable();
 
                 if(allowBruh) {
                     if(!this.itemToRender.isItemDamaged()) {
@@ -491,17 +490,18 @@ public class ItemRenderer
                         GlStateManager.rotate(f * 1F, 1,0,0);
 
                         GlStateManager.rotate(45.0F, 0.0F, 1.0F, 0.0F);
-                        float f_ = MathHelper.sin(f1 * f1 * (float) Math.PI);
-                        float f1_ = MathHelper.sin(MathHelper.sqrt_float(f1) * (float) Math.PI);
-                        GlStateManager.rotate(f_ * -20.0F, 0.0F, 1.0F, 0.0F);
-                        GlStateManager.rotate(f1_ * -20.0F, 0.0F, 0.0F, 1.0F);
-                        GlStateManager.rotate(f1_ * -80.0F, 1.0F, 0.0F, 0.0F);
+                        //float f_ = MathHelper.sin(f1 * f1 * (float) Math.PI);
+                        //float f1_ = MathHelper.sin(MathHelper.sqrt_float(f1) * (float) Math.PI);
+                        //GlStateManager.rotate(f_ * -20.0F, 0.0F, 1.0F, 0.0F);
+                        //GlStateManager.rotate(f1_ * -20.0F, 0.0F, 0.0F, 1.0F);
+                        //GlStateManager.rotate(f1_ * -80.0F, 1.0F, 0.0F, 0.0F);
                         GlStateManager.scale(0.4F, 0.4F, 0.4F);
                     } else {
                         GlStateManager.rotate(45.0F, 0.0F, 1.0F, 0.0F);
                         this.transformFirstPersonItem(0.0F, 0.0F);
                     }
                 } else {
+                    this.func_178105_d(f1);
                     this.transformFirstPersonItem(f, f1);
                 }
             }

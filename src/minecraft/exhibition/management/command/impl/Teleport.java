@@ -33,6 +33,7 @@ public class Teleport extends Command implements EventListener {
 
     public Teleport(String[] names, String description) {
         super(names, description);
+        cancel = false;
     }
 
     @Override

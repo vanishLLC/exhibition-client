@@ -80,7 +80,7 @@ public class Criticals extends Module {
     static void doCrits() {
         if(mc.getCurrentServerData() != null && (mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net")))
             return;
-        for (double offset : new double[]{0.040009234827343, 0.0, 0.030009234827343, 0})
+        for (double offset : new double[]{0.0625101D, 0.0, 0.0000101D, 0})
             NetUtil.sendPacket(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX,
                     mc.thePlayer.posY + offset, mc.thePlayer.posZ, false));
     }

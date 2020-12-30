@@ -232,7 +232,7 @@ public class Killaura extends Module {
         if (mc.thePlayer == null || mc.theWorld == null) {
             return;
         }
-
+        Criticals critModule = (Criticals) Client.getModuleManager().get(Criticals.class);
         int maxTargets = this.maxTargets.getValue().intValue();
 
         if (event instanceof EventPacket) {
@@ -250,7 +250,11 @@ public class Killaura extends Module {
                     }
                 }
                 if (packet instanceof S08PacketPlayerPosLook) {
-                    critWaitTicks = 25;
+                    if (critModule.isPacket() || critModule.isPacket2()) {
+                        critWaitTicks = 25;
+                    } else {
+                        critWaitTicks = 2;
+                    }
                 }
 
 //                if(packet instanceof C07PacketPlayerDigging) {
@@ -370,7 +374,6 @@ public class Killaura extends Module {
         }
 
         float range = ((Number) settings.get(RANGE).getValue()).floatValue();
-        Criticals critModule = (Criticals) Client.getModuleManager().get(Criticals.class);
         boolean crits = (critModule.isEnabled() && critWaitTicks <= 0) &&
                 ((!Client.getModuleManager().isEnabled(Speed.class) || (mc.thePlayer.onGround && !PlayerUtil.isMoving())) && !Client.getModuleManager().isEnabled(Fly.class) && !Client.getModuleManager().isEnabled(LongJump.class)) && !(Client.getModuleManager().isEnabled(Jesus.class) && PlayerUtil.isOnLiquid());
         String attack = attackMode.getSelected();
@@ -502,12 +505,11 @@ public class Killaura extends Module {
                                 em.setPitch(MathHelper.clamp_float(pitch / 1.1F, -90, 90));
                             }
 
-                            boolean setupCrits = target.hurtTime <= 0 || (target.waitTicks <= 1);
+                            boolean setupCrits = critModule.isOldCrits() || target.hurtTime <= 0 || (target.waitTicks <= 1);
 
                             if (crits) {
                                 if (critModule.isNewCrits()) {
                                     if (mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically && isNextTickGround()) {
-
                                         if (setupTick == 0 && setupCrits) {
                                             stepDelay = 1;
                                             blockJump = true;
@@ -544,22 +546,27 @@ public class Killaura extends Module {
                                         setupTick = 0;
                                     }
                                 } else if (critModule.isOldCrits()) {
-                                    if (isNextTickGround()) {
-                                        if (setupTick == 0 && setupCrits) {
+                                    boolean canAttackRightNow = (attack.equals("Always")) ||
+                                            (attack.equals("Precise") ? target.waitTicks <= 1 :
+                                                    target.waitTicks <= 1 || (target.hurtResistantTime <= 11 && target.hurtResistantTime >= 6) || target.hurtTime > 6);
+
+                                    if (canAttackRightNow && isNextTickGround() && !Client.instance.isLagging()) {
+                                        if (setupTick == 0 && setupCrits && (!wantsToStep || stepDelay < 0)) {
                                             if (mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {
                                                 stepDelay = 1;
                                                 isCritSetup = false;
                                                 blockJump = true;
-                                                em.setY(em.getY() + 0.070982388753245);
+                                                em.setY(em.getY() + 0.07840000152587834 + (0.0000023423F) * Math.random());
                                                 em.setGround(false);
                                                 setupTick = 1;
                                             }
                                         } else if (setupTick == 1) {
                                             if ((em.getY() == mc.thePlayer.posY && em.isOnground())) {
                                                 isCritSetup = true;
-                                                em.setY(em.getY() + 0x1.cb5c6eba0ceabp-8);
+                                                em.setY(em.getY() + +0.0076092939542 - (0.0000000002475776F) * Math.random());
                                                 em.setGround(false);
-                                                em.setAlwaysSend(true);
+                                                setupTick = 0;
+                                            } else {
                                                 setupTick = 0;
                                             }
                                         }
@@ -624,7 +631,8 @@ public class Killaura extends Module {
 
                 boolean isOptimalAttack = attack.equals("Always") || (attack.equals("Precise") ? target.waitTicks <= 0 : (target.hurtTime <= 5));
 
-                boolean twoTickCritsGood = !PlayerUtil.isOnLiquid() && isOptimalAttack && (!mc.thePlayer.onGround || (isCritSetup));
+                boolean twoTickCritsGood = !PlayerUtil.isOnLiquid() && (attack.equals("Always") || (attack.equals("Precise") ? target.waitTicks <= 1 :
+                        (target.waitTicks <= 1 || (target.hurtResistantTime <= 11 && target.hurtResistantTime >= 6) || target.hurtTime > 6))) && (!mc.thePlayer.onGround || (isCritSetup));
 
                 boolean goodCritsGood = !PlayerUtil.isOnLiquid() && (isOptimalAttack || target.waitTicks <= 1) && (!mc.thePlayer.onGround || (isCritSetup));
 
@@ -632,7 +640,7 @@ public class Killaura extends Module {
 
                 boolean shouldAttack = alwaysCrit ? isCriticalAttack : criticalsAreSet;
 
-                boolean setupCrits = (target.hurtTime <= 0 && target.waitTicks >= 6) || (target.waitTicks <= 0);
+                boolean setupCrits = critModule.isOldCrits() || (target.hurtTime <= 0 && target.waitTicks >= 6) || (target.waitTicks <= 0);
 
                 double[] p = getPrediction(target, predictionTicks.getValue().intValue(), predictionTicks.getValue().doubleValue());
 
@@ -656,8 +664,12 @@ public class Killaura extends Module {
 
                     if (((Number) settings.get(ANGLESTEP).getValue()).intValue() == 0 || (off <= 0.11 || (off <= 1 && off >= 0.22 && MathUtils.getIncremental(angleTimer.getDifference(), 50) < 200))) {
 
-                        if (crits && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically && critModule.isPacket() && setupCrits && HypixelUtil.isVerifiedHypixel() && isCritSetup && mc.getCurrentServerData() != null && (mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net"))) {
-                            NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.0076092939542 - (0.0000000002475776F) * Math.random(), mc.thePlayer.posZ, false));
+                        if (crits && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically && critModule.isPacket() && setupCrits && isCritSetup) {
+                            if (HypixelUtil.isVerifiedHypixel() && mc.getCurrentServerData() != null && (mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net"))) {
+                                NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.0076092939542 - (0.0000000002475776F) * Math.random(), mc.thePlayer.posZ, false));
+                            } else {
+                                Criticals.doCrits();
+                            }
                         }
 
                         boolean alreadyReset = false;
