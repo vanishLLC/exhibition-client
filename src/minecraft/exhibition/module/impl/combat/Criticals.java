@@ -21,6 +21,8 @@ public class Criticals extends Module {
     private String PACKET = "MODE";
     private String ALWAYSCRIT = "ALWAYS-CRIT";
 
+    // Bypass the silent fix with -DbypassCrits=true
+    private final boolean silentCrits = Boolean.parseBoolean(System.getProperty("bypassCrits"));
 
     // 0.0625101D
     public Criticals(ModuleData data) {
@@ -32,11 +34,11 @@ public class Criticals extends Module {
 
     @RegisterEvent(events = {EventPacket.class, EventMotionUpdate.class})
     public void onEvent(Event event) {
-        if(mc.thePlayer == null || mc.theWorld == null) {
+        if (mc.thePlayer == null || mc.theWorld == null) {
             return;
         }
 
-        if(this.isPacket()) {
+        if (this.isPacket()) {
             //((Options) settings.get(PACKET).getValue()).setSelected("PacketOld");
             //ChatUtil.printChat(Command.chatPrefix + "Swapped to PacketOld until Packet is fixed.");
         }
@@ -61,11 +63,21 @@ public class Criticals extends Module {
         }
     }
 
+    private boolean spoof() {
+        return Client.getModuleManager().isEnabled(Bypass.class) && !silentCrits && ((Options) settings.get(PACKET).getValue()).getSelected().startsWith("Packet");
+    }
+
     public boolean isPacket() {
-        return ((Options) settings.get(PACKET).getValue()).getSelected().equals("Packet") || ((Options) settings.get(PACKET).getValue()).getSelected().equals("Packet2");
+        if (spoof()) {
+            return false;
+        }
+        return ((Options) settings.get(PACKET).getValue()).getSelected().startsWith("Packet");
     }
 
     public boolean isPacket2() {
+        if (spoof()) {
+            return false;
+        }
         return ((Options) settings.get(PACKET).getValue()).getSelected().equals("Packet2");
     }
 
@@ -74,11 +86,14 @@ public class Criticals extends Module {
     }
 
     public boolean isOldCrits() {
+        if (spoof()) {
+            return true;
+        }
         return ((Options) settings.get(PACKET).getValue()).getSelected().equals("Ground");
     }
 
     static void doCrits() {
-        if(mc.getCurrentServerData() != null && (mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net")))
+        if (mc.getCurrentServerData() != null && (mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net")))
             return;
         for (double offset : new double[]{0.0625101D, 0.0, 0.0000101D, 0})
             NetUtil.sendPacket(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX,
