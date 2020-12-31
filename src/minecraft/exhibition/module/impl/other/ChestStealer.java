@@ -43,7 +43,6 @@ import static exhibition.module.impl.player.Scaffold.randomFloat;
 public class ChestStealer extends Module {
 
     private String DELAY = "DELAY";
-    private String DROP = "DROP";
     private String CLOSE = "CLOSE";
     private String CHESTAURA = "CHESTAURA";
     private String IGNORE = "IGNORE";
@@ -53,6 +52,7 @@ public class ChestStealer extends Module {
 
     private Setting<Options> silent = new Setting<>("MODE", mode, "Chest stealer mode.");
     private Setting<Boolean> randomMiss = new Setting<>("MISS", false, "Randomly miss clicks.");
+    private Setting<Boolean> tools = new Setting<>("TOOLS", false, "Takes better tools from chests.");
 
     private Timer timer = new Timer();
     private Timer stealTimer = new Timer();
@@ -66,11 +66,11 @@ public class ChestStealer extends Module {
     public ChestStealer(ModuleData data) {
         super(data);
         settings.put(DELAY, new Setting<>(DELAY, 2, "Tick delay before grabbing next item.", 1, 1, 5));
-        settings.put(DROP, new Setting<>(DROP, false, "Auto drop items."));
         settings.put(CLOSE, new Setting<>(CLOSE, true, "Auto closes chests when done."));
         settings.put(CHESTAURA, new Setting<>(CHESTAURA, false, "Auto opens chests near you."));
         settings.put(IGNORE, new Setting<>(IGNORE, true, "Ignores chests that are not loot. (Menus)"));
         settings.put(TRASH, new Setting<>(TRASH, true, "Ignores trash items in minigame servers."));
+        addSetting(tools);
         addSetting(silent);
         addSetting(randomMiss);
     }
@@ -196,13 +196,15 @@ public class ChestStealer extends Module {
                                     if (stack != null && !isBad(stack)) {
                                         timer.reset();
                                         Slot slot = guiChest.inventorySlots.inventorySlots.get(index);
-                                        if ((boolean) settings.get(DROP).getValue()) {
-                                            mc.playerController.windowClick(guiChest.inventorySlots.windowId, slot.slotNumber, 0, 4, mc.thePlayer);
-                                            //mc.playerController.windowClick(guiChest.inventorySlots.windowId, -999, 0, 0, mc.thePlayer);
-                                        } else {
-                                            guiChest.handleMouseClick(slot, slot.slotNumber, 0, 1);
-                                            //guiChest.handleMouseClick(slot, slot.slotNumber, 0, 6);
-                                        }
+//                                        if ((boolean) settings.get(DROP).getValue()) {
+//                                            mc.playerController.windowClick(guiChest.inventorySlots.windowId, slot.slotNumber, 0, 4, mc.thePlayer);
+//                                            //mc.playerController.windowClick(guiChest.inventorySlots.windowId, -999, 0, 0, mc.thePlayer);
+//                                        } else {
+//                                            guiChest.handleMouseClick(slot, slot.slotNumber, 0, 1);
+//                                            //guiChest.handleMouseClick(slot, slot.slotNumber, 0, 6);
+//                                        }
+                                        guiChest.handleMouseClick(slot, slot.slotNumber, 0, 1);
+
                                         canMissAgain = random.nextBoolean();
                                     } else if (randomMiss.getValue() && canMissAgain && stack == null && Math.random() > 0.95) {
                                         canMissAgain = false;
@@ -257,13 +259,18 @@ public class ChestStealer extends Module {
     private boolean isBad(ItemStack item) {
         if (!(boolean) settings.get(TRASH).getValue())
             return false;
-        if (item != null && item.getItem() instanceof ItemSword) {
+        if (item == null)
+            return true;
+        if (item.getItem() instanceof ItemSword) {
             return getDamage(item) <= bestDamage();
         }
-        if (item != null && item.getItem() instanceof ItemArmor) {
+        if (item.getItem() instanceof ItemArmor) {
             if (!(canEquip(item) || (betterCheck(item) && !canEquip(item)))) return true;
         }
-        return item != null && !(item.getItem() instanceof ItemArmor) &&
+        if(item.getItem() instanceof ItemTool) {
+            return !tools.getValue() || isToolWorst(item);
+        }
+        return !(item.getItem() instanceof ItemArmor) &&
                 ((item.getItem().getUnlocalizedName().contains("tnt")) ||
                         (item.getItem().getUnlocalizedName().contains("stick")) ||
                         (item.getItem().getUnlocalizedName().contains("egg")) ||
@@ -282,11 +289,89 @@ public class ChestStealer extends Module {
                         (item.getItem().getUnlocalizedName().contains("torch")) ||
                         (item.getItem().getUnlocalizedName().contains("seeds")) ||
                         (item.getItem().getUnlocalizedName().contains("leather")) ||
-                        ((item.getItem() instanceof ItemPickaxe)) ||
                         ((item.getItem() instanceof ItemGlassBottle)) ||
-                        ((item.getItem() instanceof ItemTool)) ||
                         (item.getItem().getUnlocalizedName().contains("piston")) ||
                         ((item.getItem().getUnlocalizedName().contains("potion")) && (isBadPotion(item))));
+    }
+
+    private boolean isToolWorst(ItemStack item) {
+        List<ItemAxe> axeList = new ArrayList<>();
+        List<ItemPickaxe> pickaxeList = new ArrayList<>();
+        List<ItemSpade> shovelList = new ArrayList<>();
+
+        for (int i = 9; i < 45; i++) {
+            if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
+                ItemStack is = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
+                if (is.getItem() instanceof ItemTool) {
+                    ItemTool itemTool = (ItemTool) is.getItem();
+                    if (itemTool instanceof ItemPickaxe && item.getItem() instanceof ItemPickaxe) {
+                        pickaxeList.add((ItemPickaxe) itemTool);
+                    } else if (itemTool instanceof ItemAxe && item.getItem() instanceof ItemAxe) {
+                        axeList.add((ItemAxe) itemTool);
+                    } else if (itemTool instanceof ItemSpade && item.getItem() instanceof ItemSpade) {
+                        shovelList.add((ItemSpade) itemTool);
+                    }
+                }
+            }
+        }
+
+        if (pickaxeList.size() > 1 && item.getItem() instanceof ItemPickaxe) {
+            ItemStack bestStack = null;
+            float currentItemDamage = getEfficiency(item);
+            float bestDamage = -1;
+            for (int i = 9; i < 45; i++)
+                if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
+                    ItemStack stack = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
+                    Item itemTool = stack.getItem();
+                    if (itemTool instanceof ItemPickaxe) {
+                        float itemDamage = getEfficiency(stack);
+                        if (itemDamage >= bestDamage) {
+                            bestDamage = itemDamage;
+                            bestStack = stack;
+                        }
+                    }
+                }
+            return currentItemDamage < bestDamage || (currentItemDamage == bestDamage && !item.equals(bestStack));
+        }
+
+        if (axeList.size() > 1 && item.getItem() instanceof ItemAxe) {
+            ItemStack bestStack = null;
+            float currentItemDamage = getEfficiency(item);
+            float bestDamage = -1;
+            for (int i = 9; i < 45; i++)
+                if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
+                    ItemStack stack = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
+                    Item itemTool = stack.getItem();
+                    if (itemTool instanceof ItemAxe) {
+                        float itemDamage = getEfficiency(stack);
+                        if (itemDamage >= bestDamage) {
+                            bestDamage = itemDamage;
+                            bestStack = stack;
+                        }
+                    }
+                }
+            return currentItemDamage < bestDamage || (currentItemDamage == bestDamage && !item.equals(bestStack));
+        }
+
+        if (shovelList.size() > 1 && item.getItem() instanceof ItemSpade) {
+            ItemStack bestStack = null;
+            float currentItemDamage = getEfficiency(item);
+            float bestDamage = -1;
+            for (int i = 9; i < 45; i++)
+                if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
+                    ItemStack stack = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
+                    Item itemTool = stack.getItem();
+                    if (itemTool instanceof ItemSpade) {
+                        float itemDamage = getEfficiency(stack);
+                        if (itemDamage >= bestDamage) {
+                            bestDamage = itemDamage;
+                            bestStack = stack;
+                        }
+                    }
+                }
+            return currentItemDamage < bestDamage || (currentItemDamage == bestDamage && !item.equals(bestStack));
+        }
+        return false;
     }
 
     private double getProtectionValue(ItemStack stack) {
@@ -294,6 +379,16 @@ public class ChestStealer extends Module {
             return ((ItemArmor) stack.getItem()).damageReduceAmount + (100 - ((ItemArmor) stack.getItem()).damageReduceAmount) * EnchantmentHelper.getEnchantmentLevel(Enchantment.protection.effectId, stack) * 0.0075D;
         }
         return 0;
+    }
+
+    private float getEfficiency(ItemStack itemTool) {
+        float var2 = ((ItemTool) itemTool.getItem()).efficiencyOnProperMaterial;
+
+        if (var2 > 1.0f) {
+            final int var6 = EnchantmentHelper.getEnchantmentLevel(Enchantment.efficiency.effectId, itemTool);
+            var2 += var6 * var6 + 1;
+        }
+        return var2;
     }
 
     private boolean betterCheck(ItemStack stack) {

@@ -129,7 +129,7 @@ public class InventoryCleaner extends Module {
                         pickaxeList.add((ItemPickaxe) itemTool);
                     } else if (itemTool instanceof ItemAxe && item.getItem() instanceof ItemAxe && pickaxeList.size() < 2 && shovelList.size() < 2) {
                         axeList.add((ItemAxe) itemTool);
-                    } else if (itemTool instanceof ItemSpade && pickaxeList.size() < 2 && axeList.size() < 2) {
+                    } else if (itemTool instanceof ItemSpade && item.getItem() instanceof ItemSpade && pickaxeList.size() < 2 && axeList.size() < 2) {
                         shovelList.add((ItemSpade) itemTool);
                     }
 

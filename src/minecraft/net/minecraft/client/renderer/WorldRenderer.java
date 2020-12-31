@@ -444,7 +444,7 @@ public class WorldRenderer
         }
         Xray x = (Xray) Client.getModuleManager().get(Xray.class);
         if (x.isEnabled()) {
-            color = Colors.getColor(iR, iG, iB, x.getOpacity());
+            color = Colors.getColorOpacity(color, x.getOpacity());
         }
 
         Module module = Client.getModuleManager().get(Aimbot.class);
