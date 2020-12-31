@@ -7,10 +7,12 @@ package exhibition.module.impl.player;
 
 import exhibition.event.Event;
 import exhibition.event.RegisterEvent;
+import exhibition.event.impl.EventDamageBlock;
 import exhibition.event.impl.EventTick;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
+import exhibition.util.Timer;
 import exhibition.util.misc.BlockUtil;
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
@@ -24,53 +26,64 @@ public class AutoTool extends Module {
         settings.put("SLOT", new Setting<>("SLOT", 3, "Slot number to put your tool in.", 1, 1, 9));
     }
 
-    int oldSlot = -1;
+    private int oldSlot = -1;
+    private Timer timer = new Timer();
 
-    @RegisterEvent(events = {EventTick.class})
+    @RegisterEvent(events = {EventTick.class, EventDamageBlock.class})
     public void onEvent(Event event) {
-        boolean swapback = (boolean)settings.get("SWAP-BACK").getValue();
-        if (!mc.gameSettings.keyBindAttack.getIsKeyPressed() || mc.objectMouseOver == null) {
-            if (oldSlot != -1 && swapback) {
-                mc.thePlayer.inventory.currentItem = oldSlot;
-                mc.playerController.updateController();
+        boolean swapback = (boolean) settings.get("SWAP-BACK").getValue();
+        if (event instanceof EventTick) {
+            if (!timer.delay(50)) {
+                return;
             }
-            oldSlot = -1;
-            return;
-        }
-        BlockPos pos = mc.objectMouseOver.getBlockPos();
-        if (pos == null) {
-            if (oldSlot != -1 && swapback) {
-                mc.thePlayer.inventory.currentItem = oldSlot;
-                mc.playerController.updateController();
+
+            if (!mc.gameSettings.keyBindAttack.getIsKeyPressed() || mc.objectMouseOver == null) {
+                if (oldSlot != -1 && swapback) {
+                    mc.thePlayer.inventory.currentItem = oldSlot;
+                    mc.playerController.updateController();
+                }
+                oldSlot = -1;
+                return;
             }
-            oldSlot = -1;
-            return;
+            BlockPos pos = mc.objectMouseOver.getBlockPos();
+            if (pos == null) {
+                if (oldSlot != -1 && swapback) {
+                    mc.thePlayer.inventory.currentItem = oldSlot;
+                    mc.playerController.updateController();
+                }
+                oldSlot = -1;
+                return;
+            }
         }
 
-        Block block = mc.theWorld.getBlockState(pos).getBlock();
-        float strength = 1.0F;
-        int bestItemIndex = -1;
-        for (int i = 0; i < 36; i++) {
-            ItemStack itemStack = mc.thePlayer.inventory.mainInventory[i];
-            if (itemStack == null) {
-                continue;
+        if (event instanceof EventDamageBlock) {
+            EventDamageBlock edb = event.cast();
+            Block block = mc.theWorld.getBlockState(edb.getCurrentBlock()).getBlock();
+            float strength = 1.0F;
+            int bestItemIndex = -1;
+            for (int i = 0; i < 36; i++) {
+                ItemStack itemStack = mc.thePlayer.inventory.mainInventory[i];
+                if (itemStack == null) {
+                    continue;
+                }
+                float tStrength = itemStack.getStrVsBlock(block);
+                if ((tStrength > strength)) {
+                    strength = tStrength;
+                    bestItemIndex = i;
+                }
             }
-            float tStrength = itemStack.getStrVsBlock(block);
-            if ((tStrength > strength)) {
-                strength = tStrength;
-                bestItemIndex = i;
+            if (bestItemIndex > 8) {
+                int slot = ((Number) settings.get("SLOT").getValue()).intValue() - 1;
+                swap(bestItemIndex, slot);
+                return;
             }
-        }
-        if (bestItemIndex > 8) {
-            int slot = ((Number) settings.get("SLOT").getValue()).intValue() - 1;
-            swap(bestItemIndex, slot);
-            return;
-        }
-        if (bestItemIndex != -1) {
-            if (oldSlot == -1 && swapback)
-                oldSlot = mc.thePlayer.inventory.currentItem;
-            mc.thePlayer.inventory.currentItem = bestItemIndex;
-            mc.playerController.updateController();
+            if (bestItemIndex != -1) {
+                if (oldSlot == -1 && swapback)
+                    oldSlot = mc.thePlayer.inventory.currentItem;
+                timer.reset();
+                mc.thePlayer.inventory.currentItem = bestItemIndex;
+                mc.playerController.updateController();
+            }
         }
     }
 

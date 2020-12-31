@@ -12,7 +12,6 @@ import exhibition.event.RegisterEvent;
 import exhibition.event.impl.*;
 import exhibition.management.PriorityManager;
 import exhibition.management.command.Command;
-import exhibition.management.notifications.dev.DevNotification;
 import exhibition.management.notifications.dev.DevNotifications;
 import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.Module;
@@ -42,12 +41,9 @@ import net.minecraft.util.MathHelper;
 
 import java.util.*;
 
-/**
- * @author cool1
- */
 public class AntiBot extends Module {
 
-    public static String MODE = "MODE";
+    private String MODE = "MODE";
     private String DEAD = "DEAD";
     private String REMOVE = "REMOVE";
 
@@ -55,7 +51,7 @@ public class AntiBot extends Module {
 
     private Timer timer = new Timer();
 
-    private List<EntityPlayer> spawnedList = new ArrayList<>();
+    private final List<EntityPlayer> spawnedList = new ArrayList<>();
 
     public AntiBot(ModuleData data) {
         super(data);
@@ -68,20 +64,14 @@ public class AntiBot extends Module {
         return invalid;
     }
 
-    private static List<EntityPlayer> invalid = new ArrayList<>();
+    private static final List<EntityPlayer> invalid = new ArrayList<>();
 
-    private static HashMap<String, Integer> ticksOnGroundMap = new HashMap<>();
+    private static final HashMap<String, Integer> ticksOnGroundMap = new HashMap<>();
 
-    public void onEnable() {
+    @Override
+    public void onToggle() {
         invalid.clear();
-    }
-
-    public void onDisable() {
-        invalid.clear();
-        try {
-
-        } catch (Exception e) {
-        }
+        ticksOnGroundMap.clear();
     }
 
     public static int getTicksOnGround(EntityLivingBase ent) {
@@ -238,7 +228,6 @@ public class AntiBot extends Module {
                         EntityPlayer ent = (EntityPlayer) o;
                         if (ent == mc.thePlayer) continue;
 
-
                         if (HypixelUtil.isInGame("SKYWARS") && HypixelUtil.isGameActive()) {
                             if (ent.isDead) {
                                 DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + ent.getHealth() + " " + ent.getName() + " has died.");
@@ -327,7 +316,6 @@ public class AntiBot extends Module {
                             switch (currentSetting) {
                                 case "Hypixel": {
 
-
                                     boolean isOnHypixel = mc.getCurrentServerData() != null && (mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net")) && mc.getIntegratedServer() == null;
 
                                     boolean doPingCheck = checkPing() == 1;
@@ -348,7 +336,7 @@ public class AntiBot extends Module {
                                             if (botNameFormat) {
                                                 invalid.add(ent);
                                                 ticksOnGroundMap.put(ent.getName(), -69420);
-                                                Notifications.getManager().post("Illegal Staff Bot", "Staff bot has been detected. \247cPlay with caution.", 6000, Notifications.Type.WARNING);
+                                                Notifications.getManager().post("Illegal Player", "An Illegal player has spawned in.", 6000, Notifications.Type.WARNING);
                                                 // mc.theWorld.removeEntity(ent);
                                             }
                                         }
@@ -379,7 +367,7 @@ public class AntiBot extends Module {
                                             continue;
                                         }
                                     }
-                                    if ((botNameFormat || str.equalsIgnoreCase(ent.getName()) || str.contains("[NPC]"))) {
+                                    if (botNameFormat || str.equalsIgnoreCase(ent.getName()) || str.contains("[NPC]")) {
                                         if (!isInTabList(ent) && isOnHypixel && (ticksOnGroundMap.getOrDefault(ent.getName(), 0) < 15)) {
                                             invalid.add(ent);
                                             if (remove && ent.isInvisible() && mc.thePlayer.getDistanceToEntity(ent) < 10 && ticksOnGroundMap.getOrDefault(ent.getName(), 0) < -20) {
@@ -390,10 +378,11 @@ public class AntiBot extends Module {
                                         }
                                     }
 
-                                    if (((!isInTabList(ent) && (str.equals(ent.getName() + "\247r") || str.equals("\247r" + ent.getName())))) || str.contains("[NPC]")) {
+                                    if ((!isInTabList(ent) && (str.equals(ent.getName() + "\247r") || str.equals("\247r" + ent.getName()))) || str.contains("[NPC]")) {
                                         invalid.add(ent);
                                         if (remove && ent.isInvisible() && ticksOnGroundMap.getOrDefault(ent.getName(), 0) < -20) {
                                             mc.theWorld.removeEntity(ent);
+                                            DevNotifications.getManager().post("Removed " + ent.getName() + " D");
                                             continue;
                                         }
                                     }

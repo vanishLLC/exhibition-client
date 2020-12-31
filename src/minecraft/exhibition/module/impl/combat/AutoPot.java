@@ -12,6 +12,7 @@ import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.movement.Fly;
 import exhibition.module.impl.movement.LongJump;
 import exhibition.module.impl.movement.Speed;
+import exhibition.util.HypixelUtil;
 import exhibition.util.NetUtil;
 import exhibition.util.PlayerUtil;
 import exhibition.util.Timer;
@@ -81,6 +82,10 @@ public class AutoPot extends Module {
             EventMotionUpdate e = (EventMotionUpdate) event;
             long delay = ((Number) settings.get(DELAY).getValue()).intValue();
             if (e.isPre()) {
+                if(Client.instance.isLagging() || HypixelUtil.scoreboardContains("Game ended")) {
+                    timer.reset();
+                }
+
                 setSuffix(mode.getSelected());
                 if (!mc.thePlayer.capabilities.allowEdit || (haltTicks < 0 && mc.thePlayer.openContainer != mc.thePlayer.inventoryContainer) || Client.getModuleManager().isEnabled(LongJump.class)) {
                     AutoPot.potting = false;

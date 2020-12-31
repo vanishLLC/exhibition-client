@@ -23,7 +23,6 @@ import exhibition.util.HypixelUtil;
 import exhibition.util.MathUtils;
 import exhibition.util.misc.ChatUtil;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -74,7 +73,7 @@ public class HackerDetect extends Module {
 
     @RegisterEvent(events = {EventMotionUpdate.class, EventSpawnEntity.class, EventPacket.class, EventTick.class})
     public void onEvent(Event event) {
-        if (mc.thePlayer == null || mc.theWorld == null) {
+        if (mc.thePlayer == null || mc.theWorld == null || !mc.thePlayer.isAllowEdit()) {
             return;
         }
 
@@ -102,7 +101,7 @@ public class HackerDetect extends Module {
                 /*
                 Bum fix to not having other checks, but does fix detecting whole lobby
                  */
-                if (mc.thePlayer.ticksExisted == 0) {
+                if (mc.thePlayer.ticksExisted == 0){
                     phasePosY = 0;
                     hypixelLag = false;
                 }

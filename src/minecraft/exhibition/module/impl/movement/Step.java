@@ -81,7 +81,7 @@ public class Step extends Module {
                             index = 0;
                         }
                         if ((boolean) this.timer.getValue()) {
-                            mc.timer.timerSpeed = new float[]{0.5F, 0.30523F, 0.20526F}[index];
+                            mc.timer.timerSpeed = new float[]{0.45F, 0.30523F, 0.20526F}[index];
                             this.ticks = 1;
                             if (((Number) this.stepHeight.getValue()).floatValue() == 1) {
                                 mc.timer.timerSpeed = 0.5F;

@@ -26,6 +26,7 @@ public class SilentView extends Module {
 
     private boolean isSilent = false;
 
+    public float lastSilentYaw = -1337;
     public float lastSilentPitch = -1337;
 
     public SilentView(ModuleData data) {
@@ -62,10 +63,12 @@ public class SilentView extends Module {
                     isSilent = true;
                 } else {
                     if (isSilent) {
-
+                        lastSilentYaw = currentYaw;
                         lastSilentPitch = currentPitch;
-
                         isSilent = false;
+                    } else {
+                        lastSilentYaw = -1337;
+                        lastSilentPitch = -1337;
                     }
 
                     lastYaw = mc.thePlayer.rotationYaw;

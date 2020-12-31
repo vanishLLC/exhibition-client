@@ -9,12 +9,16 @@ import java.util.Arrays;
 import java.util.BitSet;
 
 import exhibition.Client;
+import exhibition.module.Module;
+import exhibition.module.impl.gta.Aimbot;
 import exhibition.module.impl.render.Xray;
 import exhibition.util.render.Colors;
+import net.minecraft.block.Block;
 import net.minecraft.client.renderer.WorldRenderer$1;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.renderer.vertex.VertexFormatElement;
+import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.util.MathHelper;
 import optifine.Config;
@@ -440,7 +444,15 @@ public class WorldRenderer
         }
         Xray x = (Xray) Client.getModuleManager().get(Xray.class);
         if (x.isEnabled()) {
-            color = Colors.getColor(iR, iG, iB, x.getOpacity());
+            color = Colors.getColorOpacity(color, x.getOpacity());
+        }
+
+        Module module = Client.getModuleManager().get(Aimbot.class);
+        if (module.isEnabled()){
+            Aimbot zombieAim = (Aimbot)module;
+            if(zombieAim.usingAutowall() && zombieAim.showAutowall()) {
+                color = Colors.getColorOpacity(color, 150);
+            }
         }
 
         this.rawIntBuffer.put(index, color);

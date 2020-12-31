@@ -898,7 +898,7 @@ public abstract class World implements IBlockAccess {
                                 }
                             }
 
-                            Block[] penetrableBlocks = new Block[]{Blocks.wooden_slab, Blocks.acacia_stairs, Blocks.oak_stairs, Blocks.planks, Blocks.birch_stairs, Blocks.dark_oak_stairs, Blocks.spruce_stairs, Blocks.jungle_stairs, Blocks.log, Blocks.log2};
+                            Block[] penetrableBlocks = new Block[]{Blocks.wooden_slab, Blocks.acacia_stairs, Blocks.oak_stairs, Blocks.planks, Blocks.double_wooden_slab, Blocks.birch_stairs, Blocks.dark_oak_stairs, Blocks.spruce_stairs, Blocks.jungle_stairs, Blocks.log, Blocks.log2};
                             if (allowed)
                                 for (Block ignoreBlock : penetrableBlocks) {
                                     if (currentBlock == ignoreBlock) {
@@ -1026,7 +1026,7 @@ public abstract class World implements IBlockAccess {
                                             break;
                                         }
                                     }
-                                    Block[] penetrableBlocks = new Block[]{Blocks.wooden_slab, Blocks.acacia_stairs, Blocks.oak_stairs, Blocks.planks, Blocks.birch_stairs, Blocks.dark_oak_stairs, Blocks.spruce_stairs, Blocks.jungle_stairs, Blocks.log, Blocks.log2};
+                                    Block[] penetrableBlocks = new Block[]{Blocks.wooden_slab, Blocks.acacia_stairs, Blocks.oak_stairs, Blocks.planks, Blocks.double_wooden_slab, Blocks.birch_stairs, Blocks.dark_oak_stairs, Blocks.spruce_stairs, Blocks.jungle_stairs, Blocks.log, Blocks.log2};
                                     if (allowed)
                                         for (Block ignoreBlock : penetrableBlocks) {
                                             if (currentBlock == ignoreBlock) {

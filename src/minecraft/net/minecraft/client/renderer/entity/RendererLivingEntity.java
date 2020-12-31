@@ -118,8 +118,21 @@ public abstract class RendererLivingEntity<T extends EntityLivingBase> extends R
             boolean bruh = silentView.silent() && entity instanceof EntityPlayerSP;
 
             try {
-                float f = bruh ? silentView.interpolatedYaw(partialTicks) : this.interpolateRotation(entity.prevRenderYawOffset, entity.renderYawOffset, partialTicks);
-                float f1 = bruh ? silentView.interpolatedYaw(partialTicks) : this.interpolateRotation(entity.prevRotationYawHead, entity.rotationYawHead, partialTicks);
+
+                float previousYawOffset = entity.prevRenderYawOffset;
+                float prevRotationYawHead = entity.prevRotationYawHead;
+
+                float previousPitch = entity.prevRotationPitch;
+
+                if (silentView.lastSilentPitch != -1337 && entity instanceof EntityPlayerSP) {
+                    previousPitch = silentView.lastSilentPitch;
+                    float diff = MathHelper.wrapAngleTo180_float(previousYawOffset - silentView.lastSilentYaw);
+                    previousYawOffset += diff;
+                    prevRotationYawHead += diff;
+                }
+
+                float f = bruh ? silentView.interpolatedYaw(partialTicks) : this.interpolateRotation(previousYawOffset, entity.renderYawOffset, partialTicks);
+                float f1 = bruh ? silentView.interpolatedYaw(partialTicks) : this.interpolateRotation(prevRotationYawHead, entity.rotationYawHead, partialTicks);
                 float f2 = f1 - f;
 
                 if (this.mainModel.isRiding && entity.ridingEntity instanceof EntityLivingBase) {
@@ -143,12 +156,7 @@ public abstract class RendererLivingEntity<T extends EntityLivingBase> extends R
                     }
                 }
 
-                float previousPitch = entity.prevRotationPitch;
 
-                if (silentView.lastSilentPitch != -1337) {
-                    previousPitch = silentView.lastSilentPitch;
-                    silentView.lastSilentPitch = -1337;
-                }
 
                 float f8 = (Minecraft.getMinecraft().gameSettings.thirdPersonView != 0 && Client.getModuleManager().get(AntiAim.class).isEnabled() && entity == Minecraft.getMinecraft().thePlayer) ?
                         previousPitch + ((AntiAim.rotationPitch != 0 ? AntiAim.rotationPitch :

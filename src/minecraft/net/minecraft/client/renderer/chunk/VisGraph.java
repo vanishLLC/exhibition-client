@@ -6,9 +6,12 @@ import java.util.EnumSet;
 import java.util.Set;
 
 import exhibition.Client;
+import exhibition.module.Module;
+import exhibition.module.impl.gta.Aimbot;
 import exhibition.module.impl.movement.Phase;
 import exhibition.module.impl.render.Freecam;
 import exhibition.module.impl.render.Xray;
+import exhibition.util.render.Colors;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import optifine.IntegerCache;
@@ -28,6 +31,14 @@ public class VisGraph
         if (Client.getModuleManager().isEnabled(Xray.class) || Client.getModuleManager().get(Phase.class).isEnabled() || Client.getModuleManager().get(Freecam.class).isEnabled()) {
             return;
         }
+        Module module = Client.getModuleManager().get(Aimbot.class);
+        if (module.isEnabled()){
+            Aimbot zombieAim = (Aimbot)module;
+            if(zombieAim.usingAutowall() && zombieAim.showAutowall()) {
+                return;
+            }
+        }
+
         this.field_178612_d.set(getIndex(pos), true);
         --this.field_178611_f;
     }
@@ -49,6 +60,16 @@ public class VisGraph
             setvisibility.setAllVisible(true);
             return setvisibility;
         }
+
+        Module module = Client.getModuleManager().get(Aimbot.class);
+        if (module.isEnabled()){
+            Aimbot zombieAim = (Aimbot)module;
+            if(zombieAim.usingAutowall() && zombieAim.showAutowall()) {
+                setvisibility.setAllVisible(true);
+                return setvisibility;
+            }
+        }
+
         if (4096 - this.field_178611_f < 256)
         {
             setvisibility.setAllVisible(true);
