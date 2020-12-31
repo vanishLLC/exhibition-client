@@ -34,6 +34,8 @@ import net.minecraft.potion.Potion;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
+import tv.twitch.chat.Chat;
+import tv.twitch.chat.ChatUrlImageMessageToken;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -53,7 +55,8 @@ public class HackerDetect extends Module {
 
     private Vec3 teleported = null;
 
-    double phasePosY;
+    private boolean hypixelLag;
+    private double phasePosY;
 
     public HackerDetect(ModuleData data) {
         super(data);
@@ -100,11 +103,11 @@ public class HackerDetect extends Module {
                 /*
                 Bum fix to not having other checks, but does fix detecting whole lobby
                  */
-                if (mc.thePlayer.ticksExisted <= 0){
-                    teleported = new Vec3(posLook.getX(), posLook.getY(), posLook.getZ());
-                }
-                if (mc.thePlayer.ticksExisted <= 5 && HypixelUtil.isGameStarting()) {
-                    teleported = new Vec3(posLook.getX(), posLook.getY(), posLook.getZ());
+                if (mc.thePlayer.ticksExisted == 0){
+                    ChatUtil.debug("reset");
+                    phasePosY = 0;
+                    teleported = null;
+                    hypixelLag = false;
                 }
             }
             return;
@@ -220,25 +223,55 @@ public class HackerDetect extends Module {
                 }
 
                 /*
-                ADDed to fix phasing out in cages in teams mode
+                Phase check
                  */
                 if (phase.getValue()) {
+                    /*
+                    Initial y value
+                     */
+                    if (mc.thePlayer.ticksExisted == 30) {
+                        if (HypixelUtil.scoreboardContains("hypixel")){
+                            phasePosY = mc.thePlayer.posY;
+                            ChatUtil.debug("posY1: " + phasePosY);
+                            hypixelLag = false;
+                        } else {
+                            hypixelLag = true;
+                        }
+                    }
+                    /*
+                    Lag check
+                     */
+                    if (hypixelLag){
+                        if (HypixelUtil.isGameStarting() && HypixelUtil.isInGame("SKYWARS")) {
+                            phasePosY = mc.thePlayer.posY;
+                            ChatUtil.debug("posY2: " + phasePosY);
+                            hypixelLag = false;
+                        } else if (HypixelUtil.scoreboardContains("hypixel")) {
+                            hypixelLag = false;
+                        } else {
+                            ChatUtil.debug("true");
+                            hypixelLag = true;
+                        }
+                    }
+
+                    /*
+                    Team skywars cage check
+                     */
                     if ((HypixelUtil.scoreboardContains("start 0:09") && HypixelUtil.isInGame("SKYWARS") && HypixelUtil.scoreboardContains("teams left"))){
                         phasePosY = mc.thePlayer.posY;
-                    } else if (!PriorityManager.isPriority(ent) && (HypixelUtil.scoreboardContains("start") && HypixelUtil.isInGame("SKYWARS") && HypixelUtil.scoreboardContains("teams left"))){
+                        ChatUtil.debug("posY3: " + phasePosY);
+                    } else if (!PriorityManager.isPriority(ent) && ent.ticksExisted > 40 && teleported != null && HypixelUtil.scoreboardContains("start") && HypixelUtil.isInGame("SKYWARS") && HypixelUtil.scoreboardContains("teams left")){
                         if (phasePosY - ent.posY > 4.5) {
                             Notifications.getManager().post("Hacker Detected", ent.getName() + " has phased out of their cage!", 7500, Notifications.Type.WARNING);
                             PriorityManager.setAsPriority(ent);
                         }
-                    } else {
-                        phasePosY = 0;
                     }
 
                     /*
-                    Changed to potentially fix an issue with teleported being higher than it should
+                    Check for phase
                      */
                     if (!PriorityManager.isPriority(ent) && ent.ticksExisted > 40 && teleported != null && HypixelUtil.isInGame("SKYWARS") && !HypixelUtil.isGameActive() && HypixelUtil.isGameStarting()) {
-                        if (teleported.yCoord - ent.posY > 4.5) {
+                        if (phasePosY - ent.posY > 4.5) {
                             Notifications.getManager().post("Hacker Detected", ent.getName() + " has phased out of their cage!", 7500, Notifications.Type.WARNING);
                             PriorityManager.setAsPriority(ent);
                         }
