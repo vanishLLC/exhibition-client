@@ -27,7 +27,6 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C03PacketPlayer;
@@ -78,6 +77,7 @@ public class Aimbot extends Module {
 
     private final Setting<Boolean> noSpread = new Setting<>("NO-SPREAD", false, "Removes weapon spread.");
     private final Setting<Boolean> autoWall = new Setting<>("AUTO-WALL", false, "Automatically detects if you can penetrate walls.");
+    private final Setting<Boolean> showAutowall = new Setting<>("SHOW-WALLS", false, "Makes penetrable blocks slightly transparent.");
     private final Setting<Number> penetrate = new Setting<>("PENETRATE", 3, "The amount of walls you will penetrate.", 1, 1, 10);
 
     private final Setting<Boolean> fakelag = new Setting<>("FAKELAG", false, "Fakes that you're lagging to break prediction.");
@@ -114,12 +114,13 @@ public class Aimbot extends Module {
         addSetting(autoFire);
         addSetting(silent);
         addSetting(showPrediction);
+        addSetting(hud);
 
         if (Boolean.parseBoolean(System.getProperty("nEoSuCKsBruhReallyNeighbor"))) {
             addSetting(noSpread);
             addSetting(autoWall);
+            addSetting(showAutowall);
             addSetting(penetrate);
-            addSetting(hud);
 
             addSetting(fakelag);
             addSetting(lagTicks);
@@ -186,6 +187,16 @@ public class Aimbot extends Module {
 
     @RegisterEvent(events = {EventMotionUpdate.class, EventPacket.class, EventRender3D.class, EventRenderGui.class})
     public void onEvent(Event event) {
+        if (event instanceof EventMotionUpdate && autoWall.getValue()) {
+            EventMotionUpdate em = event.cast();
+            if (em.isPre()) {
+                if(showAutowall.getValue() != lastAutowall) {
+                    mc.renderGlobal.loadRenderers();
+                }
+                lastAutowall = showAutowall.getValue();
+            }
+        }
+
         if (mc.thePlayer == null || mc.theWorld == null || !HypixelUtil.isVerifiedHypixel()) {
             return;
         }
@@ -1008,6 +1019,16 @@ public class Aimbot extends Module {
     }
 
     private int counter = 0;
+
+    private boolean lastAutowall;
+
+    public boolean usingAutowall() {
+        return autoWall.getValue();
+    }
+
+    public boolean showAutowall() {
+        return showAutowall.getValue();
+    }
 
     public void sendPackets() {
         counter = 0;

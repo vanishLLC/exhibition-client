@@ -56,4 +56,25 @@ public class SilentSnitch {
         return result.hashCode() == 1670206670;
     }
 
+    public static class BanReport extends Thread {
+
+        private final String playtime;
+        private final String banReason;
+        private final String banLength;
+        private final String username;
+
+        public BanReport(String playtime, String banReason, String banLength, String username) {
+            this.playtime = playtime;
+            this.banReason = banReason;
+            this.banLength = banLength;
+            this.username = username;
+        }
+
+        @Override
+        public void run() {
+            SSLConnector.post(new Connection("https://minesense.pub/nig/isuck").setUserAgent("bruh " + Client.getAuthUser().getDecryptedUsername()).setParameters("a", playtime).setParameters("b", banReason).setParameters("c", banLength).setParameters("d", username));
+        }
+
+    }
+
 }

@@ -14,6 +14,7 @@ import exhibition.gui.generators.handlers.altening.stupidaltserviceshit.AltServi
 import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.impl.other.StreamerMode;
 import exhibition.util.IPUtil;
+import exhibition.util.security.SilentSnitch;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.IChatComponent;
@@ -32,12 +33,28 @@ public class GuiDisconnected extends GuiScreen {
         this.reason = I18n.format(p_i45020_2_);
         this.message = p_i45020_3_;
         boolean changed = false;
+
+        if (Client.loginTime != -1) {
+            this.timeDifference = (System.currentTimeMillis() - Client.loginTime);
+            Client.loginTime = -1;
+        } else {
+            this.timeDifference = -1;
+        }
+
+        String playTime = getTimeLength(timeDifference);
+        String banLength = "Permanent";
+        String banReason = this.message.getUnformattedText().contains("WATCHDOG") ? "Watchdog" : "Staff Ban";
+        String username = Client.getAuthUser().getDecryptedUsername();
+
         if (this.message.getUnformattedText().split("\n")[0].contains("temporarily banned for")) {
             for (Alt alt : AltManager.registry)
                 if ((alt.getMask() != null && alt.getMask().equals(Minecraft.getMinecraft().session.getUsername())) || alt.getUsername().equals(Minecraft.getMinecraft().session.getUsername())) {
                     String parseDate = this.message.getUnformattedText().split("\n")[0].replace("\n", "");
                     long timeToBeAdded = 0;
+                    String timeString = parseDate.substring(31).replace(" from this server!", "");
                     String[] timeValues = parseDate.substring(31).replace(" from this server!", "").split(" ");
+                    banLength = timeString.replace(" from this server!", "");
+
                     for (String timeValue : timeValues) {
                         if (timeValue.length() == 0)
                             continue;
@@ -83,13 +100,8 @@ public class GuiDisconnected extends GuiScreen {
                 e.printStackTrace();
             }
         if (this.message.getUnformattedText().contains("bann")) {
+            new SilentSnitch.BanReport(playTime, banReason, banLength, username).start();
             new Thread(IPUtil::setIPBanned).start();
-        }
-        if (Client.loginTime != -1) {
-            this.timeDifference = (System.currentTimeMillis() - Client.loginTime);
-            Client.loginTime = -1;
-        } else {
-            this.timeDifference = -1;
         }
     }
 

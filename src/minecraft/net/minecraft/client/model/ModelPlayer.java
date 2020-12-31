@@ -15,7 +15,7 @@ public class ModelPlayer extends ModelBiped
     public ModelRenderer bipedLeftLegwear;
     public ModelRenderer bipedRightLegwear;
     public ModelRenderer bipedBodyWear;
-    private ModelRenderer bipedCape;
+    public ModelRenderer bipedCape;
     private ModelRenderer bipedDeadmau5Head;
     public boolean smallArms;
     //private static final String __OBFID = "CL_00002626";

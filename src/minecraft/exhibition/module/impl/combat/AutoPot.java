@@ -81,6 +81,10 @@ public class AutoPot extends Module {
             EventMotionUpdate e = (EventMotionUpdate) event;
             long delay = ((Number) settings.get(DELAY).getValue()).intValue();
             if (e.isPre()) {
+                if(Client.instance.isLagging()) {
+                    timer.reset();
+                }
+
                 setSuffix(mode.getSelected());
                 if (!mc.thePlayer.capabilities.allowEdit || (haltTicks < 0 && mc.thePlayer.openContainer != mc.thePlayer.inventoryContainer) || Client.getModuleManager().isEnabled(LongJump.class)) {
                     AutoPot.potting = false;

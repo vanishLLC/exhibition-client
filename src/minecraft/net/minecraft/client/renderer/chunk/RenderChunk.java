@@ -9,6 +9,9 @@ import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 
 import exhibition.Client;
+import exhibition.module.Module;
+import exhibition.module.impl.gta.Aimbot;
+import exhibition.module.impl.gta.ZombieAim;
 import exhibition.module.impl.render.Xray;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCactus;
@@ -27,6 +30,7 @@ import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
+import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
@@ -214,6 +218,21 @@ public class RenderChunk
                 {
                     aenumworldblocklayer = this.blockLayersSingle;
                     aenumworldblocklayer[0] = block.getBlockLayer();
+
+                    Module module = Client.getModuleManager().get(Aimbot.class);
+                    if (module.isEnabled()){
+                        Aimbot zombieAim = (Aimbot)module;
+
+                        if(zombieAim.usingAutowall() && zombieAim.showAutowall()) {
+                            Block[] penetrableBlocks = new Block[]{Blocks.wooden_slab, Blocks.acacia_stairs, Blocks.oak_stairs, Blocks.planks, Blocks.double_wooden_slab, Blocks.birch_stairs, Blocks.dark_oak_stairs, Blocks.spruce_stairs, Blocks.jungle_stairs, Blocks.log, Blocks.log2};
+                            for (Block penetrableBlock : penetrableBlocks) {
+                                if (block == penetrableBlock) {
+                                    aenumworldblocklayer[0] = EnumWorldBlockLayer.TRANSLUCENT;
+                                    break;
+                                }
+                            }
+                        }
+                    }
 
                     Xray xray = (Xray) Client.getModuleManager().get(Xray.class);
                     if (xray.isEnabled()){

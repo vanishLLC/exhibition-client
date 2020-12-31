@@ -72,7 +72,7 @@ public class HackerDetect extends Module {
 
     @RegisterEvent(events = {EventMotionUpdate.class, EventSpawnEntity.class, EventPacket.class})
     public void onEvent(Event event) {
-        if (mc.thePlayer == null || mc.theWorld == null) {
+        if (mc.thePlayer == null || mc.theWorld == null || !mc.thePlayer.isAllowEdit()) {
             return;
         }
 
