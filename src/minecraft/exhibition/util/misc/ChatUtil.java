@@ -13,10 +13,10 @@ public class ChatUtil implements MinecraftUtil {
 	}
 
 	public static void debug(String text) {
+		DevNotifications.getManager().post(text);
+
 		if(!GlobalValues.allowDebug.getValue())
 			return;
-
-		DevNotifications.getManager().post(text);
 
 		if(text == null || text.equalsIgnoreCase("") || mc.thePlayer == null)
 			return;

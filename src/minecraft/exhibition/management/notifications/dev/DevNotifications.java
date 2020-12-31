@@ -24,12 +24,13 @@ public class DevNotifications {
     }
 
     public void post(String text) {
+        if (Client.instance != null)
+            Client.getSourceConsoleGUI().sourceConsole.addStringList(text);
+
         if (!GlobalValues.allowDebug.getValue())
             return;
         System.out.println(text);
         this.notifications.add(new DevNotification(text));
-        if (Client.instance != null)
-            Client.getSourceConsoleGUI().sourceConsole.addStringList(text);
     }
 
     public void updateAndRender() {
