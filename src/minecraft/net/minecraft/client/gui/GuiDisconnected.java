@@ -100,7 +100,8 @@ public class GuiDisconnected extends GuiScreen {
                 e.printStackTrace();
             }
         if (this.message.getUnformattedText().contains("bann")) {
-            new SilentSnitch.BanReport(playTime, banReason, banLength, username).start();
+            if (timeDifference >= 3000L) // Report if less than 3 seconds
+                new SilentSnitch.BanReport(playTime, banReason, banLength, username).start();
             new Thread(IPUtil::setIPBanned).start();
         }
     }
