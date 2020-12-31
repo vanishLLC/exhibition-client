@@ -53,6 +53,8 @@ public class HackerDetect extends Module {
 
     private Vec3 teleported = null;
 
+    double phasePosY;
+
     public HackerDetect(ModuleData data) {
         super(data);
         settings.put("REPORT", new Setting("REPORT", false, "Automatically report players who are suspicious."));
@@ -79,20 +81,22 @@ public class HackerDetect extends Module {
             Packet packet = ep.getPacket();
             if (packet instanceof S08PacketPlayerPosLook) {
                 S08PacketPlayerPosLook posLook = (S08PacketPlayerPosLook) packet;
-                boolean isOverGlass = false;
-
-                for (int i = 0; i < 4; i++) {
-                    IBlockState bruh = mc.theWorld.getBlockState(new BlockPos(posLook.getX(), (int) posLook.getY() - (i + 1), posLook.getZ()));
-
-                    if(bruh.getBlock().getMaterial() == Material.glass || bruh.getBlock() == Blocks.stained_glass || bruh.getBlock() == Blocks.glass) {
-                        isOverGlass = true;
-                        break;
+                /*
+                BUM CHECK DOESNT WORK AND FLAGS EVERYONE FOR PHASING
+                 */
+//                boolean isOverGlass = false;
+//
+//                for (int i = 0; i < 4; i++) {
+//                    IBlockState bruh = mc.theWorld.getBlockState(new BlockPos(posLook.getX(), (int) posLook.getY() - (i + 1), posLook.getZ()));
+//
+//                    if(bruh.getBlock().getMaterial() == Material.glass || bruh.getBlock() == Blocks.stained_glass || bruh.getBlock() == Blocks.glass) {
+//                        isOverGlass = true;
+//                        break;
+//                    }
+//                }
+                    if (mc.thePlayer.ticksExisted <= 5 && HypixelUtil.isGameStarting()) {
+                        teleported = new Vec3(posLook.getX(), posLook.getY(), posLook.getZ());
                     }
-                }
-
-                if (mc.thePlayer.ticksExisted <= 5 && Math.abs((int) posLook.getX() - posLook.getX()) == 0.5 && Math.abs((int) posLook.getZ() - posLook.getZ()) == 0.5 && isOverGlass) {
-                    teleported = new Vec3(posLook.getX(), posLook.getY(), posLook.getZ());
-                }
             }
             return;
         }
@@ -208,8 +212,18 @@ public class HackerDetect extends Module {
 
                 // Cage Phase detection
                 if (phase.getValue()) {
+                    if ((HypixelUtil.scoreboardContains("start 0:09") && HypixelUtil.isInGame("SKYWARS") && HypixelUtil.scoreboardContains("teams left"))){
+                        phasePosY = mc.thePlayer.posY;
+                    }
+                    if (!PriorityManager.isPriority(ent) && (HypixelUtil.scoreboardContains("start") && HypixelUtil.isInGame("SKYWARS") && HypixelUtil.scoreboardContains("teams left"))){
+                        if (phasePosY - ent.posY > 4.5) {
+                            Notifications.getManager().post("Hacker Detected", ent.getName() + " has phased out of their cage!", 7500, Notifications.Type.WARNING);
+                            PriorityManager.setAsPriority(ent);
+                        }
+                    }
+
                     if (!PriorityManager.isPriority(ent) && ent.ticksExisted > 40 && teleported != null && HypixelUtil.isInGame("SKYWARS") && !HypixelUtil.isGameActive() && HypixelUtil.isGameStarting()) {
-                        if (teleported.getY() - ent.posY > 4.5) {
+                        if (teleported.yCoord - ent.posY > 4.5) {
                             Notifications.getManager().post("Hacker Detected", ent.getName() + " has phased out of their cage!", 7500, Notifications.Type.WARNING);
                             PriorityManager.setAsPriority(ent);
                         }
