@@ -83,6 +83,8 @@ public class HackerDetect extends Module {
                 S08PacketPlayerPosLook posLook = (S08PacketPlayerPosLook) packet;
                 /*
                 BUM CHECK DOESNT WORK AND FLAGS EVERYONE FOR PHASING
+                Kept for future reference, weird doesnt detect glass below you sometimes, even though it is glass
+                also fences are not taken into account / other misc cages
                  */
 //                boolean isOverGlass = false;
 //
@@ -94,6 +96,10 @@ public class HackerDetect extends Module {
 //                        break;
 //                    }
 //                }
+
+                /*
+                Bum fix to not having other checks, but does fix detecting whole lobby
+                 */
                     if (mc.thePlayer.ticksExisted <= 5 && HypixelUtil.isGameStarting()) {
                         teleported = new Vec3(posLook.getX(), posLook.getY(), posLook.getZ());
                     }
@@ -210,7 +216,9 @@ public class HackerDetect extends Module {
 //                }
                 }
 
-                // Cage Phase detection
+                /*
+                ADDed to fix phasing out in cages in teams mode
+                 */
                 if (phase.getValue()) {
                     if ((HypixelUtil.scoreboardContains("start 0:09") && HypixelUtil.isInGame("SKYWARS") && HypixelUtil.scoreboardContains("teams left"))){
                         phasePosY = mc.thePlayer.posY;
@@ -222,6 +230,9 @@ public class HackerDetect extends Module {
                         }
                     }
 
+                    /*
+                    Changed to potentially fix an issue with teleported being higher than it should
+                     */
                     if (!PriorityManager.isPriority(ent) && ent.ticksExisted > 40 && teleported != null && HypixelUtil.isInGame("SKYWARS") && !HypixelUtil.isGameActive() && HypixelUtil.isGameStarting()) {
                         if (teleported.yCoord - ent.posY > 4.5) {
                             Notifications.getManager().post("Hacker Detected", ent.getName() + " has phased out of their cage!", 7500, Notifications.Type.WARNING);
