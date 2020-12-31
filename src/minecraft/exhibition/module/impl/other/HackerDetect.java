@@ -100,9 +100,12 @@ public class HackerDetect extends Module {
                 /*
                 Bum fix to not having other checks, but does fix detecting whole lobby
                  */
-                    if (mc.thePlayer.ticksExisted <= 5 && HypixelUtil.isGameStarting()) {
-                        teleported = new Vec3(posLook.getX(), posLook.getY(), posLook.getZ());
-                    }
+                if (mc.thePlayer.ticksExisted <= 0){
+                    teleported = new Vec3(posLook.getX(), posLook.getY(), posLook.getZ());
+                }
+                if (mc.thePlayer.ticksExisted <= 5 && HypixelUtil.isGameStarting()) {
+                    teleported = new Vec3(posLook.getX(), posLook.getY(), posLook.getZ());
+                }
             }
             return;
         }
@@ -222,12 +225,13 @@ public class HackerDetect extends Module {
                 if (phase.getValue()) {
                     if ((HypixelUtil.scoreboardContains("start 0:09") && HypixelUtil.isInGame("SKYWARS") && HypixelUtil.scoreboardContains("teams left"))){
                         phasePosY = mc.thePlayer.posY;
-                    }
-                    if (!PriorityManager.isPriority(ent) && (HypixelUtil.scoreboardContains("start") && HypixelUtil.isInGame("SKYWARS") && HypixelUtil.scoreboardContains("teams left"))){
+                    } else if (!PriorityManager.isPriority(ent) && (HypixelUtil.scoreboardContains("start") && HypixelUtil.isInGame("SKYWARS") && HypixelUtil.scoreboardContains("teams left"))){
                         if (phasePosY - ent.posY > 4.5) {
                             Notifications.getManager().post("Hacker Detected", ent.getName() + " has phased out of their cage!", 7500, Notifications.Type.WARNING);
                             PriorityManager.setAsPriority(ent);
                         }
+                    } else {
+                        phasePosY = 0;
                     }
 
                     /*
