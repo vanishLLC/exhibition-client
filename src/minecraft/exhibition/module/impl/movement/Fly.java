@@ -304,7 +304,7 @@ public class Fly extends Module {
                         } else {
                             mc.thePlayer.motionY = 0;
                         }
-                        em.setGround(HypixelUtil.isVerifiedHypixel() && mc.thePlayer.ticksExisted % 3 == 0);
+                        em.setGround(HypixelUtil.isVerifiedHypixel() && mc.thePlayer.ticksExisted % 7 == 0);
                         break;
                     }
 //                    case "AntiKick": {

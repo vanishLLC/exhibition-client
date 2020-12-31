@@ -211,7 +211,6 @@ public class ChestStealer extends Module {
                                         timer.setDifference(100);
                                         Slot slot = guiChest.inventorySlots.inventorySlots.get(index);
                                         guiChest.handleMouseClick(slot, slot.slotNumber, 0, 1);
-                                        ChatUtil.printChat("Random miss " + mc.thePlayer.ticksExisted);
                                     }
                                 }
                             }

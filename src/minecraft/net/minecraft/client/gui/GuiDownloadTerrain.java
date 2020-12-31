@@ -61,7 +61,8 @@ public class GuiDownloadTerrain extends GuiScreen {
 
         Angle.INSTANCE.clear();
 
-        Teleport.cancel = true;
+        if (Teleport.isTeleporting)
+            Teleport.cancel = true;
 
         AntiBot.clear();
 

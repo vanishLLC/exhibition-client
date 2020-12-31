@@ -8,6 +8,7 @@ import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.other.ChestStealer;
+import exhibition.util.HypixelUtil;
 import exhibition.util.NetUtil;
 import exhibition.util.Timer;
 import net.minecraft.client.gui.GuiChat;
@@ -50,7 +51,7 @@ public class AutoArmor extends Module {
 
     @RegisterEvent(events = {EventMotionUpdate.class})
     public void onEvent(Event event) {
-        if (!mc.thePlayer.capabilities.allowEdit || AutoSword.swapped() || mc.currentScreen instanceof GuiContainer || AutoPot.potting || mc.thePlayer.openContainer != mc.thePlayer.inventoryContainer || ChestStealer.isStealing) {
+        if (!mc.thePlayer.capabilities.allowEdit || AutoSword.swapped() || mc.currentScreen instanceof GuiContainer || AutoPot.potting || mc.thePlayer.openContainer != mc.thePlayer.inventoryContainer || ChestStealer.isStealing || HypixelUtil.scoreboardContains("Game end")) {
             timer.reset();
             swapped = false;
             return;
