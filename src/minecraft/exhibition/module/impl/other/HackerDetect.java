@@ -22,7 +22,6 @@ import exhibition.util.HypixelUtil;
 import exhibition.util.MathUtils;
 import exhibition.util.misc.ChatUtil;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -34,8 +33,6 @@ import net.minecraft.potion.Potion;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
-import tv.twitch.chat.Chat;
-import tv.twitch.chat.ChatUrlImageMessageToken;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -104,7 +101,6 @@ public class HackerDetect extends Module {
                 Bum fix to not having other checks, but does fix detecting whole lobby
                  */
                 if (mc.thePlayer.ticksExisted == 0){
-                    ChatUtil.debug("reset");
                     phasePosY = 0;
                     teleported = null;
                     hypixelLag = false;
@@ -232,7 +228,7 @@ public class HackerDetect extends Module {
                     if (mc.thePlayer.ticksExisted == 30) {
                         if (HypixelUtil.scoreboardContains("hypixel")){
                             phasePosY = mc.thePlayer.posY;
-                            ChatUtil.debug("posY1: " + phasePosY);
+                            //ChatUtil.debug("posY1: " + phasePosY);
                             hypixelLag = false;
                         } else {
                             hypixelLag = true;
@@ -244,12 +240,12 @@ public class HackerDetect extends Module {
                     if (hypixelLag){
                         if (HypixelUtil.isGameStarting() && HypixelUtil.isInGame("SKYWARS")) {
                             phasePosY = mc.thePlayer.posY;
-                            ChatUtil.debug("posY2: " + phasePosY);
+                            //ChatUtil.debug("posY2: " + phasePosY);
                             hypixelLag = false;
                         } else if (HypixelUtil.scoreboardContains("hypixel")) {
                             hypixelLag = false;
                         } else {
-                            ChatUtil.debug("true");
+                            //ChatUtil.debug("true");
                             hypixelLag = true;
                         }
                     }
@@ -259,7 +255,7 @@ public class HackerDetect extends Module {
                      */
                     if ((HypixelUtil.scoreboardContains("start 0:09") && HypixelUtil.isInGame("SKYWARS") && HypixelUtil.scoreboardContains("teams left"))){
                         phasePosY = mc.thePlayer.posY;
-                        ChatUtil.debug("posY3: " + phasePosY);
+                        //ChatUtil.debug("posY3: " + phasePosY);
                     } else if (!PriorityManager.isPriority(ent) && ent.ticksExisted > 40 && teleported != null && HypixelUtil.scoreboardContains("start") && HypixelUtil.isInGame("SKYWARS") && HypixelUtil.scoreboardContains("teams left")){
                         if (phasePosY - ent.posY > 4.5) {
                             Notifications.getManager().post("Hacker Detected", ent.getName() + " has phased out of their cage!", 7500, Notifications.Type.WARNING);
