@@ -435,6 +435,7 @@ public class HackerDetect extends Module {
                             hypixelLag = true;
                         }
                     }
+
                     /*
                     Lag check
                      */
