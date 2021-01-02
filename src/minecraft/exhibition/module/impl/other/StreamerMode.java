@@ -67,7 +67,6 @@ public class StreamerMode extends Module {
                 spoofSkins = (Boolean) settings.get(SPOOFSKINS).getValue();
                 hideScore = (Boolean) settings.get(HIDESCORE).getValue();
                 hideTab = (Boolean) settings.get(HIDETAB).getValue();
-
             }
         }
 

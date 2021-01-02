@@ -78,17 +78,17 @@ public class GuiNewChat extends Gui {
                                 String s = chatline.getChatComponent().getFormattedText();
                                 GlStateManager.enableBlend();
 
-                                if (Client.getModuleManager().isEnabled(StreamerMode.class) && (boolean) Client.getModuleManager().get(StreamerMode.class).getSetting("PROTECT").getValue() && mc.thePlayer != null) {
-                                    if (chatline.getChatComponent().getUnformattedText().contains(mc.session.getProfile().getName())) {
-                                        s = s.replaceAll(mc.session.getProfile().getName(), "\2479" + Client.getAuthUser().getDecryptedUsername());
-                                    }
-
-                                    for (Friend friend : FriendManager.friendsList) {
-                                        if (chatline.getChatComponent().getUnformattedText().contains(friend.name)) {
-                                            s = s.replaceAll(friend.name, "\2479" + friend.alias);
-                                        }
-                                    }
-                                }
+//                                if (Client.getModuleManager().isEnabled(StreamerMode.class) && (boolean) Client.getModuleManager().get(StreamerMode.class).getSetting("PROTECT").getValue() && mc.thePlayer != null) {
+//                                    if (chatline.getChatComponent().getUnformattedText().contains(mc.session.getProfile().getName())) {
+//                                        s = s.replaceAll(mc.session.getProfile().getName(), "\2479" + Client.getAuthUser().getDecryptedUsername());
+//                                    }
+//
+//                                    for (Friend friend : FriendManager.friendsList) {
+//                                        if (chatline.getChatComponent().getUnformattedText().contains(friend.name)) {
+//                                            s = s.replaceAll(friend.name, "\2479" + friend.alias);
+//                                        }
+//                                    }
+//                                }
 
                                 this.mc.fontRendererObj.drawStringWithShadow(s, (float) i2, (float) (j2 - 8), 16777215 + (l1 << 24));
                                 GlStateManager.disableAlpha();
