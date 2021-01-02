@@ -61,6 +61,7 @@ public class HackerDetect extends Module {
 
     private Setting<Boolean> teams = new Setting<>("TEAMS", false, "Doesn't report teammates.");
 
+    private boolean ignore;
     private boolean hypixelLag;
     private double phasePosY = -1;
 
@@ -83,6 +84,7 @@ public class HackerDetect extends Module {
     public void reset() {
         phasePosY = -1;
         hypixelLag = false;
+        ignore = false;
     }
 
     @RegisterEvent(events = {EventMotionUpdate.class, EventSpawnEntity.class, EventPacket.class, EventTick.class, EventRender3D.class})
@@ -490,6 +492,7 @@ public class HackerDetect extends Module {
                 if (mc.thePlayer.ticksExisted == 30) {
                     if (HypixelUtil.scoreboardContains("hypixel")) {
                         //ChatUtil.printChat("Phase pos A " + (int) mc.thePlayer.posY);
+                        ignore = false;
                         phasePosY = mc.thePlayer.posY;
                         hypixelLag = false;
                     } else {
@@ -503,6 +506,7 @@ public class HackerDetect extends Module {
                 if (hypixelLag) {
                     if (HypixelUtil.isGameStarting() && HypixelUtil.isInGame("SKYWARS")) {
                         //ChatUtil.printChat("Phase pos B " + (int) mc.thePlayer.posY);
+                        ignore = false;
                         phasePosY = mc.thePlayer.posY;
                         hypixelLag = false;
                     } else {
@@ -510,7 +514,7 @@ public class HackerDetect extends Module {
                     }
                 }
 
-                if (!HypixelUtil.isGameStarting() && HypixelUtil.isInGame("SKYWARS") && phasePosY != -1) {
+                if (!HypixelUtil.isGameStarting() && HypixelUtil.isInGame("SKYWARS") && phasePosY != -1 && !ignore) {
                     //ChatUtil.printChat("Reset phase pos");
                     phasePosY = -1;
                     hypixelLag = false;
@@ -522,6 +526,7 @@ public class HackerDetect extends Module {
                 if ((HypixelUtil.scoreboardContains("start 0:0") && HypixelUtil.isInGame("SKYWARS") && HypixelUtil.scoreboardContains("teams left")) && phasePosY == -1) {
                     //ChatUtil.printChat("Phase pos C " + (int) mc.thePlayer.posY);
                     phasePosY = mc.thePlayer.posY;
+                    ignore = true;
                 }
             }
 

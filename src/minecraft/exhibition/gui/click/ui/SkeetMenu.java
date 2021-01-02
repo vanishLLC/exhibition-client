@@ -1228,6 +1228,7 @@ public class SkeetMenu extends UI {
 
             categoryPanel.checkboxes.add(new Checkbox(categoryPanel, globalsOffsetX + 44.5F, globalsOffsetY + 10, GlobalValues.showCursor));
             categoryPanel.checkboxes.add(new Checkbox(categoryPanel, globalsOffsetX + 44.5F, globalsOffsetY + 20, GlobalValues.allowDebug));
+            categoryPanel.checkboxes.add(new Checkbox(categoryPanel, globalsOffsetX + 44.5F, globalsOffsetY + 30, GlobalValues.keepPriority));
 
 
             float xOffsetXD = 290, yOffsetXD = 215 - 10;

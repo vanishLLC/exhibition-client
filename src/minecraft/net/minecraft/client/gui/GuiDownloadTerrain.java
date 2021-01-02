@@ -3,6 +3,7 @@ package net.minecraft.client.gui;
 import java.io.IOException;
 
 import exhibition.Client;
+import exhibition.management.GlobalValues;
 import exhibition.management.PriorityManager;
 import exhibition.management.command.impl.Teleport;
 import exhibition.management.notifications.usernotification.Notifications;
@@ -74,7 +75,8 @@ public class GuiDownloadTerrain extends GuiScreen {
 
         ((Bypass) Client.getModuleManager().get(Bypass.class)).worldChange();
 
-        PriorityManager.clearPriorityList();
+        if (!GlobalValues.keepPriority.getValue())
+            PriorityManager.clearPriorityList();
 //        if(mc.getCurrentServerData() != null && mc.getCurrentServerData().serverName.toLowerCase().contains("hypixel") || mc.getCurrentServerData().serverIP.toLowerCase().contains("hypixel")) {
 //            if(Client.getModuleManager().get(AntiBot.class).isEnabled())
 //                Client.getModuleManager().get(AntiBot.class).toggle();

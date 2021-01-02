@@ -3,7 +3,6 @@ package exhibition.management.notifications.usernotification;
 import exhibition.Client;
 import exhibition.management.GlobalValues;
 import exhibition.module.impl.combat.Killaura;
-import exhibition.module.impl.hud.HUD;
 import exhibition.util.MathUtils;
 import exhibition.util.RenderingUtil;
 import exhibition.util.render.Colors;
@@ -16,7 +15,6 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
-import java.awt.*;
 import java.util.List;
 
 public class NotificationRenderer implements INotificationRenderer {

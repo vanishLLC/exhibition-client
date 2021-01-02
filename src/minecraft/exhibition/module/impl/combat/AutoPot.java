@@ -17,6 +17,7 @@ import exhibition.util.HypixelUtil;
 import exhibition.util.NetUtil;
 import exhibition.util.PlayerUtil;
 import exhibition.util.Timer;
+import exhibition.util.misc.ChatUtil;
 import exhibition.util.security.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -318,11 +319,14 @@ public class AutoPot extends Module {
             if (!(entity instanceof EntityPlayer) || entity instanceof EntityPlayerSP)
                 continue;
 
+
             EntityPlayer player = (EntityPlayer) entity;
-            if (!AntiBot.isBot(player) && !FriendManager.isFriend(player.getName()) && PriorityManager.isPriority(player) && mc.thePlayer.getDistanceToEntity(player) <= 10) {
-                double previousDistance = mc.thePlayer.getDistance(player.lastTickPosX, player.lastTickPosY, player.lastTickPosZ);
-                double currentDistance = mc.thePlayer.getDistance(player.posX, player.posY, player.posZ);
-                if (currentDistance != currentDistance && previousDistance > currentDistance && currentDistance <= 8) {
+
+            if (PriorityManager.isPriority(player) && mc.thePlayer.getDistanceToEntity(player) <= 10) {
+
+                double previousDistance = mc.thePlayer.getDistance(player.lastTickPosX, mc.thePlayer.posY, player.lastTickPosZ);
+                double currentDistance = mc.thePlayer.getDistance(player.posX, mc.thePlayer.posY, player.posZ);
+                if (currentDistance != previousDistance && previousDistance > currentDistance && currentDistance <= 10) {
                     return true;
                 }
             }
@@ -338,6 +342,7 @@ public class AutoPot extends Module {
         int potStrength = -1;
 
         boolean noPlayersNearby = true;
+        boolean shouldHeal = shouldHeal() || (smartPot.getValue() && shouldPreSplash());
 
         for (int i = 9; i < 45; i++) {
             if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
@@ -348,16 +353,14 @@ public class AutoPot extends Module {
                     if (ItemPotion.isSplash(is.getItemDamage())) {
                         if (potion.getEffects(is) != null && (!is.getDisplayName().toLowerCase().contains("frog") || allowJumpBoost)) {
                             for (Object o : potion.getEffects(is)) {
-
                                 PotionEffect effect = (PotionEffect) o;
-                                boolean shouldHeal = shouldHeal() || (smartPot.getValue() && shouldPreSplash());
                                 if (pot != -1 && currentPriority == 0 && effect.getPotionID() == Potion.jump.id && !allowJumpBoost) {
                                     if (pot == i) {
                                         pot = -1;
                                         continue;
                                     }
                                 }
-                                if (effect.getPotionID() == Potion.heal.id && shouldHeal) {
+                                if (effect.getPotionID() == Potion.heal.id && shouldHeal && !(smartPot.getValue() && shouldPreSplash())) {
                                     currentPriority = 2;
                                     pot = i;
                                     continue;
@@ -373,7 +376,6 @@ public class AutoPot extends Module {
                                     }
                                     continue;
                                 }
-
 
                                 if (currentPriority == 0 && effect.getPotionID() == Potion.moveSpeed.id && (boolean) settings.get(SPEED).getValue()) {
 
