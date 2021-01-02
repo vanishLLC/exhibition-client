@@ -21,6 +21,7 @@ import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.combat.AntiBot;
 import exhibition.util.HypixelUtil;
 import exhibition.util.MathUtils;
+import exhibition.util.TeamUtils;
 import exhibition.util.misc.ChatUtil;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
@@ -59,6 +60,7 @@ public class HackerDetect extends Module {
     public HackerDetect(ModuleData data) {
         super(data);
         settings.put("REPORT", new Setting("REPORT", false, "Automatically report players who are suspicious."));
+        settings.put("TEAMS", new Setting("TEAMS", false, "Doesn't report teammates."));
         settings.put("CHECKS", new Setting("CHECKS", checks, "Which checks HackerDetect should use."));
     }
 
@@ -122,7 +124,7 @@ public class HackerDetect extends Module {
                             if (ent.getDistanceToEntity(entity) < 2 && !FriendManager.isFriend(ent.getName())) {
                                 EntityPlayer player = (EntityPlayer) ent;
 
-                                if (PriorityManager.isPriority(player))
+                                if (PriorityManager.isPriority(player) || (((boolean) settings.get("TEAMS").getValue()) && TeamUtils.isTeam(mc.thePlayer, player)))
                                     continue;
 
                                 double motionX = Math.abs(player.posX - player.lastTickPosX);
@@ -164,7 +166,7 @@ public class HackerDetect extends Module {
             List<Entity> validPlayers = mc.theWorld.getLoadedEntityList().stream().filter(o -> o instanceof EntityPlayer && o != mc.thePlayer && !AntiBot.isBot(o)).collect(Collectors.toList());
             for (Entity entityPlayer : validPlayers) {
                 EntityPlayer ent = (EntityPlayer) entityPlayer;
-                if (ent.isInvisible() || FriendManager.isFriend(ent.getName()))
+                if (ent.isInvisible() || FriendManager.isFriend(ent.getName()) || (((boolean) settings.get("TEAMS").getValue()) && TeamUtils.isTeam(mc.thePlayer, ent)))
                     continue;
 
                 {
@@ -412,7 +414,7 @@ public class HackerDetect extends Module {
             List<Entity> validPlayers = mc.theWorld.getLoadedEntityList().stream().filter(o -> o instanceof EntityPlayer && o != mc.thePlayer && !AntiBot.isBot(o)).collect(Collectors.toList());
             for (Entity entityPlayer : validPlayers) {
                 EntityPlayer ent = (EntityPlayer) entityPlayer;
-                if (ent.isInvisible() || FriendManager.isFriend(ent.getName()))
+                if (ent.isInvisible() || FriendManager.isFriend(ent.getName()) || (((boolean) settings.get("TEAMS").getValue()) && TeamUtils.isTeam(mc.thePlayer, ent)))
                     continue;
 
                 {
