@@ -425,18 +425,19 @@ public class LongJump extends Module {
                             double var7 = mc.thePlayer.posZ - mc.thePlayer.lastReportedPosZ;
 
                             if (var3 * var3 + var5 * var5 + var7 * var7 <= 0.00090D) {
-                                if (tickPassed == 1) {
-                                    bruh = 0.000924F + (float) (min + (max - min) * Math.random()); // 0.00079
-                                }
-                                if (tickPassed == 2) {
-                                    bruh = 0.000914F + (float) (min + (max - min) * Math.random()); // -0.00031
-                                }
-                                if (tickPassed == 3) {
-                                    bruh = 0.000924F + (float) (min + (max - min) * Math.random()); // -0.00069
-                                }
-                                if (tickPassed == 4) {
-                                    bruh = 0.000917F + (float) (min + (max - min) * Math.random()); // 0.0012
-                                }
+                                em.setCancelled(true);
+//                                if (tickPassed == 1) {
+//                                    bruh = 0.000924F + (float) (min + (max - min) * Math.random()); // 0.00079
+//                                }
+//                                if (tickPassed == 2) {
+//                                    bruh = 0.000914F + (float) (min + (max - min) * Math.random()); // -0.00031
+//                                }
+//                                if (tickPassed == 3) {
+//                                    bruh = 0.000924F + (float) (min + (max - min) * Math.random()); // -0.00069
+//                                }
+//                                if (tickPassed == 4) {
+//                                    bruh = 0.000917F + (float) (min + (max - min) * Math.random()); // 0.0012
+//                                }
                             }
 
                             if ((boolean) settings.get(C13PACKET).getValue() && bruhTick > 0 && (bruhTick % (20 * 6) == 0)) {
