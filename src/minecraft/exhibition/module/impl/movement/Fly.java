@@ -363,8 +363,10 @@ public class Fly extends Module {
                 float yaw = (allowTargetStrafe() && mc.thePlayer.movementInput.moveStrafe == 0 && mc.thePlayer.movementInput.moveForward > 0) ?
                         targetStrafe.getTargetYaw(mc.thePlayer.rotationYaw, speed) : mc.thePlayer.rotationYaw;
 
-                em.setX((float) (-(Math.sin(mc.thePlayer.getDirection(yaw)) * speed)));
-                em.setZ((float) (Math.cos(mc.thePlayer.getDirection(yaw)) * speed));
+                if ((mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f)) {
+                    em.setX((float) (-(Math.sin(mc.thePlayer.getDirection(yaw)) * speed)));
+                    em.setZ((float) (Math.cos(mc.thePlayer.getDirection(yaw)) * speed));
+                }
             }
         }
     }
