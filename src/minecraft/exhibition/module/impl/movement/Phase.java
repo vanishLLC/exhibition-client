@@ -1,5 +1,6 @@
 package exhibition.module.impl.movement;
 
+import exhibition.Client;
 import exhibition.event.Event;
 import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventBlockBounds;
@@ -31,19 +32,29 @@ public class Phase extends Module {
 
     private Vec3 enablePos;
 
+    private boolean wasStep;
+
     private String PM = "PHASEMODE";
     private Setting distance = new Setting<>("DIST", 0.5, "Distance for HCF phase.", 0.1, 0.1, 2);
     private Setting<Boolean> toggle = new Setting<>("TOGGLE", false, "Automatically disable when you move 5 blocks away.");
+    private Setting<Boolean> step = new Setting<>("STEP", false, "Disables Step when Phase is Enabled");
 
     public Phase(ModuleData data) {
         super(data);
         settings.put(PM, new Setting<>(PM, new Options("Phase Mode", "Normal", "Spider", "Skip", "Normal", "FullBlock", "Silent", "HCF", "Hypixel"), "Phase exploit method."));
         settings.put("DIST", distance);
+        settings.put("STEP", step);
         addSetting(toggle);
     }
 
     @Override
     public void onEnable() {
+        if (Client.getModuleManager().get(Step.class).isEnabled() && step.getValue()){
+            Client.getModuleManager().get(Step.class).toggle();
+            wasStep = true;
+        } else {
+            wasStep = false;
+        }
         if (mc.thePlayer != null) {
             enablePos = new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ);
         }
@@ -51,6 +62,9 @@ public class Phase extends Module {
 
     @Override
     public void onDisable() {
+        if (wasStep){
+            Client.getModuleManager().get(Step.class).toggle();
+        }
         enablePos = null;
     }
 
