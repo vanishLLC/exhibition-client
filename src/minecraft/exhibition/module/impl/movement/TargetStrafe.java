@@ -92,7 +92,7 @@ public class TargetStrafe extends Module {
 
         boolean magnet = (boolean) autoPriority.getValue();
 
-        boolean isStrafing = (Client.getModuleManager().isEnabled(Speed.class) || ((LongJump) Client.getModuleManager().get(LongJump.class)).allowTargetStrafe());
+        boolean isStrafing = (Client.getModuleManager().isEnabled(Speed.class) || ((LongJump) Client.getModuleManager().get(LongJump.class)).allowTargetStrafe() || ((Fly) Client.getModuleManager().get(Fly.class)).allowTargetStrafe());
 
         if (event instanceof EventMotionUpdate) {
             EventMotionUpdate em = event.cast();

@@ -37,6 +37,7 @@ public class Fly extends Module {
 
     private Setting<Boolean> c13packet = new Setting<>("C13PACKET", true, "Sends C13Packet fly bypass packets.");
     private Setting<Boolean> blink = new Setting<>("CHOKE", true, "Blinks your entire flight. (Non Blorp only)");
+    private Setting<Boolean> targetStrafe = new Setting<>("TARGETSTRAFE", false, "Target Strafes around players.");
 
     private Timer jumpDelay = new Timer();
     private Timer boostDelay = new Timer();
@@ -156,7 +157,7 @@ public class Fly extends Module {
         mc.thePlayer.capabilities.isFlying = false;
         mc.thePlayer.capabilities.allowFlying = lastFlyState;
 
-        if(blink.getValue() && !(boolean) settings.get(this.BYPASS).getValue()) {
+        if (blink.getValue() && !(boolean) settings.get(this.BYPASS).getValue()) {
             sendPackets();
         }
     }
@@ -199,12 +200,16 @@ public class Fly extends Module {
         }
     }
 
+    public boolean allowTargetStrafe() {
+        return this.isEnabled() && targetStrafe.getValue();
+    }
+
     @RegisterEvent(events = {EventMove.class, EventPacket.class, EventMotionUpdate.class, EventStep.class})
     public void onEvent(Event event) {
-        if(mc.thePlayer == null || mc.theWorld == null)
+        if (mc.thePlayer == null || mc.theWorld == null)
             return;
 
-        if(event instanceof EventPacket) {
+        if (event instanceof EventPacket) {
             EventPacket ep = event.cast();
             Packet packet = ep.getPacket();
 
@@ -213,7 +218,7 @@ public class Fly extends Module {
                     packetList.add(packet);
                 }
                 event.setCancelled(true);
-                ((LongJump)Client.getModuleManager().get(LongJump.class)).resetTimer();
+                ((LongJump) Client.getModuleManager().get(LongJump.class)).resetTimer();
             }
         }
 
@@ -234,7 +239,7 @@ public class Fly extends Module {
                 float min = 0.00000014F;
                 float max = 0.00000043F;
 
-                if(bruhTick == 0) {
+                if (bruhTick == 0) {
                     mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.00304F, mc.thePlayer.posZ);
                 }
 
@@ -353,31 +358,13 @@ public class Fly extends Module {
                     mc.timer.timerSpeed = 1F;
                 }
                 zoom--;
-                double forward = mc.thePlayer.movementInput.moveForward;
-                double strafe = mc.thePlayer.movementInput.moveStrafe;
-                float yaw = mc.thePlayer.rotationYaw;
-                if ((forward == 0.0D) && (strafe == 0.0D)) {
-                    em.setX(0.0D);
-                    em.setZ(0.0D);
-                } else {
-                    if (forward != 0.0D) {
-                        if (strafe > 0.0D) {
-                            yaw += (forward > 0.0D ? -45 : 45);
-                        } else if (strafe < 0.0D) {
-                            yaw += (forward > 0.0D ? 45 : -45);
-                        }
-                        strafe = 0.0D;
-                        if (forward > 0.0D) {
-                            forward = 1;
-                        } else {
-                            forward = -1;
-                        }
-                    }
-                    em.setX(forward * speed * Math.cos(Math.toRadians(yaw + 90.0F))
-                            + strafe * speed * Math.sin(Math.toRadians(yaw + 90.0F)));
-                    em.setZ(forward * speed * Math.sin(Math.toRadians(yaw + 90.0F))
-                            - strafe * speed * Math.cos(Math.toRadians(yaw + 90.0F)));
-                }
+
+                TargetStrafe targetStrafe = (TargetStrafe) Client.getModuleManager().get(TargetStrafe.class);
+                float yaw = (allowTargetStrafe() && mc.thePlayer.movementInput.moveStrafe == 0 && mc.thePlayer.movementInput.moveForward > 0) ?
+                        targetStrafe.getTargetYaw(mc.thePlayer.rotationYaw, speed) : mc.thePlayer.rotationYaw;
+
+                em.setX((float) (-(Math.sin(mc.thePlayer.getDirection(yaw)) * speed)));
+                em.setZ((float) (Math.cos(mc.thePlayer.getDirection(yaw)) * speed));
             }
         }
     }

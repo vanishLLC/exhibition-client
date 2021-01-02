@@ -342,6 +342,8 @@ public class HackerDetect extends Module {
 
                     int tickInAir = ent.onGround ? 0 : ent.ticksExisted - ent.jumpedTick;
 
+                    int speedFlags = 0;
+
                     if (jumped) {
                         ent.jumpedTick = ent.ticksExisted;
 
@@ -365,7 +367,7 @@ public class HackerDetect extends Module {
                         float diff = Math.abs(MathHelper.wrapAngleTo180_float(-(MathHelper.wrapAngleTo180_float(ent.rotationYaw) - (float) MathHelper.wrapAngleTo180_float(yawDirection))));
 
                         if (MathUtils.roundToPlace(velocity, 1) >= 0.5 && diff > 46) {
-                            ent.speedFlags += diff > 120 ? 15 : diff > 90 ? 7 : 3;
+                            speedFlags += diff > 120 ? 15 : diff > 90 ? 7 : 3;
                             //ChatUtil.debug("Yaw Diff: " + diff + " " + ent.getName() + " " + velocity);
                         }
                     }
@@ -388,7 +390,7 @@ public class HackerDetect extends Module {
                         float diff = Math.abs(MathHelper.wrapAngleTo180_float(-(MathHelper.wrapAngleTo180_float(ent.lastAirYaw) - (float) MathHelper.wrapAngleTo180_float(yawDirection))));
 
                         if (diff > 60 && MathUtils.roundToPlace(velocity, 1) >= 0.36 && velocity < 2) {
-                            ent.speedFlags += diff > 100 ? 7 : diff > 60 ? 5 : 2;
+                            speedFlags += diff > 100 ? 7 : diff > 60 ? 5 : 2;
                             ent.lastFlaggedTick = ent.ticksExisted;
                             ent.lastAirYaw = yawDirection;
                             //ChatUtil.debug("Yaw Diff Air " + tickInAir + ": " + diff + " " + ent.getName() + " " + velocity);
@@ -396,7 +398,7 @@ public class HackerDetect extends Module {
                     }
 
                     if (tickInAir > 0 && !jumped && motionY > -0.3 && motionY < 0 && (ent.ticksExisted - ent.jumpedTick) <= 2 && mc.theWorld.getBlockState(new BlockPos(ent.posX, ent.posY + 2, ent.posZ)).getBlock() == Blocks.air) {
-                        ent.speedFlags += 5;
+                        speedFlags += 5;
                         ent.lowhopFlags++;
                         if (ent.ticksExisted - ent.lastFlaggedTick < 15 && ent.lowhopFlags > 2 && !PriorityManager.isPriority(ent) && velocity > 0.2) {
                             Notifications.getManager().post("Hacker Detected", ent.getName() + " is using LowHop.", 7500, Notifications.Type.WARNING);
@@ -407,6 +409,12 @@ public class HackerDetect extends Module {
 
                         ent.lastFlaggedTick = ent.ticksExisted;
                     }
+
+                    if(ent.isBlocking()) {
+                        speedFlags *= 1.5;
+                    }
+
+                    ent.speedFlags += speedFlags;
 
 //                    if((ent.lastMotionY < 0 || ent.lastMotionY == 0) && (motionY > 0.2 && motionY < 0.47) && ent.onGround && mc.theWorld.getBlockState(new BlockPos(ent.posX, ent.posY - motionY - 0.5, ent.posZ)).getBlock() != Blocks.air) {
 //                        ChatUtil.debug("Hmm? " + ent.getName() + " " + ent.ticksExisted + " " + motionY + " " + ent.posY);
@@ -481,7 +489,7 @@ public class HackerDetect extends Module {
                      */
                 if (mc.thePlayer.ticksExisted == 30) {
                     if (HypixelUtil.scoreboardContains("hypixel")) {
-                        ChatUtil.printChat("Phase pos A " + (int) mc.thePlayer.posY);
+                        //ChatUtil.printChat("Phase pos A " + (int) mc.thePlayer.posY);
                         phasePosY = mc.thePlayer.posY;
                         hypixelLag = false;
                     } else {
@@ -494,7 +502,7 @@ public class HackerDetect extends Module {
                      */
                 if (hypixelLag) {
                     if (HypixelUtil.isGameStarting() && HypixelUtil.isInGame("SKYWARS")) {
-                        ChatUtil.printChat("Phase pos B " + (int) mc.thePlayer.posY);
+                        //ChatUtil.printChat("Phase pos B " + (int) mc.thePlayer.posY);
                         phasePosY = mc.thePlayer.posY;
                         hypixelLag = false;
                     } else {
@@ -503,7 +511,7 @@ public class HackerDetect extends Module {
                 }
 
                 if (!HypixelUtil.isGameStarting() && HypixelUtil.isInGame("SKYWARS") && phasePosY != -1) {
-                    ChatUtil.printChat("Reset phase pos");
+                    //ChatUtil.printChat("Reset phase pos");
                     phasePosY = -1;
                     hypixelLag = false;
                 }
@@ -512,7 +520,7 @@ public class HackerDetect extends Module {
                     Team skywars cage check
                      */
                 if ((HypixelUtil.scoreboardContains("start 0:0") && HypixelUtil.isInGame("SKYWARS") && HypixelUtil.scoreboardContains("teams left")) && phasePosY == -1) {
-                    ChatUtil.printChat("Phase pos C " + (int) mc.thePlayer.posY);
+                    //ChatUtil.printChat("Phase pos C " + (int) mc.thePlayer.posY);
                     phasePosY = mc.thePlayer.posY;
                 }
             }

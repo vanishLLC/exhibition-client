@@ -4,6 +4,7 @@ import exhibition.Client;
 import exhibition.event.Event;
 import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventMotionUpdate;
+import exhibition.management.PriorityManager;
 import exhibition.management.friend.FriendManager;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
@@ -26,10 +27,13 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemPotion;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.C03PacketPlayer;
+import net.minecraft.network.play.client.C07PacketPlayerDigging;
+import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
 import net.minecraft.network.play.client.C09PacketHeldItemChange;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -82,7 +86,7 @@ public class AutoPot extends Module {
             EventMotionUpdate e = (EventMotionUpdate) event;
             long delay = ((Number) settings.get(DELAY).getValue()).intValue();
             if (e.isPre()) {
-                if(Client.instance.isLagging() || HypixelUtil.scoreboardContains("Game ended")) {
+                if (Client.instance.isLagging() || HypixelUtil.scoreboardContains("Game ended")) {
                     timer.reset();
                 }
 
@@ -98,11 +102,10 @@ public class AutoPot extends Module {
                 if (potting && haltTicks < 0) {
                     potting = false;
                 }
-                float health = ((Number) settings.get(HEALTH).getValue()).floatValue() * 2;
 
                 int potionSlot = mc.thePlayer.openContainer != mc.thePlayer.inventoryContainer ? -1 : getPotionFromInv();
 
-                boolean shouldHeal = mc.thePlayer.getMaxHealth() == 20 ? mc.thePlayer.getHealth() <= health : (mc.thePlayer.getHealth() / mc.thePlayer.getMaxHealth()) <= (health / 20F);
+                boolean shouldHeal = shouldHeal() || (smartPot.getValue() && shouldPreSplash());
 
                 boolean shouldSplash = ((!mc.thePlayer.isPotionActive(Potion.moveSpeed) || mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getDuration() < 200) || shouldHeal) && (mc.thePlayer.onGround || mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.5, mc.thePlayer.posZ)).getBlock() != Blocks.air);
 
@@ -122,7 +125,7 @@ public class AutoPot extends Module {
                     }
                 }
 
-                boolean goodPot = !smartPot.getValue() || (shouldSplash && !shouldHeal) ? (Killaura.target == null || mc.thePlayer.hurtResistantTime <= 3) : (Killaura.target == null || mc.thePlayer.hurtTime >= 5 || mc.thePlayer.hurtTime == 0 || mc.thePlayer.hurtResistantTime <= 8 || Killaura.target.hurtTime >= 5);
+                boolean goodPot = !smartPot.getValue() || (shouldSplash && !shouldHeal) ? (Killaura.target == null || mc.thePlayer.hurtResistantTime <= 3) : (Killaura.target == null || (Killaura.target.hurtTime > 5 || Killaura.target.waitTicks >= 5));
 
                 if (shouldSplash && potionSlot != -1 && timer.delay(delay) && goodPot) {
                     boolean noMovement = false;
@@ -169,11 +172,19 @@ public class AutoPot extends Module {
 
 
                             int currentItem = mc.thePlayer.inventory.currentItem;
+                            if (mc.thePlayer.isBlocking()) {
+                                NetUtil.sendPacketNoEvents(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
+                            }
+
                             NetUtil.sendPacketNoEvents(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem = hotbarSlot));
                             if (mc.playerController.sendUseItem(mc.thePlayer, mc.theWorld, mc.thePlayer.inventory.getCurrentItem())) {
                                 mc.entityRenderer.itemRenderer.resetEquippedProgress2();
                             }
                             NetUtil.sendPacketNoEvents(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem = currentItem));
+                            if (mc.thePlayer.isBlocking()) {
+                                NetUtil.sendPacket(new C08PacketPlayerBlockPlacement(mc.thePlayer.getCurrentEquippedItem()));
+                            }
+
 
                             double[] offsets = new double[]{0.41999998688697815, 0.7531999805212024, 1.0013359791121417, 1.1661092609382138, 1.2491870787446828}; // Next 5 ticks ignored
 
@@ -285,14 +296,6 @@ public class AutoPot extends Module {
         return true;
     }
 
-    private static String decodeByteArray(byte[] bytes) {
-        String str = "";
-        for (byte b : bytes) {
-            str += (char) (b & 0xFF);
-        }
-        return str;
-    }
-
     private boolean hasArmor(EntityPlayer player) {
         ItemStack boots = player.inventory.armorInventory[0];
         ItemStack pants = player.inventory.armorInventory[1];
@@ -305,9 +308,30 @@ public class AutoPot extends Module {
         mc.playerController.windowClick(mc.thePlayer.inventoryContainer.windowId, slot, hotbarNum, 2, mc.thePlayer);
     }
 
+    public boolean shouldHeal() {
+        float health = ((Number) settings.get(HEALTH).getValue()).floatValue() * 2;
+        return mc.thePlayer.getMaxHealth() == 20 ? mc.thePlayer.getHealth() <= health : (mc.thePlayer.getHealth() / mc.thePlayer.getMaxHealth()) <= (health / 10F);
+    }
+
+    public boolean shouldPreSplash() {
+        for (Entity entity : mc.theWorld.getLoadedEntityList()) {
+            if (!(entity instanceof EntityPlayer) || entity instanceof EntityPlayerSP)
+                continue;
+
+            EntityPlayer player = (EntityPlayer) entity;
+            if (!AntiBot.isBot(player) && !FriendManager.isFriend(player.getName()) && PriorityManager.isPriority(player) && mc.thePlayer.getDistanceToEntity(player) <= 10) {
+                double previousDistance = mc.thePlayer.getDistance(player.lastTickPosX, player.lastTickPosY, player.lastTickPosZ);
+                double currentDistance = mc.thePlayer.getDistance(player.posX, player.posY, player.posZ);
+                if (currentDistance != currentDistance && previousDistance > currentDistance && currentDistance <= 8) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private int getPotionFromInv() {
         int pot = -1;
-        float health = ((Number) settings.get(HEALTH).getValue()).floatValue() * 2;
         boolean allowJumpBoost = (boolean) settings.get(JUMPBOOST).getValue();
 
         int currentPriority = 0; // 1 = regen, 2 = healing
@@ -326,7 +350,7 @@ public class AutoPot extends Module {
                             for (Object o : potion.getEffects(is)) {
 
                                 PotionEffect effect = (PotionEffect) o;
-                                boolean shouldHeal = mc.thePlayer.getMaxHealth() == 20 ? mc.thePlayer.getHealth() <= health : (mc.thePlayer.getHealth() / mc.thePlayer.getMaxHealth()) <= (health / 10F);
+                                boolean shouldHeal = shouldHeal() || (smartPot.getValue() && shouldPreSplash());
                                 if (pot != -1 && currentPriority == 0 && effect.getPotionID() == Potion.jump.id && !allowJumpBoost) {
                                     if (pot == i) {
                                         pot = -1;
