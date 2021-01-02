@@ -49,8 +49,9 @@ public class HackerDetect extends Module {
     private Setting<Boolean> scaffold = new Setting<>("FLY/SCAFFOLD", true);
     private Setting<Boolean> phase = new Setting<>("CAGE PHASE", true);
 
-
     private MultiBool checks = new MultiBool("Checks", killaura, autoBlock, cleaner, fastfly, scaffold, phase);
+
+    private Setting<Boolean> teams = new Setting("TEAMS", false, "Doesn't report teammates.");
 
     private Vec3 teleported = null;
 
@@ -60,8 +61,8 @@ public class HackerDetect extends Module {
     public HackerDetect(ModuleData data) {
         super(data);
         settings.put("REPORT", new Setting("REPORT", false, "Automatically report players who are suspicious."));
-        settings.put("TEAMS", new Setting("TEAMS", false, "Doesn't report teammates."));
         settings.put("CHECKS", new Setting("CHECKS", checks, "Which checks HackerDetect should use."));
+        addSetting(teams);
     }
 
     private double defaultSpeed(EntityPlayer ent) {
@@ -103,7 +104,7 @@ public class HackerDetect extends Module {
                 /*
                 Bum fix to not having other checks, but does fix detecting whole lobby
                  */
-                if (mc.thePlayer.ticksExisted == 0){
+                if (mc.thePlayer.ticksExisted == 0) {
                     phasePosY = 0;
                     hypixelLag = false;
                 }
@@ -166,7 +167,7 @@ public class HackerDetect extends Module {
             List<Entity> validPlayers = mc.theWorld.getLoadedEntityList().stream().filter(o -> o instanceof EntityPlayer && o != mc.thePlayer && !AntiBot.isBot(o)).collect(Collectors.toList());
             for (Entity entityPlayer : validPlayers) {
                 EntityPlayer ent = (EntityPlayer) entityPlayer;
-                if (ent.isInvisible() || FriendManager.isFriend(ent.getName()) || (((boolean) settings.get("TEAMS").getValue()) && TeamUtils.isTeam(mc.thePlayer, ent)))
+                if (ent.isInvisible() || FriendManager.isFriend(ent.getName()) || (teams.getValue() && TeamUtils.isTeam(mc.thePlayer, ent)))
                     continue;
 
                 {
@@ -410,7 +411,7 @@ public class HackerDetect extends Module {
 
             }
         }
-        if (event instanceof EventTick){
+        if (event instanceof EventTick) {
             List<Entity> validPlayers = mc.theWorld.getLoadedEntityList().stream().filter(o -> o instanceof EntityPlayer && o != mc.thePlayer && !AntiBot.isBot(o)).collect(Collectors.toList());
             for (Entity entityPlayer : validPlayers) {
                 EntityPlayer ent = (EntityPlayer) entityPlayer;
@@ -430,7 +431,7 @@ public class HackerDetect extends Module {
                     Initial y value
                      */
                     if (mc.thePlayer.ticksExisted == 30) {
-                        if (HypixelUtil.scoreboardContains("hypixel")){
+                        if (HypixelUtil.scoreboardContains("hypixel")) {
                             phasePosY = mc.thePlayer.posY;
                             hypixelLag = false;
                         } else {
@@ -441,7 +442,7 @@ public class HackerDetect extends Module {
                     /*
                     Lag check
                      */
-                    if (hypixelLag){
+                    if (hypixelLag) {
                         if (HypixelUtil.isGameStarting() && HypixelUtil.isInGame("SKYWARS")) {
                             phasePosY = mc.thePlayer.posY;
                             hypixelLag = false;
@@ -453,9 +454,9 @@ public class HackerDetect extends Module {
                     /*
                     Team skywars cage check
                      */
-                    if ((HypixelUtil.scoreboardContains("start 0:09") && HypixelUtil.isInGame("SKYWARS") && HypixelUtil.scoreboardContains("teams left"))){
+                    if ((HypixelUtil.scoreboardContains("start 0:09") && HypixelUtil.isInGame("SKYWARS") && HypixelUtil.scoreboardContains("teams left"))) {
                         phasePosY = mc.thePlayer.posY;
-                    } else if (!PriorityManager.isPriority(ent) && ent.ticksExisted > 40 && HypixelUtil.scoreboardContains("start") && HypixelUtil.isInGame("SKYWARS") && HypixelUtil.scoreboardContains("teams left")){
+                    } else if (!PriorityManager.isPriority(ent) && ent.ticksExisted > 40 && HypixelUtil.scoreboardContains("start") && HypixelUtil.isInGame("SKYWARS") && HypixelUtil.scoreboardContains("teams left")) {
                         if (phasePosY - ent.posY > 4.5) {
                             Notifications.getManager().post("Hacker Detected", ent.getName() + " has phased out of their cage!", 7500, Notifications.Type.WARNING);
                             PriorityManager.setAsPriority(ent);
