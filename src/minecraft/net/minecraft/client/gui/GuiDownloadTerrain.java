@@ -14,6 +14,7 @@ import exhibition.module.impl.movement.Fly;
 import exhibition.module.impl.movement.LongJump;
 import exhibition.module.impl.movement.Phase;
 import exhibition.module.impl.movement.Speed;
+import exhibition.module.impl.other.HackerDetect;
 import exhibition.module.impl.player.AutoFish;
 import exhibition.module.impl.player.Scaffold;
 import exhibition.module.impl.render.MotionPrediction;
@@ -57,6 +58,11 @@ public class GuiDownloadTerrain extends GuiScreen {
         if (Client.getModuleManager().isEnabled(AutoFish.class)) {
             Client.getModuleManager().get(AutoFish.class).toggle();
             Notifications.getManager().post("Server Change", "Blub Blub Blub.", 1500, Notifications.Type.NOTIFY);
+        }
+
+        if (Client.getModuleManager().isEnabled(HackerDetect.class)) {
+            HackerDetect hackerDetect = Client.getModuleManager().get(HackerDetect.class).cast();
+            hackerDetect.reset();
         }
 
         Angle.INSTANCE.clear();

@@ -48,7 +48,7 @@ public class HypixelUtil {
 
         if (scoreobjective1 != null) {
             String bruh = StringUtils.stripControlCodes(scoreobjective1.getDisplayName());
-            return bruh.contains(gameString);
+            return bruh.toLowerCase().contains(gameString.toLowerCase());
         }
 
         return false;
@@ -94,7 +94,7 @@ public class HypixelUtil {
                     ScorePlayerTeam scoreplayerteam1 = scoreboard.getPlayersTeam(score.getPlayerName());
                     String s1 = ScorePlayerTeam.formatPlayerName(scoreplayerteam1, score.getPlayerName());
 
-                    if (StringUtils.stripControlCodes(s1).toLowerCase().contains(str)) {
+                    if (StringUtils.stripControlCodes(s1).toLowerCase().contains(str.toLowerCase())) {
                         return true;
                     }
                 }

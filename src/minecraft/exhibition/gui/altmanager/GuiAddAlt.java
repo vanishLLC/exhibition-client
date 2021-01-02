@@ -88,7 +88,9 @@ public class GuiAddAlt extends PanoramaScreen {
         this.buttonList.add(new GuiButton(1, this.width / 2 - 100, this.height / 4 + 116 + 12, "Back"));
         buttonList.add(new GuiButton(2, this.width / 2 - 100, this.height / 4 + 92 - 12, "Import user:pass"));
         this.username = new GuiTextField(this.eventButton, this.mc.fontRendererObj, this.width / 2 - 100, 60, 200, 20);
+        this.username.setMaxStringLength(128);
         this.password = new PasswordField(this.mc.fontRendererObj, this.width / 2 - 100, 100, 200, 20);
+        this.password.setMaxStringLength(128);
         super.initGui();
     }
 

@@ -394,27 +394,27 @@ public class LongJump extends Module {
                     float bruh = 0;
                     if (mc.getIntegratedServer() == null && mc.getCurrentServerData() != null) {
                         if (isHypixel) {
-                            float min = 0.0000014F;
-                            float max = 0.0000043F;
+                            float min = 0.00000014F;
+                            float max = 0.00000043F;
 
                             int tickPassed = bruhTick % 5;
 
                             if (tickPassed == 0) {
-                                bruh = 0.00014F + (float) (min + (max - min) * Math.random());
+                                bruh = 0.000014F + (float) (min + (max - min) * Math.random());
                             }
                             if (tickPassed == 1) {
                                 up = true;
-                                bruh = 0.00024F + (float) (min + (max - min) * Math.random()); // 0.00079
+                                bruh = 0.000024F + (float) (min + (max - min) * Math.random()); // 0.00079
                             }
                             if (tickPassed == 2) {
-                                bruh = 0.00014F + (float) (min + (max - min) * Math.random()); // -0.00031
+                                bruh = 0.000014F + (float) (min + (max - min) * Math.random()); // -0.00031
                             }
                             if (tickPassed == 3) {
                                 up = true;
-                                bruh = 0.00024F + (float) (min + (max - min) * Math.random()); // -0.00069
+                                bruh = 0.000024F + (float) (min + (max - min) * Math.random()); // -0.00069
                             }
                             if (tickPassed == 4) {
-                                bruh = 0.00017F + (float) (min + (max - min) * Math.random()); // 0.0012
+                                bruh = 0.000017F + (float) (min + (max - min) * Math.random()); // 0.0012
                             }
 
                             bruhTick++;

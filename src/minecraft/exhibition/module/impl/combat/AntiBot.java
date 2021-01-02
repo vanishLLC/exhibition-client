@@ -300,7 +300,7 @@ public class AntiBot extends Module {
 //                                    DevNotifications.getManager().post("Is Bruh");
 //                                DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "------------------------------------------------------------------------");
 
-                                if (ent.flagged != 1 && !ent.isInvisible() && ent.getDisplayName().getFormattedText().contains("\247c" + ent.getName() + "\247r")) {
+                                if (ent.flagged != 1 && !ent.isInvisible() && ent.getDisplayName().getFormattedText().contains("\247c" + ent.getName() + "\247r") && mc.thePlayer.getDistanceToEntity(ent) < 7.5) {
                                     Notifications.getManager().post("Possible Staff Bot", ent.getDisplayName().getFormattedText() + " \247fmay be a staff bot!", 5000, Notifications.Type.WARNING);
                                     ent.flagged = 1;
                                 }

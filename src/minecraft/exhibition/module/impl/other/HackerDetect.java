@@ -7,10 +7,7 @@ package exhibition.module.impl.other;
 
 import exhibition.event.Event;
 import exhibition.event.RegisterEvent;
-import exhibition.event.impl.EventMotionUpdate;
-import exhibition.event.impl.EventPacket;
-import exhibition.event.impl.EventSpawnEntity;
-import exhibition.event.impl.EventTick;
+import exhibition.event.impl.*;
 import exhibition.management.PriorityManager;
 import exhibition.management.friend.FriendManager;
 import exhibition.management.notifications.usernotification.Notifications;
@@ -19,23 +16,32 @@ import exhibition.module.data.ModuleData;
 import exhibition.module.data.MultiBool;
 import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.combat.AntiBot;
+import exhibition.module.impl.combat.Killaura;
 import exhibition.util.HypixelUtil;
 import exhibition.util.MathUtils;
+import exhibition.util.RenderingUtil;
 import exhibition.util.TeamUtils;
 import exhibition.util.misc.ChatUtil;
+import exhibition.util.render.Colors;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemFishingRod;
 import net.minecraft.network.Packet;
+import net.minecraft.network.play.server.S02PacketChat;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.potion.Potion;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
+import org.lwjgl.opengl.GL11;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,20 +54,20 @@ public class HackerDetect extends Module {
     private Setting<Boolean> fastfly = new Setting<>("BLINK-FLY", false);
     private Setting<Boolean> scaffold = new Setting<>("FLY/SCAFFOLD", true);
     private Setting<Boolean> phase = new Setting<>("CAGE PHASE", true);
+    private Setting<Boolean> debugPhase = new Setting<>("DEBUG PHASE", false);
+    private Setting<Boolean> chatBypass = new Setting<>("CHAT BYPASS", true);
 
-    private MultiBool checks = new MultiBool("Checks", killaura, autoBlock, cleaner, fastfly, scaffold, phase);
+    private MultiBool checks = new MultiBool("Checks", chatBypass, killaura, autoBlock, cleaner, fastfly, scaffold, phase, debugPhase);
 
-    private Setting<Boolean> teams = new Setting("TEAMS", false, "Doesn't report teammates.");
-
-    private Vec3 teleported = null;
+    private Setting<Boolean> teams = new Setting<>("TEAMS", false, "Doesn't report teammates.");
 
     private boolean hypixelLag;
-    private double phasePosY;
+    private double phasePosY = -1;
 
     public HackerDetect(ModuleData data) {
         super(data);
-        settings.put("REPORT", new Setting("REPORT", false, "Automatically report players who are suspicious."));
-        settings.put("CHECKS", new Setting("CHECKS", checks, "Which checks HackerDetect should use."));
+        settings.put("REPORT", new Setting<>("REPORT", false, "Automatically report players who are suspicious."));
+        settings.put("CHECKS", new Setting<>("CHECKS", checks, "Which checks HackerDetect should use."));
         addSetting(teams);
     }
 
@@ -74,10 +80,45 @@ public class HackerDetect extends Module {
         return baseSpeed;
     }
 
-    @RegisterEvent(events = {EventMotionUpdate.class, EventSpawnEntity.class, EventPacket.class, EventTick.class})
+    public void reset() {
+        phasePosY = -1;
+        hypixelLag = false;
+    }
+
+    @RegisterEvent(events = {EventMotionUpdate.class, EventSpawnEntity.class, EventPacket.class, EventTick.class, EventRender3D.class})
     public void onEvent(Event event) {
         if (mc.thePlayer == null || mc.theWorld == null || !mc.thePlayer.isAllowEdit()) {
             return;
+        }
+
+        if (event instanceof EventRender3D) {
+            EventRender3D er = event.cast();
+            if (!debugPhase.getValue())
+                return;
+
+            if (phasePosY != -1 && HypixelUtil.isInGame("SKYWARS") && (HypixelUtil.isGameStarting() || HypixelUtil.scoreboardContains("start 0:0"))) {
+                GL11.glPushMatrix();
+                RenderingUtil.pre3D();
+                mc.entityRenderer.setupCameraTransform(mc.timer.renderPartialTicks, 2);
+
+                double x = (mc.thePlayer.prevPosX + (mc.thePlayer.posX - mc.thePlayer.prevPosX) * er.renderPartialTicks) - RenderManager.renderPosX;
+                double y = phasePosY - RenderManager.renderPosY;
+                double z = (mc.thePlayer.prevPosZ + (mc.thePlayer.posZ - mc.thePlayer.prevPosZ) * er.renderPartialTicks) - RenderManager.renderPosZ;
+                GlStateManager.translate(x, y, z);
+
+                AxisAlignedBB var11 = mc.thePlayer.getEntityBoundingBox().expand(2, 0, 2);
+                AxisAlignedBB var12 = new AxisAlignedBB(var11.minX - mc.thePlayer.posX, var11.minY - 0.01 - mc.thePlayer.posY, var11.minZ - mc.thePlayer.posZ, var11.maxX - mc.thePlayer.posX, var11.minY + 0.01 - mc.thePlayer.posY, var11.maxZ - mc.thePlayer.posZ);
+
+                RenderingUtil.glColor(Colors.getColor(255, 75));
+                RenderingUtil.drawBoundingBox(var12);
+
+                GL11.glLineWidth(2);
+                RenderingUtil.glColor(Colors.getColor(255, 255));
+                RenderingUtil.drawOutlinedBoundingBox(var12);
+
+                RenderingUtil.post3D();
+                GL11.glPopMatrix();
+            }
         }
 
         if (event instanceof EventPacket) {
@@ -104,11 +145,36 @@ public class HackerDetect extends Module {
                 /*
                 Bum fix to not having other checks, but does fix detecting whole lobby
                  */
-                if (mc.thePlayer.ticksExisted == 0) {
-                    phasePosY = 0;
-                    hypixelLag = false;
+                if (mc.thePlayer.ticksExisted <= 10) {
+                    reset();
                 }
             }
+
+            if (packet instanceof S02PacketChat && chatBypass.getValue()) {
+                S02PacketChat s02PacketChat = (S02PacketChat) packet;
+                String[] charList = new String[]{"\u05fc"};
+                for (String character : charList) {
+                    String unformatted = s02PacketChat.getChatComponent().getUnformattedText();
+                    if (unformatted.contains(":") && unformatted.contains(character)) {
+                        List<Entity> validPlayers = mc.theWorld.getLoadedEntityList().stream().filter(o -> o instanceof EntityPlayer && o != mc.thePlayer &&
+                                !AntiBot.isBot(o) && !o.isInvisible() && !FriendManager.isFriend(o.getName())).collect(Collectors.toList());
+                        for (Entity entityPlayer : validPlayers) {
+                            EntityPlayer ent = (EntityPlayer) entityPlayer;
+                            if ((teams.getValue() && TeamUtils.isTeam(mc.thePlayer, ent)))
+                                continue;
+
+                            if (unformatted.contains(ent.getName()) && !PriorityManager.isPriority(ent)) {
+                                Notifications.getManager().post("Hacker Detected", ent.getName() + " may be using Chat Bypass.", 7500, Notifications.Type.WARNING);
+                                if ((boolean) settings.get("REPORT").getValue())
+                                    ChatUtil.sendChat("/wdr " + ent.getName() + " fly");
+                                PriorityManager.setAsPriority(ent);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
             return;
         }
 
@@ -160,14 +226,11 @@ public class HackerDetect extends Module {
             if (!em.isPre())
                 return;
 
-            if (teleported != null && (HypixelUtil.isInGame("SKYWARS") && HypixelUtil.isGameActive())) {
-                teleported = null;
-            }
-
-            List<Entity> validPlayers = mc.theWorld.getLoadedEntityList().stream().filter(o -> o instanceof EntityPlayer && o != mc.thePlayer && !AntiBot.isBot(o)).collect(Collectors.toList());
+            List<Entity> validPlayers = mc.theWorld.getLoadedEntityList().stream().filter(o -> o instanceof EntityPlayer && o != mc.thePlayer &&
+                    !AntiBot.isBot(o) && !o.isInvisible() && !FriendManager.isFriend(o.getName())).collect(Collectors.toList());
             for (Entity entityPlayer : validPlayers) {
                 EntityPlayer ent = (EntityPlayer) entityPlayer;
-                if (ent.isInvisible() || FriendManager.isFriend(ent.getName()) || (teams.getValue() && TeamUtils.isTeam(mc.thePlayer, ent)))
+                if ((teams.getValue() && TeamUtils.isTeam(mc.thePlayer, ent)))
                     continue;
 
                 {
@@ -412,6 +475,48 @@ public class HackerDetect extends Module {
             }
         }
         if (event instanceof EventTick) {
+            if (phase.getValue()) {
+                    /*
+                    Initial y value
+                     */
+                if (mc.thePlayer.ticksExisted == 30) {
+                    if (HypixelUtil.scoreboardContains("hypixel")) {
+                        ChatUtil.printChat("Phase pos A " + (int) mc.thePlayer.posY);
+                        phasePosY = mc.thePlayer.posY;
+                        hypixelLag = false;
+                    } else {
+                        hypixelLag = true;
+                    }
+                }
+
+                    /*
+                    Lag check
+                     */
+                if (hypixelLag) {
+                    if (HypixelUtil.isGameStarting() && HypixelUtil.isInGame("SKYWARS")) {
+                        ChatUtil.printChat("Phase pos B " + (int) mc.thePlayer.posY);
+                        phasePosY = mc.thePlayer.posY;
+                        hypixelLag = false;
+                    } else {
+                        hypixelLag = true;
+                    }
+                }
+
+                if (!HypixelUtil.isGameStarting() && HypixelUtil.isInGame("SKYWARS") && phasePosY != -1) {
+                    ChatUtil.printChat("Reset phase pos");
+                    phasePosY = -1;
+                    hypixelLag = false;
+                }
+
+                    /*
+                    Team skywars cage check
+                     */
+                if ((HypixelUtil.scoreboardContains("start 0:0") && HypixelUtil.isInGame("SKYWARS") && HypixelUtil.scoreboardContains("teams left")) && phasePosY == -1) {
+                    ChatUtil.printChat("Phase pos C " + (int) mc.thePlayer.posY);
+                    phasePosY = mc.thePlayer.posY;
+                }
+            }
+
             List<Entity> validPlayers = mc.theWorld.getLoadedEntityList().stream().filter(o -> o instanceof EntityPlayer && o != mc.thePlayer && !AntiBot.isBot(o)).collect(Collectors.toList());
             for (Entity entityPlayer : validPlayers) {
                 EntityPlayer ent = (EntityPlayer) entityPlayer;
@@ -428,35 +533,9 @@ public class HackerDetect extends Module {
                  */
                 if (phase.getValue()) {
                     /*
-                    Initial y value
-                     */
-                    if (mc.thePlayer.ticksExisted == 30) {
-                        if (HypixelUtil.scoreboardContains("hypixel")) {
-                            phasePosY = mc.thePlayer.posY;
-                            hypixelLag = false;
-                        } else {
-                            hypixelLag = true;
-                        }
-                    }
-
-                    /*
-                    Lag check
-                     */
-                    if (hypixelLag) {
-                        if (HypixelUtil.isGameStarting() && HypixelUtil.isInGame("SKYWARS")) {
-                            phasePosY = mc.thePlayer.posY;
-                            hypixelLag = false;
-                        } else {
-                            hypixelLag = true;
-                        }
-                    }
-
-                    /*
                     Team skywars cage check
                      */
-                    if ((HypixelUtil.scoreboardContains("start 0:09") && HypixelUtil.isInGame("SKYWARS") && HypixelUtil.scoreboardContains("teams left"))) {
-                        phasePosY = mc.thePlayer.posY;
-                    } else if (!PriorityManager.isPriority(ent) && ent.ticksExisted > 40 && HypixelUtil.scoreboardContains("start") && HypixelUtil.isInGame("SKYWARS") && HypixelUtil.scoreboardContains("teams left")) {
+                    if (!PriorityManager.isPriority(ent) && ent.ticksExisted > 40 && HypixelUtil.scoreboardContains("start") && HypixelUtil.isInGame("SKYWARS") && HypixelUtil.scoreboardContains("teams left")) {
                         if (phasePosY - ent.posY > 4.5) {
                             Notifications.getManager().post("Hacker Detected", ent.getName() + " has phased out of their cage!", 7500, Notifications.Type.WARNING);
                             PriorityManager.setAsPriority(ent);
