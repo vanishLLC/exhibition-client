@@ -237,10 +237,10 @@ public class Angle {
         // Declare the variable.
         double violation = 0.0;
 
-        // If the average move is between 0 and 0.2 block(s), add it to the violation.
-
+        // Flag information variables
         double moveFlag = 0, timeFlag = 0, yawFlag = 0, switchFlag = 0;
 
+        // If the average move is between 0 and 0.2 block(s), add it to the violation.
         if (averageMove >= 0.0 && averageMove < 0.2D) {
             violation += moveFlag = 20.0 * (0.2 - averageMove) / 0.2;
         }
@@ -264,19 +264,17 @@ public class Angle {
 
         // Is the violation is superior to the threshold defined in the configuration?
         if (violation > 50) {
-            ChatUtil.printChat("\2474[\247cExhi NCP\2474] \247fFIGHT_ANGLE VL: \2477" + MathUtils.roundToPlace(violation, 1) +
+            ChatUtil.printChat("\2474[\247cExhi NCP\2474] \247fFIGHT_ANGLE VL: " + MathUtils.roundToPlace(angleVL, 1) + "(+" + MathUtils.roundToPlace(violation, 1) + ")" +
                     " \2478|\247f M: \2477" + MathUtils.roundToPlace(moveFlag, 1) +
                     " \2478|\247f T: \2477" + MathUtils.roundToPlace(timeFlag, 1) +
                     " \2478|\247f Y: \2477" + MathUtils.roundToPlace(yawFlag, 1) +
                     " \2478|\247f S: \2477" + MathUtils.roundToPlace(switchFlag, 1));
-            // Has the server lagged?
-            // TODO: 1.5 is a fantasy value.
-            // If it hasn't, increment the violation level.
+
             angleVL += violation;
 
             // Execute whatever actions are associated with this check and the violation level and find out if we should
             // cancel the event.
-            cancel = angleVL > 50;
+            cancel = angleVL > 100; // Note: Default NCP cancellation seems to be > 100 VL
         } else {
             // Reward the player by lowering their violation level.
             angleVL *= 0.98D;

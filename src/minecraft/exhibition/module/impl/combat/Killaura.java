@@ -574,7 +574,7 @@ public class Killaura extends Module {
                                         setupTick = 0;
                                     }
                                 } else if (critModule.isPacket() && HypixelUtil.isVerifiedHypixel() && mc.getCurrentServerData() != null && (mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net"))) {
-                                    boolean isAttacking = mc.thePlayer.getDistanceToEntity(target) <= (mc.thePlayer.canEntityBeSeen(target) ? range : 3.25F) && delay.roundDelay(50 * nextRandom);
+                                    boolean isAttacking = mc.thePlayer.getDistanceToEntity(target) <= (mc.thePlayer.canEntityBeSeen(target) ? range : 3) && delay.roundDelay(50 * nextRandom);
                                     boolean canAttackRightNow = (attack.equals("Always") && (!mc.thePlayer.onGround || (target.waitTicks <= 0 || target.hurtTime > 7))) ||
                                             (attack.equals("Precise") ? target.waitTicks <= 0 :
                                                     target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
@@ -646,7 +646,7 @@ public class Killaura extends Module {
 
                 double distance = mc.thePlayer.getDistance(target.posX + p[0], target.posY + p[1], target.posZ + p[2]);
 
-                boolean isAttacking = distance <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3.25F, distance)) && delay.roundDelay(50 * nextRandom);
+                boolean isAttacking = distance <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, distance)) && delay.roundDelay(50 * nextRandom);
 
                 boolean canAttackRightNow = attack.equals("Always") || (attack.equals("Precise") ? target.waitTicks <= 0 : target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
 
@@ -920,7 +920,7 @@ public class Killaura extends Module {
         double motionX = mc.thePlayer.posX - mc.thePlayer.lastTickPosX;
         double motionZ = mc.thePlayer.posZ - mc.thePlayer.lastTickPosZ;
 
-        double[][] offsets = new double[][]{new double[]{-0.35, -0.35}, new double[]{-0.35, 0.35}, new double[]{0.35, 0.35}, new double[]{0.35, -0.35}};
+        double[][] offsets = new double[][]{new double[]{-0.351, -0.351}, new double[]{-0.351, 0.351}, new double[]{0.351, 0.351}, new double[]{0.351, -0.351}};
         for (double[] offset : offsets) {
             double offsetX = offset[0];
             double offsetZ = offset[1];
@@ -1008,7 +1008,7 @@ public class Killaura extends Module {
         boolean armor = (Boolean) multi.getSetting(/*ARMOR*/decodeByteArray(new byte[]{65, 82, 77, 79, 82})).getValue();
 
         float range = ((Number) settings.get(RANGE).getValue()).floatValue();
-        float focusRange = range >= ((Number) blockRange.getValue()).floatValue() ? (mc.thePlayer.canEntityBeSeen(entity) ? range : 3.25F) : ((Number) blockRange.getValue()).floatValue();
+        float focusRange = range >= ((Number) blockRange.getValue()).floatValue() ? (mc.thePlayer.canEntityBeSeen(entity) ? range : 3) : ((Number) blockRange.getValue()).floatValue();
         if ((mc.thePlayer.getHealth() > 0) && (entity.getHealth() > 0 && !entity.isDead) || Float.isNaN(entity.getHealth())) {
             boolean raytrace = (!((Boolean) settings.get(RAYTRACE).getValue())) || (mc.thePlayer.canEntityBeSeen(entity));
             if (mc.thePlayer.getDistanceToEntity(entity) <= focusRange && raytrace && entity.ticksExisted > ((Number) settings.get(TICK).getValue()).intValue()) {
@@ -1048,7 +1048,7 @@ public class Killaura extends Module {
             loaded.sort(Comparator.comparingDouble(o -> (Math.abs(RotationUtils.getYawChange(o.posX, o.posZ)))));
         } else if (current.equalsIgnoreCase(/*Angle*/ decodeByteArray(new byte[]{65, 110, 103, 108, 101}))) {
             loaded.sort(Comparator.comparingDouble(o -> o.getDistanceToEntity(mc.thePlayer)));
-            loaded.sort(Comparator.comparingDouble(o -> RotationUtils.getRotations(o)[0]));
+            loaded.sort(Comparator.comparingDouble(o -> MathUtils.roundToPlace(RotationUtils.getRotations(o)[0], 15)));
         } else if (current.equalsIgnoreCase(/*Armor*/ decodeByteArray(new byte[]{65, 114, 109, 111, 114}))) {
             loaded.sort(Comparator.comparingInt(o -> (o instanceof EntityPlayer ? ((EntityPlayer) o).inventory.getTotalArmorValue() : (int) o.getHealth())));
         }
