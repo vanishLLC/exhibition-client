@@ -181,7 +181,7 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
                     add(new ClickTP(new ModuleData(Player, "ClickTP", "Teleports to your clicked position.")));
                     add(new ChatFilter(new ModuleData(Other, "ChatFilter", "Filters the chat in The Pit.")));
                     add(new AntiObby(new ModuleData(Player, "AntiObby", "Breaks the block under you when your head is in a block.")));
-                    add(new NetGraph(new ModuleData(Other, "NetGraph", "Shows incoming/outgoing network data.")));
+                    add(new NetGraph(new ModuleData(Other, "NetInfo", "Shows network information.")));
                     add(new StreamerMode(new ModuleData(Player, "StreamerMode", "Hides certain identifiable information.")));
 
                     if (Boolean.parseBoolean(System.getProperty("NEoBuMASs"))) {
