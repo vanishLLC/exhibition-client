@@ -8,7 +8,6 @@ import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.util.RenderingUtil;
 import exhibition.util.render.Colors;
-import exhibition.util.render.GLUtil;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.tileentity.TileEntityEnderChest;
@@ -16,8 +15,6 @@ import net.minecraft.tileentity.TileEntityLockable;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.Vec3;
 import org.lwjgl.opengl.GL11;
-
-import static org.lwjgl.opengl.GL11.GL_LIGHTING;
 
 public class ChestESP extends Module {
 

@@ -63,7 +63,7 @@ public class AutoArmor extends Module {
         swapped = false;
 
         Killaura k = (Killaura) Client.getModuleManager().get(Killaura.class);
-        boolean attacking = (boolean) attackCheck.getValue() && k.isEnabled() && Killaura.target != null;
+        boolean attacking = (boolean) attackCheck.getValue() && k.isEnabled() && Killaura.getTarget() != null;
         if (mc.thePlayer != null && (mc.currentScreen == null || mc.currentScreen instanceof GuiChat || mc.currentScreen instanceof GuiInventory)) {
             int slotID = -1;
             double maxProt = -1.0D;

@@ -17,7 +17,6 @@ import exhibition.util.HypixelUtil;
 import exhibition.util.NetUtil;
 import exhibition.util.PlayerUtil;
 import exhibition.util.Timer;
-import exhibition.util.misc.ChatUtil;
 import exhibition.util.security.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -126,7 +125,7 @@ public class AutoPot extends Module {
                     }
                 }
 
-                boolean goodPot = !smartPot.getValue() || (shouldSplash && !shouldHeal) ? (Killaura.target == null || mc.thePlayer.hurtResistantTime <= 3) : (Killaura.target == null || (Killaura.target.hurtTime > 5 || Killaura.target.waitTicks >= 5));
+                boolean goodPot = !smartPot.getValue() || (shouldSplash && !shouldHeal) ? (Killaura.getTarget() == null || mc.thePlayer.hurtResistantTime <= 3) : (Killaura.getTarget() == null || (Killaura.getTarget().hurtTime > 5 || Killaura.getTarget().waitTicks >= 5));
 
                 if (shouldSplash && potionSlot != -1 && timer.delay(delay) && goodPot) {
                     boolean noMovement = false;

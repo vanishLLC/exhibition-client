@@ -28,10 +28,10 @@ public class Step extends Module {
 
     private double[] offsets;
     private int ticks = 0;
-    private Setting timer = new Setting("TIMER", (Object) false, "Timer (Helps bypass)");
-    private Setting stepHeight = new Setting("HEIGHT", 1, "The height you step.", 0.5, 1.0, 2.0);
-    private Setting delay = new Setting("DELAY", 150, "The delay that must pass before you step again.", 50, 0, 500);
-    private Setting speedCheck = new Setting("SPEED-CHECK", false, "Disables step when using Speed.");
+    private Setting timer = new Setting<>("TIMER", false, "Timer (Helps bypass)");
+    private Setting stepHeight = new Setting<>("HEIGHT", 1, "The height you step.", 0.5, 1.0, 2.0);
+    private Setting delay = new Setting<>("DELAY", 150, "The delay that must pass before you step again.", 50, 0, 500);
+    private Setting speedCheck = new Setting<>("SPEED-CHECK", false, "Disables step when using Speed.");
 
     private Timer stepTimer = new Timer();
 

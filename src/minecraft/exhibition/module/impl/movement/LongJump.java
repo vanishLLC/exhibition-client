@@ -19,7 +19,6 @@ import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.combat.AutoPot;
 import exhibition.module.impl.player.Scaffold;
 import exhibition.util.*;
-import exhibition.util.misc.ChatUtil;
 import exhibition.util.render.Colors;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.entity.player.PlayerCapabilities;
@@ -31,8 +30,6 @@ import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.BlockPos;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;

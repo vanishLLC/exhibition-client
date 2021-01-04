@@ -83,7 +83,7 @@ public class AntiAim extends Module {
             }
 
             EventMotionUpdate em = (EventMotionUpdate) event;
-            if (em.isPre() && Killaura.target == null) {
+            if (em.isPre() && Killaura.getTarget() == null) {
                 if (lastAngles == null) {
                     lastAngles = new float[]{mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch};
                 }

@@ -532,7 +532,6 @@ public class RenderingUtil {
         final Tessellator tessellator = Tessellator.getInstance();
         final WorldRenderer worldrender = Tessellator.getInstance().getWorldRenderer();
         GL11.glPushMatrix();
-
         GL11.glBegin(GL_QUADS);
         GL11.glVertex3d(axisalignedbb.minX, axisalignedbb.minY, axisalignedbb.minZ);
         GL11.glVertex3d(axisalignedbb.minX, axisalignedbb.maxY, axisalignedbb.minZ);
@@ -583,9 +582,6 @@ public class RenderingUtil {
         GL11.glVertex3d(axisalignedbb.maxX, axisalignedbb.maxY, axisalignedbb.maxZ);
         GL11.glVertex3d(axisalignedbb.maxX, axisalignedbb.minY, axisalignedbb.maxZ);
         GL11.glEnd();
-
-
-
         GL11.glPopMatrix();
     }
 

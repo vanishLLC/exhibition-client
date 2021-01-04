@@ -98,13 +98,13 @@ public class TargetStrafe extends Module {
             EventMotionUpdate em = event.cast();
             if (em.isPre()) {
                 setSuffix(pathMode.getSelected());
-                target = Killaura.target;
+                target = Killaura.getTarget();
                 if (target == null)
                     for (Entity entity : mc.theWorld.getLoadedEntityList().stream().filter(Entity::isPlayerMP).sorted(Comparator.comparingDouble(o -> -o.getDistanceToEntity(mc.thePlayer))).collect(Collectors.toList())) {
                         if (entity instanceof EntityPlayer && entity != mc.thePlayer && !AntiBot.isBot(entity) && !FriendManager.isFriend(entity.getName())) {
                             EntityPlayer ent = (EntityPlayer) entity;
                             boolean nearest = targetMode.getSelected().equalsIgnoreCase("Nearby");
-                            if ((nearest || (targetMode.getSelected().equals("Priority") && TargetESP.isPriority(ent)) || (targetMode.getSelected().equals("Aura Only") && Killaura.target == ent)) && mc.thePlayer.getDistanceToEntity(ent) <= range && (!(boolean) teams.getValue() || !TeamUtils.isTeam(mc.thePlayer, ent))) {
+                            if ((nearest || (targetMode.getSelected().equals("Priority") && TargetESP.isPriority(ent)) || (targetMode.getSelected().equals("Aura Only") && Killaura.getTarget() == ent)) && mc.thePlayer.getDistanceToEntity(ent) <= range && (!(boolean) teams.getValue() || !TeamUtils.isTeam(mc.thePlayer, ent))) {
                                 target = ent;
                                 if (ent != Killaura.vip && magnet) {
                                     Killaura.vip = ent;

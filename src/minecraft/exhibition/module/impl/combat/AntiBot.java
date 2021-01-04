@@ -259,7 +259,7 @@ public class AntiBot extends Module {
                                 mc.theWorld.getBlockState(new BlockPos(ent.lastTickPosX, ent.lastTickPosY - (motionYNormal < 0.1 ? 0.65 : 1.255), ent.lastTickPosZ)).getBlock().getMaterial() != Material.air)) ||
                                 isTouchingGround(ent)) && !mc.theWorld.getBlockState(new BlockPos(ent.posX, ent.posY + ent.getEyeHeight(), ent.posZ)).getBlock().isBlockNormalCube();
 
-                        if (Killaura.target != ent) {
+                        if (Killaura.getTarget() != ent) {
                             if (onGround) {
                                 int ticksOnGround = ticksOnGroundMap.getOrDefault(ent.getName(), 0);
                                 ticksOnGroundMap.put(ent.getName(), ticksOnGround + (motionY < 0.05 ? ent.isInvisible() ? 1 : ent.flagged == 1 ? 1 : 3 : 1));
@@ -307,7 +307,8 @@ public class AntiBot extends Module {
 
                                 invalid.add(ent);
 
-                                ticksOnGroundMap.put(ent.getName(), -20);
+                                int ticksOnGround = ticksOnGroundMap.getOrDefault(ent.getName(), 0);
+                                ticksOnGroundMap.put(ent.getName(), Math.max(ticksOnGround - 20, -20));
                             }
                         }
 

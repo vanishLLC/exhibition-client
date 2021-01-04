@@ -11,6 +11,8 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S02PacketChat;
 import net.minecraft.util.StringUtils;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 import java.util.PriorityQueue;
 
 public class AutoMath extends Module {
@@ -44,34 +46,17 @@ public class AutoMath extends Module {
             } else {
                 if (unformatted.contains("Solve: ")) {
                     String calculate = unformatted.split("Solve: ")[1];
-
-                    String[] inputs = new String[]{"+", "x"};
-
-                    for (String input : inputs) {
-                        if (calculate.contains(input)) {
-                            try {
-                                String[] split = calculate.split(input);
-                                int a = Integer.parseInt(split[0].trim());
-                                int b = Integer.parseInt(split[0].trim());
-                                switch (input) {
-                                    case "+": {
-                                        chatQueue.add(String.valueOf(a + b));
-                                        break;
-                                    }
-                                    case "x": {
-                                        chatQueue.add(String.valueOf(a * b));
-                                        break;
-                                    }
-                                }
-                                chatDelay.reset();
-                            } catch (Exception ignored) {
-
-                            }
-                        }
+                    try {
+                        ScriptEngineManager mgr = new ScriptEngineManager();
+                        ScriptEngine engine = mgr.getEngineByName("JavaScript");
+                        String result = String.valueOf(engine.eval(calculate.trim()));
+                        chatQueue.add(result);
+                        chatDelay.reset();
+                    } catch (Exception ignored) {
                     }
-                    listen = false;
                 }
             }
+            listen = false;
         }
     }
 }

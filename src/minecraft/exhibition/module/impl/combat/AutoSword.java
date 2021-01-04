@@ -111,7 +111,7 @@ public class AutoSword extends Module {
                     for (int i = 36; i < 45; i++)
                         if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
                             Item item = mc.thePlayer.inventoryContainer.getSlot(i).getStack().getItem();
-                            if (item instanceof ItemSword && (Killaura.target != null || !Killaura.loaded.isEmpty())) {
+                            if (item instanceof ItemSword && (Killaura.getTarget() != null || !Killaura.loaded.isEmpty())) {
                                 mc.thePlayer.inventory.currentItem = i - 36;
                                 mc.playerController.updateController();
                                 break;

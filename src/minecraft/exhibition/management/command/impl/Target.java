@@ -33,10 +33,23 @@ public class Target extends Command {
                 ChatUtil.printChat(chatPrefix + "Target entity cleared!");
                 return;
             }
-            if(name.equalsIgnoreCase("clear")) {
-                Killaura.vip = null;
+            if (name.equalsIgnoreCase("clear")) {
                 PriorityManager.clearPriorityList();
                 ChatUtil.printChat(chatPrefix + "Priority list cleared!");
+                return;
+            }
+            if (name.equalsIgnoreCase("add")) {
+                if(args.length == 2) {
+                    String vip = args[1];
+                    if (!PriorityManager.isPriority(vip)) {
+                        ChatUtil.printChat(chatPrefix + "Added \247f" + vip + "\2478 to the Priority list.");
+                    } else {
+                        PriorityManager.removePriority(vip);
+                        ChatUtil.printChat(chatPrefix + "Removed \247f" + vip + "\2478 from the Priority list.");
+                    }
+                } else {
+                    ChatUtil.printChat(chatPrefix + "\247cPlease enter a valid name.");
+                }
                 return;
             }
             if (mc.theWorld.getPlayerEntityByName(name) != null) {

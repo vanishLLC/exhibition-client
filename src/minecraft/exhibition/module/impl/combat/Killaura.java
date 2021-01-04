@@ -87,7 +87,7 @@ public class Killaura extends Module {
 
     private Options attackMode = new Options("Attack Mode", "Smart", "Precise", "Smart", "Always");
 
-    private HashMap<EntityLivingBase, EntityDelta> deltaHashMap = new HashMap<>();
+    private final HashMap<EntityLivingBase, EntityDelta> deltaHashMap = new HashMap<>();
 
     public static List<EntityLivingBase> loaded = new CopyOnWriteArrayList<>();
     private int index;
@@ -160,10 +160,14 @@ public class Killaura extends Module {
     }
 
     public static boolean isBlocking;
-    public static EntityLivingBase target;
+    private static EntityLivingBase target;
     public static EntityLivingBase vip;
     static boolean allowCrits;
     public static boolean wantsToStep;
+
+    public static synchronized EntityLivingBase getTarget() {
+        return target;
+    }
 
     @Override
     public Priority getPriority() {
@@ -185,7 +189,9 @@ public class Killaura extends Module {
         wantsToStep = false;
         wantedToJump = false;
         wait = -1;
-        target = null;
+        synchronized (Killaura.class) {
+            target = null;
+        }
         stepDelay = -2;
         setupTick = 0;
 
@@ -206,7 +212,9 @@ public class Killaura extends Module {
         wantsToStep = false;
         wantedToJump = false;
         wait = 0;
-        target = null;
+        synchronized (Killaura.class) {
+            target = null;
+        }
         stepDelay = -2;
         setupTick = 0;
     }
@@ -214,7 +222,9 @@ public class Killaura extends Module {
     @Override
     public void onToggle() {
         critWaitTicks = 0;
-        target = null;
+        synchronized (Killaura.class) {
+            target = null;
+        }
         loaded.clear();
     }
 
@@ -282,11 +292,13 @@ public class Killaura extends Module {
             boolean crits = (Client.getModuleManager().isEnabled(Criticals.class) && critWaitTicks <= 0) && (!Client.getModuleManager().isEnabled(Speed.class) && !Client.getModuleManager().isEnabled(Fly.class) && !Client.getModuleManager().isEnabled(LongJump.class));
             if (crits) {
                 if (step.isPre() && stepDelay > 0) {
+                    ChatUtil.printChat("WAnts to step");
                     Killaura.wantsToStep = true;
                     event.setCancelled(true);
                     step.setActive(false);
                 }
                 if (!step.isPre()) {
+                    critWaitTicks = 2;
                     Killaura.wantsToStep = false;
                 }
             }
@@ -352,7 +364,9 @@ public class Killaura extends Module {
             }
             if ((Boolean) settings.get(DEATH).getValue()) {
                 if (!mc.thePlayer.isEntityAlive() && !disabled) {
-                    target = null;
+                    synchronized (Killaura.class) {
+                        target = null;
+                    }
                     loaded.clear();
                     toggle();
                     deathTimer.reset();
@@ -375,7 +389,8 @@ public class Killaura extends Module {
 
         float range = ((Number) settings.get(RANGE).getValue()).floatValue();
         boolean crits = (critModule.isEnabled() && critWaitTicks <= 0) &&
-                ((!Client.getModuleManager().isEnabled(Speed.class) || (mc.thePlayer.onGround && !PlayerUtil.isMoving())) && !Client.getModuleManager().isEnabled(Fly.class) && !Client.getModuleManager().isEnabled(LongJump.class)) && !(Client.getModuleManager().isEnabled(Jesus.class) && PlayerUtil.isOnLiquid());
+                ((!Client.getModuleManager().isEnabled(Speed.class) || (mc.thePlayer.onGround && !PlayerUtil.isMoving())) && !Client.getModuleManager().isEnabled(Fly.class) && !Client.getModuleManager().isEnabled(LongJump.class)) &&
+                !(Client.getModuleManager().isEnabled(Jesus.class) && PlayerUtil.isOnLiquid());
         String attack = attackMode.getSelected();
         if (true) {
             boolean single = maxTargets == 1;
@@ -423,7 +438,7 @@ public class Killaura extends Module {
                         switchTimer.reset();
                     }
 
-                    if (target == null) {
+                    if (target == null || single) {
                         target = loaded.get(single ? 0 : Math.min(loaded.size() - 1, index));
                     }
 
@@ -438,7 +453,9 @@ public class Killaura extends Module {
                                 if (!isBlocking)
                                     blockTimer.reset();
                                 lastAngles.x = mc.thePlayer.rotationYaw;
-                                target = null;
+                                synchronized (Killaura.class) {
+                                    target = null;
+                                }
                                 deltaHashMap.clear();
                                 wait = 0;
                                 setupTick = 0;
@@ -550,20 +567,21 @@ public class Killaura extends Module {
                                             (attack.equals("Precise") ? target.waitTicks <= 1 :
                                                     target.waitTicks <= 1 || (target.hurtResistantTime <= 11 && target.hurtResistantTime >= 6) || target.hurtTime > 6);
 
-                                    if (canAttackRightNow && isNextTickGround() && !Client.instance.isLagging()) {
-                                        if (setupTick == 0 && setupCrits && (!wantsToStep || stepDelay < 0)) {
+                                    if (canAttackRightNow && isNextTickGround() && !Client.instance.isLagging() && (!wantsToStep || stepDelay < 0)) {
+                                        if (setupTick == 0 && setupCrits) {
                                             if (mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {
-                                                stepDelay = 1;
-                                                isCritSetup = false;
+                                                stepDelay = 2;
                                                 blockJump = true;
                                                 em.setY(em.getY() + 0.07840000152587834 + (0.0000023423F) * Math.random());
                                                 em.setGround(false);
+                                                em.setForcePos(true);
+                                                isCritSetup = false;
                                                 setupTick = 1;
                                             }
                                         } else if (setupTick == 1) {
                                             if ((em.getY() == mc.thePlayer.posY && em.isOnground())) {
                                                 isCritSetup = true;
-                                                em.setY(em.getY() + +0.0076092939542 - (0.0000000002475776F) * Math.random());
+                                                em.setY(em.getY() + 0.0076092939542 - (0.0000000002475776F) * Math.random());
                                                 em.setGround(false);
                                                 setupTick = 0;
                                             } else {
@@ -610,8 +628,11 @@ public class Killaura extends Module {
                         blockTimer.reset();
                     lastAngles.x = mc.thePlayer.rotationYaw;
                     deltaHashMap.clear();
-                    target = null;
+                    synchronized (Killaura.class) {
+                        target = null;
+                    }
                     wait = 0;
+                    stepDelay = 0;
                     setupTick = 0;
                 }
 
@@ -1060,6 +1081,7 @@ public class Killaura extends Module {
 
     private List<EntityLivingBase> getTargets() {
         List<EntityLivingBase> targets = new ArrayList<>();
+        boolean priorityOnly = false;
         for (Object o : mc.theWorld.getLoadedEntityList()) {
             if (o instanceof EntityLivingBase) {
                 EntityLivingBase entity = (EntityLivingBase) o;
@@ -1070,11 +1092,13 @@ public class Killaura extends Module {
                         return targets;
                     }
                     if (entity instanceof EntityPlayer && PriorityManager.isPriority((EntityPlayer) entity)) {
-                        targets.clear();
+                        if (!priorityOnly)
+                            targets.clear();
+                        priorityOnly = true;
                         targets.add(entity);
-                        return targets;
                     }
-                    targets.add(entity);
+                    if (!priorityOnly)
+                        targets.add(entity);
                 }
             }
         }

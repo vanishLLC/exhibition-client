@@ -116,7 +116,7 @@ public class ChestStealer extends Module {
             if (!mc.thePlayer.capabilities.allowEdit)
                 return;
 
-            if ((Boolean) settings.get(CHESTAURA).getValue() && (mc.currentScreen == null) && !isStealing && Killaura.loaded.isEmpty() && Killaura.target == null && (!HypixelUtil.isInGame("SKYWARS") || HypixelUtil.isGameActive())) {
+            if ((Boolean) settings.get(CHESTAURA).getValue() && (mc.currentScreen == null) && !isStealing && Killaura.loaded.isEmpty() && Killaura.getTarget() == null && (!HypixelUtil.isInGame("SKYWARS") || HypixelUtil.isGameActive())) {
                 if (stealTimer.delay(2000) && isStealing) {
                     stealTimer.reset();
                     isStealing = false;

@@ -64,7 +64,7 @@ public class AutoFish extends Module {
                     for (int i = 36; i < 45; i++)
                         if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
                             Item item = mc.thePlayer.inventoryContainer.getSlot(i).getStack().getItem();
-                            if (item instanceof ItemFishingRod && Killaura.target == null && Killaura.loaded.isEmpty()) {
+                            if (item instanceof ItemFishingRod && Killaura.getTarget() == null && Killaura.loaded.isEmpty()) {
                                 mc.getNetHandler().addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem = i - 36));
                                 mc.playerController.updateController();
                                 return;

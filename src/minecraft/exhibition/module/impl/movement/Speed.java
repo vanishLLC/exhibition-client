@@ -368,7 +368,7 @@ public class Speed extends Module {
                     }
                     double e = MathUtils.roundToPlace(mc.thePlayer.posY - (int) mc.thePlayer.posY, 3);
                     boolean didthebruh = false;
-                    if (lowhop.getValue() && !mc.gameSettings.keyBindJump.getIsKeyPressed() && ((boolean) lowhopTarget.getValue() || Killaura.target == null) && !mc.thePlayer.isPotionActive(Potion.jump) && em.getY() > 0 && !mc.thePlayer.isCollidedHorizontally &&
+                    if (lowhop.getValue() && !PlayerUtil.isInLiquid() && !mc.gameSettings.keyBindJump.getIsKeyPressed() && ((boolean) lowhopTarget.getValue() || Killaura.getTarget() == null) && !mc.thePlayer.isPotionActive(Potion.jump) && em.getY() > 0 && !mc.thePlayer.isCollidedHorizontally &&
                             (e == MathUtils.roundToPlace(0.42, 3) ||
                                     e == MathUtils.roundToPlace(0.92, 3) ||
                                     e == MathUtils.roundToPlace(0.545, 3) ||
