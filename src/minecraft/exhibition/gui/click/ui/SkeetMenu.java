@@ -1111,7 +1111,7 @@ public class SkeetMenu extends UI {
                         if (module.getName().equalsIgnoreCase("ChatFilter")) {
                             yOff -= 52.5 - 4;
                         }
-                        if (module.getName().equalsIgnoreCase("NetGraph")) {
+                        if (module.getName().equalsIgnoreCase("NetInfo")) {
                             //xOff = 50 + categoryButton.panel.x + 95;
                             yOff -= 38;
                         }

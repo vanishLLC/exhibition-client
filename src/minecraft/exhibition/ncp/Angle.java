@@ -156,23 +156,29 @@ public class Angle {
         // Declare the variable.
         double violation = 0.0;
 
+        // Flag information variables
+        double moveFlag = 0, timeFlag = 0, yawFlag = 0, switchFlag = 0;
+
         // If the average move is between 0 and 0.2 block(s), add it to the violation.
         if (averageMove >= 0.0 && averageMove < 0.2D) {
-            violation += 20.0 * (0.2 - averageMove) / 0.2;
+            violation += moveFlag = 20.0 * (0.2 - averageMove) / 0.2;
         }
 
         // If the average time elapsed is between 0 and 150 millisecond(s), add it to the violation.
         if (averageTime >= 0.0 && averageTime < 150.0) {
-            violation += 30.0 * (150.0 - averageTime) / 150.0;
+            violation += timeFlag = 30.0 * (150.0 - averageTime) / 150.0;
+            //ChatUtil.printChat("Flagged Time " + violation);
         }
 
         // If the average difference of yaw is superior to 50 degrees, add it to the violation.
         if (averageYaw > 50.0) {
-            violation += 30.0 * averageYaw / 180.0;
+            violation += yawFlag = 30.0 * averageYaw / 180.0;
+            //ChatUtil.printChat("Flagged Yaw " + violation);
         }
 
         if (averageSwitching > 0.0) {
-            violation += 20.0 * averageSwitching;
+            violation += switchFlag = 20.0 * averageSwitching;
+            //ChatUtil.printChat("Flagged Switching " + violation);
         }
 
         return violation > 50;

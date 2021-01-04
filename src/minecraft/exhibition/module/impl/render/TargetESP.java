@@ -84,7 +84,7 @@ public class TargetESP extends Module {
             return true;
         if (PriorityManager.isPriority(player))
             return true;
-        if(Client.getModuleManager().isEnabled(TargetESP.class) && player.getDisplayName().getFormattedText().contains("0g")) {
+        if(Client.getModuleManager().isEnabled(TargetESP.class) && (player.getDisplayName().getFormattedText().contains("0g") || player.getDisplayName().getFormattedText().contains("5g"))) {
             if (player.getDisplayName().getFormattedText().contains(" \2476\247l")) {
                 return true;
             }

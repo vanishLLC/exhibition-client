@@ -292,7 +292,6 @@ public class Killaura extends Module {
             boolean crits = (Client.getModuleManager().isEnabled(Criticals.class) && critWaitTicks <= 0) && (!Client.getModuleManager().isEnabled(Speed.class) && !Client.getModuleManager().isEnabled(Fly.class) && !Client.getModuleManager().isEnabled(LongJump.class));
             if (crits) {
                 if (step.isPre() && stepDelay > 0) {
-                    ChatUtil.printChat("WAnts to step");
                     Killaura.wantsToStep = true;
                     event.setCancelled(true);
                     step.setActive(false);
@@ -592,7 +591,7 @@ public class Killaura extends Module {
                                         setupTick = 0;
                                     }
                                 } else if (critModule.isPacket() && HypixelUtil.isVerifiedHypixel() && mc.getCurrentServerData() != null && (mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net"))) {
-                                    boolean isAttacking = mc.thePlayer.getDistanceToEntity(target) <= (mc.thePlayer.canEntityBeSeen(target) ? range : 3) && delay.roundDelay(50 * nextRandom);
+                                    boolean isAttacking = mc.thePlayer.getDistanceToEntity(target) <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && delay.roundDelay(50 * nextRandom);
                                     boolean canAttackRightNow = (attack.equals("Always") && (!mc.thePlayer.onGround || (target.waitTicks <= 0 || target.hurtTime > 7))) ||
                                             (attack.equals("Precise") ? target.waitTicks <= 0 :
                                                     target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
@@ -667,7 +666,7 @@ public class Killaura extends Module {
 
                 double distance = mc.thePlayer.getDistance(target.posX + p[0], target.posY + p[1], target.posZ + p[2]);
 
-                boolean isAttacking = distance <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, distance)) && delay.roundDelay(50 * nextRandom);
+                boolean isAttacking = distance <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && delay.roundDelay(50 * nextRandom);
 
                 boolean canAttackRightNow = attack.equals("Always") || (attack.equals("Precise") ? target.waitTicks <= 0 : target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
 
@@ -694,8 +693,9 @@ public class Killaura extends Module {
                         }
 
                         boolean alreadyReset = false;
+                        boolean willViolate = Angle.INSTANCE.willViolateYaw(new Location(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, em.getYaw(), 0), target);
 
-                        if (canAttackRightNow && shouldAttack) {
+                        if (canAttackRightNow && shouldAttack && (!reduce.getValue() || !HypixelUtil.isInGame("PIT") || !willViolate)) {
                             if (!(boolean) noswing.getValue())
                                 mc.thePlayer.swingItem();
 
@@ -1029,7 +1029,7 @@ public class Killaura extends Module {
         boolean armor = (Boolean) multi.getSetting(/*ARMOR*/decodeByteArray(new byte[]{65, 82, 77, 79, 82})).getValue();
 
         float range = ((Number) settings.get(RANGE).getValue()).floatValue();
-        float focusRange = range >= ((Number) blockRange.getValue()).floatValue() ? (mc.thePlayer.canEntityBeSeen(entity) ? range : 3) : ((Number) blockRange.getValue()).floatValue();
+        float focusRange = range >= ((Number) blockRange.getValue()).floatValue() ? (mc.thePlayer.canEntityBeSeen(entity) ? range : Math.min(3, range)) : ((Number) blockRange.getValue()).floatValue();
         if ((mc.thePlayer.getHealth() > 0) && (entity.getHealth() > 0 && !entity.isDead) || Float.isNaN(entity.getHealth())) {
             boolean raytrace = (!((Boolean) settings.get(RAYTRACE).getValue())) || (mc.thePlayer.canEntityBeSeen(entity));
             if (mc.thePlayer.getDistanceToEntity(entity) <= focusRange && raytrace && entity.ticksExisted > ((Number) settings.get(TICK).getValue()).intValue()) {

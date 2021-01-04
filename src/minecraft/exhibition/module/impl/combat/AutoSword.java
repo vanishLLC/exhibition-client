@@ -24,6 +24,7 @@ public class AutoSword extends Module {
     private String SWAP = "SWAP";
     private String GAPPLES = "GAPPLES";
     private Setting<Boolean> useSwap = new Setting<>("USE-SWAP", false, "Swaps to your sword even if you are using an item/eating.");
+    private Setting<Boolean> replace = new Setting<>("REPLACE", false, "Swaps to your sword even if you are using an item/eating.");
 
     public AutoSword(ModuleData data) {
         super(data);

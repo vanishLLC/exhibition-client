@@ -107,7 +107,7 @@ public class AutoSoup extends Module {
                 boolean shouldApple = (boolean) settings.get(HEADS).getValue() && (((Item.getIdFromItem(item) == Item.getIdFromItem(Items.skull) ||
                         Item.getIdFromItem(item) == Item.getIdFromItem(Items.baked_potato) ||
                         Item.getIdFromItem(item) == Item.getIdFromItem(Items.magma_cream)) &&
-                        (!mc.thePlayer.isPotionActive(Potion.regeneration) || !mc.thePlayer.isPotionActive(Potion.absorption) ||
+                        (!mc.thePlayer.isPotionActive(Potion.regeneration) || (mc.thePlayer.getAbsorptionAmount() <= 0) ||
                                 (mc.thePlayer.isPotionActive(Potion.regeneration) && mc.thePlayer.getActivePotionEffect(Potion.regeneration).getDuration() < 5))) || shouldMutton);
                 if (Item.getIdFromItem(item) == 282 || shouldApple) {
                     soup = i;

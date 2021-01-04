@@ -48,7 +48,7 @@ public class BedFucker extends Module {
                 teleported = null;
             }
 
-            if (teleported != null) {
+            if (HypixelUtil.isInGame("BED WARS") && teleported != null) {
                 if (mc.thePlayer.getDistance(teleported.getX(), mc.thePlayer.posY, teleported.getZ()) < 30) {
                     return;
                 }

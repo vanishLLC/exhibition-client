@@ -120,7 +120,7 @@ public class Nametags extends Module {
 
                         String str = ((boolean) distance.getValue() ? "\247a" + dist + "m\247r " : "") + playerName;
                         // System.out.println(str);
-                        str = str.replace(playerName, FriendManager.isFriend(ent.getName()) ? FriendManager.getAlias(ent.getName()) : "\247f" + playerName);
+                        str = str.replace(playerName, FriendManager.isFriend(ent.getName()) ? FriendManager.getAlias(ent.getName()) : "\247f\247l" + playerName);
 
                         if ((boolean) settings.get(BOTS).getValue() && AntiBot.isBot(ent)) {
                             boolean isNCP = str.contains("[NPC] ");
@@ -202,7 +202,7 @@ public class Nametags extends Module {
 
                         int color = Colors.getColor(255, (int) (255 * percentage));
 
-                        font.drawBorderedString(str, -strWidth / 2, -8.5F, color, Colors.getColor(0, (int) (190 * percentage)));
+                        font.drawBorderedString(str, -strWidth / 2, -8.5F, color, Colors.getColor(200, (int) (190 * percentage)));
 
                         if (!AntiBot.isBot(ent)) {
                             double y = -strWidth / 2 - 2;
