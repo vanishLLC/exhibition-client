@@ -563,7 +563,7 @@ public class Killaura extends Module {
                                         } else if (setupTick == 1) {
                                             if ((em.getY() == mc.thePlayer.posY && em.isOnground())) {
                                                 isCritSetup = true;
-                                                em.setY(em.getY() + +0.0076092939542 - (0.0000000002475776F) * Math.random());
+                                                em.setY(em.getY() + 0.00076092939542 - (0.0000000002475776F) * Math.random());
                                                 em.setGround(false);
                                                 setupTick = 0;
                                             } else {

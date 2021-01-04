@@ -9,6 +9,7 @@ import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.Options;
 import exhibition.module.data.settings.Setting;
+import exhibition.module.impl.movement.Fly;
 import exhibition.module.impl.movement.LongJump;
 import exhibition.module.impl.movement.Speed;
 import exhibition.util.NetUtil;
@@ -53,7 +54,7 @@ public class Criticals extends Module {
             if (packet2 instanceof C02PacketUseEntity) {
                 C02PacketUseEntity packet = (C02PacketUseEntity) packet2;
                 if (packet.getAction() == C02PacketUseEntity.Action.ATTACK && mc.thePlayer.isCollidedVertically && Killaura.allowCrits) {
-                    if (Client.getModuleManager().isEnabled(LongJump.class) || Client.getModuleManager().isEnabled(Speed.class))
+                    if (Client.getModuleManager().isEnabled(LongJump.class) || Client.getModuleManager().isEnabled(Speed.class) || Client.getModuleManager().isEnabled(Fly.class))
                         return;
                     if (((Options) settings.get(PACKET).getValue()).getSelected().equals("Packet")) {
                         doCrits();
