@@ -52,6 +52,7 @@ public class ChestStealer extends Module {
 
     private Setting<Options> silent = new Setting<>("MODE", mode, "Chest stealer mode.");
     private Setting<Boolean> randomMiss = new Setting<>("MISS", false, "Randomly miss clicks.");
+    private Setting<Boolean> rayTrace = new Setting<>("RAYTRACE", false, "Visible check for target.");
     private Setting<Boolean> tools = new Setting<>("TOOLS", false, "Takes better tools from chests.");
 
     private Timer timer = new Timer();
@@ -72,6 +73,7 @@ public class ChestStealer extends Module {
         settings.put(TRASH, new Setting<>(TRASH, true, "Ignores trash items in minigame servers."));
         addSetting(tools);
         addSetting(silent);
+        addSetting(rayTrace);
         addSetting(randomMiss);
     }
 
@@ -129,7 +131,7 @@ public class ChestStealer extends Module {
                             float y = chest.getPos().getY();
                             float z = chest.getPos().getZ();
                             if (Killaura.loaded.isEmpty() && chest.lidAngle < 1 && Math.abs(RotationUtils.getYawChange(x + 0.5, z + 0.5)) < 90) {
-                                if (mc.theWorld.rayTraceBlocks(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY + mc.thePlayer.getEyeHeight(), mc.thePlayer.posZ), new Vec3(x + 0.5, y + 0.9, z + 0.5)) == null) {
+                                if (!rayTrace.getValue() || mc.theWorld.rayTraceBlocks(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY + mc.thePlayer.getEyeHeight(), mc.thePlayer.posZ), new Vec3(x + 0.5, y + 0.9, z + 0.5)) == null) {
                                     if (!isStealing && !chest.isEmpty && mc.thePlayer.getDistance(x, y, z) < 4 && stealTimer.delay(1000) && mc.currentScreen == null) {
                                         this.chest = chest;
                                         isStealing = true;
