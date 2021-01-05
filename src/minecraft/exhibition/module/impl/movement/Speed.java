@@ -180,7 +180,7 @@ public class Speed extends Module {
 
             if (packet instanceof S27PacketExplosion) {
                 S27PacketExplosion velocity = (S27PacketExplosion) packet;
-                lastDist += Math.hypot(velocity.xMotion, velocity.zMotion)/3;
+                lastDist += Math.sqrt(velocity.xMotion * velocity.xMotion + velocity.zMotion * velocity.zMotion)/3;
             }
         }
         if (event instanceof EventStep && (boolean) step.getValue()) {
