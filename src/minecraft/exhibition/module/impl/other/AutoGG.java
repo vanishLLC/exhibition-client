@@ -37,23 +37,23 @@ public class AutoGG extends Module {
     public void onEvent(Event event) {
         EventPacket ep = event.cast();
         Packet castPacket = ep.getPacket();
-        if (chatDelay.delay(3000) && messageDelay.delay(((Number)settings.get("DELAY").getValue()).longValue()) && chatQueue.peek() != null) {
+        if (chatDelay.delay(3000) && messageDelay.delay(((Number) settings.get("DELAY").getValue()).longValue()) && chatQueue.peek() != null) {
             chatDelay.reset();
-            ((AutoPlay)Client.getModuleManager().get(AutoPlay.class)).resetTimer();
-            ((KillSults)Client.getModuleManager().get(KillSults.class)).resetTimer();
+            ((AutoPlay) Client.getModuleManager().get(AutoPlay.class)).resetTimer();
+            ((KillSults) Client.getModuleManager().get(KillSults.class)).resetTimer();
             String message = chatQueue.poll();
             ChatUtil.sendChat(message);
         }
-        if(castPacket instanceof S45PacketTitle) {
+        if (castPacket instanceof S45PacketTitle) {
             S45PacketTitle packet = ((S45PacketTitle) castPacket);
-            if(packet.getType().equals(S45PacketTitle.Type.TITLE)) {
+            if (packet.getType().equals(S45PacketTitle.Type.TITLE)) {
                 String text = packet.getMessage().getUnformattedText();
-                if(text.equals("VICTORY!") || text.endsWith("YOU WON!")) {
+                if (text.equals("VICTORY!") || text.endsWith("YOU WON!")) {
                     chatQueue.add("/achat " + settings.get("WORDS").getValue().toString());
                     messageDelay.reset();
-                } else if((text.equals("YOU DIED") || text.equals("GAME OVER")) && Client.getModuleManager().get(Killaura.class).isEnabled()) {
-                    Client.getModuleManager().get(Killaura.class).toggle();
-                    Notifications.getManager().post("Aura Death", "Aura disabled due to death.");
+                } else if (text.equals("GAME OVER") && Client.getModuleManager().get(Killaura.class).isEnabled()) {
+                    chatQueue.add("/achat gg");
+                    messageDelay.reset();
                 }
             }
         }

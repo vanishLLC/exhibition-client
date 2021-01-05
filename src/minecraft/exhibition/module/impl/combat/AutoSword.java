@@ -31,6 +31,7 @@ public class AutoSword extends Module {
         settings.put(SWAP, new Setting<>(SWAP, false, "Swaps to sword when attacking."));
         settings.put(GAPPLES, new Setting<>(GAPPLES, false, "Automatically moves gapples to the desired slot."));
         addSetting(useSwap);
+        addSetting(replace);
         settings.put("SLOT", new Setting<>("SLOT", 1, "Slot number to put your sword in.", 1, 1, 9));
         settings.put("GAPPLE-SLOT", new Setting<>("GAPPLE-SLOT", 1, "Slot number to put your gapples in.", 1, 1, 9));
     }
@@ -63,48 +64,50 @@ public class AutoSword extends Module {
         if (mc.currentScreen == null) {
             int slot = ((Number) settings.get("SLOT").getValue()).intValue() - 1;
 
-            boolean foundSword = false;
-            for (int i = 9; i < 45; i++)
-                if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
-                    Item item = mc.thePlayer.inventoryContainer.getSlot(i).getStack().getItem();
-                    if (item instanceof ItemSword) {
-                        float itemDamage = getAttackDamage(mc.thePlayer.inventoryContainer.getSlot(i).getStack());
-                        float currentDamage = getAttackDamage(mc.thePlayer.inventoryContainer.getSlot(36 + slot).getStack());
-                        if (itemDamage > currentDamage && (i - 36 != slot)) {
-                            foundSword = true;
-                            if (timer.delay(300)) {
-                                swap(i, slot);
-                                timer.reset();
-                                swapped = true;
-                                return;
-                            }
-                            break;
-                        }
-                    }
-                }
-
-            boolean foundGapple = false;
-            if ((boolean) settings.get(GAPPLES).getValue()) {
-                int gslot = ((Number) settings.get("GAPPLE-SLOT").getValue()).intValue() - 1;
-
+            if (replace.getValue()) {
+                boolean foundSword = false;
                 for (int i = 9; i < 45; i++)
                     if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
                         Item item = mc.thePlayer.inventoryContainer.getSlot(i).getStack().getItem();
-                        if (item instanceof ItemAppleGold && (!mc.thePlayer.inventoryContainer.getSlot(36 + gslot).getHasStack() || !(mc.thePlayer.inventoryContainer.getSlot(36 + gslot).getStack().getItem() instanceof ItemAppleGold))) {
-                            foundGapple = true;
-                            if (timer.delay(300)) {
-                                swap(i, gslot);
-                                timer.reset();
-                                swapped = true;
-                                return;
+                        if (item instanceof ItemSword) {
+                            float itemDamage = getAttackDamage(mc.thePlayer.inventoryContainer.getSlot(i).getStack());
+                            float currentDamage = getAttackDamage(mc.thePlayer.inventoryContainer.getSlot(36 + slot).getStack());
+                            if (itemDamage > currentDamage && (i - 36 != slot)) {
+                                foundSword = true;
+                                if (timer.delay(300)) {
+                                    swap(i, slot);
+                                    timer.reset();
+                                    swapped = true;
+                                    return;
+                                }
+                                break;
                             }
-                            break;
                         }
                     }
-            }
 
-            if (!foundSword && !foundGapple) {
-                timer.reset();
+                boolean foundGapple = false;
+                if ((boolean) settings.get(GAPPLES).getValue()) {
+                    int gslot = ((Number) settings.get("GAPPLE-SLOT").getValue()).intValue() - 1;
+
+                    for (int i = 9; i < 45; i++)
+                        if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
+                            Item item = mc.thePlayer.inventoryContainer.getSlot(i).getStack().getItem();
+                            if (item instanceof ItemAppleGold && (!mc.thePlayer.inventoryContainer.getSlot(36 + gslot).getHasStack() || !(mc.thePlayer.inventoryContainer.getSlot(36 + gslot).getStack().getItem() instanceof ItemAppleGold))) {
+                                foundGapple = true;
+                                if (timer.delay(300)) {
+                                    swap(i, gslot);
+                                    timer.reset();
+                                    swapped = true;
+                                    return;
+                                }
+                                break;
+                            }
+                        }
+                }
+
+                if (!foundSword && !foundGapple) {
+                    timer.reset();
+                }
             }
 
             if ((boolean) settings.get(SWAP).getValue() && mc.thePlayer.inventory.currentItem != slot && !AutoSoup.isHealing && !AutoPot.potting) {
