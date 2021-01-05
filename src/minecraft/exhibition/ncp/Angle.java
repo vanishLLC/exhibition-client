@@ -117,11 +117,11 @@ public class Angle {
         long deltaTime = 0L;
         float deltaYaw = 0f;
         int deltaSwitchTarget = 0;
-        final Iterator<AttackLocation> it = angleHits.iterator();
+        final Iterator<AttackLocation> it = tempAttack.iterator();
         while (it.hasNext()) {
             final AttackLocation refLoc = it.next();
             if (time - refLoc.time > maxTimeDiff) {
-                it.remove();
+//                it.remove();
                 continue;
             }
             deltaMove += refLoc.distSqLast;
@@ -135,11 +135,11 @@ public class Angle {
         }
 
         // Check if there is enough data present.
-        if (angleHits.size() < 2) {
+        if (tempAttack.size() < 2) {
             return false;
         }
 
-        final double n = angleHits.size() - 1;
+        final double n = tempAttack.size() - 1;
 
         // Let's calculate the average move.
         final double averageMove = deltaMove / n;
@@ -181,7 +181,11 @@ public class Angle {
             //ChatUtil.printChat("Flagged Switching " + violation);
         }
 
-        return violation > 50;
+        if(violation > 50) {
+            return true;
+        }
+
+        return false;
 
     }
 

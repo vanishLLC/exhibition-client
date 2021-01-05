@@ -9,30 +9,39 @@ import exhibition.Client;
 import exhibition.event.Event;
 import exhibition.event.RegisterEvent;
 import exhibition.event.impl.*;
+import exhibition.management.friend.FriendManager;
 import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.UselessBypassClass;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.Options;
 import exhibition.module.data.settings.Setting;
+import exhibition.module.impl.combat.AntiBot;
 import exhibition.module.impl.combat.AutoPot;
 import exhibition.module.impl.combat.Criticals;
 import exhibition.module.impl.combat.Killaura;
 import exhibition.module.impl.player.Scaffold;
 import exhibition.util.MathUtils;
 import exhibition.util.PlayerUtil;
+import exhibition.util.misc.ChatUtil;
 import exhibition.util.render.Colors;
 import exhibition.util.render.Depth;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockAir;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
+import net.minecraft.network.play.server.S12PacketEntityVelocity;
+import net.minecraft.network.play.server.S27PacketExplosion;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.Vec3;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
@@ -166,6 +175,12 @@ public class Speed extends Module {
                 stage = -15;
                 speed = 0;
                 lastDist = 0;
+            }
+
+
+            if (packet instanceof S27PacketExplosion) {
+                S27PacketExplosion velocity = (S27PacketExplosion) packet;
+                lastDist += Math.hypot(velocity.xMotion, velocity.zMotion)/3;
             }
         }
         if (event instanceof EventStep && (boolean) step.getValue()) {
@@ -382,7 +397,8 @@ public class Speed extends Module {
                         return;
                     }
 
-                    double moveSpeed = speed = (defaultSpeed()) * ((mc.thePlayer.isInsideOfMaterial(Material.vine)) ? 0.5 : (mc.thePlayer.isSneaking()) ? 0.8 : (PlayerUtil.isInLiquid() ? 0.6 : ((mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.1, mc.thePlayer.posZ)).getBlock().slipperiness == 0.98f) ? 2.4 : 1.0)));;
+                    double moveSpeed = speed = (defaultSpeed()) * ((mc.thePlayer.isInsideOfMaterial(Material.vine)) ? 0.5 : (mc.thePlayer.isSneaking()) ? 0.8 : (PlayerUtil.isInLiquid() ? 0.6 : ((mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.1, mc.thePlayer.posZ)).getBlock().slipperiness == 0.98f) ? 2.4 : 1.0)));
+                    ;
 
                     if (stage == 1 && mc.thePlayer.isCollidedVertically && (mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f)) {
                         stage = 2;
@@ -463,7 +479,7 @@ public class Speed extends Module {
                         this.speed = list.get(2) - 0.0000125F;
 
                     }
-                    speed = Math.max(speed * (mc.thePlayer.hurtTime > 7 ? 1.05 : 1), moveSpeed);
+                    speed = Math.max(speed, moveSpeed);
 
                     //Stage checks if you're greater than 0 as step sets you -6 stage to make sure the player wont flag.
                     if (stage > 0) {
@@ -589,7 +605,8 @@ public class Speed extends Module {
                         return;
                     }
 
-                    double moveSpeed = speed = (defaultSpeed()) * ((mc.thePlayer.isInsideOfMaterial(Material.vine)) ? 0.5 : (mc.thePlayer.isSneaking()) ? 0.8 : (PlayerUtil.isInLiquid() ? 0.54 : ((mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.1, mc.thePlayer.posZ)).getBlock().slipperiness == 0.98f) ? 2.4 : 1.0)));;
+                    double moveSpeed = speed = (defaultSpeed()) * ((mc.thePlayer.isInsideOfMaterial(Material.vine)) ? 0.5 : (mc.thePlayer.isSneaking()) ? 0.8 : (PlayerUtil.isInLiquid() ? 0.54 : ((mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.1, mc.thePlayer.posZ)).getBlock().slipperiness == 0.98f) ? 2.4 : 1.0)));
+                    ;
 
                     if (stage == 1 && mc.thePlayer.isCollidedVertically && (mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f)) {
                         stage = 2;

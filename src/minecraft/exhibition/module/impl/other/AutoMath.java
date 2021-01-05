@@ -3,6 +3,7 @@ package exhibition.module.impl.other;
 import exhibition.event.Event;
 import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventPacket;
+import exhibition.management.command.Command;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.util.Timer;
@@ -39,24 +40,18 @@ public class AutoMath extends Module {
         if (packet instanceof S02PacketChat) {
             S02PacketChat packetChat = (S02PacketChat) packet;
             String unformatted = StringUtils.stripControlCodes(packetChat.getChatComponent().getUnformattedText());
-            if (!listen) {
-                if (unformatted.contains(" to answer gain ")) {
-                    listen = true;
-                }
-            } else {
-                if (unformatted.contains("Solve: ")) {
-                    String calculate = unformatted.split("Solve: ")[1];
-                    try {
-                        ScriptEngineManager mgr = new ScriptEngineManager();
-                        ScriptEngine engine = mgr.getEngineByName("JavaScript");
-                        String result = String.valueOf(engine.eval(calculate.trim()));
-                        chatQueue.add(result);
-                        chatDelay.reset();
-                    } catch (Exception ignored) {
-                    }
+            if (unformatted.contains("Solve: ")) {
+                String calculate = unformatted.split("Solve: ")[1];
+                try {
+                    ScriptEngineManager mgr = new ScriptEngineManager();
+                    ScriptEngine engine = mgr.getEngineByName("JavaScript");
+                    String result = String.valueOf(engine.eval(calculate.trim()));
+                    ChatUtil.printChat(Command.chatPrefix + "\247e" + result);
+                    chatQueue.add(result);
+                    chatDelay.reset();
+                } catch (Exception ignored) {
                 }
             }
-            listen = false;
         }
     }
 }

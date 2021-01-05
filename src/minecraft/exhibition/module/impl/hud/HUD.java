@@ -17,6 +17,7 @@ import exhibition.module.data.Options;
 import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.other.AutoSkin;
 import exhibition.module.impl.other.ChatCommands;
+import exhibition.ncp.Angle;
 import exhibition.util.HypixelUtil;
 import exhibition.util.MathUtils;
 import exhibition.util.RenderingUtil;
@@ -240,8 +241,8 @@ public class HUD extends Module {
         }
 
 //        String okbruh = Angle.INSTANCE.angleVL + " Angle VL | Size: " + Angle.INSTANCE.angleHits.size();
-//        mc.fontRendererObj.drawStringWithShadow(mc.thePlayer.capabilities.getWalkSpeed() + "", e.getResolution().getScaledWidth_double() / 2 - 50, 250, -1);
-
+//        mc.fontRendererObj.drawStringWithShadow(okbruh, e.getResolution().getScaledWidth_double() / 2 - 50, 250, -1);
+//
 //
 //        final long time2 = System.currentTimeMillis();
 //        double deltaMove = 0D;
@@ -253,6 +254,7 @@ public class HUD extends Module {
 //        while (it.hasNext()) {
 //            final Angle.AttackLocation refLoc = it.next();
 //            if (time2 - refLoc.time > 1000L) {
+//                it.remove();
 //                continue;
 //            }
 //            deltaMove += refLoc.distSqLast;

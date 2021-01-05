@@ -115,9 +115,13 @@ public class Bypass extends Module {
             return;
 
         if (event instanceof EventPacket) {
-            if (!Client.getModuleManager().isEnabled(LongJump.class) || c13Timer.delay(7_000)) {
-                c13Timer.reset();
-                sendPackets();
+            if (mc.thePlayer != null) {
+                if (!Client.getModuleManager().isEnabled(LongJump.class) || c13Timer.delay(7_000)) {
+                    c13Timer.reset();
+                    sendPackets();
+                }
+            } else {
+                resetPackets();
             }
 
             List<BruhPacket> packetsToRemove = new ArrayList<>();

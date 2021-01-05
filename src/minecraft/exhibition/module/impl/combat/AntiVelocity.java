@@ -12,6 +12,7 @@ import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.movement.LongJump;
 import exhibition.util.Timer;
+import exhibition.util.misc.ChatUtil;
 import net.minecraft.block.BlockAir;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.Entity;
@@ -101,25 +102,6 @@ public class AntiVelocity extends Module {
             if (castPacket instanceof S12PacketEntityVelocity) {
                 S12PacketEntityVelocity packet = (S12PacketEntityVelocity) castPacket;
                 if (packet.getEntityID() == mc.thePlayer.getEntityId()) {
-                    if (nearbyOnly.getValue()) {
-                        boolean nearby = false;
-                        for (Entity entity : mc.theWorld.getLoadedEntityList()) {
-                            if (!(entity instanceof EntityPlayer) || entity instanceof EntityPlayerSP)
-                                continue;
-                            if (!AntiBot.isBot(entity) && !FriendManager.isFriend(entity.getName()) && mc.thePlayer.getDistanceToEntity(entity) <= 15) {
-                                nearby = true;
-                                break;
-                            }
-                        }
-                        if (!nearby && !projectileNearby) {
-                            if(!((LongJump) Client.getModuleManager().get(LongJump.class)).noShake() && ignore.delay(500)) {
-                                velocity = new Vec3((double)packet.getMotionX() / 8000.0D, (double)packet.getMotionY() / 8000.0D, (double)packet.getMotionZ() / 8000.0D);
-                                checkDamage = true;
-                                hurtDelay.reset();
-                            }
-                            return;
-                        }
-                    }
 
                     int vertical = ((Number) settings.get(VERTICAL).getValue()).intValue();
                     int horizontal = ((Number) settings.get(HORIZONTAL).getValue()).intValue();
@@ -141,8 +123,6 @@ public class AntiVelocity extends Module {
                 S27PacketExplosion packet = (S27PacketExplosion) castPacket;
 
                 if (nearbyOnly.getValue() && packet.yMotion > -0.5) {
-                    if (!mc.thePlayer.capabilities.allowEdit)
-                        return;
                     boolean nearby = false;
                     for (Entity entity : mc.theWorld.getLoadedEntityList()) {
                         if (!(entity instanceof EntityPlayer) || entity instanceof EntityPlayerSP)
@@ -153,6 +133,11 @@ public class AntiVelocity extends Module {
                         }
                     }
                     if (!nearby && !projectileNearby) {
+                        if(!((LongJump) Client.getModuleManager().get(LongJump.class)).noShake() && ignore.delay(500) && packet.xMotion != 0 && packet.zMotion != 0 && packet.yMotion != 0) {
+                            velocity = new Vec3(packet.xMotion, packet.yMotion,packet.zMotion);
+                            checkDamage = true;
+                            hurtDelay.reset();
+                        }
                         return;
                     }
                 }

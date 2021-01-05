@@ -260,7 +260,7 @@ public class Killaura extends Module {
                     }
                 }
                 if (packet instanceof S08PacketPlayerPosLook) {
-                    critWaitTicks = critModule.isPacket() ? 25 : 2;
+                    critWaitTicks = critModule.isPacket() ? 25 : 6;
                     setupTick = 0;
                 }
 
@@ -276,6 +276,8 @@ public class Killaura extends Module {
                     if (titlePacket.getType().equals(S45PacketTitle.Type.TITLE)) {
                         String text = titlePacket.getMessage().getUnformattedText();
                         if ((text.equals("YOU DIED") || text.equals("GAME OVER")) && isEnabled()) {
+                            Killaura.target = null;
+                            Killaura.loaded.clear();
                             toggle();
                             Notifications.getManager().post("Aura Death", "Aura disabled due to death.");
                         }
@@ -287,16 +289,16 @@ public class Killaura extends Module {
         if (event instanceof EventStep) {
             EventStep step = event.cast();
             boolean crits = (Client.getModuleManager().isEnabled(Criticals.class) && critWaitTicks <= 0) && (!Client.getModuleManager().isEnabled(Speed.class) && !Client.getModuleManager().isEnabled(Fly.class) && !Client.getModuleManager().isEnabled(LongJump.class));
-            if (crits) {
-                if (step.isPre() && stepDelay > 0) {
-                    Killaura.wantsToStep = true;
-                    event.setCancelled(true);
-                    step.setActive(false);
-                }
-                if (!step.isPre()) {
-                    critWaitTicks = 2;
-                    Killaura.wantsToStep = false;
-                }
+            if (step.isPre() && crits && stepDelay > 0) {
+                critWaitTicks = 3;
+                Killaura.wantsToStep = true;
+                event.setCancelled(true);
+                step.setActive(false);
+            }
+            if (!step.isPre()) {
+                Killaura.wantsToStep = false;
+                critWaitTicks = 2;
+                stepDelay = 0;
             }
             return;
         }
@@ -348,7 +350,7 @@ public class Killaura extends Module {
         EventMotionUpdate em = event.cast();
         if (em.isPre()) {
             tickEntities();
-            if (stepDelay > -2) {
+            if (stepDelay > 0) {
                 stepDelay--;
             }
             if (critWaitTicks > 0)
@@ -403,6 +405,10 @@ public class Killaura extends Module {
 
                 if (!mc.thePlayer.onGround && !mc.thePlayer.isCollidedVertically) {
                     stepDelay = 1;
+                }
+
+                if (stepDelay < 0) {
+                    wantsToStep = false;
                 }
 
                 if (loaded.size() > 0) {
@@ -498,12 +504,12 @@ public class Killaura extends Module {
                                     Vec3 v = getDirection(lastAngles.x, em.getPitch());
                                     double off = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), v,
                                             target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height,
-                                            HypixelUtil.isInGame("DUEL") ? Direction.DIRECT_PRECISION/2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.5 : 1.25);
+                                            HypixelUtil.isInGame("DUEL") ? Direction.DIRECT_PRECISION / 2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.5 : 1.25);
 
                                     Vec3 backwardsBruh = getDirection(lastAngles.x, 180 - em.getPitch());
                                     double backwardsOff = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), backwardsBruh,
                                             target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height,
-                                            HypixelUtil.isInGame("DUEL") ? Direction.DIRECT_PRECISION/2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.5 : 1.25);
+                                            HypixelUtil.isInGame("DUEL") ? Direction.DIRECT_PRECISION / 2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.5 : 1.25);
 
                                     float tempNewYaw = (float) MathUtils.getIncremental(lastAngles.x + (targetYaw / 1.1F), 30);
 
@@ -580,27 +586,27 @@ public class Killaura extends Module {
                                             (attack.equals("Precise") ? target.waitTicks <= 1 :
                                                     target.waitTicks <= 1 || (target.hurtResistantTime <= 11 && target.hurtResistantTime >= 6) || target.hurtTime > 6);
 
-                                    if (canAttackRightNow && isNextTickGround() && !Client.instance.isLagging() && (!wantsToStep || stepDelay < 0)) {
+                                    if (canAttackRightNow && isNextTickGround() && !Client.instance.isLagging()) {
                                         if (setupCrits) {
                                             if (setupTick == 0) {
                                                 if (mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {
                                                     stepDelay = 2;
                                                     blockJump = true;
-                                                    em.setY(em.getY() + 0.07840000152587834 + (0.0000023423F) * Math.random());
+                                                    em.setY(em.getY() + 0.07234F + (0.0000023F) * Math.random());
                                                     em.setGround(false);
                                                     em.setForcePos(true);
                                                     isCritSetup = false;
                                                     setupTick = 1;
                                                 }
                                             } else if (setupTick == 1) {
-                                                if ((em.getY() == mc.thePlayer.posY && em.isOnground())) {
+                                                if (mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {
                                                     isCritSetup = true;
-                                                    //em.setY(em.getY() + 0.0076092939542 - (0.0000000002475776F) * Math.random());
+                                                    if (HypixelUtil.isInGame("HYPIXEL PIT"))
+                                                        em.setY(em.getY() + 0.0076092939542 - (0.0000000002475776F) * Math.random());
                                                     em.setGround(false);
-                                                    setupTick = 0;
-                                                } else {
-                                                    setupTick = 0;
+                                                    em.setForcePos(true);
                                                 }
+                                                setupTick = 0;
                                             } else {
                                                 setupTick = 0;
                                             }
@@ -612,9 +618,7 @@ public class Killaura extends Module {
                                     }
                                 } else if (critModule.isPacket() && HypixelUtil.isVerifiedHypixel() && mc.getCurrentServerData() != null && (mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net"))) {
                                     boolean isAttacking = mc.thePlayer.getDistanceToEntity(target) <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && delay.roundDelay(50 * nextRandom);
-                                    boolean canAttackRightNow = (attack.equals("Always") && (!mc.thePlayer.onGround || (target.waitTicks <= 0 || target.hurtTime > 7))) ||
-                                            (attack.equals("Precise") ? target.waitTicks <= 0 :
-                                                    target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
+                                    boolean canAttackRightNow = attack.equals("Always") || (attack.equals("Precise") ? target.waitTicks <= 0 : target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
 
                                     if (isAttacking && canAttackRightNow && isNextTickGround())
                                         if (mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {
@@ -653,6 +657,7 @@ public class Killaura extends Module {
                     wait = 0;
                     stepDelay = 0;
                     setupTick = 0;
+                    wantsToStep = false;
                 }
 
                 boolean packetMode = Client.getModuleManager().isEnabled(NoSlowdown.class);
@@ -700,7 +705,7 @@ public class Killaura extends Module {
 
                 if (isAttacking && !isBlocking && (!antiLag.getValue() || !Client.instance.isLagging())) {
                     Vec3 v = getDirection(em.getYaw(), em.getPitch());
-                    double off = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), v, target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height, HypixelUtil.isInGame("DUEL") ? Direction.DIRECT_PRECISION/2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.5 : 1.2);
+                    double off = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), v, target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height, HypixelUtil.isInGame("DUEL") ? Direction.DIRECT_PRECISION / 2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.5 : 1.2);
 
                     if (((Number) settings.get(ANGLESTEP).getValue()).intValue() == 0 || (off <= 0.11 || (off <= 1 && off >= 0.22 && MathUtils.getIncremental(angleTimer.getDifference(), 50) < 200))) {
 
@@ -713,7 +718,7 @@ public class Killaura extends Module {
                         }
 
                         boolean alreadyReset = false;
-                        boolean willViolate = target.waitTicks <= 0 && Angle.INSTANCE.willViolateYaw(new Location(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, em.getYaw(), 0), target);
+                        boolean willViolate = Angle.INSTANCE.willViolateYaw(new Location(mc.thePlayer.posX, em.getY(), mc.thePlayer.posZ, em.getYaw(), 0), target);
 
                         if (canAttackRightNow && shouldAttack && (!reduce.getValue() || !HypixelUtil.isInGame("PIT") || !willViolate)) {
                             if (!(boolean) noswing.getValue())
@@ -966,9 +971,9 @@ public class Killaura extends Module {
             double offsetX = offset[0];
             double offsetZ = offset[1];
 
-            double posX = offsetX + mc.thePlayer.posX + motionX;
+            double posX = offsetX + mc.thePlayer.posX + motionX * 1.5;
             double posY = -0.45 + mc.thePlayer.posY;
-            double posZ = offsetZ + mc.thePlayer.posZ + motionZ;
+            double posZ = offsetZ + mc.thePlayer.posZ + motionZ * 1.5;
 
             if (isPosOnGround(posX, posY, posZ)) {
                 nextTickGround = true;

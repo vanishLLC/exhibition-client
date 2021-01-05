@@ -195,7 +195,7 @@ public class TargetStrafe extends Module {
                         GlStateManager.pushMatrix();
                         RenderingUtil.pre3D();
                         GlStateManager.translate(x + rotX, y, z + rotY);
-                        AxisAlignedBB var12 = new AxisAlignedBB(-0.025, -0.025, -0.025, 0.025, 0.025 + i / 20F, 0.025);
+                        AxisAlignedBB var12 = new AxisAlignedBB(-0.025, -0.025, -0.025, 0.025, 0.025, 0.025);
                         RenderingUtil.glColor(isFineTick ? -1 : Colors.getColor(255, 150, 0));
                         RenderingUtil.drawBoundingBox(var12);
                         RenderingUtil.post3D();
@@ -205,8 +205,9 @@ public class TargetStrafe extends Module {
 
                         Vec3 vec = new Vec3(rotX, 0, rotY);
 
-                        if (!isFineTick) {
+                        List<Vec3> validPoints = new ArrayList<>();
 
+                        if (!isFineTick || lastRad != -1) {
                             for (int bruh = 1; bruh < 30; bruh++) {
                                 double posRad = rad + (increment * bruh);
 
@@ -231,121 +232,93 @@ public class TargetStrafe extends Module {
 
                                 boolean isFinePos = willNotCollide && !isCurrentlyVoid;
 
-                                if (isFinePos && posRad < lastRad) {
-                                    double temp = posRad + (lastRad - posRad) * 0.75;
-
-                                    double rotNewX = (temp * cos);
-                                    double rotNewY = (temp * sin);
-
-                                    double tempDiffX = (target.posX + rotNewX) - mc.thePlayer.posX;
-                                    double tempDiffY = (target.posZ + rotNewY) - mc.thePlayer.posZ;
-
-                                    boolean newNotCollide = mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(tempDiffX, diffY, tempDiffY).expand(var41, 0, var41)).isEmpty();
-
-                                    boolean isNewVoid = true;
-
-                                    for (int _y = (int) target.posY; _y >= 0; _y--) {
-                                        if (!(mc.theWorld.getBlockState(new BlockPos(target.posX + rotNewX, _y, target.posZ + rotNewY)).getBlock() instanceof BlockAir)) {
-                                            isNewVoid = false;
-                                            break;
-                                        }
-                                    }
-
-                                    boolean isNewFine = newNotCollide && !isNewVoid;
-
-                                    if (isNewFine) {
-                                        rotPosX = rotNewX;
-                                        rotPosY = rotNewY;
-                                        adjustedRad = temp;
-                                    }
+                                if (!isFinePos) {
+                                    GlStateManager.pushMatrix();
+                                    RenderingUtil.pre3D();
+                                    GlStateManager.translate(x + rotPosX, y, z + rotPosY);
+                                    RenderingUtil.glColor(isFinePos ? Colors.getColor(0, 255, 0, 255) : Colors.getColor(255, 0, 0, 30));
+                                    RenderingUtil.drawBoundingBox(var12);
+                                    RenderingUtil.post3D();
+                                    GlStateManager.popMatrix();
                                 }
 
-                                GlStateManager.pushMatrix();
-                                RenderingUtil.pre3D();
-                                GlStateManager.translate(x + rotPosX, y, z + rotPosY);
-                                RenderingUtil.glColor(isFinePos ? Colors.getColor(0, 255, 0, 255) : Colors.getColor(255, 0, 0, 60));
-                                RenderingUtil.drawBoundingBox(var12);
-                                RenderingUtil.post3D();
-                                GlStateManager.popMatrix();
-
                                 if (isFinePos) {
-                                    lastRad = adjustedRad;
                                     isFineTick = true;
                                     vec = new Vec3(rotPosX, 0, rotPosY);
-                                    break;
+                                    validPoints.add(vec);
                                 }
                             }
 
                             int lowest = (int) (rad / increment);
 
-                            if (!isFineTick)
-                                for (int bruh = 1; bruh < lowest; bruh++) {
-                                    double posRad = rad - (increment * bruh);
+                            for (int bruh = 1; bruh < lowest; bruh++) {
+                                double posRad = rad - (increment * bruh);
 
-                                    double adjustedRad = posRad;
+                                double adjustedRad = posRad;
 
-                                    double rotPosX = (adjustedRad * cos);
-                                    double rotPosY = (adjustedRad * sin);
+                                double rotPosX = (adjustedRad * cos);
+                                double rotPosY = (adjustedRad * sin);
 
-                                    double diffPosX = (target.posX + rotPosX) - mc.thePlayer.posX;
-                                    double diffPosZ = (target.posZ + rotPosY) - mc.thePlayer.posZ;
+                                double diffPosX = (target.posX + rotPosX) - mc.thePlayer.posX;
+                                double diffPosZ = (target.posZ + rotPosY) - mc.thePlayer.posZ;
 
-                                    boolean willNotCollide = mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(diffPosX, diffY, diffPosZ).expand(var41, 0, var41)).isEmpty();
+                                boolean willNotCollide = mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(diffPosX, diffY, diffPosZ).expand(var41, 0, var41)).isEmpty();
 
-                                    boolean isCurrentlyVoid = true;
+                                boolean isCurrentlyVoid = true;
 
-                                    for (int _y = (int) target.posY; _y >= 0; _y--) {
-                                        if (!(mc.theWorld.getBlockState(new BlockPos(target.posX + rotPosX, _y, target.posZ + rotPosY)).getBlock() instanceof BlockAir)) {
-                                            isCurrentlyVoid = false;
-                                            break;
-                                        }
-                                    }
-
-                                    boolean isFinePos = willNotCollide && !isCurrentlyVoid;
-
-                                    if (isFinePos && posRad > lastRad) {
-                                        double temp = posRad + (lastRad - posRad) * 0.75;
-
-                                        double rotNewX = (temp * cos);
-                                        double rotNewY = (temp * sin);
-
-                                        double tempDiffX = (target.posX + rotNewX) - mc.thePlayer.posX;
-                                        double tempDiffY = (target.posZ + rotNewY) - mc.thePlayer.posZ;
-
-                                        boolean newNotCollide = mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(tempDiffX, diffY, tempDiffY).expand(var41, 0, var41)).isEmpty();
-
-                                        boolean isNewVoid = true;
-
-                                        for (int _y = (int) target.posY; _y >= 0; _y--) {
-                                            if (!(mc.theWorld.getBlockState(new BlockPos(target.posX + rotNewX, _y, target.posZ + rotNewY)).getBlock() instanceof BlockAir)) {
-                                                isNewVoid = false;
-                                                break;
-                                            }
-                                        }
-
-                                        boolean isNewFine = newNotCollide && !isNewVoid;
-
-                                        if (isNewFine) {
-                                            rotPosX = rotNewX;
-                                            rotPosY = rotNewY;
-                                            adjustedRad = temp;
-                                        }
-                                    }
-
-                                    GlStateManager.pushMatrix();
-                                    RenderingUtil.pre3D();
-                                    GlStateManager.translate(x + rotPosX, y, z + rotPosY);
-                                    RenderingUtil.glColor(isFinePos ? Colors.getColor(0, 255, 0, 255) : Colors.getColor(255, 0, 0, 60));
-                                    RenderingUtil.drawBoundingBox(var12);
-                                    RenderingUtil.post3D();
-                                    GlStateManager.popMatrix();
-
-                                    if (isFinePos) {
-                                        lastRad = adjustedRad;
-                                        vec = new Vec3(rotPosX, 0, rotPosY);
+                                for (int _y = (int) target.posY; _y >= 0; _y--) {
+                                    if (!(mc.theWorld.getBlockState(new BlockPos(target.posX + rotPosX, _y, target.posZ + rotPosY)).getBlock() instanceof BlockAir)) {
+                                        isCurrentlyVoid = false;
                                         break;
                                     }
                                 }
+
+                                boolean isFinePos = willNotCollide && !isCurrentlyVoid;
+
+                                if (!isFinePos) {
+                                    GlStateManager.pushMatrix();
+                                    RenderingUtil.pre3D();
+                                    GlStateManager.translate(x + rotPosX, y, z + rotPosY);
+                                    RenderingUtil.glColor(isFinePos ? Colors.getColor(0, 255, 0, 255) : Colors.getColor(255, 0, 0, 30));
+                                    RenderingUtil.drawBoundingBox(var12);
+                                    RenderingUtil.post3D();
+                                    GlStateManager.popMatrix();
+                                }
+
+                                if (isFinePos) {
+                                    vec = new Vec3(rotPosX, 0, rotPosY);
+                                    validPoints.add(vec);
+                                }
+                            }
+
+                            Vec3 closestValid = null;
+
+                            double currentRad = Double.MAX_VALUE;
+
+                            double lastPosRad = lastRad;
+
+                            for (Vec3 validPoint : validPoints) {
+                                double radius = Math.sqrt(validPoint.getX() * validPoint.getX() + validPoint.getZ() * validPoint.getZ());
+
+                                double radDiff = Math.abs(lastPosRad - radius);
+                                if (lastRad == rad || radDiff < currentRad) {
+                                    currentRad = radDiff;
+                                    lastRad = radius;
+                                    closestValid = validPoint;
+                                }
+
+                            }
+
+                            if (closestValid != null) {
+                                GlStateManager.pushMatrix();
+                                RenderingUtil.pre3D();
+                                GlStateManager.translate(x + closestValid.getX(), y, z + closestValid.getZ());
+                                RenderingUtil.glColor(Colors.getColor(150, 150, 255, 255));
+                                RenderingUtil.drawBoundingBox(var12);
+                                RenderingUtil.post3D();
+                                GlStateManager.popMatrix();
+                                vec = closestValid;
+                            }
                         } else {
                             vec = new Vec3(rotX, 0, rotY);
                             posList.add(vec);
@@ -460,7 +433,7 @@ public class TargetStrafe extends Module {
 
             double lowestDist = Double.MAX_VALUE;
 
-            double lastRad = -1;
+            double lastRad = rad;
 
             List<Vec3> posList = new ArrayList<>();
 
@@ -487,9 +460,11 @@ public class TargetStrafe extends Module {
 
                 double increment = 0.1;
 
-                if (!isFineTick) {
+                if (!isFineTick || lastRad != rad) {
+                    List<Vec3> validPoints = new ArrayList<>();
 
                     for (int bruh = 1; bruh < 30; bruh++) {
+
                         double posRad = rad + (increment * bruh);
 
                         double adjustedRad = posRad;
@@ -513,109 +488,69 @@ public class TargetStrafe extends Module {
 
                         boolean isFinePos = willNotCollide && !isCurrentlyVoid;
 
-                        if (isFinePos && posRad < lastRad) {
-                            double temp = posRad + (lastRad - posRad) * 0.75;
-
-                            double rotNewX = (temp * cos);
-                            double rotNewY = (temp * sin);
-
-                            double tempDiffX = (target.posX + rotNewX) - mc.thePlayer.posX;
-                            double tempDiffY = (target.posZ + rotNewY) - mc.thePlayer.posZ;
-
-                            boolean newNotCollide = mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(tempDiffX, diffY, tempDiffY).expand(var41, 0, var41)).isEmpty();
-
-                            boolean isNewVoid = true;
-
-                            for (int _y = (int) target.posY; _y >= 0; _y--) {
-                                if (!(mc.theWorld.getBlockState(new BlockPos(target.posX + rotNewX, _y, target.posZ + rotNewY)).getBlock() instanceof BlockAir)) {
-                                    isNewVoid = false;
-                                    break;
-                                }
-                            }
-
-                            boolean isNewFine = newNotCollide && !isNewVoid;
-
-                            if (isNewFine) {
-                                rotPosX = rotNewX;
-                                rotPosY = rotNewY;
-                                adjustedRad = temp;
-                            }
-                        }
-
                         if (isFinePos) {
                             rotX = rotPosX;
                             rotY = rotPosY;
-                            lastRad = adjustedRad;
-                            isFineTick = true;
-                            break;
+                            validPoints.add(new Vec3(rotX, 0, rotY));
                         }
                     }
 
                     int lowest = (int) (rad / increment);
 
-                    if (!isFineTick)
-                        for (int bruh = 1; bruh < lowest; bruh++) {
-                            double posRad = rad - (increment * bruh);
+                    for (int bruh = 1; bruh < lowest; bruh++) {
+                        double posRad = rad - (increment * bruh);
 
-                            double adjustedRad = posRad;
+                        double adjustedRad = posRad;
 
-                            double rotPosX = (adjustedRad * cos);
-                            double rotPosY = (adjustedRad * sin);
+                        double rotPosX = (adjustedRad * cos);
+                        double rotPosY = (adjustedRad * sin);
 
-                            double diffPosX = (target.posX + rotPosX) - mc.thePlayer.posX;
-                            double diffPosZ = (target.posZ + rotPosY) - mc.thePlayer.posZ;
+                        double diffPosX = (target.posX + rotPosX) - mc.thePlayer.posX;
+                        double diffPosZ = (target.posZ + rotPosY) - mc.thePlayer.posZ;
 
-                            boolean willNotCollide = mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(diffPosX, diffY, diffPosZ).expand(var41, 0, var41)).isEmpty();
+                        boolean willNotCollide = mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(diffPosX, diffY, diffPosZ).expand(var41, 0, var41)).isEmpty();
 
-                            boolean isCurrentlyVoid = true;
+                        boolean isCurrentlyVoid = true;
 
-                            for (int _y = (int) target.posY; _y >= 0; _y--) {
-                                if (!(mc.theWorld.getBlockState(new BlockPos(target.posX + rotPosX, _y, target.posZ + rotPosY)).getBlock() instanceof BlockAir)) {
-                                    isCurrentlyVoid = false;
-                                    break;
-                                }
-                            }
-
-                            boolean isFinePos = willNotCollide && !isCurrentlyVoid;
-
-                            if (isFinePos && posRad > lastRad) {
-                                double temp = posRad + (lastRad - posRad) * 0.75;
-
-                                double rotNewX = (temp * cos);
-                                double rotNewY = (temp * sin);
-
-                                double tempDiffX = (target.posX + rotNewX) - mc.thePlayer.posX;
-                                double tempDiffY = (target.posZ + rotNewY) - mc.thePlayer.posZ;
-
-                                boolean newNotCollide = mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(tempDiffX, diffY, tempDiffY).expand(var41, 0, var41)).isEmpty();
-
-                                boolean isNewVoid = true;
-
-                                for (int _y = (int) target.posY; _y >= 0; _y--) {
-                                    if (!(mc.theWorld.getBlockState(new BlockPos(target.posX + rotNewX, _y, target.posZ + rotNewY)).getBlock() instanceof BlockAir)) {
-                                        isNewVoid = false;
-                                        break;
-                                    }
-                                }
-
-                                boolean isNewFine = newNotCollide && !isNewVoid;
-
-                                if (isNewFine) {
-                                    rotPosX = rotNewX;
-                                    rotPosY = rotNewY;
-                                    adjustedRad = temp;
-                                }
-                            }
-
-                            if (isFinePos) {
-                                rotX = rotPosX;
-                                rotY = rotPosY;
-                                lastRad = adjustedRad;
+                        for (int _y = (int) target.posY; _y >= 0; _y--) {
+                            if (!(mc.theWorld.getBlockState(new BlockPos(target.posX + rotPosX, _y, target.posZ + rotPosY)).getBlock() instanceof BlockAir)) {
+                                isCurrentlyVoid = false;
                                 break;
                             }
                         }
 
+                        boolean isFinePos = willNotCollide && !isCurrentlyVoid;
+
+                        if (isFinePos) {
+                            rotX = rotPosX;
+                            rotY = rotPosY;
+                            validPoints.add(new Vec3(rotX, 0, rotY));
+                        }
+                    }
+
+                    Vec3 closestValid = null;
+
+                    double currentRad = Double.MAX_VALUE;
+
+                    double lastPosRad = lastRad;
+
+                    for (Vec3 validPoint : validPoints) {
+                        double radius = Math.sqrt(validPoint.getX() * validPoint.getX() + validPoint.getZ() * validPoint.getZ());
+
+                        double radDiff = Math.abs(lastPosRad - radius);
+                        if (lastRad == -1 || radDiff < currentRad) {
+                            currentRad = radDiff;
+                            lastRad = radius;
+                            closestValid = validPoint;
+                        }
+                    }
+
+                    if (closestValid != null) {
+                        rotX = closestValid.getX();
+                        rotY = closestValid.getZ();
+                    }
                 }
+
                 posList.add(new Vec3(rotX, 0, rotY));
 
 //                float rotationOffset = RotationUtils.getYawChangeGiven(x + rotX, z + rotY, speedYaw);
@@ -672,9 +607,11 @@ public class TargetStrafe extends Module {
 
             int closestPos = (36 + closest + currentStep) % 36;
 
+            ChatUtil.printChat(closest + " " + closestPos + " " + posList.size());
+
             Vec3 vestPos = posList.get(closestPos);
 
-            newYaw += RotationUtils.getYawChangeGiven(x + vestPos.getX(), z + vestPos.getZ(), newYaw);
+            newYaw += RotationUtils.getYawChangeGiven(x + vestPos.getX(), z + vestPos.getZ(), speedYaw);
 
         }
         return newYaw;
