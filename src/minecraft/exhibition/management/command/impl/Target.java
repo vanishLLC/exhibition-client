@@ -42,6 +42,7 @@ public class Target extends Command {
                 if(args.length == 2) {
                     String vip = args[1];
                     if (!PriorityManager.isPriority(vip)) {
+                        PriorityManager.setAsPriority(vip);
                         ChatUtil.printChat(chatPrefix + "Added \247f" + vip + "\2478 to the Priority list.");
                     } else {
                         PriorityManager.removePriority(vip);
