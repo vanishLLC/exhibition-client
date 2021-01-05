@@ -260,11 +260,8 @@ public class Killaura extends Module {
                     }
                 }
                 if (packet instanceof S08PacketPlayerPosLook) {
-                    if (critModule.isPacket() || critModule.isPacket2()) {
-                        critWaitTicks = 25;
-                    } else {
-                        critWaitTicks = 2;
-                    }
+                    critWaitTicks = critModule.isPacket() ? 25 : 2;
+                    setupTick = 0;
                 }
 
 //                if(packet instanceof C07PacketPlayerDigging) {
@@ -492,23 +489,40 @@ public class Killaura extends Module {
                                 float pitch = (float) -(Math.atan2(yDiff - (distance > 2.1 ? 0.75 : 1), dist) * 180.0D / 3.141592653589793D);
                                 float newYaw = 0F;
 
-                                if (distance <= (HypixelUtil.isInGame("DUEL") ? 1.35 : 0.75) && yDifference <= 1.5) {
+                                if (distance <= (HypixelUtil.isInGame("DUEL") ? 1.12 : 0.75) && yDifference <= 1.5) {
                                     em.setYaw(lastAngles.x);
                                     em.setPitch(MathHelper.clamp_float(88.9F + (float) (0.5F * Math.random()), -89.5F, 89.5F));
                                 } else {
                                     em.setPitch(MathHelper.clamp_float(pitch / 1.1F, -89.5F, 89.5F));
 
                                     Vec3 v = getDirection(lastAngles.x, em.getPitch());
-                                    double off = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), v, target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height, HypixelUtil.isInGame("DUEL") ? Direction.DIRECT_PRECISION : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.5 : 1.25);
+                                    double off = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), v,
+                                            target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height,
+                                            HypixelUtil.isInGame("DUEL") ? Direction.DIRECT_PRECISION/2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.5 : 1.25);
+
+                                    Vec3 backwardsBruh = getDirection(lastAngles.x, 180 - em.getPitch());
+                                    double backwardsOff = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), backwardsBruh,
+                                            target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height,
+                                            HypixelUtil.isInGame("DUEL") ? Direction.DIRECT_PRECISION/2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.5 : 1.25);
 
                                     float tempNewYaw = (float) MathUtils.getIncremental(lastAngles.x + (targetYaw / 1.1F), 30);
 
                                     boolean willViolate = target.waitTicks <= 0 && Angle.INSTANCE.willViolateYaw(new Location(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, tempNewYaw, 0), target);
 
-                                    if ((angleTimer.roundDelay(1000) && off >= 0.11 && !willViolate) || (angleTimer.roundDelay(250) && !willViolate && off >= 0.2)) {
-                                        newYaw += targetYaw / 1.1F;
-                                        angleTimer.reset();
-                                        em.setYaw((float) MathUtils.getIncremental(lastAngles.x += (newYaw), 30) + (float) randomNumber(4, -4));
+                                    if (off >= 0.1 && backwardsOff < 0.1) {
+                                        boolean isAttacking = mc.thePlayer.getDistanceToEntity(target) <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && delay.roundDelay(50 * nextRandom);
+                                        boolean canAttackRightNow = (attack.equals("Always")) ||
+                                                (attack.equals("Precise") ? target.waitTicks <= 0 :
+                                                        target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
+
+                                        if (isAttacking && canAttackRightNow)
+                                            em.setPitch(180 - em.getPitch());
+                                    } else {
+                                        if ((angleTimer.roundDelay(1000) && off >= 0.11 && !willViolate) || (angleTimer.roundDelay(250) && !willViolate && off >= 0.2)) {
+                                            newYaw += targetYaw / 1.1F;
+                                            angleTimer.reset();
+                                            em.setYaw((float) MathUtils.getIncremental(lastAngles.x += (newYaw), 30) + (float) randomNumber(4, -4));
+                                        }
                                     }
 
                                     em.setYaw(lastAngles.x);
@@ -521,7 +535,7 @@ public class Killaura extends Module {
                                 em.setPitch(MathHelper.clamp_float(pitch / 1.1F, -90, 90));
                             }
 
-                            boolean setupCrits = critModule.isOldCrits() || target.hurtTime <= 0 || (target.waitTicks <= 1);
+                            boolean setupCrits = critModule.isOldCrits() || target.hurtTime <= 1 || (target.waitTicks <= 1);
 
                             if (crits) {
                                 if (critModule.isNewCrits()) {
@@ -567,25 +581,31 @@ public class Killaura extends Module {
                                                     target.waitTicks <= 1 || (target.hurtResistantTime <= 11 && target.hurtResistantTime >= 6) || target.hurtTime > 6);
 
                                     if (canAttackRightNow && isNextTickGround() && !Client.instance.isLagging() && (!wantsToStep || stepDelay < 0)) {
-                                        if (setupTick == 0 && setupCrits) {
-                                            if (mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {
-                                                stepDelay = 2;
-                                                blockJump = true;
-                                                em.setY(em.getY() + 0.07840000152587834 + (0.0000023423F) * Math.random());
-                                                em.setGround(false);
-                                                em.setForcePos(true);
-                                                isCritSetup = false;
-                                                setupTick = 1;
-                                            }
-                                        } else if (setupTick == 1) {
-                                            if ((em.getY() == mc.thePlayer.posY && em.isOnground())) {
-                                                isCritSetup = true;
-                                                em.setY(em.getY() + 0.0076092939542 - (0.0000000002475776F) * Math.random());
-                                                em.setGround(false);
-                                                setupTick = 0;
+                                        if (setupCrits) {
+                                            if (setupTick == 0) {
+                                                if (mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {
+                                                    stepDelay = 2;
+                                                    blockJump = true;
+                                                    em.setY(em.getY() + 0.07840000152587834 + (0.0000023423F) * Math.random());
+                                                    em.setGround(false);
+                                                    em.setForcePos(true);
+                                                    isCritSetup = false;
+                                                    setupTick = 1;
+                                                }
+                                            } else if (setupTick == 1) {
+                                                if ((em.getY() == mc.thePlayer.posY && em.isOnground())) {
+                                                    isCritSetup = true;
+                                                    //em.setY(em.getY() + 0.0076092939542 - (0.0000000002475776F) * Math.random());
+                                                    em.setGround(false);
+                                                    setupTick = 0;
+                                                } else {
+                                                    setupTick = 0;
+                                                }
                                             } else {
                                                 setupTick = 0;
                                             }
+                                        } else {
+                                            setupTick = 0;
                                         }
                                     } else {
                                         setupTick = 0;
@@ -680,7 +700,7 @@ public class Killaura extends Module {
 
                 if (isAttacking && !isBlocking && (!antiLag.getValue() || !Client.instance.isLagging())) {
                     Vec3 v = getDirection(em.getYaw(), em.getPitch());
-                    double off = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), v, target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height, HypixelUtil.isInGame("DUEL") ? Direction.DIRECT_PRECISION : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.5 : 1.2);
+                    double off = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), v, target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height, HypixelUtil.isInGame("DUEL") ? Direction.DIRECT_PRECISION/2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.5 : 1.2);
 
                     if (((Number) settings.get(ANGLESTEP).getValue()).intValue() == 0 || (off <= 0.11 || (off <= 1 && off >= 0.22 && MathUtils.getIncremental(angleTimer.getDifference(), 50) < 200))) {
 

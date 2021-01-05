@@ -10,6 +10,7 @@ import exhibition.module.data.ModuleData;
 import exhibition.module.data.MultiBool;
 import exhibition.module.data.settings.Setting;
 import exhibition.util.HypixelUtil;
+import exhibition.util.RenderingUtil;
 import exhibition.util.render.Colors;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.entity.RenderManager;
@@ -99,7 +100,9 @@ public class BedFucker extends Module {
         }
         if (event instanceof EventRender3D) {
             if (blockBreaking != null) {
+                RenderingUtil.pre3D();
                 drawESP(blockBreaking.getX(), blockBreaking.getY(), blockBreaking.getZ(), blockBreaking.getX() + 1, blockBreaking.getY() + 1, blockBreaking.getZ() + 1, 100, 100, 100);
+                RenderingUtil.post3D();
             }
         }
         if (event instanceof EventPacket) {
