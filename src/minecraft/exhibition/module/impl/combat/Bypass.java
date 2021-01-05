@@ -243,7 +243,10 @@ public class Bypass extends Module {
 
     public void sendPackets() {
         while (chokePackets.peek() != null) {
-            NetUtil.sendPacketNoEvents(chokePackets.poll());
+            Packet packet = chokePackets.poll();
+            if(packet != null) {
+                NetUtil.sendPacketNoEvents(packet);
+            }
         }
         this.resetPackets();
     }

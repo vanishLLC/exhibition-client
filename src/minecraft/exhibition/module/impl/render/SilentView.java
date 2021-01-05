@@ -63,8 +63,8 @@ public class SilentView extends Module {
                     currentPitch = em.getPitch();
 
                     Killaura killaura = Client.getModuleManager().get(Killaura.class).cast();
-                    if (killaura.isEnabled() && Killaura.getTarget() != null && (boolean) killaura.getSetting("REDUCE").getValue()) {
-                        currentYaw = MathHelper.clamp_float(currentYaw, -90, 90);
+                    if (killaura.isEnabled() && Killaura.getTarget() != null && (boolean) killaura.getSetting("REDUCE").getValue() && currentPitch > 90 || currentPitch < -90) {
+                        currentPitch = 180 - currentPitch;
                     }
 
                     isSilent = true;
