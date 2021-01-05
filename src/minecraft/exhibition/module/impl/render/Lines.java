@@ -51,6 +51,11 @@ public class Lines extends Module {
     @RegisterEvent(events = {EventRender3D.class})
     public void onEvent(Event event) {
         EventRender3D er = (EventRender3D) event;
+        final boolean bobbing = mc.gameSettings.viewBobbing;
+        GL11.glLoadIdentity();
+        mc.gameSettings.viewBobbing = false;
+        mc.entityRenderer.orientCamera(mc.timer.renderPartialTicks);
+
         for (Object o : mc.theWorld.loadedTileEntityList) {
             int color = -1;
             TileEntity ent = (TileEntity) o;
@@ -69,15 +74,10 @@ public class Lines extends Module {
             if (color == -1)
                 continue;
 
-            final boolean bobbing = mc.gameSettings.viewBobbing;
-            GL11.glLoadIdentity();
-            mc.gameSettings.viewBobbing = false;
-            mc.entityRenderer.orientCamera(mc.timer.renderPartialTicks);
             float posX = (float) ((float) ent.getPos().getX() + 0.5 - RenderManager.renderPosX);
             float posY = (float) ((float) ent.getPos().getY() + 0.5 - RenderManager.renderPosY);
             float posZ = (float) ((float) ent.getPos().getZ() + 0.5 - RenderManager.renderPosZ);
             RenderingUtil.draw3DLine(posX, posY, posZ, color);
-            mc.gameSettings.viewBobbing = bobbing;
         }
 
         for (Entity entity : mc.theWorld.getLoadedEntityList()) {
@@ -89,6 +89,7 @@ public class Lines extends Module {
                 RenderingUtil.draw3DLine(posX, posY, posZ, color);
             }
         }
+        mc.gameSettings.viewBobbing = bobbing;
     }
 
 }
