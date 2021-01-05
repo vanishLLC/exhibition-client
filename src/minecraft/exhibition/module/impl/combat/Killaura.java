@@ -693,7 +693,7 @@ public class Killaura extends Module {
                         }
 
                         boolean alreadyReset = false;
-                        boolean willViolate = Angle.INSTANCE.willViolateYaw(new Location(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, em.getYaw(), 0), target);
+                        boolean willViolate = target.waitTicks <= 0 && Angle.INSTANCE.willViolateYaw(new Location(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, em.getYaw(), 0), target);
 
                         if (canAttackRightNow && shouldAttack && (!reduce.getValue() || !HypixelUtil.isInGame("PIT") || !willViolate)) {
                             if (!(boolean) noswing.getValue())
