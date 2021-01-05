@@ -12,6 +12,7 @@ import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.movement.Fly;
 import exhibition.module.impl.movement.LongJump;
 import exhibition.module.impl.movement.Speed;
+import exhibition.util.HypixelUtil;
 import exhibition.util.NetUtil;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C02PacketUseEntity;
@@ -65,7 +66,7 @@ public class Criticals extends Module {
     }
 
     private boolean spoof() {
-        return Client.getModuleManager().isEnabled(Bypass.class) && !silentCrits && ((Options) settings.get(PACKET).getValue()).getSelected().startsWith("Packet");
+        return Client.getModuleManager().isEnabled(Bypass.class) && !silentCrits && ((Options) settings.get(PACKET).getValue()).getSelected().startsWith("Packet") && (HypixelUtil.isInGame("DUEL") || HypixelUtil.isInGame("HYPIXEL PIT"));
     }
 
     public boolean isPacket() {

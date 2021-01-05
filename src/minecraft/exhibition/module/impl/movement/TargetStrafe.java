@@ -607,8 +607,6 @@ public class TargetStrafe extends Module {
 
             int closestPos = (36 + closest + currentStep) % 36;
 
-            ChatUtil.printChat(closest + " " + closestPos + " " + posList.size());
-
             Vec3 vestPos = posList.get(closestPos);
 
             newYaw += RotationUtils.getYawChangeGiven(x + vestPos.getX(), z + vestPos.getZ(), speedYaw);

@@ -10,11 +10,13 @@ import exhibition.management.ColorManager;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
+import exhibition.module.impl.combat.Killaura;
 import exhibition.util.RenderingUtil;
 import exhibition.util.render.Colors;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.client.renderer.entity.RendererLivingEntity;
+import net.minecraft.util.MathHelper;
 import org.lwjgl.opengl.GL11;
 
 public class SilentView extends Module {
@@ -59,6 +61,11 @@ public class SilentView extends Module {
 
                     currentYaw = em.getYaw();
                     currentPitch = em.getPitch();
+
+                    Killaura killaura = Client.getModuleManager().get(Killaura.class).cast();
+                    if (killaura.isEnabled() && Killaura.getTarget() != null && (boolean) killaura.getSetting("REDUCE").getValue()) {
+                        currentYaw = MathHelper.clamp_float(currentYaw, -90, 90);
+                    }
 
                     isSilent = true;
                 } else {
