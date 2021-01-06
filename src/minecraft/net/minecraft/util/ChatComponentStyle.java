@@ -104,13 +104,14 @@ public abstract class ChatComponentStyle implements IChatComponent
         String s = stringbuilder.toString();
 
         if (Client.getModuleManager().isEnabled(StreamerMode.class) && (boolean) Client.getModuleManager().get(StreamerMode.class).getSetting("PROTECT").getValue() && Minecraft.getMinecraft().thePlayer != null) {
-            if (getUnformattedText().contains(Minecraft.getMinecraft().session.getProfile().getName())) {
-                s = s.replaceAll(Minecraft.getMinecraft().session.getProfile().getName(), "\2479" + Client.getAuthUser().getDecryptedUsername() + "\247r");
+            String unformatted = getUnformattedText();
+            if (unformatted.contains(Minecraft.getMinecraft().session.getProfile().getName())) {
+                s = s.replaceAll(Minecraft.getMinecraft().session.getProfile().getName(), "\2479\247n" + Client.getAuthUser().getDecryptedUsername() + "\247r");
             }
 
             for (Friend friend : FriendManager.friendsList) {
-                if (getUnformattedText().contains(friend.name)) {
-                    s = s.replaceAll(friend.name, "\2479" + friend.alias + "\247r");
+                if (unformatted.contains(friend.name)) {
+                    s = s.replaceAll(friend.name, "\2479\247n" + friend.alias + "\247r");
                 }
             }
         }

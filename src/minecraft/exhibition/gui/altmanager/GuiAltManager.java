@@ -287,7 +287,7 @@ public class GuiAltManager extends PanoramaScreen {
             }
         }
 
-        String str = (Client.getModuleManager().isEnabled(StreamerMode.class) ? Minecraft.getMinecraft().session.getUsername().substring(0, Math.min(Minecraft.getMinecraft().session.getUsername().length(), 3)) : currentAlt.toString());
+        String str = currentAlt.toString();
 
 
         this.drawString(this.fontRendererObj, str, 10, 10, 14540253);

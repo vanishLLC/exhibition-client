@@ -183,6 +183,7 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
                     add(new AntiObby(new ModuleData(Player, "AntiObby", "Breaks the block under you when your head is in a block.")));
                     add(new NetGraph(new ModuleData(Other, "NetInfo", "Shows network information.")));
                     add(new StreamerMode(new ModuleData(Player, "StreamerMode", "Hides certain identifiable information.")));
+                    add(new AutoOOF(new ModuleData(Other, "AutoOOF", "Automatically runs /oof and disables Aura/KB when someone is staff banned.")));
 
                     if (Boolean.parseBoolean(System.getProperty("NEoBuMASs"))) {
                         add(new Aimbot(new ModuleData(Minigames, "Aimbot", "Cops n Crims aimbot.")));

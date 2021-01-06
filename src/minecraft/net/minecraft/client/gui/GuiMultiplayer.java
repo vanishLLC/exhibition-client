@@ -399,7 +399,7 @@ public class GuiMultiplayer extends GuiScreen implements GuiYesNoCallback
             }
         }
 
-        String str = "Current Alt: " + (Client.getModuleManager().isEnabled(StreamerMode.class) ? Minecraft.getMinecraft().session.getUsername().substring(0, Math.min(Minecraft.getMinecraft().session.getUsername().length(), 3)) : currentAlt);
+        String str = "Current Alt: " + currentAlt;
 
         this.drawCenteredString(this.fontRendererObj, str, this.width / 2, 5, 16777215);
         this.drawCenteredString(this.fontRendererObj, I18n.format("multiplayer.title"), this.width / 2, 20, 16777215);

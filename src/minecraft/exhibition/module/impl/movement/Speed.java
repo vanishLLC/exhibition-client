@@ -52,6 +52,7 @@ public class Speed extends Module {
     private String MODE = "MODE";
     private double speed;
     private double lastDist;
+    private double velocityBoost;
     public static int stage;
     private Setting<Boolean> lowhop = new Setting<>("LOWHOP", false, "Speed still full jumps up blocks, when attacking, or holding Jump. (HypixelSlow Only)");
     private Setting lowhopTarget = new Setting<>("LOW-TARGET", false, "Will lowhop when targeting players. (HypixelSlow Only)");
@@ -96,6 +97,7 @@ public class Speed extends Module {
         if (mc.thePlayer != null) {
             speed = defaultSpeed();
         }
+        velocityBoost = 0;
         lastDist = 0.0;
         stage = 2;
         Module[] modules = new Module[]{Client.getModuleManager().get(Phase.class), Client.getModuleManager().get(Fly.class), Client.getModuleManager().get(LongJump.class), Client.getModuleManager().get(Scaffold.class), Client.getModuleManager().get(Phase.class)};
@@ -174,13 +176,14 @@ public class Speed extends Module {
             if (packet instanceof S08PacketPlayerPosLook) {
                 stage = -15;
                 speed = 0;
+                velocityBoost = 0;
                 lastDist = 0;
             }
 
 
             if (packet instanceof S27PacketExplosion) {
                 S27PacketExplosion velocity = (S27PacketExplosion) packet;
-                lastDist += Math.sqrt(velocity.xMotion * velocity.xMotion + velocity.zMotion * velocity.zMotion)/3;
+                velocityBoost = Math.sqrt(velocity.xMotion * velocity.xMotion + velocity.zMotion * velocity.zMotion)/3;
             }
         }
         if (event instanceof EventStep && (boolean) step.getValue()) {
@@ -191,7 +194,7 @@ public class Speed extends Module {
                     Speed.stage = -1;
             }
         }
-        if (((boolean) water.getValue() && PlayerUtil.isInLiquid()) || Killaura.blockJump) {
+        if (((boolean) water.getValue() && PlayerUtil.isInLiquid()) || (Killaura.blockJump && Client.getModuleManager().isEnabled(Killaura.class))) {
             return;
         }
         switch (currentMode) {
@@ -215,6 +218,7 @@ public class Speed extends Module {
                 if (stage < 1) {
                     stage++;
                     lastDist = 0;
+                    velocityBoost = 0;
                     break;
                 }
                 if (event instanceof EventMove) {
@@ -264,6 +268,7 @@ public class Speed extends Module {
                     EventMove em = (EventMove) event;
                     if (stage < 0) {
                         lastDist = 0;
+                        velocityBoost = 0;
                         break;
                     }
                     if (steps > 2)
@@ -315,6 +320,7 @@ public class Speed extends Module {
                 if (stage <= 1) {
                     stage++;
                     lastDist = 0;
+                    velocityBoost = 0;
                     break;
                 }
                 if (event instanceof EventMove) {
@@ -339,6 +345,7 @@ public class Speed extends Module {
                         } else {
                             speed = defaultSpeed();
                             lastDist = 0;
+                            velocityBoost = 0;
                         }
 
                         speed = Math.max(speed, defaultSpeed());
@@ -369,10 +376,11 @@ public class Speed extends Module {
                     if (stage < 0) {
                         stage++;
                         lastDist = 0;
+                        velocityBoost = 0;
                         break;
                     }
                     double oldY = em.getY();
-                    if (Killaura.blockJump)
+                    if (Killaura.blockJump && Client.getModuleManager().isEnabled(Killaura.class))
                         return;
 
                     if (steps > 2)
@@ -481,6 +489,11 @@ public class Speed extends Module {
                     }
                     speed = Math.max(speed, moveSpeed);
 
+                    if(velocityBoost != 0) {
+                        speed += velocityBoost;
+                        velocityBoost = 0;
+                    }
+
                     //Stage checks if you're greater than 0 as step sets you -6 stage to make sure the player wont flag.
                     if (stage > 0) {
                         double forward = mc.thePlayer.movementInput.moveForward;
@@ -587,10 +600,10 @@ public class Speed extends Module {
                     if (stage < 0) {
                         stage++;
                         lastDist = 0;
+                        velocityBoost = 0;
                         break;
                     }
-                    double oldY = em.getY();
-                    if (Killaura.blockJump)
+                    if (Killaura.blockJump && Client.getModuleManager().isEnabled(Killaura.class))
                         return;
 
                     if (steps > 2)
@@ -606,7 +619,6 @@ public class Speed extends Module {
                     }
 
                     double moveSpeed = speed = (defaultSpeed()) * ((mc.thePlayer.isInsideOfMaterial(Material.vine)) ? 0.5 : (mc.thePlayer.isSneaking()) ? 0.8 : (PlayerUtil.isInLiquid() ? 0.54 : ((mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.1, mc.thePlayer.posZ)).getBlock().slipperiness == 0.98f) ? 2.4 : 1.0)));
-                    ;
 
                     if (stage == 1 && mc.thePlayer.isCollidedVertically && (mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f)) {
                         stage = 2;
@@ -665,8 +677,6 @@ public class Speed extends Module {
                             currentYaw += difference;
                         }
                     } else if (stage == 3) {
-//                        if (lastDist < 0.9149644)
-//                            lastDist = 0.9149644;
 
                         double bruh = 0.645D;
 
@@ -703,6 +713,11 @@ public class Speed extends Module {
 
                     }
                     speed = Math.max(speed, moveSpeed);
+
+                    if(velocityBoost != 0) {
+                        speed += velocityBoost;
+                        velocityBoost = 0;
+                    }
 
                     //Stage checks if you're greater than 0 as step sets you -6 stage to make sure the player wont flag.
                     if (stage > 0) {

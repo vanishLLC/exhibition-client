@@ -6,6 +6,7 @@ package exhibition.module.impl.other;
  * Creator: cool1
  */
 
+import exhibition.Client;
 import exhibition.event.Event;
 import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventMotionUpdate;
@@ -118,7 +119,7 @@ public class ChestStealer extends Module {
             if (!mc.thePlayer.capabilities.allowEdit)
                 return;
 
-            if ((Boolean) settings.get(CHESTAURA).getValue() && (mc.currentScreen == null) && !isStealing && Killaura.loaded.isEmpty() && Killaura.getTarget() == null && (!HypixelUtil.isInGame("SKYWARS") || HypixelUtil.isGameActive())) {
+            if ((Boolean) settings.get(CHESTAURA).getValue() && (mc.currentScreen == null) && !isStealing && ((Killaura) Client.getModuleManager().get(Killaura.class)).loaded.isEmpty() && Killaura.getTarget() == null && (!HypixelUtil.isInGame("SKYWARS") || HypixelUtil.isGameActive())) {
                 if (stealTimer.delay(2000) && isStealing) {
                     stealTimer.reset();
                     isStealing = false;
@@ -130,7 +131,7 @@ public class ChestStealer extends Module {
                             float x = chest.getPos().getX();
                             float y = chest.getPos().getY();
                             float z = chest.getPos().getZ();
-                            if (Killaura.loaded.isEmpty() && chest.lidAngle < 1 && Math.abs(RotationUtils.getYawChange(x + 0.5, z + 0.5)) < 90) {
+                            if (((Killaura) Client.getModuleManager().get(Killaura.class)).loaded.isEmpty() && chest.lidAngle < 1 && Math.abs(RotationUtils.getYawChange(x + 0.5, z + 0.5)) < 90) {
                                 if (!rayTrace.getValue() || mc.theWorld.rayTraceBlocks(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY + mc.thePlayer.getEyeHeight(), mc.thePlayer.posZ), new Vec3(x + 0.5, y + 0.9, z + 0.5)) == null) {
                                     if (!isStealing && !chest.isEmpty && mc.thePlayer.getDistance(x, y, z) < 4 && stealTimer.delay(1000) && mc.currentScreen == null) {
                                         this.chest = chest;

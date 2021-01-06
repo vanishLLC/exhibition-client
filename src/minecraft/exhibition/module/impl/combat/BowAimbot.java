@@ -5,6 +5,7 @@
  */
 package exhibition.module.impl.combat;
 
+import exhibition.Client;
 import exhibition.event.Event;
 import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventMotionUpdate;
@@ -56,7 +57,7 @@ public class BowAimbot extends Module {
             if (o instanceof EntityLivingBase) {
                 EntityLivingBase ent = (EntityLivingBase) o;
                 if (ent instanceof EntityPlayer && mc.thePlayer.canEntityBeSeen(ent) && !FriendManager.isFriend(ent.getName()) && ent.isEntityAlive()) {
-                    if (ent == Killaura.vip) {
+                    if (ent == ((Killaura) Client.getModuleManager().get(Killaura.class)).vip) {
                         return ent;
                     }
                     loaded.add(ent);

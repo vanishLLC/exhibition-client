@@ -1,5 +1,6 @@
 package exhibition.module.impl.movement;
 
+import exhibition.Client;
 import exhibition.event.Event;
 import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventMotionUpdate;
@@ -11,6 +12,7 @@ import exhibition.module.impl.combat.Killaura;
 import exhibition.util.NetUtil;
 import exhibition.util.PlayerUtil;
 import exhibition.util.misc.ChatUtil;
+import net.minecraft.block.material.Material;
 import net.minecraft.item.ItemBow;
 import net.minecraft.network.play.client.C07PacketPlayerDigging;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
@@ -37,16 +39,16 @@ public class NoSlowdown extends Module {
             if ((boolean) settings.get("VANILLA").getValue())
                 return;
             EventMotionUpdate em = (EventMotionUpdate) event;
+            Killaura killaura = ((Killaura) Client.getModuleManager().get(Killaura.class));
             if (shouldUnblock && !(Boolean) settings.get("VANILLA").getValue()) {
-                if (em.isPre() && (mc.thePlayer.isBlocking() && Killaura.isBlocking)) {
-                    Killaura.isBlocking = false;
-                    if (mc.thePlayer.onGround){
+                if (em.isPre() && (mc.thePlayer.isBlocking() && killaura.isBlocking)) {
+                    killaura.isBlocking = false;
+                    if (mc.thePlayer.onGround) {
                         NetUtil.sendPacketNoEvents(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, new BlockPos(-1, -1, -1), EnumFacing.DOWN));
-                        System.out.print("BruhBean");
                     }
                 }
-                if(em.isPost() && (mc.thePlayer.isBlocking() && !Killaura.isBlocking)) {
-                    Killaura.isBlocking = true;
+                if (em.isPost() && (mc.thePlayer.isBlocking() && !killaura.isBlocking)) {
+                    killaura.isBlocking = true;
                     NetUtil.sendPacket(new C08PacketPlayerBlockPlacement(mc.thePlayer.inventory.getCurrentItem()));
                 }
             }

@@ -1,5 +1,6 @@
 package exhibition.management.command.impl;
 
+import exhibition.Client;
 import exhibition.management.PriorityManager;
 import exhibition.management.command.Command;
 import exhibition.module.impl.combat.Killaura;
@@ -17,9 +18,11 @@ public class Target extends Command {
 
     @Override
     public void fire(String[] args) {
+        Killaura killaura = ((Killaura) Client.getModuleManager().get(Killaura.class));
+
         if (args == null) {
-            if (Killaura.vip != null) {
-                Killaura.vip = null;
+            if (killaura.vip != null) {
+                killaura.vip = null;
                 ChatUtil.printChat(chatPrefix + "Target entity cleared!");
                 return;
             }
@@ -29,7 +32,7 @@ public class Target extends Command {
         if (args.length > 0) {
             String name = args[0];
             if (name.equalsIgnoreCase("none")) {
-                Killaura.vip = null;
+                killaura.vip = null;
                 ChatUtil.printChat(chatPrefix + "Target entity cleared!");
                 return;
             }
@@ -55,23 +58,23 @@ public class Target extends Command {
             }
             if (mc.theWorld.getPlayerEntityByName(name) != null) {
                 EntityPlayer vip = mc.theWorld.getPlayerEntityByName(name);
-                if (vip != Killaura.vip && !PriorityManager.isPriority(vip)) {
-                    Killaura.vip = vip;
+                if (vip != killaura.vip && !PriorityManager.isPriority(vip)) {
+                    killaura.vip = vip;
                     ChatUtil.printChat(chatPrefix + "Now targeting " + args[0]);
                 } else {
                     PriorityManager.removePriority(vip);
                     vip.flags = 0;
-                    Killaura.vip = null;
+                    killaura.vip = null;
                     ChatUtil.printChat(chatPrefix + "Is no longer priority " + args[0]);
                 }
                 return;
             } else {
-                Killaura.vip = null;
+                killaura.vip = null;
                 ChatUtil.printChat(chatPrefix + "No entity with the name " + "\"" + args[0] + "\"" + " currently exists.");
             }
         } else {
-            if (Killaura.vip != null) {
-                Killaura.vip = null;
+            if (killaura.vip != null) {
+                killaura.vip = null;
                 ChatUtil.printChat(chatPrefix + "Target entity cleared!");
                 return;
             }

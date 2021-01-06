@@ -1,5 +1,6 @@
 package exhibition.module.impl.combat;
 
+import exhibition.Client;
 import exhibition.event.Event;
 import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventMotionUpdate;
@@ -109,7 +110,7 @@ public class AimAssist extends Module {
                 if (ent.isEntityAlive() && ent instanceof EntityPlayer && ent
                         .getDistanceToEntity(mc.thePlayer) < ((Number) settings.get(RANGE).getValue()).floatValue()
                         && fovCheck(ent)) {
-                    if (ent == Killaura.vip) {
+                    if (ent == ((Killaura) Client.getModuleManager().get(Killaura.class)).vip) {
                         return ent;
                     }
                     loaded.add(ent);

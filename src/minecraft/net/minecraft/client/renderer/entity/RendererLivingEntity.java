@@ -180,7 +180,10 @@ public abstract class RendererLivingEntity<T extends EntityLivingBase> extends R
                 float f6 = entity.limbSwing - entity.limbSwingAmount * (1.0F - partialTicks);
                 if (entity instanceof EntityPlayer && !ignoreChams) {
                     em.fire(entity, true, f6, f5, f7, f2, f8, f, 0.0625F);
-                    if (em.isCancelled()) return;
+                    if (em.isCancelled()) {
+                        GlStateManager.popMatrix();
+                        return;
+                    }
                 }
 
                 if (entity.isChild()) {

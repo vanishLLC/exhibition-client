@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
+import exhibition.Client;
 import exhibition.event.Event;
 import exhibition.event.EventSystem;
 import exhibition.event.impl.EventDeath;
@@ -1817,7 +1818,7 @@ public abstract class EntityPlayer extends EntityLivingBase
      */
     public void jump()
     {
-        if(Killaura.blockJump) {
+        if(Killaura.blockJump && Client.getModuleManager().isEnabled(Killaura.class)) {
             Killaura.wantedToJump = Minecraft.getMinecraft().gameSettings.keyBindJump.isPressed();
             return;
         }

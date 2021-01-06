@@ -1707,17 +1707,7 @@ public class EntityRenderer implements IResourceManagerReloadListener
             RenderHelper.enableStandardItemLighting();
             this.mc.mcProfiler.endStartSection("entities");
 
-            if (Reflector.ForgeHooksClient_setRenderPass.exists())
-            {
-                Reflector.callVoid(Reflector.ForgeHooksClient_setRenderPass, new Object[] {Integer.valueOf(0)});
-            }
-
             renderglobal.renderEntities(entity, frustum, partialTicks);
-
-            if (Reflector.ForgeHooksClient_setRenderPass.exists())
-            {
-                Reflector.callVoid(Reflector.ForgeHooksClient_setRenderPass, new Object[] {Integer.valueOf(-1)});
-            }
 
             RenderHelper.disableStandardItemLighting();
             this.disableLightmap();

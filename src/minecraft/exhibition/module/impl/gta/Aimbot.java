@@ -1553,7 +1553,7 @@ public class Aimbot extends Module {
     }
 
     public double getTargetWeight(EntityPlayer p) {
-        if (Killaura.vip == p || PriorityManager.isPriority(p)) {
+        if (((Killaura)Client.getModuleManager().get(Killaura.class)).vip == p || PriorityManager.isPriority(p)) {
             return Double.POSITIVE_INFINITY;
         }
 

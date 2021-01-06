@@ -158,7 +158,7 @@ public class AutoPot extends Module {
 
 
                             Killaura aura = (Killaura) Client.getModuleManager().get(Killaura.class);
-                            float yaw = aura.isEnabled() && !Killaura.loaded.isEmpty() ? aura.getLastYaw() : e.getYaw();
+                            float yaw = aura.isEnabled() && !((Killaura) Client.getModuleManager().get(Killaura.class)).loaded.isEmpty() ? aura.getLastYaw() : e.getYaw();
 
                             NetUtil.sendPacketNoEvents(new C03PacketPlayer.C06PacketPlayerPosLook(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, yaw, -89.9F, true)); // First canceled
 

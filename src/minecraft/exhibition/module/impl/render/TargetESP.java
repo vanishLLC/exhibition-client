@@ -14,6 +14,7 @@ import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.combat.Killaura;
+import exhibition.util.HypixelUtil;
 import exhibition.util.RenderingUtil;
 import exhibition.util.render.Colors;
 import net.minecraft.entity.Entity;
@@ -80,7 +81,7 @@ public class TargetESP extends Module {
     }
 
     public static boolean isPriority(EntityPlayer player) {
-        if (player.equals(Killaura.vip))
+        if (player.equals(((Killaura)Client.getModuleManager().get(Killaura.class)).vip))
             return true;
         if (PriorityManager.isPriority(player))
             return true;
@@ -92,6 +93,9 @@ public class TargetESP extends Module {
                 return true;
             }
             return player.getDisplayName().getFormattedText().contains(" \247c\247l");
+        }
+        if(Client.getModuleManager().isEnabled(TargetESP.class) && (player.getDisplayName().getFormattedText().contains("HELD")) && HypixelUtil.scoreboardContains("Event")) {
+            return true;
         }
         return false;
     }

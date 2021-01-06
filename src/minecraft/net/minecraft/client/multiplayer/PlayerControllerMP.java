@@ -657,7 +657,7 @@ public class PlayerControllerMP
     public void onStoppedUsingItem(EntityPlayer playerIn) {
         this.syncCurrentPlayItem();
         Module module = Client.getModuleManager().get(Killaura.class);
-        if((!module.isEnabled() || !(boolean)module.getSetting("AUTOBLOCK").getValue()) || (boolean)module.getSetting("AUTOBLOCK").getValue() && (Killaura.loaded.isEmpty() && Killaura.getTarget() == null)) {
+        if((!module.isEnabled() || !(boolean)module.getSetting("AUTOBLOCK").getValue()) || (boolean)module.getSetting("AUTOBLOCK").getValue() && (((Killaura) Client.getModuleManager().get(Killaura.class)).loaded.isEmpty() && Killaura.getTarget() == null)) {
             this.netClientHandler.addToSendQueue(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
         }
         playerIn.stopUsingItem();

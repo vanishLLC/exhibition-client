@@ -98,6 +98,7 @@ public class TargetStrafe extends Module {
             EventMotionUpdate em = event.cast();
             if (em.isPre()) {
                 setSuffix(pathMode.getSelected());
+                target = null;
                 target = Killaura.getTarget();
                 if (target == null)
                     for (Entity entity : mc.theWorld.getLoadedEntityList().stream().filter(Entity::isPlayerMP).sorted(Comparator.comparingDouble(o -> -o.getDistanceToEntity(mc.thePlayer))).collect(Collectors.toList())) {
@@ -106,8 +107,8 @@ public class TargetStrafe extends Module {
                             boolean nearest = targetMode.getSelected().equalsIgnoreCase("Nearby");
                             if ((nearest || (targetMode.getSelected().equals("Priority") && TargetESP.isPriority(ent)) || (targetMode.getSelected().equals("Aura Only") && Killaura.getTarget() == ent)) && mc.thePlayer.getDistanceToEntity(ent) <= range && (!(boolean) teams.getValue() || !TeamUtils.isTeam(mc.thePlayer, ent))) {
                                 target = ent;
-                                if (ent != Killaura.vip && magnet) {
-                                    Killaura.vip = ent;
+                                if (ent != ((Killaura) Client.getModuleManager().get(Killaura.class)).vip && magnet) {
+                                    ((Killaura) Client.getModuleManager().get(Killaura.class)).vip = ent;
                                 }
                             }
                         }

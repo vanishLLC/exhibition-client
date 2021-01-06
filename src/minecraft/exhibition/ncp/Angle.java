@@ -1,5 +1,6 @@
 package exhibition.ncp;
 
+import exhibition.util.HypixelUtil;
 import exhibition.util.MathUtils;
 import exhibition.util.misc.ChatUtil;
 import net.minecraft.entity.Entity;
@@ -62,6 +63,19 @@ public class Angle {
                 idDiffLast = true;
             }
         }
+
+        public AttackLocation(AttackLocation attackLocation) {
+            x = attackLocation.x;
+            y = attackLocation.y;
+            z = attackLocation.z;
+            yaw = attackLocation.yaw;
+            this.time = attackLocation.time;
+            this.damagedId = attackLocation.damagedId;
+            distSqLast = attackLocation.distSqLast;
+            yawDiffLast = attackLocation.yawDiffLast;
+            timeDiff = attackLocation.timeDiff;
+            idDiffLast = attackLocation.idDiffLast;
+        }
     }
 
     public static float yawDiff(float fromYaw, float toYaw) {
@@ -99,10 +113,24 @@ public class Angle {
     }
 
     public boolean willViolateYaw(final Location tempLocation, final Entity damagedEntity) {
-        LinkedList<AttackLocation> tempAttack = (LinkedList<AttackLocation>) angleHits.clone();
+        LinkedList<AttackLocation> tempAttack = new LinkedList<>();
+
+        // Deep clone of angleHits
+        for (AttackLocation angleHit : angleHits) {
+            tempAttack.add(new AttackLocation(angleHit));
+        }
 
         // Quick check for expiration of all entries.
         final long time = System.currentTimeMillis();
+
+        final Iterator<AttackLocation> realIterator = angleHits.iterator();
+        while (realIterator.hasNext()) {
+            final AttackLocation refLoc = realIterator.next();
+            if (time - refLoc.time > maxTimeDiff) {
+                realIterator.remove();
+            }
+        }
+
         AttackLocation lastLoc = tempAttack.isEmpty() ? null : tempAttack.getLast();
         if (lastLoc != null && time - lastLoc.time > maxTimeDiff) {
             tempAttack.clear();
@@ -121,7 +149,7 @@ public class Angle {
         while (it.hasNext()) {
             final AttackLocation refLoc = it.next();
             if (time - refLoc.time > maxTimeDiff) {
-//                it.remove();
+                it.remove();
                 continue;
             }
             deltaMove += refLoc.distSqLast;
@@ -181,11 +209,7 @@ public class Angle {
             //ChatUtil.printChat("Flagged Switching " + violation);
         }
 
-        if(violation > 50) {
-            return true;
-        }
-
-        return false;
+        return violation > (HypixelUtil.isInGame("HYPIXEL PIT") ? 60 : 50);
 
     }
 
