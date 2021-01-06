@@ -41,7 +41,7 @@ public class AutoOOF extends Module {
                 if (unformatted.contains("[WATCHDOG CHEAT DETECTION]")) {
                     watchdogTimer.reset();
                 }
-                if (!watchdogTimer.delay(1000) && unformatted.contains("Thanks for reporting it!")) {
+                if (watchdogTimer.delay(1000) && unformatted.contains("Thanks for reporting it!")) {
                     Notifications.getManager().post("Staff Ban Detected", "Disabled Aura/KB and /oof'd");
                     Module[] modules = new Module[]{Client.getModuleManager().get(Killaura.class), Client.getModuleManager().get(AntiVelocity.class)};
                     for (Module module : modules) {
