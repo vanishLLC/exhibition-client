@@ -42,7 +42,6 @@ public class NoSlowdown extends Module {
                     Killaura.isBlocking = false;
                     if (mc.thePlayer.onGround){
                         NetUtil.sendPacketNoEvents(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, new BlockPos(-1, -1, -1), EnumFacing.DOWN));
-                        System.out.print("BruhBean");
                     }
                 }
                 if(em.isPost() && (mc.thePlayer.isBlocking() && !Killaura.isBlocking)) {
