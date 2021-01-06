@@ -10,6 +10,7 @@ import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.combat.Killaura;
 import exhibition.util.NetUtil;
 import exhibition.util.PlayerUtil;
+import exhibition.util.misc.ChatUtil;
 import net.minecraft.item.ItemBow;
 import net.minecraft.network.play.client.C07PacketPlayerDigging;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
@@ -39,7 +40,10 @@ public class NoSlowdown extends Module {
             if (shouldUnblock && !(Boolean) settings.get("VANILLA").getValue()) {
                 if (em.isPre() && (mc.thePlayer.isBlocking() && Killaura.isBlocking)) {
                     Killaura.isBlocking = false;
-                    NetUtil.sendPacketNoEvents(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
+                    if (mc.thePlayer.onGround){
+                        NetUtil.sendPacketNoEvents(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, new BlockPos(-1, -1, -1), EnumFacing.DOWN));
+                        System.out.print("BruhBean");
+                    }
                 }
                 if(em.isPost() && (mc.thePlayer.isBlocking() && !Killaura.isBlocking)) {
                     Killaura.isBlocking = true;

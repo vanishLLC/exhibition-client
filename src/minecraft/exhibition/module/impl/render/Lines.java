@@ -8,6 +8,7 @@ package exhibition.module.impl.render;
 import exhibition.event.Event;
 import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventRender3D;
+import exhibition.management.ColorManager;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
@@ -17,10 +18,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityChest;
-import net.minecraft.tileentity.TileEntityMobSpawner;
-import net.minecraft.tileentity.TileEntitySign;
+import net.minecraft.tileentity.*;
 import org.lwjgl.opengl.GL11;
 
 /**
@@ -60,7 +58,9 @@ public class Lines extends Module {
             int color = -1;
             TileEntity ent = (TileEntity) o;
             if (o instanceof TileEntityChest && ((boolean) settings.get(CHEST).getValue())) {
-                color = Colors.getColor(114, 0, 187);
+                if (!(((TileEntityChest) o).getChestType() != 0) && !(((TileEntityChest) o).isEmpty || ((TileEntityChest) o).lidAngle > 0)) {
+                    color = Colors.getColor(114, 0, 187);
+                }
             }
 
             if (o instanceof TileEntityMobSpawner && ((boolean) settings.get(SPAWNER).getValue())) {
