@@ -206,7 +206,8 @@ public class ChestStealer extends Module {
 //                                            guiChest.handleMouseClick(slot, slot.slotNumber, 0, 1);
 //                                            //guiChest.handleMouseClick(slot, slot.slotNumber, 0, 6);
 //                                        }
-                                        guiChest.handleMouseClick(slot, slot.slotNumber, 0, 1);
+                                            guiChest.handleMouseClick(slot, slot.slotNumber, 0, 1);
+                                            //guiChest.handleMouseClick(slot, slot.slotNumber, 0, 6);
 
                                         canMissAgain = random.nextBoolean();
                                     } else if (randomMiss.getValue() && canMissAgain && stack == null && Math.random() > 0.95) {

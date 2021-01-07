@@ -11,6 +11,7 @@ import exhibition.module.impl.combat.AntiVelocity;
 import exhibition.module.impl.combat.Killaura;
 import exhibition.util.HypixelUtil;
 import exhibition.util.Timer;
+import exhibition.util.misc.ChatUtil;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S02PacketChat;
 
@@ -46,6 +47,7 @@ public class AutoOOF extends Module {
                 }
                 if (watchdogTimer.delay(1000) && unformatted.contains("Thanks for reporting it!")) {
                     Notifications.getManager().post("Staff Ban Detected", "Disabled Aura/KB and /oof'd");
+                    ChatUtil.sendChat("/oof");
                     Module[] modules = new Module[]{Client.getModuleManager().get(Killaura.class), Client.getModuleManager().get(AntiVelocity.class)};
                     for (Module module : modules) {
                         if (module.isEnabled()) {

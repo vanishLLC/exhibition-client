@@ -7,6 +7,7 @@ import exhibition.event.impl.EventPacket;
 import exhibition.event.impl.EventRenderGui;
 import exhibition.event.impl.EventScreenDisplay;
 import exhibition.event.impl.EventTick;
+import exhibition.management.notifications.dev.DevNotifications;
 import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
@@ -14,6 +15,7 @@ import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.movement.LongJump;
 import exhibition.util.*;
 import exhibition.util.Timer;
+import exhibition.util.misc.ChatUtil;
 import exhibition.util.render.Colors;
 import net.minecraft.client.gui.GuiDisconnected;
 import net.minecraft.client.gui.GuiDownloadTerrain;
@@ -49,6 +51,8 @@ public class Bypass extends Module {
 
     private int bruh;
 
+    private int lastValid = -1;
+
     private Timer c13Timer = new Timer();
 
     public Bypass(ModuleData data) {
@@ -74,6 +78,8 @@ public class Bypass extends Module {
 
     public void worldChange() {
         this.bruh = 0;
+        this.lastValid = -1;
+        this.resetPackets();
     }
 
     private final boolean b = Boolean.parseBoolean(System.getProperty("bypassSecret"));
@@ -174,21 +180,28 @@ public class Bypass extends Module {
                     this.bruh++;
                     if (bruh > 6) {
                         event.setCancelled(true);
-                        short s = (short) random.nextInt(32767);
-                        C0FPacketConfirmTransaction confirmTransaction = new C0FPacketConfirmTransaction(0, s, packet.getAccepted());
-                        if (Client.getModuleManager().isEnabled(LongJump.class)) {
+                        short s = (short) MathUtils.randomNumber(Short.MIN_VALUE / 3, Short.MIN_VALUE / 4);
+                        boolean sendNormal = bruh % 50 == 0 && (!Client.getModuleManager().isEnabled(LongJump.class) || bruh % 100 == 0);
+                        C0FPacketConfirmTransaction confirmTransaction = new C0FPacketConfirmTransaction(packet.getWindowId(), sendNormal ? (short) lastValid++ : (short) (s), packet.getAccepted());
+                        DevNotifications.getManager().post(bruh + " " + confirmTransaction.getUid() + " " + confirmTransaction.getAccepted() + (sendNormal ? " EEEEEE" : " M"));
+
+                        //packetList.add(new BruhPacket(confirmTransaction, DELAY.getValue().longValue()));
+                        if (Client.getModuleManager().isEnabled(LongJump.class) && !sendNormal) {
                             chokePackets.add(confirmTransaction);
                         } else {
                             c13Timer.reset();
                             NetUtil.sendPacketNoEvents(confirmTransaction);
                         }
+                    } else {
+                        DevNotifications.getManager().post(bruh + " " + packet.getUid() + " " + packet.getAccepted());
+                        lastValid = packet.getUid();
                     }
                 }
             }
 
             if (p instanceof C00PacketKeepAlive) {
-                if (DELAY.getValue().doubleValue() != 0) {
-                    packetList.add(new BruhPacket(p, (long) DELAY.getValue().doubleValue()));
+                if (DELAY.getValue().longValue() != 0) {
+                    packetList.add(new BruhPacket(p, (long) DELAY.getValue().longValue()));
                     event.setCancelled(true);
                 }
             }
@@ -242,12 +255,16 @@ public class Bypass extends Module {
     }
 
     public void sendPackets() {
+        boolean b = false;
         while (chokePackets.peek() != null) {
             Packet packet = chokePackets.poll();
-            if(packet != null) {
+            if (packet != null) {
+                b = true;
                 NetUtil.sendPacketNoEvents(packet);
             }
         }
+        if (b)
+            DevNotifications.getManager().post("\247aSent Packet");
         this.resetPackets();
     }
 

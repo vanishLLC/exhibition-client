@@ -521,9 +521,22 @@ public class Killaura extends Module {
                                         boolean willViolate = target.waitTicks <= 0 && Angle.INSTANCE.willViolateYaw(new Location(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, tempNewYaw, 0), target);
 
                                         if ((angleTimer.roundDelay(1000) && off >= 0.11 && !willViolate) || (angleTimer.roundDelay(250) && !willViolate && off >= 0.2)) {
-                                            newYaw += targetYaw / 1.1F;
-                                            angleTimer.reset();
-                                            em.setYaw((float) MathUtils.getIncremental(lastAngles.x += (newYaw), 30) + (float) randomNumber(4, -4));
+                                            newYaw += targetYaw;
+
+                                            Vec3 vecReverse = getDirection((float)MathUtils.getIncremental(lastAngles.x + MathHelper.wrapAngleTo180_float((newYaw + 180)),30), em.getPitch());
+                                            double newOffReverse = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), vecReverse,
+                                                    target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height,
+                                                    HypixelUtil.isInGame("DUEL") ? Direction.DIRECT_PRECISION / 2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1.25);
+
+                                            if(newYaw >= 50 && newOffReverse < 0.1) {
+                                                ChatUtil.printChat("Backwards " + MathHelper.wrapAngleTo180_float((newYaw + 180)) + " " + newYaw);
+                                                angleTimer.reset();
+                                                em.setYaw((float) MathUtils.getIncremental(lastAngles.x += MathHelper.wrapAngleTo180_float((newYaw + 180)), 30));
+                                                em.setPitch(180 - em.getPitch());
+                                            } else {
+                                                angleTimer.reset();
+                                                em.setYaw((float) MathUtils.getIncremental(lastAngles.x += (newYaw), 30));
+                                            }
                                         }
                                     }
 

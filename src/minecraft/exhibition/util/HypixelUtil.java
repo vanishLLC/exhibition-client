@@ -92,7 +92,7 @@ public class HypixelUtil {
 
                 for (Score score : arraylist1) {
                     ScorePlayerTeam scoreplayerteam1 = scoreboard.getPlayersTeam(score.getPlayerName());
-                    String s1 = ScorePlayerTeam.formatPlayerName(scoreplayerteam1, score.getPlayerName());
+                    String s1 = ScorePlayerTeam.formatPlayerName(scoreplayerteam1, score.getPlayerName()).replace("\uD83D\uDC7D", "");
 
                     if (StringUtils.stripControlCodes(s1).toLowerCase().contains(str.toLowerCase())) {
                         return true;
