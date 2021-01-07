@@ -828,7 +828,7 @@ public class ESP2D extends Module {
                     double x = ent.posX;
                     double y = ent.posY;
                     double z = ent.posZ;
-                    if (y > 70 && x < 30 && x > -30 && z < 30 && z > -30) {
+                    if (y > Client.instance.spawnY && x < 30 && x > -30 && z < 30 && z > -30) {
                         entityConvertedPointsMap.remove(ent);
                         continue;
                     }

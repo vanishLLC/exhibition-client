@@ -85,7 +85,7 @@ public class Nametags extends Module {
                     double x = ent.posX;
                     double y = ent.posY;
                     double z = ent.posZ;
-                    if (y > 86 && x < 30 && x > -30 && z < 30 && z > -30) {
+                    if (y > Client.instance.spawnY && x < 30 && x > -30 && z < 30 && z > -30) {
                         return;
                     }
                 }
@@ -420,7 +420,7 @@ public class Nametags extends Module {
                     double x = ent.posX;
                     double y = ent.posY;
                     double z = ent.posZ;
-                    if (y > 86 && x < 30 && x > -30 && z < 30 && z > -30) {
+                    if (y > Client.instance.spawnY && x < 30 && x > -30 && z < 30 && z > -30) {
                         entityPositions.remove(entity);
                         continue;
                     }

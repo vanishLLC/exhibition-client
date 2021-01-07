@@ -29,6 +29,9 @@ public class AutoOOF extends Module {
 
     @RegisterEvent(events = {EventPacket.class})
     public void onEvent(Event event) {
+        if(mc.thePlayer == null)
+            return;
+
         if (event instanceof EventPacket) {
             EventPacket ep = event.cast();
             Packet packet = ep.getPacket();

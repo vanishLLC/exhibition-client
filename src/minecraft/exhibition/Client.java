@@ -23,11 +23,16 @@ import exhibition.management.friend.FriendManager;
 import exhibition.management.waypoints.WaypointManager;
 import exhibition.module.Module;
 import exhibition.module.ModuleManager;
+import exhibition.util.MathUtils;
 import exhibition.util.Timer;
+import exhibition.util.misc.ChatUtil;
 import exhibition.util.security.*;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.network.Packet;
+import net.minecraft.network.play.server.S05PacketSpawnPosition;
+import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.util.CryptManager;
 import net.minecraft.util.ResourceLocation;
 
@@ -384,12 +389,31 @@ public class Client implements EventListener {
         return packetTimer.roundDelay(250);
     }
 
+    public double spawnY = 86;
+
     @RegisterEvent(events = {EventPacket.class})
     public void onEvent(Event event) {
         if (event instanceof EventPacket) {
             EventPacket eventPacket = event.cast();
+            Packet packet = eventPacket.getPacket();
             if (eventPacket.isIncoming()) {
                 packetTimer.reset();
+            }
+
+            if (packet instanceof S08PacketPlayerPosLook) {
+                S08PacketPlayerPosLook spawnPosition = (S08PacketPlayerPosLook) packet;
+
+                double x = spawnPosition.getX();
+                double y = spawnPosition.getY();
+                double z = spawnPosition.getZ();
+
+                double distance = Math.sqrt(x * x + z * z);
+
+                double yOffset = MathUtils.roundToPlace((y - (int) y), 10);
+
+                if (distance < 20 && yOffset == 0.6) {
+                    spawnY = y - 15;
+                }
             }
         }
     }
