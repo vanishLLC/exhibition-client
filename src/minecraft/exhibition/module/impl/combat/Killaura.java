@@ -75,6 +75,7 @@ public class Killaura extends Module {
 
     private Timer angleTimer = new Timer();
 
+    private Setting<Boolean> pitSpawn = new Setting<>("PIT-SPAWN", true, "Disables Killaura when in PIT spawn.");
     private Setting<Boolean> antiLag = new Setting<>("ANTI-LAG", true, "Prevents the Killaura from flagging you when lagging.");
     private Setting<Boolean> reduce = new Setting<>("REDUCE", false, "Reduces your rotations to prevent flags.");
     private Setting<Boolean> prediction = new Setting<>("PREDICTION", true, "Predicts where the player will be on server side.");
@@ -140,6 +141,7 @@ public class Killaura extends Module {
         addSetting(predictionScale);
         addSetting(maxTargets);
         addSetting(antiLag);
+        addSetting(pitSpawn);
         addSetting(new Setting<>("ATTACK-MODE", attackMode, "Customizes the Killaura attack mode."));
     }
 
@@ -176,6 +178,7 @@ public class Killaura extends Module {
     public void onDisable() {
         if (mc.thePlayer != null) {
             lastAngles.x = mc.thePlayer.rotationYaw;
+            lastAngles.y = mc.thePlayer.rotationPitch;
         }
         deltaHashMap.clear();
         loaded.clear();
@@ -199,8 +202,10 @@ public class Killaura extends Module {
         loaded.clear();
         disabled = false;
         allowCrits = true;
-        if (mc.thePlayer != null)
+        if (mc.thePlayer != null) {
             lastAngles.x = mc.thePlayer.rotationYaw;
+            lastAngles.y = mc.thePlayer.rotationPitch;
+        }
         disabled = false;
         isBlocking = false;
         isCritSetup = false;
@@ -263,9 +268,9 @@ public class Killaura extends Module {
 //                    ChatUtil.debug("Blocked " + mc.thePlayer.ticksExisted + " " + isBlocking);
 //                }
 
-                if(packet instanceof C01PacketChatMessage) {
-                    C01PacketChatMessage chatMessage = (C01PacketChatMessage)packet;
-                    if(chatMessage.getMessage().contains("/spawn")) {
+                if (packet instanceof C01PacketChatMessage) {
+                    C01PacketChatMessage chatMessage = (C01PacketChatMessage) packet;
+                    if (chatMessage.getMessage().contains("/spawn")) {
                         ChatUtil.printChat("Spawn " + chatMessage.getMessage());
                     }
                 }
@@ -382,6 +387,17 @@ public class Killaura extends Module {
             disable = true;
         }
 
+        boolean ignorePit = HypixelUtil.isInGame("THE HYPIXEL PIT") && pitSpawn.getValue();
+
+        if(ignorePit) {
+            double x = mc.thePlayer.posX;
+            double y = mc.thePlayer.posY;
+            double z = mc.thePlayer.posZ;
+            if (y > Client.instance.spawnY && x < 30 && x > -30 && z < 30 && z > -30) {
+                disable = true;
+            }
+        }
+
         float range = ((Number) settings.get(RANGE).getValue()).floatValue();
         boolean crits = (critModule.isEnabled() && critWaitTicks <= 0) &&
                 ((!Client.getModuleManager().isEnabled(Speed.class) || (mc.thePlayer.onGround && !PlayerUtil.isMoving())) && !Client.getModuleManager().isEnabled(Fly.class) && !Client.getModuleManager().isEnabled(LongJump.class)) &&
@@ -452,6 +468,7 @@ public class Killaura extends Module {
                                 if (!isBlocking)
                                     blockTimer.reset();
                                 lastAngles.x = mc.thePlayer.rotationYaw;
+                                lastAngles.y = mc.thePlayer.rotationPitch;
                                 target = null;
                                 deltaHashMap.clear();
                                 wait = 0;
@@ -474,7 +491,7 @@ public class Killaura extends Module {
 
                             double distance = MathUtils.roundToPlace(dist, 1);
 
-                            boolean shouldReduce = reduce.getValue() && distance <= 3;
+                            boolean shouldReduce = reduce.getValue() && distance <= 3.25;
 
                             float targetYaw = MathHelper.clamp_float(RotationUtils.getYawChangeGiven(target.posX, target.posZ, lastAngles.x), -180, 180);
                             int maxAngleStep = reduce.getValue() ? 180 : ((Number) settings.get(ANGLESTEP).getValue()).intValue();
@@ -496,6 +513,10 @@ public class Killaura extends Module {
                                 } else {
                                     em.setPitch(MathHelper.clamp_float(pitch / 1.1F, -89.5F, 89.5F));
 
+                                    if(lastAngles.y > 90 || lastAngles.y < -90) {
+                                        em.setPitch(180 - em.getPitch());
+                                    }
+
                                     Vec3 v = getDirection(lastAngles.x, em.getPitch());
                                     double off = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), v,
                                             target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height,
@@ -516,26 +537,29 @@ public class Killaura extends Module {
                                             em.setPitch(180 - em.getPitch());
                                     } else {
 
-                                        float tempNewYaw = (float) MathUtils.getIncremental(lastAngles.x + (targetYaw / 1.1F), 30);
+                                        float tempNewYaw = (float) MathUtils.getIncremental(lastAngles.x + (targetYaw / 1.1F), 20);
 
                                         boolean willViolate = target.waitTicks <= 0 && Angle.INSTANCE.willViolateYaw(new Location(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, tempNewYaw, 0), target);
 
                                         if ((angleTimer.roundDelay(1000) && off >= 0.11 && !willViolate) || (angleTimer.roundDelay(250) && !willViolate && off >= 0.2)) {
                                             newYaw += targetYaw;
 
-                                            Vec3 vecReverse = getDirection((float)MathUtils.getIncremental(lastAngles.x + MathHelper.wrapAngleTo180_float((newYaw + 180)),30), em.getPitch());
+                                            float normalDiff = Math.abs(newYaw);
+                                            float backwardsDiff = Math.abs(MathHelper.wrapAngleTo180_float(newYaw + 180));
+
+                                            Vec3 vecReverse = getDirection((float) MathUtils.getIncremental(lastAngles.x + MathHelper.wrapAngleTo180_float((newYaw + 180)), 30), 180 - em.getPitch());
                                             double newOffReverse = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), vecReverse,
                                                     target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height,
                                                     HypixelUtil.isInGame("DUEL") ? Direction.DIRECT_PRECISION / 2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1.25);
 
-                                            if(newYaw >= 50 && newOffReverse < 0.1) {
+                                            if (backwardsDiff < normalDiff && newOffReverse < 0.1) {
                                                 ChatUtil.printChat("Backwards " + MathHelper.wrapAngleTo180_float((newYaw + 180)) + " " + newYaw);
                                                 angleTimer.reset();
-                                                em.setYaw((float) MathUtils.getIncremental(lastAngles.x += MathHelper.wrapAngleTo180_float((newYaw + 180)), 30));
+                                                em.setYaw((float) MathUtils.getIncremental(lastAngles.x += MathHelper.wrapAngleTo180_float((newYaw + 180)), 20));
                                                 em.setPitch(180 - em.getPitch());
                                             } else {
                                                 angleTimer.reset();
-                                                em.setYaw((float) MathUtils.getIncremental(lastAngles.x += (newYaw), 30));
+                                                em.setYaw((float) MathUtils.getIncremental(lastAngles.x += (newYaw), 20));
                                             }
                                         }
                                     }
@@ -549,6 +573,8 @@ public class Killaura extends Module {
                                 em.setYaw((lastAngles.x += targetYaw / 1.1F));
                                 em.setPitch(MathHelper.clamp_float(pitch / 1.1F, -90, 90));
                             }
+
+                            lastAngles.y = em.getPitch();
 
                             boolean setupCrits = critModule.isOldCrits() || target.hurtTime <= 1 || (target.waitTicks <= 1);
 
@@ -645,16 +671,17 @@ public class Killaura extends Module {
                         } else {
                             if (AutoPot.haltTicks < 0) {
                                 lastAngles.x = em.getYaw();
-                            } else {
+                                lastAngles.y = em.getPitch();
+                            }/* else {
                                 em.setYaw(lastAngles.x);
-                            }
-                            lastAngles.y = em.getPitch();
+                            }*/
                         }
                     }
                 } else {
                     if (!isBlocking)
                         blockTimer.reset();
                     lastAngles.x = mc.thePlayer.rotationYaw;
+                    lastAngles.y = mc.thePlayer.rotationPitch;
                     deltaHashMap.clear();
                     target = null;
                     wait = 0;

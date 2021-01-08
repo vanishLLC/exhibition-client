@@ -267,15 +267,16 @@ public class Nametags extends Module {
                         if (armor || hovered && selectArmor.equals("Hover") || isPriority) {
                             List<ItemStack> itemsToRender = new ArrayList<>();
                             for (int i = 0; i < 5; i++) {
-                                ItemStack stack = ((EntityPlayer) ent).getEquipmentInSlot(i);
+                                ItemStack stack = ent.getEquipmentInSlot(i);
                                 if (stack != null) {
                                     itemsToRender.add(stack);
                                 }
                             }
-                            int x = -5 - (itemsToRender.size() * 10) / 2;
+                            int x = -5 - (itemsToRender.size() * 5);
                             for (ItemStack stack : itemsToRender) {
 
-                                int bruh = stack.getItemDamage() > 0 && stack.getMaxDamage() - stack.getItemDamage() > 0 ? -27 : -24;
+                                boolean stackDamaged = stack.getItemDamage() > 0 && stack.getMaxDamage() - stack.getItemDamage() > 0;
+                                int bruh = stackDamaged ? -27 : -24;
 
                                 RenderingUtil.rectangleBordered(x, bruh, x + 11, bruh + 11, 0.5, backgroundColor, borderColor);
                                 RenderHelper.enableGUIStandardItemLighting();
@@ -287,81 +288,71 @@ public class Nametags extends Module {
                                 GlStateManager.translate(-x + 0.5, -bruh, 0);
                                 x += 3;
                                 RenderHelper.disableStandardItemLighting();
-                                if (stack != null) {
-                                    int y = 21;
-                                    int sLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.sharpness.effectId,
-                                            stack);
-                                    int fLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.fireAspect.effectId,
-                                            stack);
-                                    int kLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.knockback.effectId,
-                                            stack);
-                                    if (sLevel > 0) {
-                                        drawEnchantTag("Sh" + getColor(sLevel) + sLevel, x, y);
-                                        y -= 9;
-                                    }
-                                    if (fLevel > 0) {
-                                        drawEnchantTag("Fir" + getColor(fLevel) + fLevel, x, y);
-                                        y -= 9;
-                                    }
-                                    if (kLevel > 0) {
-                                        drawEnchantTag("Kb" + getColor(kLevel) + kLevel, x, y);
-                                    } else if ((stack.getItem() instanceof ItemArmor)) {
-                                        int pLevel = EnchantmentHelper
-                                                .getEnchantmentLevel(Enchantment.protection.effectId, stack);
-                                        int tLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.thorns.effectId,
-                                                stack);
-                                        int uLevel = EnchantmentHelper
-                                                .getEnchantmentLevel(Enchantment.unbreaking.effectId, stack);
-                                        if (pLevel > 0) {
-                                            drawEnchantTag("P" + getColor(pLevel) + pLevel, x, y);
-                                            y -= 9;
-                                        }
-                                        if (tLevel > 0) {
-                                            drawEnchantTag("Th" + getColor(tLevel) + tLevel, x, y);
-                                            y -= 9;
-                                        }
-                                        if (uLevel > 0) {
-                                            drawEnchantTag("Unb" + getColor(uLevel) + uLevel, x, y);
-                                        }
-                                    } else if ((stack.getItem() instanceof ItemBow)) {
-                                        int powLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.power.effectId,
-                                                stack);
-                                        int punLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.punch.effectId,
-                                                stack);
-                                        int fireLevel = EnchantmentHelper
-                                                .getEnchantmentLevel(Enchantment.flame.effectId, stack);
-                                        if (powLevel > 0) {
-                                            drawEnchantTag("Pow" + getColor(powLevel) + powLevel, x, y);
-                                            y -= 9;
-                                        }
-                                        if (punLevel > 0) {
-                                            drawEnchantTag("Pun" + getColor(punLevel) + punLevel, x, y);
-                                            y -= 9;
-                                        }
-                                        if (fireLevel > 0) {
-                                            drawEnchantTag("Fir" + getColor(fireLevel) + fireLevel, x, y);
-                                        }
-                                    } else if (stack.getRarity() == EnumRarity.EPIC) {
-                                        drawEnchantTag("\2476\247lGod", x, y);
-                                    }
-                                    int potionEffect = (int) Math.round(255.0D
-                                            - (double) stack.getItemDamage() * 255.0D / (double) stack.getMaxDamage());
-                                    int var10 = 255 - potionEffect << 16 | potionEffect << 8;
-                                    Color customColor = new Color(var10).brighter();
-
-                                    int x2 = (x * 2);
-                                    if (stack.getItemDamage() > 0 && stack.getMaxDamage() - stack.getItemDamage() > 0) {
-                                        String aa = "" + (stack.getMaxDamage() - stack.getItemDamage());
-                                        double width = mc.fontRendererObj.getStringWidth(aa);
-                                        GlStateManager.pushMatrix();
-                                        GlStateManager.disableDepth();
-                                        GL11.glScalef(0.5F, 0.5F, 0.5F);
-                                        mc.fontRendererObj.drawStringWithShadow(aa, x2 - width / 4D, -9 - y, customColor.getRGB());
-                                        GlStateManager.enableDepth();
-                                        GlStateManager.popMatrix();
-                                    }
-                                    x += 10;
+                                int y = 21;
+                                int sLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.sharpness.effectId, stack);
+                                int fLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.fireAspect.effectId, stack);
+                                int kLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.knockback.effectId, stack);
+                                if (sLevel > 0) {
+                                    drawEnchantTag("Sh" + getColor(sLevel) + sLevel, x, y);
+                                    y -= 9;
                                 }
+                                if (fLevel > 0) {
+                                    drawEnchantTag("Fir" + getColor(fLevel) + fLevel, x, y);
+                                    y -= 9;
+                                }
+                                if (kLevel > 0) {
+                                    drawEnchantTag("Kb" + getColor(kLevel) + kLevel, x, y);
+                                } else if ((stack.getItem() instanceof ItemArmor)) {
+                                    int pLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.protection.effectId, stack);
+                                    int tLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.thorns.effectId, stack);
+                                    int uLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.unbreaking.effectId, stack);
+                                    if (pLevel > 0) {
+                                        drawEnchantTag("P" + getColor(pLevel) + pLevel, x, y);
+                                        y -= 9;
+                                    }
+                                    if (tLevel > 0) {
+                                        drawEnchantTag("Th" + getColor(tLevel) + tLevel, x, y);
+                                        y -= 9;
+                                    }
+                                    if (uLevel > 0) {
+                                        drawEnchantTag("Unb" + getColor(uLevel) + uLevel, x, y);
+                                    }
+                                } else if ((stack.getItem() instanceof ItemBow)) {
+                                    int powLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.power.effectId,
+                                            stack);
+                                    int punLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.punch.effectId,
+                                            stack);
+                                    int fireLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.flame.effectId, stack);
+                                    if (powLevel > 0) {
+                                        drawEnchantTag("Pow" + getColor(powLevel) + powLevel, x, y);
+                                        y -= 9;
+                                    }
+                                    if (punLevel > 0) {
+                                        drawEnchantTag("Pun" + getColor(punLevel) + punLevel, x, y);
+                                        y -= 9;
+                                    }
+                                    if (fireLevel > 0) {
+                                        drawEnchantTag("Fir" + getColor(fireLevel) + fireLevel, x, y);
+                                    }
+                                } else if (stack.getRarity() == EnumRarity.EPIC) {
+                                    drawEnchantTag("\2476\247lGod", x, y);
+                                }
+                                int potionEffect = (int) Math.round(255.0D - (double) stack.getItemDamage() * 255.0D / (double) stack.getMaxDamage());
+                                int var10 = 255 - potionEffect << 16 | potionEffect << 8;
+                                Color customColor = new Color(var10).brighter();
+
+                                int x2 = (x * 2);
+                                if (stackDamaged) {
+                                    String aa = "" + (stack.getMaxDamage() - stack.getItemDamage());
+                                    double width = mc.fontRendererObj.getStringWidth(aa);
+                                    GlStateManager.pushMatrix();
+                                    GlStateManager.disableDepth();
+                                    GL11.glScalef(0.5F, 0.5F, 0.5F);
+                                    mc.fontRendererObj.drawStringWithShadow(aa, x2 - width / 4D, -9 - y, customColor.getRGB());
+                                    GlStateManager.enableDepth();
+                                    GlStateManager.popMatrix();
+                                }
+                                x += 10;
                             }
                         }
                         GlStateManager.popMatrix();

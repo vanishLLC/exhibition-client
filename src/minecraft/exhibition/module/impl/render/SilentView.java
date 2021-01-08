@@ -66,7 +66,7 @@ public class SilentView extends Module {
                     Killaura killaura = Client.getModuleManager().get(Killaura.class).cast();
                     if (Client.getModuleManager().isEnabled(Bypass.class) && killaura.isEnabled() && Killaura.getTarget() != null && (boolean) killaura.getSetting("REDUCE").getValue() && (currentPitch > 90 || currentPitch < -90)) {
                         currentPitch = 180 - currentPitch;
-                        currentYaw = em.getYaw() + 180; // So your head isn't looking away from them
+                        currentYaw = currentYaw + 180; // So your head isn't looking away from them
                     }
 
                     isSilent = true;
