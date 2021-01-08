@@ -63,6 +63,8 @@ public class Speed extends Module {
     private Setting retard = new Setting<>("STEPS", 40.3, "retard", 0.1, 15, 180);
 
     private int ticks = 0;
+    private boolean reset = false;
+
 
     private float currentYaw;
 
@@ -94,6 +96,7 @@ public class Speed extends Module {
 
     @Override
     public void onEnable() {
+        reset = false;
         if (mc.thePlayer != null) {
             speed = defaultSpeed();
         }
@@ -155,6 +158,8 @@ public class Speed extends Module {
             int color = Colors.getColor(255, 0, 0, 255);
 
             String bruh = "Speed disabled " + MathUtils.roundToPlace((Math.abs(stage) / 20F), 1) + "s";
+            reset = true;
+
 
             GlStateManager.enableBlend();
             Depth.pre();
@@ -168,6 +173,9 @@ public class Speed extends Module {
             Depth.post();
             mc.fontRendererObj.drawString(bruh, res.getScaledWidth() / 2F - mc.fontRendererObj.getStringWidth(bruh) / 2F, res.getScaledHeight() / 2F - 37, color);
             GlStateManager.disableBlend();
+        }
+        if (stage == 3){
+            reset = false;
         }
 
         if (event instanceof EventPacket) {
@@ -405,7 +413,7 @@ public class Speed extends Module {
                         return;
                     }
 
-                    double moveSpeed = speed = (defaultSpeed()) * ((mc.thePlayer.isInsideOfMaterial(Material.vine)) ? 0.5 : (mc.thePlayer.isSneaking()) ? 0.8 : (PlayerUtil.isInLiquid() ? 0.6 : ((mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.1, mc.thePlayer.posZ)).getBlock().slipperiness == 0.98f) ? 2.4 : 1.0)));
+                    double moveSpeed = speed = (defaultSpeed()) * ((mc.thePlayer.isInsideOfMaterial(Material.vine)) ? 0.5 : (mc.thePlayer.isSneaking()) ? 0.8 : (PlayerUtil.isInLiquid() ? 0.6 : (reset) ? 0.53 : ((mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.1, mc.thePlayer.posZ)).getBlock().slipperiness == 0.98f) ? 2.4 : 1.0)));
                     ;
 
                     if (stage == 1 && mc.thePlayer.isCollidedVertically && (mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f)) {
@@ -618,7 +626,7 @@ public class Speed extends Module {
                         return;
                     }
 
-                    double moveSpeed = speed = (defaultSpeed()) * ((mc.thePlayer.isInsideOfMaterial(Material.vine)) ? 0.5 : (mc.thePlayer.isSneaking()) ? 0.8 : (PlayerUtil.isInLiquid() ? 0.54 : ((mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.1, mc.thePlayer.posZ)).getBlock().slipperiness == 0.98f) ? 2.4 : 1.0)));
+                    double moveSpeed = speed = (defaultSpeed()) * ((mc.thePlayer.isInsideOfMaterial(Material.vine)) ? 0.5 : (mc.thePlayer.isSneaking()) ? 0.8 : (PlayerUtil.isInLiquid() ? 0.54 : (reset) ? 0.53 : ((mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.1, mc.thePlayer.posZ)).getBlock().slipperiness == 0.98f) ? 2.4 : 1.0)));
 
                     if (stage == 1 && mc.thePlayer.isCollidedVertically && (mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f)) {
                         stage = 2;
