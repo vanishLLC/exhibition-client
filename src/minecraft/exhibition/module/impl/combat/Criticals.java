@@ -40,10 +40,6 @@ public class Criticals extends Module {
             return;
         }
 
-        if (this.isPacket()) {
-            //((Options) settings.get(PACKET).getValue()).setSelected("PacketOld");
-            //ChatUtil.printChat(Command.chatPrefix + "Swapped to PacketOld until Packet is fixed.");
-        }
         if (event instanceof EventMotionUpdate) {
             setSuffix(((Options) settings.get(PACKET).getValue()).getSelected());
         }

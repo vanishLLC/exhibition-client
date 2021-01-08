@@ -11,7 +11,6 @@ import exhibition.management.notifications.dev.DevNotifications;
 import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
-import exhibition.module.data.Options;
 import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.movement.Fly;
 import exhibition.module.impl.movement.LongJump;
@@ -266,8 +265,6 @@ public class Bypass extends Module {
                 NetUtil.sendPacketNoEvents(packet);
             }
         }
-        if (b)
-            DevNotifications.getManager().post("\247aSent Packet");
         this.resetPackets();
     }
 

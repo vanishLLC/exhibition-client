@@ -21,7 +21,6 @@ import exhibition.util.HypixelUtil;
 import exhibition.util.NetUtil;
 import exhibition.util.RotationUtils;
 import exhibition.util.Timer;
-import exhibition.util.misc.ChatUtil;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.enchantment.Enchantment;

@@ -43,7 +43,6 @@ import net.minecraft.item.ItemSword;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.*;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
-import net.minecraft.network.play.server.S2FPacketSetSlot;
 import net.minecraft.network.play.server.S45PacketTitle;
 import net.minecraft.util.*;
 import org.lwjgl.opengl.GL11;

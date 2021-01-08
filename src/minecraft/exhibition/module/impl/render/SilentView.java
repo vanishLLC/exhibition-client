@@ -17,7 +17,6 @@ import exhibition.util.render.Colors;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.client.renderer.entity.RendererLivingEntity;
-import net.minecraft.util.MathHelper;
 import org.lwjgl.opengl.GL11;
 
 public class SilentView extends Module {
