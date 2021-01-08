@@ -11,11 +11,11 @@ import exhibition.management.notifications.dev.DevNotifications;
 import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
+import exhibition.module.data.Options;
 import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.movement.LongJump;
 import exhibition.util.*;
 import exhibition.util.Timer;
-import exhibition.util.misc.ChatUtil;
 import exhibition.util.render.Colors;
 import net.minecraft.client.gui.GuiDisconnected;
 import net.minecraft.client.gui.GuiDownloadTerrain;
@@ -23,14 +23,12 @@ import net.minecraft.client.gui.GuiMultiplayer;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.multiplayer.GuiConnecting;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.entity.player.PlayerCapabilities;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C00PacketKeepAlive;
 import net.minecraft.network.play.client.C0DPacketCloseWindow;
 import net.minecraft.network.play.client.C0FPacketConfirmTransaction;
-import net.minecraft.network.play.client.C13PacketPlayerAbilities;
 import net.minecraft.network.play.server.S2DPacketOpenWindow;
 import net.minecraft.network.play.server.S30PacketWindowItems;
 
@@ -46,19 +44,22 @@ public class Bypass extends Module {
     public Setting<Number> DELAY = new Setting<>("DELAY", 300, "Spoof offset. This should be 500 - (your ping).", 5, 0, 1000);
     public Setting<Boolean> AUTOBYPASS = new Setting<>("AUTOBYPASS", false, "Automatically detects optimal delay value.");
 
+    private final Options mode = new Options("Mode", "Dong", "Dong", "Edwardo");
+
     private long startMS = -1;
     private int state = 0;
 
     private int bruh;
-
+    private int lastUid;
     private int lastValid = -1;
 
-    private Timer c13Timer = new Timer();
+    private final Timer c13Timer = new Timer();
 
     public Bypass(ModuleData data) {
         super(data);
-        settings.put(DELAY.getName(), DELAY);
-        settings.put(AUTOBYPASS.getName(), AUTOBYPASS);
+        addSetting(DELAY);
+        addSetting(AUTOBYPASS);
+        settings.put("MODE", new Setting<>("MODE", mode, "\"I'm gonna shoot you, you stupid fucking prisoner\" ~ 3DS 2021"));
     }
 
     @Override
@@ -77,12 +78,18 @@ public class Bypass extends Module {
     }
 
     public void worldChange() {
+        initialValues[0] = -1;
+        initialValues[1] = -2;
+        initialValues[2] = -3;
+        lastUid = 0;
         this.bruh = 0;
         this.lastValid = -1;
         this.resetPackets();
     }
 
     private final boolean b = Boolean.parseBoolean(System.getProperty("bypassSecret"));
+
+    private double[] initialValues = new double[3];
 
     @Override
     public void onDisable() {
@@ -92,26 +99,6 @@ public class Bypass extends Module {
             Notifications.getManager().post("Bypass Warning", "This feature is strongly recommended to bypass Watchdog.", 5_000, Notifications.Type.WARNING);
         }
     }
-
-    private void sendC13Packet() {
-        if (mc.getIntegratedServer() == null && mc.getCurrentServerData() != null) {
-            if (mc.getCurrentServerData() != null && (mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net"))) {
-                PlayerCapabilities pc = mc.thePlayer.capabilities;
-                PlayerCapabilities spoofedCapabilities = new PlayerCapabilities();
-                spoofedCapabilities.isCreativeMode = pc.isCreativeMode;
-                spoofedCapabilities.disableDamage = pc.disableDamage;
-                spoofedCapabilities.allowEdit = pc.allowEdit;
-                spoofedCapabilities.allowFlying = true;
-                spoofedCapabilities.isFlying = true;
-                spoofedCapabilities.setFlySpeed(pc.getFlySpeed());
-                spoofedCapabilities.setPlayerWalkSpeed(pc.getWalkSpeed());
-
-                NetUtil.sendPacketNoEvents(new C13PacketPlayerAbilities(spoofedCapabilities));
-            }
-        }
-    }
-
-    short lastBruh = 1337;
 
     private Random random = new Random();
 
@@ -175,27 +162,45 @@ public class Bypass extends Module {
 //            }
 
             if (p instanceof C0FPacketConfirmTransaction) {
+                boolean sendBurst = mode.getSelected().equalsIgnoreCase("Dong");
+
                 C0FPacketConfirmTransaction packet = (C0FPacketConfirmTransaction) p;
                 if (packet.getUid() < 0 && HypixelUtil.isVerifiedHypixel()) {
                     this.bruh++;
-                    if (bruh > 6) {
-                        event.setCancelled(true);
-                        short s = (short) MathUtils.randomNumber(Short.MIN_VALUE / 3, Short.MIN_VALUE / 4);
-                        boolean sendNormal = bruh % 50 == 0 && (!Client.getModuleManager().isEnabled(LongJump.class) || bruh % 100 == 0);
-                        C0FPacketConfirmTransaction confirmTransaction = new C0FPacketConfirmTransaction(packet.getWindowId(), sendNormal ? (short) lastValid++ : (short) (s), packet.getAccepted());
-                        DevNotifications.getManager().post(bruh + " " + confirmTransaction.getUid() + " " + confirmTransaction.getAccepted() + (sendNormal ? " EEEEEE" : " M"));
 
-                        //packetList.add(new BruhPacket(confirmTransaction, DELAY.getValue().longValue()));
-                        if (Client.getModuleManager().isEnabled(LongJump.class) && !sendNormal) {
-                            chokePackets.add(confirmTransaction);
-                        } else {
-                            c13Timer.reset();
-                            NetUtil.sendPacketNoEvents(confirmTransaction);
+                    if (sendBurst ? bruh > 10 : Math.abs(packet.getUid() - lastUid) < 3) {
+                        event.setCancelled(true);
+
+                        if (sendBurst && bruh % 100 == 0) {
+                            while (lastValid > packet.getUid()) {
+                                C0FPacketConfirmTransaction confirmTransaction = new C0FPacketConfirmTransaction(packet.getWindowId(), (short) --lastValid, packet.getAccepted());
+                                if (Client.getModuleManager().isEnabled(LongJump.class)) {
+                                    chokePackets.add(confirmTransaction);
+                                } else {
+                                    c13Timer.reset();
+                                    NetUtil.sendPacketNoEvents(confirmTransaction);
+                                }
+                            }
                         }
+
+                        if (Math.abs(packet.getUid() - lastUid) > 3) {
+                            C0FPacketConfirmTransaction confirmTransaction = new C0FPacketConfirmTransaction(packet.getWindowId(), packet.getUid(), packet.getAccepted());
+                            if (Client.getModuleManager().isEnabled(LongJump.class)) {
+                                chokePackets.add(confirmTransaction);
+                            } else {
+                                c13Timer.reset();
+                                NetUtil.sendPacketNoEvents(confirmTransaction);
+                            }
+                            bruh = 5;
+                            lastValid = 0;
+                            lastUid = 0;
+                            return;
+                        }
+
                     } else {
-                        DevNotifications.getManager().post(bruh + " " + packet.getUid() + " " + packet.getAccepted());
                         lastValid = packet.getUid();
                     }
+                    lastUid = packet.getUid();
                 }
             }
 

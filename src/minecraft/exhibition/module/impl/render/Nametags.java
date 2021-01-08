@@ -202,7 +202,7 @@ public class Nametags extends Module {
 
                         int color = Colors.getColor(255, (int) (255 * percentage));
 
-                        font.drawBorderedString(str, -strWidth / 2, -8.5F, color, Colors.getColor(200, (int) (190 * percentage)));
+                        font.drawBorderedString(str, -strWidth / 2, -8.5F, color, Colors.getColorOpacity(-1, (int) (190 * percentage)));
 
                         if (!AntiBot.isBot(ent)) {
                             double y = -strWidth / 2 - 2;
@@ -258,7 +258,7 @@ public class Nametags extends Module {
 
                             try {
                                 RenderingUtil.rectangleBordered(strWidth / 2 + 3, -11, strWidth / 2 + 3 + fullWidth, 0, 0.5, backgroundColor, borderColor);
-                                font.drawBorderedString(healthInfo, strWidth / 2 + 3.5 + fullWidth / 2 - strWidth2 / 2, -8.5, Colors.getColor(customColor.getRed(), customColor.getGreen(), customColor.getBlue(), (int) (255 * percentage)), Colors.getColor(0, (int) (190 * percentage)));
+                                font.drawBorderedString(healthInfo, strWidth / 2 + 3.5 + fullWidth / 2 - strWidth2 / 2, -8.5, Colors.getColor(customColor.getRed(), customColor.getGreen(), customColor.getBlue(), (int) (255 * percentage)), Colors.getColor(customColor.getRed(), customColor.getGreen(), customColor.getBlue(), (int) (190 * percentage)));
                             } catch (Exception ignored) {
 
                             }

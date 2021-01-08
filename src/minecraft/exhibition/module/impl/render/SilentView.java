@@ -10,6 +10,7 @@ import exhibition.management.ColorManager;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
+import exhibition.module.impl.combat.Bypass;
 import exhibition.module.impl.combat.Killaura;
 import exhibition.util.RenderingUtil;
 import exhibition.util.render.Colors;
@@ -63,8 +64,9 @@ public class SilentView extends Module {
                     currentPitch = em.getPitch();
 
                     Killaura killaura = Client.getModuleManager().get(Killaura.class).cast();
-                    if (killaura.isEnabled() && Killaura.getTarget() != null && (boolean) killaura.getSetting("REDUCE").getValue() && currentPitch > 90 || currentPitch < -90) {
+                    if (Client.getModuleManager().isEnabled(Bypass.class) && killaura.isEnabled() && Killaura.getTarget() != null && (boolean) killaura.getSetting("REDUCE").getValue() && (currentPitch > 90 || currentPitch < -90)) {
                         currentPitch = 180 - currentPitch;
+                        currentYaw = em.getYaw() + 180; // So your head isn't looking away from them
                     }
 
                     isSilent = true;

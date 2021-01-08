@@ -114,7 +114,7 @@ public class TargetStrafe extends Module {
                         }
                     }
 
-                if ((boolean) flip.getValue() && mc.thePlayer.isCollidedHorizontally && !collidedLast && delay.delay(1000)) {
+                if ((boolean) flip.getValue() && mc.thePlayer.isCollidedHorizontally && !collidedLast && delay.delay(450)) {
                     reverse = !reverse;
                     delay.reset();
                 }

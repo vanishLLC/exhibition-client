@@ -273,8 +273,8 @@ public class Killaura extends Module {
                 if (packet instanceof S45PacketTitle && (boolean) settings.get(DEATH).getValue()) {
                     S45PacketTitle titlePacket = ((S45PacketTitle) packet);
                     if (titlePacket.getType().equals(S45PacketTitle.Type.TITLE)) {
-                        String text = titlePacket.getMessage().getUnformattedText();
-                        if ((text.contains("YOU DIED") || text.contains("GAME OVER")) && isEnabled()) {
+                        String text = StringUtils.stripControlCodes(titlePacket.getMessage().getUnformattedText());
+                        if ((text.contains("DIED") || text.contains("GAME OVER")) && isEnabled()) {
                             target = null;
                             loaded.clear();
                             toggle();
@@ -289,7 +289,7 @@ public class Killaura extends Module {
             EventStep step = event.cast();
             boolean crits = (Client.getModuleManager().isEnabled(Criticals.class) && critWaitTicks <= 0) && (!Client.getModuleManager().isEnabled(Speed.class) && !Client.getModuleManager().isEnabled(Fly.class) && !Client.getModuleManager().isEnabled(LongJump.class));
             if (step.isPre() && crits && stepDelay > 0) {
-                critWaitTicks = 3;
+                critWaitTicks = critModule.isPacket() ? 2 : 3;
                 Killaura.wantsToStep = true;
                 event.setCancelled(true);
                 step.setActive(false);
@@ -968,16 +968,16 @@ public class Killaura extends Module {
             double offsetX = offset[0];
             double offsetZ = offset[1];
 
-            double posX = offsetX + mc.thePlayer.posX + motionX * 1.5;
+            double posX = offsetX + mc.thePlayer.posX + motionX;
             double posY = -0.45 + mc.thePlayer.posY;
-            double posZ = offsetZ + mc.thePlayer.posZ + motionZ * 1.5;
+            double posZ = offsetZ + mc.thePlayer.posZ + motionZ;
 
             if (isPosOnGround(posX, posY, posZ)) {
                 nextTickGround = true;
                 break;
             }
         }
-        boolean isGround = forceTrue || (!PlayerUtil.isMoving() || nextTickGround);
+        boolean isGround = forceTrue || nextTickGround;
         return isGround;
     }
 

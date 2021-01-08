@@ -6,6 +6,7 @@
 package exhibition.management.command.impl;
 
 import exhibition.management.command.Command;
+import exhibition.util.HypixelUtil;
 import exhibition.util.NetUtil;
 import exhibition.util.misc.ChatUtil;
 import net.minecraft.client.Minecraft;
@@ -47,7 +48,9 @@ public class Damage extends Command {
 
        // int counts = 0;
 
-        for (int index = 0; amountFallen < 3.0; index++) {
+        double minimalFall = HypixelUtil.isInGame("CAPTURE THE WOOL") ? 10 : 3;
+
+        for (int index = 0; amountFallen < minimalFall; index++) {
 
             double top = 0.0625234F + ((0.00039F * (Math.min(index, 35) / 39F)));
             double bottom = 0.000134F + ((0.0000000039F * (Math.min(index, 35) / 39F)));
@@ -59,7 +62,9 @@ public class Damage extends Command {
             NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + bottom, mc.thePlayer.posZ, false));
 
             //counts++;
-            if (amountFallen >= 3 + nigga) {
+
+
+            if (amountFallen >= minimalFall + nigga) {
                 break;
             }
         }
