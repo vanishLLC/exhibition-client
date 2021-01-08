@@ -174,7 +174,7 @@ public class Speed extends Module {
             mc.fontRendererObj.drawString(bruh, res.getScaledWidth() / 2F - mc.fontRendererObj.getStringWidth(bruh) / 2F, res.getScaledHeight() / 2F - 37, color);
             GlStateManager.disableBlend();
         }
-        if (stage == 3){
+        if (stage == 3) {
             reset = false;
         }
 
@@ -191,7 +191,7 @@ public class Speed extends Module {
 
             if (packet instanceof S27PacketExplosion) {
                 S27PacketExplosion velocity = (S27PacketExplosion) packet;
-                velocityBoost = Math.sqrt(velocity.xMotion * velocity.xMotion + velocity.zMotion * velocity.zMotion)/3;
+                velocityBoost = Math.sqrt(velocity.xMotion * velocity.xMotion + velocity.zMotion * velocity.zMotion) / 3;
             }
         }
         if (event instanceof EventStep && (boolean) step.getValue()) {
@@ -497,9 +497,10 @@ public class Speed extends Module {
                     }
                     speed = Math.max(speed, moveSpeed);
 
-                    if(velocityBoost != 0) {
-                        speed += velocityBoost;
-                        velocityBoost = 0;
+                    if (velocityBoost != 0) {
+                        speed += (velocityBoost *= 0.75);
+                        if (mc.thePlayer.hurtTime <= 0)
+                            velocityBoost = 0;
                     }
 
                     //Stage checks if you're greater than 0 as step sets you -6 stage to make sure the player wont flag.
@@ -722,9 +723,10 @@ public class Speed extends Module {
                     }
                     speed = Math.max(speed, moveSpeed);
 
-                    if(velocityBoost != 0) {
-                        speed += velocityBoost;
-                        velocityBoost = 0;
+                    if (velocityBoost != 0) {
+                        speed += (velocityBoost *= 0.75);
+                        if (mc.thePlayer.hurtTime <= 0)
+                            velocityBoost = 0;
                     }
 
                     //Stage checks if you're greater than 0 as step sets you -6 stage to make sure the player wont flag.

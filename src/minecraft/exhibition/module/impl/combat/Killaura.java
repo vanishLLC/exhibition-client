@@ -553,7 +553,7 @@ public class Killaura extends Module {
                                                     HypixelUtil.isInGame("DUEL") ? Direction.DIRECT_PRECISION / 2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1.25);
 
                                             if (backwardsDiff < normalDiff && newOffReverse < 0.1) {
-                                                ChatUtil.printChat("Backwards " + MathHelper.wrapAngleTo180_float((newYaw + 180)) + " " + newYaw);
+                                                //ChatUtil.printChat("Backwards " + MathHelper.wrapAngleTo180_float((newYaw + 180)) + " " + newYaw);
                                                 angleTimer.reset();
                                                 em.setYaw((float) MathUtils.getIncremental(lastAngles.x += MathHelper.wrapAngleTo180_float((newYaw + 180)), 20));
                                                 em.setPitch(180 - em.getPitch());
