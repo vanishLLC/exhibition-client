@@ -46,7 +46,7 @@ public class AutoOOF extends Module {
                     watchdogTimer.reset();
                 }
                 if (watchdogTimer.delay(1000) && unformatted.contains("Thanks for reporting it!")) {
-                    Notifications.getManager().post("Staff Ban Detected", "Disabled Aura/KB and /oof'd");
+                    Notifications.getManager().post("Staff Ban Detected", "Disabled Aura/KB and /oof'd", 5000, Notifications.Type.WARNING);
                     ChatUtil.sendChat("/oof");
                     Module[] modules = new Module[]{Client.getModuleManager().get(Killaura.class), Client.getModuleManager().get(AntiVelocity.class)};
                     for (Module module : modules) {

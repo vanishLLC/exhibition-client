@@ -499,7 +499,7 @@ public class Killaura extends Module {
 
                             double distance = MathUtils.roundToPlace(dist, 1);
 
-                            boolean shouldReduce = reduce.getValue() && distance <= 3.25;
+                            boolean shouldReduce = reduce.getValue() && distance <= 3;
 
                             float targetYaw = MathHelper.clamp_float(RotationUtils.getYawChangeGiven(target.posX, target.posZ, lastAngles.x), -180, 180);
                             int maxAngleStep = reduce.getValue() ? 180 : ((Number) settings.get(ANGLESTEP).getValue()).intValue();
