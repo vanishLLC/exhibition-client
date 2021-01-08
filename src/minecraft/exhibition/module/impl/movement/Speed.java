@@ -969,14 +969,6 @@ public class Speed extends Module {
                 break;
             }
             case "OnGround": {
-                if (event instanceof  EventStep){
-                    EventStep em = (EventStep) event;
-                    if (em.isPre()){
-                        speed = defaultSpeed();
-                    } else {
-                    }
-
-                }
                 if (event instanceof EventMotionUpdate) {
                     EventMotionUpdate em = (EventMotionUpdate) event;
                     if (em.isPre()) {
