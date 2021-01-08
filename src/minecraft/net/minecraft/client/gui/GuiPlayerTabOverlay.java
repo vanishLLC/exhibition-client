@@ -57,11 +57,11 @@ public class GuiPlayerTabOverlay extends Gui {
 
         if (Client.getModuleManager().isEnabled(StreamerMode.class) && (boolean) Client.getModuleManager().get(StreamerMode.class).getSetting("PROTECT").getValue() && mc.thePlayer != null)
             if (bruh.contains(mc.thePlayer.getName())) {
-                bruh = bruh.replaceAll(mc.thePlayer.getName(), "\2479\247l" + Client.getAuthUser().getDecryptedUsername() + "\247r");
+                bruh = bruh.replaceAll(mc.thePlayer.getName(), "\247d\247l" + Client.getAuthUser().getDecryptedUsername() + "\247r");
             } else {
                 for (Friend friend : FriendManager.friendsList) {
                     if (bruh.contains(friend.name)) {
-                        bruh = bruh.replaceAll(friend.name, "\2479\247l" + friend.alias + "\247r");
+                        bruh = bruh.replaceAll(friend.name, "\247d\247l" + friend.alias + "\247r");
                     }
                 }
             }

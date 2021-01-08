@@ -42,7 +42,9 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import org.lwjgl.opengl.GL11;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class HackerDetect extends Module {
@@ -57,13 +59,15 @@ public class HackerDetect extends Module {
     private Setting<Boolean> debugPhase = new Setting<>("DEBUG PHASE", false);
     private Setting<Boolean> chatBypass = new Setting<>("CHAT BYPASS", true);
 
-    private MultiBool checks = new MultiBool("Checks", chatBypass, killaura, autoBlock, cleaner, fastfly, scaffold, phase, debugPhase);
+    private MultiBool checks = new MultiBool("Checks", chatBypass, killaura, autoBlock, speed, cleaner, fastfly, scaffold, phase, debugPhase);
 
     private Setting<Boolean> teams = new Setting<>("TEAMS", false, "Doesn't report teammates.");
 
     private boolean ignore;
     private boolean hypixelLag;
     private double phasePosY = -1;
+
+    private Pattern pattern = Pattern.compile("[A-Za-z0-9_]+");
 
     public HackerDetect(ModuleData data) {
         super(data);
@@ -154,24 +158,69 @@ public class HackerDetect extends Module {
 
             if (packet instanceof S02PacketChat && chatBypass.getValue()) {
                 S02PacketChat s02PacketChat = (S02PacketChat) packet;
-                String[] charList = new String[]{"\u05fc"};
-                for (String character : charList) {
-                    String unformatted = s02PacketChat.getChatComponent().getUnformattedText();
-                    if (unformatted.contains(":") && unformatted.contains(character)) {
-                        List<Entity> validPlayers = mc.theWorld.getLoadedEntityList().stream().filter(o -> o instanceof EntityPlayer && o != mc.thePlayer &&
-                                !AntiBot.isBot(o) && !o.isInvisible() && !FriendManager.isFriend(o.getName())).collect(Collectors.toList());
-                        for (Entity entityPlayer : validPlayers) {
-                            EntityPlayer ent = (EntityPlayer) entityPlayer;
-                            if ((teams.getValue() && TeamUtils.isTeam(mc.thePlayer, ent)))
-                                continue;
+//                String[] charList = new String[]{"\u05fc"};
+//                for (String character : charList) {
+//                    String unformatted = s02PacketChat.getChatComponent().getUnformattedText();
+//                    if (unformatted.contains(":") && unformatted.contains(character)) {
+//                        List<Entity> validPlayers = mc.theWorld.getLoadedEntityList().stream().filter(o -> o instanceof EntityPlayer && o != mc.thePlayer &&
+//                                !AntiBot.isBot(o) && !o.isInvisible() && !FriendManager.isFriend(o.getName())).collect(Collectors.toList());
+//                        for (Entity entityPlayer : validPlayers) {
+//                            EntityPlayer ent = (EntityPlayer) entityPlayer;
+//                            if ((teams.getValue() && TeamUtils.isTeam(mc.thePlayer, ent)))
+//                                continue;
+//
+//                            if (unformatted.contains(ent.getName()) && !PriorityManager.isPriority(ent)) {
+//                                Notifications.getManager().post("Hacker Detected", ent.getName() + " may be using Chat Bypass.", 7500, Notifications.Type.WARNING);
+//                                if ((boolean) settings.get("REPORT").getValue())
+//                                    ChatUtil.sendChat("/wdr " + ent.getName() + " fly");
+//                                PriorityManager.setAsPriority(ent);
+//                                break;
+//                            }
+//                        }
+//                    }
+//                }
 
-                            if (unformatted.contains(ent.getName()) && !PriorityManager.isPriority(ent)) {
-                                Notifications.getManager().post("Hacker Detected", ent.getName() + " may be using Chat Bypass.", 7500, Notifications.Type.WARNING);
-                                if ((boolean) settings.get("REPORT").getValue())
-                                    ChatUtil.sendChat("/wdr " + ent.getName() + " fly");
-                                PriorityManager.setAsPriority(ent);
-                                break;
+                String unformatted = s02PacketChat.getChatComponent().getUnformattedText();
+                if (unformatted.contains(": ")) {
+                    List<Entity> validPlayers = new ArrayList<>(mc.theWorld.getLoadedEntityList()).stream().filter(o -> o instanceof EntityPlayer && o != mc.thePlayer &&
+                            !AntiBot.isBot(o) && !o.isInvisible() && !FriendManager.isFriend(o.getName())).collect(Collectors.toList());
+                    for (Entity entityPlayer : validPlayers) {
+                        EntityPlayer ent = (EntityPlayer) entityPlayer;
+                        if ((teams.getValue() && TeamUtils.isTeam(mc.thePlayer, ent)))
+                            continue;
+                        int unicodeCount = 0;
+
+                        try {
+                            String message = unformatted.split(": ")[1];
+
+                            boolean valid = pattern.matcher(message).matches();
+
+                            if (!valid) {
+                                for (int i = 0; i < message.length(); i++) {
+                                    char character = message.charAt(i);
+                                    if(!Character.isAlphabetic(character) && mc.fontRendererObj.getStringWidth(character + "") == 0) {
+                                        unicodeCount++;
+                                        if (unicodeCount > 2 && unformatted.contains(ent.getName()) && !PriorityManager.isPriority(ent)) {
+                                            if(character == '\u05fc') {
+                                                Notifications.getManager().post("Hacker Detected", ent.getName() + " may be using Novoline (CB).", 7500, Notifications.Type.WARNING);
+                                                if ((boolean) settings.get("REPORT").getValue())
+                                                    ChatUtil.sendChat("/wdr " + ent.getName() + " fly");
+                                                PriorityManager.setAsPriority(ent);
+                                            } else {
+                                                Notifications.getManager().post("Hacker Detected", ent.getName() + " may be using Chat Bypass.", 7500, Notifications.Type.WARNING);
+                                                if ((boolean) settings.get("REPORT").getValue())
+                                                    ChatUtil.sendChat("/wdr " + ent.getName() + " fly");
+                                                PriorityManager.setAsPriority(ent);
+                                            }
+
+
+                                            break;
+                                        }
+                                    }
+                                }
                             }
+                        } catch (Exception e) {
+
                         }
                     }
                 }
@@ -412,7 +461,7 @@ public class HackerDetect extends Module {
                         ent.lastFlaggedTick = ent.ticksExisted;
                     }
 
-                    if(ent.isBlocking()) {
+                    if (ent.isBlocking()) {
                         speedFlags *= 1.5;
                     }
 
@@ -525,7 +574,7 @@ public class HackerDetect extends Module {
                      */
                 if ((HypixelUtil.scoreboardContains("start 0:0") && HypixelUtil.isInGame("SKYWARS") && HypixelUtil.scoreboardContains("teams left")) && phasePosY == -1) {
                     //ChatUtil.printChat("Phase pos C " + (int) mc.thePlayer.posY);
-                        phasePosY = mc.thePlayer.posY;
+                    phasePosY = mc.thePlayer.posY;
                     ignore = true;
                 }
             }
@@ -593,9 +642,9 @@ public class HackerDetect extends Module {
 //                        fallCheck = false;
 //                    }
 //                }
-                }
             }
-            }
+        }
+    }
 
     private boolean isBlockUnder(EntityPlayer player) {
         for (int i = (int) (player.posY); i >= 0; i--) {

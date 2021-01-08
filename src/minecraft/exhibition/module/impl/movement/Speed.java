@@ -499,8 +499,6 @@ public class Speed extends Module {
 
                     if (velocityBoost != 0 && stage > 0) {
                         speed += (velocityBoost *= 0.66);
-                        if (mc.thePlayer.hurtTime <= 0)
-                            velocityBoost = 0;
                     }
 
                     //Stage checks if you're greater than 0 as step sets you -6 stage to make sure the player wont flag.
@@ -725,8 +723,6 @@ public class Speed extends Module {
 
                     if (velocityBoost != 0 && stage > 0) {
                         speed += (velocityBoost *= 0.66);
-                        if (mc.thePlayer.hurtTime <= 0)
-                            velocityBoost = 0;
                     }
 
                     //Stage checks if you're greater than 0 as step sets you -6 stage to make sure the player wont flag.
