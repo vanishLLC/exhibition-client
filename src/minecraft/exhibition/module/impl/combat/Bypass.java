@@ -44,8 +44,6 @@ public class Bypass extends Module {
     public Setting<Number> DELAY = new Setting<>("DELAY", 300, "Spoof offset. This should be 500 - (your ping).", 5, 0, 1000);
     public Setting<Boolean> AUTOBYPASS = new Setting<>("AUTOBYPASS", false, "Automatically detects optimal delay value.");
 
-    private final Options mode = new Options("Mode", "Dong", "Dong", "Edwardo");
-
     private long startMS = -1;
     private int state = 0;
 
@@ -59,7 +57,6 @@ public class Bypass extends Module {
         super(data);
         addSetting(DELAY);
         addSetting(AUTOBYPASS);
-        settings.put("MODE", new Setting<>("MODE", mode, "\"I'm gonna shoot you, you stupid fucking prisoner\" ~ 3DS 2021"));
     }
 
     @Override
@@ -162,16 +159,14 @@ public class Bypass extends Module {
 //            }
 
             if (p instanceof C0FPacketConfirmTransaction) {
-                boolean sendBurst = mode.getSelected().equalsIgnoreCase("Dong");
-
                 C0FPacketConfirmTransaction packet = (C0FPacketConfirmTransaction) p;
                 if (packet.getUid() < 0 && HypixelUtil.isVerifiedHypixel()) {
                     this.bruh++;
 
-                    if (sendBurst ? bruh > 10 : Math.abs(packet.getUid() - lastUid) < 3) {
+                    if (bruh > 10) {
                         event.setCancelled(true);
 
-                        if (sendBurst && bruh % 100 == 0) {
+                        if (bruh % 100 == 0) {
                             while (lastValid > packet.getUid()) {
                                 C0FPacketConfirmTransaction confirmTransaction = new C0FPacketConfirmTransaction(packet.getWindowId(), (short) --lastValid, packet.getAccepted());
                                 if (Client.getModuleManager().isEnabled(LongJump.class)) {
@@ -206,7 +201,7 @@ public class Bypass extends Module {
 
             if (p instanceof C00PacketKeepAlive) {
                 if (DELAY.getValue().longValue() != 0) {
-                    packetList.add(new BruhPacket(p, (long) DELAY.getValue().longValue()));
+                    packetList.add(new BruhPacket(p, DELAY.getValue().longValue()));
                     event.setCancelled(true);
                 }
             }
@@ -222,7 +217,7 @@ public class Bypass extends Module {
             packetList.removeAll(packetsToRemove);
 
             ScaledResolution res = new ScaledResolution(mc);
-            if (state < 2 && (boolean) AUTOBYPASS.getValue()) {
+            if (state < 2 && AUTOBYPASS.getValue()) {
                 GlStateManager.pushMatrix();
                 float centerX = (float) res.getScaledWidth_double() / 2F, centerY = (float) res.getScaledHeight_double() / 2F;
                 boolean holding = mc.thePlayer.inventory.getCurrentItem() != null && mc.thePlayer.inventory.getCurrentItem().getItem() != null && Item.getIdFromItem(mc.thePlayer.inventory.getCurrentItem().getItem()) == 345;
