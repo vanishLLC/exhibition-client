@@ -13,6 +13,7 @@ import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.Options;
 import exhibition.module.data.settings.Setting;
+import exhibition.module.impl.movement.Fly;
 import exhibition.module.impl.movement.LongJump;
 import exhibition.util.*;
 import exhibition.util.Timer;
@@ -109,7 +110,7 @@ public class Bypass extends Module {
 
         if (event instanceof EventPacket) {
             if (mc.thePlayer != null) {
-                if (!Client.getModuleManager().isEnabled(LongJump.class) || c13Timer.delay(7_000)) {
+                if (!Client.getModuleManager().isEnabled(LongJump.class) || !Client.getModuleManager().isEnabled(Fly.class) || c13Timer.delay(7_000)) {
                     c13Timer.reset();
                     sendPackets();
                 }
@@ -174,7 +175,7 @@ public class Bypass extends Module {
                         if (sendBurst && bruh % 100 == 0) {
                             while (lastValid > packet.getUid()) {
                                 C0FPacketConfirmTransaction confirmTransaction = new C0FPacketConfirmTransaction(packet.getWindowId(), (short) --lastValid, packet.getAccepted());
-                                if (Client.getModuleManager().isEnabled(LongJump.class)) {
+                                if (Client.getModuleManager().isEnabled(LongJump.class) || Client.getModuleManager().isEnabled(Fly.class)) {
                                     chokePackets.add(confirmTransaction);
                                 } else {
                                     c13Timer.reset();
@@ -185,7 +186,7 @@ public class Bypass extends Module {
 
                         if (Math.abs(packet.getUid() - lastUid) > 3) {
                             C0FPacketConfirmTransaction confirmTransaction = new C0FPacketConfirmTransaction(packet.getWindowId(), packet.getUid(), packet.getAccepted());
-                            if (Client.getModuleManager().isEnabled(LongJump.class)) {
+                            if (Client.getModuleManager().isEnabled(LongJump.class) || Client.getModuleManager().isEnabled(Fly.class)) {
                                 chokePackets.add(confirmTransaction);
                             } else {
                                 c13Timer.reset();
