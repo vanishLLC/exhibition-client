@@ -14,6 +14,7 @@ import net.minecraft.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class HypixelUtil {
@@ -81,7 +82,12 @@ public class HypixelUtil {
             try {
                 Scoreboard scoreboardBruh = scoreobjective1.getScoreboard();
                 Collection<Score> collection = scoreboardBruh.getSortedScores(scoreobjective1);
-                ArrayList<Score> arraylist = collection.stream().filter(p_apply_1_ -> p_apply_1_.getPlayerName() != null && !p_apply_1_.getPlayerName().startsWith("#")).collect(Collectors.toCollection(Lists::newArrayList));
+                ArrayList<Score> arraylist = collection.stream().filter(new Predicate<Score>() {
+                    @Override
+                    public boolean test(Score score) {
+                        return score.getPlayerName() != null && !score.getPlayerName().startsWith("#");
+                    }
+                }).collect(Collectors.toCollection(Lists::newArrayList));
                 ArrayList<Score> arraylist1;
 
                 if (arraylist.size() > 15) {
