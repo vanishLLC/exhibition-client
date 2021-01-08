@@ -209,7 +209,7 @@ public class Angle {
             //ChatUtil.printChat("Flagged Switching " + violation);
         }
 
-        return violation > (HypixelUtil.isInGame("HYPIXEL PIT") ? 60 : 50);
+        return violation > 50;
 
     }
 

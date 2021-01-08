@@ -497,8 +497,8 @@ public class Speed extends Module {
                     }
                     speed = Math.max(speed, moveSpeed);
 
-                    if (velocityBoost != 0) {
-                        speed += (velocityBoost *= 0.75);
+                    if (velocityBoost != 0 && stage > 0) {
+                        speed += (velocityBoost *= 0.66);
                         if (mc.thePlayer.hurtTime <= 0)
                             velocityBoost = 0;
                     }
@@ -723,8 +723,8 @@ public class Speed extends Module {
                     }
                     speed = Math.max(speed, moveSpeed);
 
-                    if (velocityBoost != 0) {
-                        speed += (velocityBoost *= 0.75);
+                    if (velocityBoost != 0 && stage > 0) {
+                        speed += (velocityBoost *= 0.66);
                         if (mc.thePlayer.hurtTime <= 0)
                             velocityBoost = 0;
                     }

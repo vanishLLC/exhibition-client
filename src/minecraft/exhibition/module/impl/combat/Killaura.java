@@ -181,7 +181,11 @@ public class Killaura extends Module {
             lastAngles.y = mc.thePlayer.rotationPitch;
         }
         deltaHashMap.clear();
-        loaded.clear();
+        try {
+            loaded.clear();
+        } catch (Exception e) {
+
+        }
         disabled = false;
         allowCrits = true;
         isBlocking = false;
@@ -199,7 +203,11 @@ public class Killaura extends Module {
     @Override
     public void onEnable() {
         deltaHashMap.clear();
-        loaded.clear();
+        try {
+            loaded.clear();
+        } catch (Exception e) {
+
+        }
         disabled = false;
         allowCrits = true;
         if (mc.thePlayer != null) {
