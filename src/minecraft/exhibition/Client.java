@@ -55,7 +55,7 @@ public class Client implements EventListener {
     public static boolean isNewUser;
 
     // Client data
-    public static String version = "010121";
+    public static String version = "010821";
     public static String parsedVersion;
     public static String clientName = "ArthimoWare";
     public static ColorManager cm = new ColorManager();
