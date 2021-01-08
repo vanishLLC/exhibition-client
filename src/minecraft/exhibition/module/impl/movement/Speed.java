@@ -152,7 +152,7 @@ public class Speed extends Module {
         if (mc.thePlayer.isDead)
             return;
 
-        if (stage < 0 && event instanceof EventRenderGui) {
+        if (stage < 0 && event instanceof EventRenderGui && !currentMode.equalsIgnoreCase("onground")) {
             ScaledResolution res = new ScaledResolution(mc);
             //Renders block count. TODO: Make text clearer.
             int color = Colors.getColor(255, 0, 0, 255);
@@ -971,17 +971,29 @@ public class Speed extends Module {
                 break;
             }
             case "OnGround": {
+                if (event instanceof  EventStep){
+                    EventStep em = (EventStep) event;
+                    if (em.isPre()){
+                        speed = defaultSpeed();
+                    } else {
+                    }
+
+                }
                 if (event instanceof EventMotionUpdate) {
                     EventMotionUpdate em = (EventMotionUpdate) event;
                     if (em.isPre()) {
-                        mc.timer.timerSpeed = 1.085f;
+                       mc.timer.timerSpeed = 1.065f + ((float) Math.random() * 0.2f);
                         double forward = mc.thePlayer.movementInput.moveForward;
                         double strafe = mc.thePlayer.movementInput.moveStrafe;
                         if ((forward != 0 || strafe != 0) && !mc.thePlayer.isJumping && !mc.thePlayer.isInWater() && !mc.thePlayer.isOnLadder() && (!mc.thePlayer.isCollidedHorizontally)) {
                             em.setY(mc.thePlayer.posY + (mc.thePlayer.ticksExisted % 2 != 0 ? 0.42F : 0));
                         }
-                        speed = Math.max(mc.thePlayer.ticksExisted % 2 == 0 ? 2.1 : 1.3, defaultSpeed());
+                        speed = Math.max(mc.thePlayer.ticksExisted % 2 == 0 ? (2 + (0.084541487 + (int)(Math.random() * 0.09878956)))  : (1 + (0.3291651713 + (int)(Math.random() * 0.396541521))), defaultSpeed());
                         float yaw = mc.thePlayer.rotationYaw;
+                        if (mc.thePlayer.fallDistance > 0){
+                            speed = defaultSpeed();
+                            mc.timer.timerSpeed = 0.7f;
+                        }
                         if ((forward == 0.0D) && (strafe == 0.0D)) {
                             mc.thePlayer.motionX = (0.0D);
                             mc.thePlayer.motionZ = (0.0D);
@@ -1006,8 +1018,8 @@ public class Speed extends Module {
                             }
                             double cos = Math.cos(Math.toRadians(yaw + 90.0F));
                             double sin = Math.sin(Math.toRadians(yaw + 90.0F));
-                            mc.thePlayer.motionX = (forward * speed * cos + strafe * speed * sin);
-                            mc.thePlayer.motionZ = (forward * speed * sin - strafe * speed * cos);
+                                mc.thePlayer.motionX = (forward * speed * cos + strafe * speed * sin);
+                                mc.thePlayer.motionZ = (forward * speed * sin - strafe * speed * cos);
                         }
                     }
                 }
