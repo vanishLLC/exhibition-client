@@ -181,7 +181,6 @@ public abstract class RendererLivingEntity<T extends EntityLivingBase> extends R
                 if (entity instanceof EntityPlayer && !ignoreChams) {
                     em.fire(entity, true, f6, f5, f7, f2, f8, f, 0.0625F);
                     if (em.isCancelled()) {
-                        GlStateManager.popMatrix();
                         return;
                     }
                 }
