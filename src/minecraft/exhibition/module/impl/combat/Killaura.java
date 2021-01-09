@@ -314,32 +314,38 @@ public class Killaura extends Module {
             return;
         }
         if (event instanceof EventRender3D) {
-            if ((boolean) indicator.getValue() && loaded.size() > 0) {
+            if ((boolean) indicator.getValue()) {
                 EventRender3D er = event.cast();
+                GL11.glPushMatrix();
+                RenderingUtil.pre3D();
+                mc.entityRenderer.setupCameraTransform(mc.timer.renderPartialTicks, 2);
 
-                for (EntityLivingBase target : new ArrayList<>(loaded)) {
-                    double[] p = getPrediction(target, predictionTicks.getValue().intValue(), predictionTicks.getValue().doubleValue());
+                try {
+                    Iterator<EntityLivingBase> loadedIter = loaded.iterator();
+                    while (loadedIter.hasNext()) {
+                        EntityLivingBase target = loadedIter.next();
+                        double[] p = getPrediction(target, predictionTicks.getValue().intValue(), predictionTicks.getValue().doubleValue());
 
-                    GL11.glPushMatrix();
-                    RenderingUtil.pre3D();
-                    mc.entityRenderer.setupCameraTransform(mc.timer.renderPartialTicks, 2);
+                        double x = (target.prevPosX + (target.posX - target.prevPosX) * er.renderPartialTicks) - RenderManager.renderPosX + p[0];
+                        double y = (target.prevPosY + (target.posY - target.prevPosY) * er.renderPartialTicks) - RenderManager.renderPosY + p[1];
+                        double z = (target.prevPosZ + (target.posZ - target.prevPosZ) * er.renderPartialTicks) - RenderManager.renderPosZ + p[2];
+                        GlStateManager.translate(x, y, z);
+                        GlStateManager.rotate(-(target.prevRotationYawHead + (target.rotationYawHead - target.prevRotationYawHead) * er.renderPartialTicks), 0, 1, 0);
+                        float collisSize = target.getCollisionBorderSize();
 
-                    double x = (target.prevPosX + (target.posX - target.prevPosX) * er.renderPartialTicks) - RenderManager.renderPosX + p[0];
-                    double y = (target.prevPosY + (target.posY - target.prevPosY) * er.renderPartialTicks) - RenderManager.renderPosY + p[1];
-                    double z = (target.prevPosZ + (target.posZ - target.prevPosZ) * er.renderPartialTicks) - RenderManager.renderPosZ + p[2];
-                    GlStateManager.translate(x, y, z);
-                    GlStateManager.rotate(-(target.prevRotationYawHead + (target.rotationYawHead - target.prevRotationYawHead) * er.renderPartialTicks), 0, 1, 0);
-                    float collisSize = target.getCollisionBorderSize();
+                        AxisAlignedBB var11 = target.getEntityBoundingBox().expand(collisSize, collisSize, collisSize);
+                        AxisAlignedBB var12 = new AxisAlignedBB(var11.minX - target.posX, var11.minY + target.getEyeHeight() - 0.05 - target.posY, var11.minZ - target.posZ, var11.maxX - target.posX, var11.minY + target.getEyeHeight() + 0.05 - target.posY, var11.maxZ - target.posZ);
 
-                    AxisAlignedBB var11 = target.getEntityBoundingBox().expand(collisSize, collisSize, collisSize);
-                    AxisAlignedBB var12 = new AxisAlignedBB(var11.minX - target.posX, var11.minY + target.getEyeHeight() - 0.05 - target.posY, var11.minZ - target.posZ, var11.maxX - target.posX, var11.minY + target.getEyeHeight() + 0.05 - target.posY, var11.maxZ - target.posZ);
+                        RenderingUtil.glColor(target != this.target ? Colors.getColor(255, 45) : target.hurtTime > 0 ? Colors.getColor(209, 194, 82, 75) : Colors.getColor(255, 41, 41, 75));
+                        RenderingUtil.drawBoundingBox(var12);
+                    }
+                } catch (Exception ignored) {
 
-                    RenderingUtil.glColor(target != this.target ? Colors.getColor(255, 45) : target.hurtTime > 0 ? Colors.getColor(209, 194, 82, 75) : Colors.getColor(255, 41, 41, 75));
-                    RenderingUtil.drawBoundingBox(var12);
-
-                    RenderingUtil.post3D();
-                    GL11.glPopMatrix();
                 }
+
+                RenderingUtil.post3D();
+                GL11.glPopMatrix();
+
             }
             return;
         }
@@ -1118,7 +1124,7 @@ public class Killaura extends Module {
 
         float range = ((Number) settings.get(RANGE).getValue()).floatValue();
         float focusRange = range >= ((Number) blockRange.getValue()).floatValue() ? (mc.thePlayer.canEntityBeSeen(entity) ? range : Math.min(3, range)) : ((Number) blockRange.getValue()).floatValue();
-        if ((mc.thePlayer.getHealth() > 0) && (entity.getHealth() > 0 && !entity.isDead) || Float.isNaN(entity.getHealth())) {
+        if ((mc.thePlayer.getHealth() > 0) && (entity.getHealth() > 0 && !entity.isDead && entity.deathTime <= 0) || Float.isNaN(entity.getHealth())) {
             boolean raytrace = (!((Boolean) settings.get(RAYTRACE).getValue())) || (mc.thePlayer.canEntityBeSeen(entity));
             if (mc.thePlayer.getDistanceToEntity(entity) <= focusRange && raytrace && entity.ticksExisted > ((Number) settings.get(TICK).getValue()).intValue()) {
                 if (!isInFOV(entity))
