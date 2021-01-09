@@ -391,7 +391,7 @@ public class LongJump extends Module {
 
             if (velocityBoost != 0 && delay < 2) {
                 speed += velocityBoost;
-                velocityBoost *= 0.75;
+                velocityBoost *= 0.66;
             }
 
             TargetStrafe targetStrafe = (TargetStrafe) Client.getModuleManager().get(TargetStrafe.class);

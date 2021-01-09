@@ -505,7 +505,7 @@ public class Speed extends Module {
                     if (velocityBoost != 0 && stage >= 3) {
                         speed += velocityBoost;
                     }
-                    velocityBoost *= 0.75;
+                    velocityBoost *= 0.66;
 
                     //Stage checks if you're greater than 0 as step sets you -6 stage to make sure the player wont flag.
                     if (stage > 0) {
@@ -730,7 +730,7 @@ public class Speed extends Module {
                     if (velocityBoost != 0 && stage >= 3) {
                         speed += velocityBoost;
                     }
-                    velocityBoost *= 0.75;
+                    velocityBoost *= 0.66;
 
                     //Stage checks if you're greater than 0 as step sets you -6 stage to make sure the player wont flag.
                     if (stage > 0) {
