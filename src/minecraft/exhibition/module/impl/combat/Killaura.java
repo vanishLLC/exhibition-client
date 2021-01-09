@@ -92,7 +92,7 @@ public class Killaura extends Module {
     private int nextRandom = -1;
     public static boolean blockJump;
     public static boolean wantedToJump;
-    private Vector2f lastAngles = new Vector2f(0, 0);
+    public Vector2f lastAngles = new Vector2f(0, 0);
     private Setting blockRange = new Setting<>(/*BLOCK-RANGE*/decodeByteArray(new byte[]{66, 76, 79, 67, 75, 45, 82, 65, 78, 71, 69}), 4.5, /*Range for killaura.*/decodeByteArray(new byte[]{82, 97, 110, 103, 101, 32, 102, 111, 114, 32, 107, 105, 108, 108, 97, 117, 114, 97, 46}), 0.1, 1, 10);
 
     private static String decodeByteArray(byte[] bytes) {
@@ -335,10 +335,13 @@ public class Killaura extends Module {
                         float collisSize = target.getCollisionBorderSize();
 
                         AxisAlignedBB var11 = target.getEntityBoundingBox().expand(collisSize, collisSize, collisSize);
-                        AxisAlignedBB var12 = new AxisAlignedBB(var11.minX - target.posX, var11.minY + target.getEyeHeight() - 0.05 - target.posY, var11.minZ - target.posZ, var11.maxX - target.posX, var11.minY + target.getEyeHeight() + 0.05 - target.posY, var11.maxZ - target.posZ);
-
-                        RenderingUtil.glColor(target != this.target ? Colors.getColor(255, 45) : target.hurtTime > 0 ? Colors.getColor(209, 194, 82, 75) : Colors.getColor(255, 41, 41, 75));
+                        AxisAlignedBB var12 = new AxisAlignedBB(var11.minX - target.posX, var11.minY - target.posY, var11.minZ - target.posZ, var11.maxX - target.posX, var11.maxY - target.posY, var11.maxZ - target.posZ);
+                        RenderingUtil.glColor(target != this.target ? Colors.getColor(255, 45) : target.hurtTime > 0 ? Colors.getColorOpacity(1186128252, 75) : Colors.getColor(255, 41, 41, 75));
                         RenderingUtil.drawBoundingBox(var12);
+                        RenderingUtil.glColor(target != this.target ? Colors.getColor(255, 150) : target.hurtTime > 0 ? Colors.getColorOpacity(-5054084, 200) : Colors.getColor(255, 41, 41, 200));
+                        GL11.glLineWidth(1);
+                        RenderingUtil.drawOutlinedBoundingBox(var12);
+
                         GL11.glPopMatrix();
                     }
                 } catch (Exception ignored) {
@@ -518,7 +521,8 @@ public class Killaura extends Module {
                             if (targetYaw > maxAngleStep) targetYaw = maxAngleStep;
                             else if (targetYaw < -maxAngleStep) targetYaw = -maxAngleStep;
 
-                            boolean allowInvalidAngles = Client.getModuleManager().isEnabled(Bypass.class) && HypixelUtil.isVerifiedHypixel();
+                            Bypass bypass = Client.getModuleManager().getCast(Bypass.class);
+                            boolean allowInvalidAngles = bypass.isEnabled() && (bypass.bruh > 10 && bypass.bruh % 100 > 10 && bypass.bruh % 100 < 99) && HypixelUtil.isVerifiedHypixel();
 
                             if (shouldReduce) {
                                 float pitch = (float) -(Math.atan2(yDiff - (distance > 2.1 ? 0.75 : 1), dist) * 180.0D / 3.141592653589793D);
@@ -531,34 +535,37 @@ public class Killaura extends Module {
                                     em.setPitch(MathHelper.clamp_float(pitch / 1.1F, -89.5F, 89.5F));
 
                                     if (lastAngles.y > 90 || lastAngles.y < -90) {
-                                        em.setPitch(180 - em.getPitch());
+                                        //em.setPitch(180 - em.getPitch());
                                     }
 
                                     Vec3 v = getDirection(lastAngles.x, em.getPitch());
                                     double off = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), v,
                                             target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height,
-                                            HypixelUtil.isInGame("DUEL") ? Direction.DIRECT_PRECISION / 2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1.25);
+                                            HypixelUtil.isInGame("DUEL") ? 1.2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1);
 
                                     Vec3 backwardsBruh = getDirection(lastAngles.x, 180 - em.getPitch());
                                     double backwardsOff = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), backwardsBruh,
                                             target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height,
-                                            HypixelUtil.isInGame("DUEL") ? Direction.DIRECT_PRECISION / 2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1.25);
+                                            HypixelUtil.isInGame("DUEL") ? 1.2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1);
 
-                                    if (allowInvalidAngles && off >= 0.1 && backwardsOff < 0.1) {
+                                    if (allowInvalidAngles && em.getPitch() >= 0 && off >= 0.1 && backwardsOff < 0.1) {
                                         boolean isAttacking = mc.thePlayer.getDistanceToEntity(target) <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && delay.roundDelay(50 * nextRandom);
                                         boolean canAttackRightNow = (attack.equals("Always")) ||
                                                 (attack.equals("Precise") ? target.waitTicks <= 0 :
                                                         target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
 
-                                        if (isAttacking && canAttackRightNow)
-                                            em.setPitch(180 - em.getPitch());
+                                        if(isAttacking && canAttackRightNow) {
+                                            em.setPitch(MathHelper.wrapAngleTo180_float(180 - em.getPitch()));
+                                        } else {
+                                            em.setPitch(em.getPitch() + 360);
+                                        }
                                     } else {
 
                                         float tempNewYaw = (float) MathUtils.getIncremental(lastAngles.x + (targetYaw / 1.1F), 20);
 
                                         boolean willViolate = target.waitTicks <= 0 && Angle.INSTANCE.willViolateYaw(new Location(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, tempNewYaw, 0), target);
 
-                                        if ((angleTimer.roundDelay(1000) && off >= 0.11 && !willViolate) || (angleTimer.roundDelay(250) && !willViolate && off >= 0.2)) {
+                                        if ((angleTimer.roundDelay(1000) && off >= 0.11 && !willViolate) || (angleTimer.roundDelay(200) && !willViolate && off >= 0.2)) {
                                             newYaw += targetYaw;
 
                                             float normalDiff = Math.abs(newYaw);
@@ -567,10 +574,9 @@ public class Killaura extends Module {
                                             Vec3 vecReverse = getDirection((float) MathUtils.getIncremental(lastAngles.x + MathHelper.wrapAngleTo180_float((newYaw + 180)), 30), 180 - em.getPitch());
                                             double newOffReverse = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), vecReverse,
                                                     target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height,
-                                                    HypixelUtil.isInGame("DUEL") ? Direction.DIRECT_PRECISION / 2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1.25);
+                                                    HypixelUtil.isInGame("DUEL") ? 1.2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1);
 
-                                            if (allowInvalidAngles && backwardsDiff < normalDiff && newOffReverse < 0.1) {
-                                                //ChatUtil.printChat("Backwards " + MathHelper.wrapAngleTo180_float((newYaw + 180)) + " " + newYaw);
+                                            if (allowInvalidAngles && em.getPitch() >= 0 && backwardsDiff < normalDiff && newOffReverse < 0.1 && normalDiff > 90) {
                                                 angleTimer.reset();
                                                 em.setYaw((float) MathUtils.getIncremental(lastAngles.x += MathHelper.wrapAngleTo180_float((newYaw + 180)), 20));
                                                 em.setPitch(180 - em.getPitch());
@@ -596,9 +602,9 @@ public class Killaura extends Module {
                                     Vec3 vecReverse = getDirection((float) MathUtils.getIncremental(lastAngles.x + MathHelper.wrapAngleTo180_float((targetYaw + 180)), 30), 180 - em.getPitch());
                                     double newOffReverse = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), vecReverse,
                                             target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height,
-                                            HypixelUtil.isInGame("DUEL") ? Direction.DIRECT_PRECISION / 2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1.25);
+                                            HypixelUtil.isInGame("DUEL") ? 1.2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1);
 
-                                    if (backwardsDiff < normalDiff && newOffReverse < 0.1) {
+                                    if (backwardsDiff < normalDiff && newOffReverse < 0.1 && normalDiff > 120) {
                                         em.setYaw(lastAngles.x += MathHelper.wrapAngleTo180_float((targetYaw + 180)) / 1.1F);
 
                                         boolean isAttacking = mc.thePlayer.getDistanceToEntity(target) <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && delay.roundDelay(50 * nextRandom);
@@ -607,8 +613,7 @@ public class Killaura extends Module {
                                                         target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
 
                                         // Only headsnap when attacking to reduce others figuring this out
-                                        if (isAttacking && canAttackRightNow)
-                                            em.setPitch(180 - em.getPitch());
+                                        em.setPitch(MathHelper.wrapAngleTo180_float(180 - em.getPitch()));
                                     } else {
                                         angleTimer.reset();
                                         em.setYaw((lastAngles.x += targetYaw / 1.1F));
@@ -781,8 +786,8 @@ public class Killaura extends Module {
                 if (isAttacking && !isBlocking && (!antiLag.getValue() || !Client.instance.isLagging())) {
                     Vec3 v = getDirection(em.getYaw(), em.getPitch());
                     double off = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), v, target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height,
-                            HypixelUtil.isInGame("DUEL") ? Direction.DIRECT_PRECISION / 2 :
-                                    HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1.2);
+                            HypixelUtil.isInGame("DUEL") ? 1.2 :
+                                    HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1);
 
                     if (((Number) settings.get(ANGLESTEP).getValue()).intValue() == 0 || (off <= 0.11 || (off <= 1 && off >= 0.22 && MathUtils.getIncremental(angleTimer.getDifference(), 50) < 100))) {
 
@@ -919,7 +924,7 @@ public class Killaura extends Module {
     }
 
     public float getLastYaw() {
-        return lastAngles.x;
+        return lastAngles.y > 90 || lastAngles.y < -90 ? lastAngles.x + 180 : lastAngles.x;
     }
 
     private final double[] ZERO = new double[]{0, 0, 0};

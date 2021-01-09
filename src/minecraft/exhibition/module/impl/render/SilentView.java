@@ -13,10 +13,12 @@ import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.combat.Bypass;
 import exhibition.module.impl.combat.Killaura;
 import exhibition.util.RenderingUtil;
+import exhibition.util.misc.ChatUtil;
 import exhibition.util.render.Colors;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.client.renderer.entity.RendererLivingEntity;
+import net.minecraft.util.MathHelper;
 import org.lwjgl.opengl.GL11;
 
 public class SilentView extends Module {
@@ -59,13 +61,21 @@ public class SilentView extends Module {
                     lastYaw = currentYaw;
                     lastPitch = currentPitch;
 
-                    currentYaw = em.getYaw();
+                    currentYaw = lastYaw + MathHelper.wrapAngleTo180_float(em.getYaw() - lastYaw);
                     currentPitch = em.getPitch();
+
+                    if(currentPitch > 360) {
+                        em.setPitch(em.getPitch() - 360);
+                    }
 
                     Killaura killaura = Client.getModuleManager().get(Killaura.class).cast();
                     if (Client.getModuleManager().isEnabled(Bypass.class) && killaura.isEnabled() && Killaura.getTarget() != null && (boolean) killaura.getSetting("REDUCE").getValue() && (currentPitch > 90 || currentPitch < -90)) {
-                        currentPitch = 180 - currentPitch;
-                        currentYaw = currentYaw + 180; // So your head isn't looking away from them
+                        if(currentPitch < 360) {
+                            currentPitch = lastPitch + MathHelper.wrapAngleTo180_float(((180 - currentPitch) - lastPitch));
+                        } else {
+                            currentPitch = lastPitch + MathHelper.wrapAngleTo180_float(((currentPitch) - lastPitch));
+                        }
+                        currentYaw = lastYaw + MathHelper.wrapAngleTo180_float((em.getYaw() + 180) - lastYaw); // So your head isn't looking away from them
                     }
 
                     isSilent = true;

@@ -785,20 +785,20 @@ public class SkeetMenu extends UI {
                 if (module.getType() == ModuleData.Type.Movement) {
                     y = 20;
                     if (module == Client.getModuleManager().get(NoSlowdown.class)) {
-                        yOff -= 10;
+                        yOff -= 20;
                     }
                     if (module == Client.getModuleManager().get(Phase.class)) {
-                        yOff -= 14;
+                        yOff -= 24;
                     }
                     if (module == Client.getModuleManager().get(AntiFall.class)) {
                         xOff = 50 + categoryButton.panel.x;
-                        yOff += 44;
+                        yOff += 54;
                     }
                     if (module == Client.getModuleManager().get(LongJump.class)) {
                         yOff -= 27 + 10;
                     }
                     if (module == Client.getModuleManager().get(Fly.class)) {
-                        yOff += 27;
+                        yOff += 37;
                     }
 
                     if (getSettings(module) != null) {
@@ -2213,8 +2213,7 @@ public class SkeetMenu extends UI {
             float xOff = panel.categoryButton.panel.dragX;
             float yOff = panel.categoryButton.panel.dragY;
 
-            final double percent = slider.dragX / 38;
-            MathHelper.clamp_double(percent, 0, 1);
+            final double percent = MathHelper.clamp_double(slider.dragX / 38, 0, 1);
             final double value = MathUtils.getIncremental((percent * 100) * (slider.setting.getMax() - slider.setting.getMin()) / 100 + slider.setting.getMin(), slider.setting.getInc());
 
             float sliderX = (float) (((((Number) slider.setting.getValue()).doubleValue() - slider.setting.getMin()) / (slider.setting.getMax() - slider.setting.getMin())) * 38);
@@ -2297,7 +2296,7 @@ public class SkeetMenu extends UI {
     public void SliderMouseClicked(Slider slider, int mouseX, int mouseY, int mouse, CategoryPanel panel) {
         float xOff = panel.categoryButton.panel.dragX;
         float yOff = panel.categoryButton.panel.dragY;
-        if (panel.visible && mouseX >= panel.x + xOff + slider.x && mouseY >= yOff + panel.y + slider.y - 6 && mouseX <= xOff + panel.x + slider.x + 38.0f && mouseY <= yOff + panel.y + slider.y + 4.0f && mouse == 0) {
+        if (panel.visible && mouseX >= panel.x + xOff + slider.x && mouseY >= yOff + panel.y + slider.y - 6 && mouseX <= xOff + panel.x + slider.x + 38.0f && mouseY <= yOff + panel.y + slider.y + 3.5F && mouse == 0) {
             slider.dragging = true;
             slider.lastDragX = mouseX;
             slider.dragX = (mouseX - (slider.x + xOff));

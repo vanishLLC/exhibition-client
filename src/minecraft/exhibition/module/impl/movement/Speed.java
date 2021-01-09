@@ -502,10 +502,10 @@ public class Speed extends Module {
                     }
                     speed = Math.max(speed, moveSpeed);
 
-                    if (velocityBoost != 0 && stage > 0) {
+                    if (velocityBoost != 0 && stage >= 3) {
                         speed += velocityBoost;
-                        velocityBoost *= 0.66;
                     }
+                    velocityBoost *= 0.75;
 
                     //Stage checks if you're greater than 0 as step sets you -6 stage to make sure the player wont flag.
                     if (stage > 0) {
@@ -691,7 +691,7 @@ public class Speed extends Module {
                         }
                     } else if (stage == 3) {
 
-                        double bruh = 0.645D;
+                        double bruh = 0.655D;
 
 
                         if (mc.thePlayer.isPotionActive(Potion.moveSpeed)) {
@@ -727,10 +727,10 @@ public class Speed extends Module {
                     }
                     speed = Math.max(speed, moveSpeed);
 
-                    if (velocityBoost != 0 && stage > 0) {
+                    if (velocityBoost != 0 && stage >= 3) {
                         speed += velocityBoost;
-                        velocityBoost *= 0.66;
                     }
+                    velocityBoost *= 0.75;
 
                     //Stage checks if you're greater than 0 as step sets you -6 stage to make sure the player wont flag.
                     if (stage > 0) {

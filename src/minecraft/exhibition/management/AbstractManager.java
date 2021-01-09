@@ -1,5 +1,6 @@
 package exhibition.management;
 
+import exhibition.module.Module;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.lang.reflect.Array;
@@ -45,6 +46,10 @@ public abstract class AbstractManager<E> {
 			}
 		}
 		return null;
+	}
+
+	public <T extends E> T getCast(Class clazz) {
+		return (T) get(clazz);
 	}
 
 	/**

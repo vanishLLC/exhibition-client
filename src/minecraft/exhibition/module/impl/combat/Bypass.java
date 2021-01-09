@@ -16,6 +16,7 @@ import exhibition.module.impl.movement.Fly;
 import exhibition.module.impl.movement.LongJump;
 import exhibition.util.*;
 import exhibition.util.Timer;
+import exhibition.util.misc.ChatUtil;
 import exhibition.util.render.Colors;
 import net.minecraft.client.gui.GuiDisconnected;
 import net.minecraft.client.gui.GuiDownloadTerrain;
@@ -47,7 +48,7 @@ public class Bypass extends Module {
     private long startMS = -1;
     private int state = 0;
 
-    private int bruh;
+    public int bruh;
     private int lastUid;
     private int lastValid = -1;
 
@@ -108,7 +109,7 @@ public class Bypass extends Module {
 
         if (event instanceof EventPacket) {
             if (mc.thePlayer != null) {
-                if ((!Client.getModuleManager().isEnabled(LongJump.class) && !blorpFly) || c13Timer.delay(7_000)) {
+                if ((!Client.getModuleManager().isEnabled(LongJump.class) && !blorpFly) || c13Timer.delay(15_000)) {
                     c13Timer.reset();
                     sendPackets();
                 }

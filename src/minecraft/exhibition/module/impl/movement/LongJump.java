@@ -389,9 +389,9 @@ public class LongJump extends Module {
             onGroundLastTick = mc.thePlayer.onGround;
             speed = Math.max(speed, defaultSpeed());
 
-            if (velocityBoost != 0) {
+            if (velocityBoost != 0 && delay < 2) {
                 speed += velocityBoost;
-                velocityBoost *= 0.66;
+                velocityBoost *= 0.75;
             }
 
             TargetStrafe targetStrafe = (TargetStrafe) Client.getModuleManager().get(TargetStrafe.class);
