@@ -41,8 +41,8 @@ public class AutoMath extends Module {
             S02PacketChat packetChat = (S02PacketChat) packet;
             String unformatted = StringUtils.stripControlCodes(packetChat.getChatComponent().getUnformattedText());
             if (unformatted.contains("Solve: ")) {
-                String calculate = unformatted.split("Solve: ")[1];
                 try {
+                    String calculate = unformatted.split("Solve: ")[1];
                     ScriptEngineManager mgr = new ScriptEngineManager();
                     ScriptEngine engine = mgr.getEngineByName("JavaScript");
                     String result = String.valueOf(engine.eval(calculate.trim()));
@@ -50,6 +50,7 @@ public class AutoMath extends Module {
                     chatQueue.add(result);
                     chatDelay.reset();
                 } catch (Exception ignored) {
+                    ChatUtil.printChat(Command.chatPrefix + "\247cfailed to solve. " + ignored.getMessage());
                 }
             }
         }
