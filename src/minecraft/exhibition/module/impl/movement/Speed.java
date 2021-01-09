@@ -30,6 +30,7 @@ import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
+import net.minecraft.network.play.server.S12PacketEntityVelocity;
 import net.minecraft.network.play.server.S27PacketExplosion;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.BlockPos;
@@ -47,12 +48,13 @@ public class Speed extends Module {
     private double velocityBoost;
     public static int stage;
     private Setting<Boolean> lowhop = new Setting<>("LOWHOP", false, "Speed still full jumps up blocks, when attacking, or holding Jump. (HypixelSlow Only)");
-    private Setting lowhopTarget = new Setting<>("LOW-TARGET", false, "Will lowhop when targeting players. (HypixelSlow Only)");
-    private Setting step = new Setting<>("STEP", false, "Disables speed while stepping up multiple stairs/slabs.");
-    private Setting water = new Setting<>("WATER", false, "Disables Speed while in water.");
-    private Setting scaffold = new Setting<>("SCAFFOLD", true, "Disables Scaffold when Speed is Enabled.");
-    private Setting NOBOB = new Setting<>("NOBOB", false, "Disables viewbobbing when using Speed. (Makes Lowhop less aids)");
-    private Setting retard = new Setting<>("STEPS", 40.3, "retard", 0.1, 15, 180);
+    private Setting<Boolean> lowhopTarget = new Setting<>("LOW-TARGET", false, "Will lowhop when targeting players. (HypixelSlow Only)");
+    private Setting<Boolean> step = new Setting<>("STEP", false, "Disables speed while stepping up multiple stairs/slabs.");
+    private Setting<Boolean> water = new Setting<>("WATER", false, "Disables Speed while in water.");
+    private Setting<Boolean> scaffold = new Setting<>("SCAFFOLD", true, "Disables Scaffold when Speed is Enabled.");
+    private Setting<Boolean> NOBOB = new Setting<>("NOBOB", false, "Disables viewbobbing when using Speed. (Makes Lowhop less aids)");
+    private Setting<Number> retard = new Setting<>("STEPS", 40.3, "Allows you to smooth the speeds strafing.", 0.1, 15, 180);
+    private Setting<Number> boostScale = new Setting<>("VEL-BOOST", 0.5, "Boosts your speed when you take KB.", 0.01, 0, 1);
 
     private int ticks = 0;
     private boolean reset = false;
@@ -62,15 +64,16 @@ public class Speed extends Module {
 
     public Speed(ModuleData data) {
         super(data);
-        settings.put("STEP", step);
-        settings.put("WATER", water);
-        settings.put("SCAFFOLD", scaffold);
-        settings.put(lowhopTarget.getName(), lowhopTarget);
-        settings.put(lowhop.getName(), lowhop);
-        settings.put(retard.getName(), retard);
-        settings.put(NOBOB.getName(), NOBOB);
+        addSetting(step);
+        addSetting(water);
+        addSetting(scaffold);
+        addSetting(lowhopTarget);
+        addSetting(lowhop);
+        addSetting(retard);
+        addSetting(NOBOB);
+        addSetting(boostScale);
 
-        settings.put(MODE, new Setting<>(MODE, new Options("Speed Mode", "Hypixel", "Hop", "HypixelSlow", "Hypixel", "Mineplex", "OnGround", "YPort", "OldHop", "OldSlow", "TritonJump", "Jump"), "Speed bypass method."));
+        addSetting(new Setting<>(MODE, new Options("Speed Mode", "Hypixel", "Hop", "HypixelSlow", "Hypixel", "Mineplex", "OnGround", "YPort", "OldHop", "OldSlow", "TritonJump", "Jump"), "Speed bypass method."));
     }
 
     private double defaultSpeed() {
@@ -180,10 +183,20 @@ public class Speed extends Module {
                 lastDist = 0;
             }
 
-
+            if (packet instanceof S12PacketEntityVelocity) {
+                S12PacketEntityVelocity velocity = (S12PacketEntityVelocity) packet;
+                if (velocity.getEntityID() == mc.thePlayer.getEntityId()) {
+                    double x = (double) velocity.getMotionX() / 8000.0D;
+                    double y = (double) velocity.getMotionY() / 8000.0D;
+                    double z = (double) velocity.getMotionZ() / 8000.0D;
+                    if (x != 0 && y != 0 && z != 0)
+                        velocityBoost = Math.sqrt(x * x + z * z) * boostScale.getValue().doubleValue();
+                }
+            }
             if (packet instanceof S27PacketExplosion) {
                 S27PacketExplosion velocity = (S27PacketExplosion) packet;
-                velocityBoost = Math.sqrt(velocity.xMotion * velocity.xMotion + velocity.zMotion * velocity.zMotion) / 3;
+                if (velocity.xMotion != 0 && velocity.yMotion != 0 && velocity.zMotion != 0)
+                    velocityBoost = Math.sqrt(velocity.xMotion * velocity.xMotion + velocity.zMotion * velocity.zMotion) * boostScale.getValue().doubleValue();
             }
         }
         if (event instanceof EventStep && (boolean) step.getValue()) {
@@ -490,7 +503,8 @@ public class Speed extends Module {
                     speed = Math.max(speed, moveSpeed);
 
                     if (velocityBoost != 0 && stage > 0) {
-                        speed += (velocityBoost *= 0.66);
+                        speed += velocityBoost;
+                        velocityBoost *= 0.66;
                     }
 
                     //Stage checks if you're greater than 0 as step sets you -6 stage to make sure the player wont flag.
@@ -714,7 +728,8 @@ public class Speed extends Module {
                     speed = Math.max(speed, moveSpeed);
 
                     if (velocityBoost != 0 && stage > 0) {
-                        speed += (velocityBoost *= 0.66);
+                        speed += velocityBoost;
+                        velocityBoost *= 0.66;
                     }
 
                     //Stage checks if you're greater than 0 as step sets you -6 stage to make sure the player wont flag.
@@ -962,15 +977,15 @@ public class Speed extends Module {
                 if (event instanceof EventMotionUpdate) {
                     EventMotionUpdate em = (EventMotionUpdate) event;
                     if (em.isPre()) {
-                       mc.timer.timerSpeed = 1.065f + ((float) Math.random() * 0.2f);
+                        mc.timer.timerSpeed = 1.065f + ((float) Math.random() * 0.2f);
                         double forward = mc.thePlayer.movementInput.moveForward;
                         double strafe = mc.thePlayer.movementInput.moveStrafe;
                         if ((forward != 0 || strafe != 0) && !mc.thePlayer.isJumping && !mc.thePlayer.isInWater() && !mc.thePlayer.isOnLadder() && (!mc.thePlayer.isCollidedHorizontally)) {
                             em.setY(mc.thePlayer.posY + (mc.thePlayer.ticksExisted % 2 != 0 ? 0.42F : 0));
                         }
-                        speed = Math.max(mc.thePlayer.ticksExisted % 2 == 0 ? (2 + (0.084541487 + (int)(Math.random() * 0.09878956)))  : (1 + (0.3291651713 + (int)(Math.random() * 0.396541521))), defaultSpeed());
+                        speed = Math.max(mc.thePlayer.ticksExisted % 2 == 0 ? (2 + (0.084541487 + (int) (Math.random() * 0.09878956))) : (1 + (0.3291651713 + (int) (Math.random() * 0.396541521))), defaultSpeed());
                         float yaw = mc.thePlayer.rotationYaw;
-                        if (mc.thePlayer.fallDistance > 0){
+                        if (mc.thePlayer.fallDistance > 0) {
                             speed = defaultSpeed();
                             mc.timer.timerSpeed = 0.7f;
                         }
@@ -998,8 +1013,8 @@ public class Speed extends Module {
                             }
                             double cos = Math.cos(Math.toRadians(yaw + 90.0F));
                             double sin = Math.sin(Math.toRadians(yaw + 90.0F));
-                                mc.thePlayer.motionX = (forward * speed * cos + strafe * speed * sin);
-                                mc.thePlayer.motionZ = (forward * speed * sin - strafe * speed * cos);
+                            mc.thePlayer.motionX = (forward * speed * cos + strafe * speed * sin);
+                            mc.thePlayer.motionZ = (forward * speed * sin - strafe * speed * cos);
                         }
                     }
                 }

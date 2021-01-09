@@ -27,6 +27,8 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.client.C13PacketPlayerAbilities;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
+import net.minecraft.network.play.server.S12PacketEntityVelocity;
+import net.minecraft.network.play.server.S27PacketExplosion;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.BlockPos;
 
@@ -46,6 +48,7 @@ public class LongJump extends Module {
     private String TIMER = "TIMER";
     private Setting<Boolean> useBlink = new Setting<>("CHOKE", false, "Uses blink to bypass.");
     private Setting<Boolean> targetStrafe = new Setting<>("TARGETSTRAFE", false, "Target Strafes around players.");
+    private Setting<Number> boostScale = new Setting<>("VEL-BOOST", 0.5, "Boosts your speed when you take KB.", 0.01, 0, 1);
 
     private Timer waitTimer = new Timer();
     private Timer auraTimer = new Timer();
@@ -56,6 +59,8 @@ public class LongJump extends Module {
     private boolean wasOnGround;
     private int zoom;
     private int blinkTicks;
+
+    private double velocityBoost;
 
     private int delay;
 
@@ -76,6 +81,7 @@ public class LongJump extends Module {
         settings.put(C13PACKET, new Setting<>(C13PACKET, true, "Sends a C13 Flying packet on enable. (Experimental)"));
         addSetting(targetStrafe);
         addSetting(useBlink);
+        addSetting(boostScale);
         settings.put(CHOKE, new Setting<>(CHOKE, 50, "The amount of ticks to choke by in between blinks.", 1, 2, 70));
         settings.put(TIMER, new Setting<>(TIMER, 0.0, "FastFly starting timer. (0 = 1x Timer, 1.0 = 2x Timer)", 0.01, 0, 2));
 
@@ -273,6 +279,22 @@ public class LongJump extends Module {
                     auraTimer.reset();
                 }
             }
+
+            if (packet instanceof S12PacketEntityVelocity) {
+                S12PacketEntityVelocity velocity = (S12PacketEntityVelocity) packet;
+                if (velocity.getEntityID() == mc.thePlayer.getEntityId()) {
+                    double x = (double) velocity.getMotionX() / 8000.0D;
+                    double y = (double) velocity.getMotionY() / 8000.0D;
+                    double z = (double) velocity.getMotionZ() / 8000.0D;
+                    if (x != 0 && y != 0 && z != 0)
+                        velocityBoost = Math.sqrt(x * x + z * z) * boostScale.getValue().doubleValue();
+                }
+            }
+            if (packet instanceof S27PacketExplosion) {
+                S27PacketExplosion velocity = (S27PacketExplosion) packet;
+                if (velocity.xMotion != 0 && velocity.yMotion != 0 && velocity.zMotion != 0)
+                    velocityBoost = Math.sqrt(velocity.xMotion * velocity.xMotion + velocity.zMotion * velocity.zMotion) * boostScale.getValue().doubleValue();
+            }
         }
         if (event instanceof EventMove) {
             EventMove em = (EventMove) event;
@@ -366,6 +388,11 @@ public class LongJump extends Module {
             }
             onGroundLastTick = mc.thePlayer.onGround;
             speed = Math.max(speed, defaultSpeed());
+
+            if (velocityBoost != 0) {
+                speed += velocityBoost;
+                velocityBoost *= 0.66;
+            }
 
             TargetStrafe targetStrafe = (TargetStrafe) Client.getModuleManager().get(TargetStrafe.class);
             float yaw = (allowTargetStrafe() && mc.thePlayer.movementInput.moveStrafe == 0 && mc.thePlayer.movementInput.moveForward > 0) ?

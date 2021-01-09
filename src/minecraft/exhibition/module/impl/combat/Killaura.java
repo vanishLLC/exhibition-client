@@ -323,6 +323,7 @@ public class Killaura extends Module {
                 try {
                     Iterator<EntityLivingBase> loadedIter = loaded.iterator();
                     while (loadedIter.hasNext()) {
+                        GlStateManager.pushMatrix();
                         EntityLivingBase target = loadedIter.next();
                         double[] p = getPrediction(target, predictionTicks.getValue().intValue(), predictionTicks.getValue().doubleValue());
 
@@ -338,6 +339,7 @@ public class Killaura extends Module {
 
                         RenderingUtil.glColor(target != this.target ? Colors.getColor(255, 45) : target.hurtTime > 0 ? Colors.getColor(209, 194, 82, 75) : Colors.getColor(255, 41, 41, 75));
                         RenderingUtil.drawBoundingBox(var12);
+                        GL11.glPopMatrix();
                     }
                 } catch (Exception ignored) {
 
