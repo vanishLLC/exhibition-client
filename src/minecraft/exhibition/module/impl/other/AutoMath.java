@@ -42,7 +42,7 @@ public class AutoMath extends Module {
             String unformatted = StringUtils.stripControlCodes(packetChat.getChatComponent().getUnformattedText());
             if (unformatted.contains("Solve: ")) {
                 try {
-                    String calculate = unformatted.split("Solve: ")[1];
+                    String calculate = unformatted.split("Solve: ")[1].replace("x", "*").replace("÷", "/");
                     ScriptEngineManager mgr = new ScriptEngineManager();
                     ScriptEngine engine = mgr.getEngineByName("JavaScript");
                     String result = String.valueOf(engine.eval(calculate.trim()));
