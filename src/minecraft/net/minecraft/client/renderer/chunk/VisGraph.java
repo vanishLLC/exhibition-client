@@ -32,7 +32,7 @@ public class VisGraph
             return;
         }
         Module module = Client.getModuleManager().get(Aimbot.class);
-        if (module.isEnabled()){
+        if (module != null && module.isEnabled()){
             Aimbot zombieAim = (Aimbot)module;
             if(zombieAim.usingAutowall() && zombieAim.showAutowall()) {
                 return;
@@ -62,7 +62,7 @@ public class VisGraph
         }
 
         Module module = Client.getModuleManager().get(Aimbot.class);
-        if (module.isEnabled()){
+        if (module != null && module.isEnabled()){
             Aimbot zombieAim = (Aimbot)module;
             if(zombieAim.usingAutowall() && zombieAim.showAutowall()) {
                 setvisibility.setAllVisible(true);
