@@ -179,7 +179,7 @@ public class SkeetMenu extends UI {
             mc.getTextureManager().bindTexture(cursor);
             GlStateManager.translate(p0, p1, 0);
             ColorObject c = ColorManager.hudColor;
-            RenderingUtil.glColor(Colors.getColor(c.getRed(), c.getGreen(), c.getBlue(), (int) (c.getAlpha() * opacity.getScale())));
+            RenderingUtil.glColor(Colors.getColor(c.getRed(), c.getGreen(), c.getBlue(), (int) (255 * opacity.getScale())));
             GlStateManager.scale(0.5, 0.5, 0.5);
             drawIcon(0, 0, 0, 0, 12, 19, 12, 19);
             GL11.glColor4d(1, 1, 1, 1);

@@ -376,7 +376,7 @@ public class GuiAltManager extends PanoramaScreen {
                 } else if (this.isMouseOverAlt(par1, par2, y - this.offset)) {
                     RenderingUtil.rectangleBordered(52.0f, y - this.offset - 4, this.width - 52, y - this.offset + 20, 1.0f, Colors.getColor(50, 60), -2145180893);
                 }
-                String numberP = (alt.isFavorite() ? "\2476" : "\2477") + (AltManager.registry.indexOf(alt) + 1) + ". \247f";
+                String numberP = (alt.isFavorite() ? "\2476❤ \247f" : "\2477" + (AltManager.registry.indexOf(alt) + 1) + ". \247f");
                 this.drawCenteredString(this.fontRendererObj, numberP + name, this.width / 2, y - this.offset, -1);
                 this.drawCenteredString(this.fontRendererObj, (alt.getStatus().equals(Alt.Status.NotWorking) ? "\247m" : "") + pass, this.width / 2, y - this.offset + 10, Colors.getColor(110));
                 y += 26;
