@@ -51,6 +51,12 @@ public class SilentView extends Module {
         }
     }
 
+    @Override
+    public void onDisable() {
+        lastSilentYaw = -1337;
+        lastSilentPitch = -1337;
+    }
+
     @RegisterEvent(events = {EventMotionUpdate.class, EventRender3D.class, EventRenderEntity.class})
     public void onEvent(Event event) {
         if (event instanceof EventMotionUpdate) {
