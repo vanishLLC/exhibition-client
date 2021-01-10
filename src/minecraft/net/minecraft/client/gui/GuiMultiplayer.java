@@ -49,7 +49,6 @@ public class GuiMultiplayer extends GuiScreen implements GuiYesNoCallback
     private LanServerDetector.LanServerList lanServerList;
     private LanServerDetector.ThreadLanServerFind lanServerDetector;
     private boolean initialized;
-    private int bruh = 1;
 
     public GuiMultiplayer(GuiScreen parentScreen)
     {
@@ -210,20 +209,12 @@ public class GuiMultiplayer extends GuiScreen implements GuiYesNoCallback
             } else if(button.id == 6969) {
                 mc.displayGuiScreen(new GuiAltManager(this));
             } else if(button.id == 44444) {
-                if (bruh == 4){
-                    bruh = 1;
-                }
-                if (bruh == 3){
-                    ViaFabric.config.setClientSideVersion(ProtocolVersion.v1_8.getVersion());
-                    bruh++;
-                }
-                if (bruh == 2){
+                if (ViaFabric.config.getClientSideVersion() == ProtocolVersion.v1_8.getVersion()){
                     ViaFabric.config.setClientSideVersion(ProtocolVersion.v1_12_2.getVersion());
-                    bruh++;
-                }
-                if (bruh == 1) {
+                } else if (ViaFabric.config.getClientSideVersion() == ProtocolVersion.v1_12_2.getVersion()){
                     ViaFabric.config.setClientSideVersion(ProtocolVersion.v1_16_4.getVersion());
-                    bruh++;
+                } else {
+                    ViaFabric.config.setClientSideVersion(ProtocolVersion.v1_8.getVersion());
                 }
                 ViaFabric.config.saveConfig();
             }
