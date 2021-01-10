@@ -13,7 +13,6 @@ import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.combat.Bypass;
 import exhibition.module.impl.combat.Killaura;
 import exhibition.util.RenderingUtil;
-import exhibition.util.misc.ChatUtil;
 import exhibition.util.render.Colors;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderPlayer;

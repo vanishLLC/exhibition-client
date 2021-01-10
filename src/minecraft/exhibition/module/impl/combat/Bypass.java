@@ -16,7 +16,6 @@ import exhibition.module.impl.movement.Fly;
 import exhibition.module.impl.movement.LongJump;
 import exhibition.util.*;
 import exhibition.util.Timer;
-import exhibition.util.misc.ChatUtil;
 import exhibition.util.render.Colors;
 import net.minecraft.client.gui.GuiDisconnected;
 import net.minecraft.client.gui.GuiDownloadTerrain;
