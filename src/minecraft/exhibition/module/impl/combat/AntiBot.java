@@ -12,6 +12,7 @@ import exhibition.event.RegisterEvent;
 import exhibition.event.impl.*;
 import exhibition.management.PriorityManager;
 import exhibition.management.command.Command;
+import exhibition.management.friend.FriendManager;
 import exhibition.management.notifications.dev.DevNotifications;
 import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.Module;
@@ -89,6 +90,8 @@ public class AntiBot extends Module {
     }
 
     private int spawnedSinceUpdate = 0;
+
+    private NetworkPlayerInfo playerInfo;
 
     @RegisterEvent(events = {EventPacket.class, EventMotionUpdate.class, EventAttack.class, EventSpawnPlayer.class})
     public void onEvent(Event event) {
@@ -223,10 +226,11 @@ public class AntiBot extends Module {
                     timer.reset();
                 }
                 // Loop through entity list
-                for (Object o : mc.theWorld.getLoadedEntityList()) {
+
+                for (Entity o : mc.theWorld.getLoadedEntityList()) {
                     if (o instanceof EntityPlayer) {
                         EntityPlayer ent = (EntityPlayer) o;
-                        if (ent == mc.thePlayer) continue;
+                        if (FriendManager.isFriend(ent.getName())) continue;
 
                         if (HypixelUtil.isInGame("SKYWARS") && HypixelUtil.isGameActive()) {
                             if (ent.isDead) {
@@ -237,6 +241,7 @@ public class AntiBot extends Module {
                                 DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + ent.getName() + " has vanished.");
                             }
                         }
+
 
                         ent.lastTickInvisible = ent.isInvisible();
 
@@ -312,17 +317,29 @@ public class AntiBot extends Module {
                             }
                         }
 
+                        final NetHandlerPlayClient var4 = mc.thePlayer.sendQueue;
+                        List<NetworkPlayerInfo> list = new ArrayList<>(var4.getPlayerInfoMap());
+                        if (playerInfo == null || !list.contains(playerInfo)) {
+                            GameProfile gameProfile = mc.thePlayer.getGameProfile();
+                            for (NetworkPlayerInfo networkPlayerInfo : list) {
+                                if (networkPlayerInfo.getGameProfile() != null && gameProfile != null)
+                                    if (gameProfile.equals(networkPlayerInfo.getGameProfile()) || gameProfile.getName().equals(networkPlayerInfo.getGameProfile().getName())) {
+                                        playerInfo = networkPlayerInfo;
+                                        break;
+                                    }
+                            }
+                        }
 
-                        if (!invalid.contains(ent))
+                        if (!invalid.contains(ent)) {
                             switch (currentSetting) {
                                 case "Hypixel": {
 
                                     boolean isOnHypixel = mc.getCurrentServerData() != null && (mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net")) && mc.getIntegratedServer() == null;
 
-                                    boolean doPingCheck = checkPing() == 1;
+                                    boolean doPingCheck = Math.max(playerInfo.getResponseTime(), 0) == 1;
 
                                     if (doPingCheck) {
-                                        if (ticksOnGroundMap.getOrDefault(ent.getName(), 0) < 15 && ESP2D.getPlayerPing(ent) > 1 && isInTabList(ent)) {
+                                        if (ticksOnGroundMap.getOrDefault(ent.getName(), 0) < 15 && ESP2D.getPlayerPing(ent) > 1 && isInTabList(list, ent)) {
                                             invalid.add(ent);
                                         }
                                     }
@@ -348,7 +365,7 @@ public class AntiBot extends Module {
                                     }
 
                                     if (botNameFormat || str.equalsIgnoreCase(ent.getName())) {
-                                        if (botNameFormat && !isInTabList(ent) && isOnHypixel) {
+                                        if (botNameFormat && !isInTabList(list, ent) && isOnHypixel) {
                                             if (ticksOnGroundMap.getOrDefault(ent.getName(), 0) < 15) {
                                                 invalid.add(ent);
                                                 if (remove && (ticksOnGroundMap.getOrDefault(ent.getName(), 0) < -20 && ent.isInvisible()) && mc.thePlayer.getDistanceToEntity(ent) < 10) {
@@ -362,14 +379,15 @@ public class AntiBot extends Module {
 
                                     if (ent.isInvisible() && ticksOnGroundMap.getOrDefault(ent.getName(), 0) < 15 && botNameFormat) {
                                         invalid.add(ent);
-                                        if (remove && ticksOnGroundMap.getOrDefault(ent.getName(), 0) < -20 && !isInTabList(ent)) {
+                                        if (remove && ticksOnGroundMap.getOrDefault(ent.getName(), 0) < -20 && !isInTabList(list, ent)) {
                                             DevNotifications.getManager().post("Removed " + ent.getName() + " B");
                                             mc.theWorld.removeEntity(ent);
                                             continue;
                                         }
                                     }
+
                                     if (botNameFormat || str.equalsIgnoreCase(ent.getName()) || str.contains("[NPC]")) {
-                                        if (!isInTabList(ent) && isOnHypixel && (ticksOnGroundMap.getOrDefault(ent.getName(), 0) < 15)) {
+                                        if (!isInTabList(list, ent) && isOnHypixel && (ticksOnGroundMap.getOrDefault(ent.getName(), 0) < 15)) {
                                             invalid.add(ent);
                                             if (remove && ent.isInvisible() && mc.thePlayer.getDistanceToEntity(ent) < 10 && ticksOnGroundMap.getOrDefault(ent.getName(), 0) < -20) {
                                                 mc.theWorld.removeEntity(ent);
@@ -379,7 +397,7 @@ public class AntiBot extends Module {
                                         }
                                     }
 
-                                    if ((!isInTabList(ent) && (str.equals(ent.getName() + "\247r") || str.equals("\247r" + ent.getName()))) || str.contains("[NPC]")) {
+                                    if (((str.equals(ent.getName() + "\247r") || str.equals("\247r" + ent.getName())) && !isInTabList(list, ent)) || str.contains("[NPC]")) {
                                         invalid.add(ent);
                                         if (remove && ent.isInvisible() && ticksOnGroundMap.getOrDefault(ent.getName(), 0) < -20) {
                                             mc.theWorld.removeEntity(ent);
@@ -392,9 +410,10 @@ public class AntiBot extends Module {
                                 case "Mineplex": {
                                     if (ent.getHealth() >= 0) invalid.add(ent);
                                     if (ent.isPlayerSleeping()) invalid.add(ent);
+                                    break;
                                 }
                             }
-
+                        }
                     }
                 }
             }
@@ -455,28 +474,7 @@ public class AntiBot extends Module {
         return false;
     }
 
-    private int checkPing() {
-        int ping = -1;
-        GameProfile gameProfile = mc.thePlayer.getGameProfile();
-        final NetHandlerPlayClient var4 = mc.thePlayer.sendQueue;
-        List<NetworkPlayerInfo> list = GuiPlayerTabOverlay.playerInfoMap.sortedCopy(var4.getPlayerInfoMap());
-        for (NetworkPlayerInfo networkPlayerInfo : list) {
-            if (networkPlayerInfo.getGameProfile() != null && gameProfile != null)
-                if (gameProfile.equals(networkPlayerInfo.getGameProfile()) || (networkPlayerInfo.getGameProfile() != null && gameProfile.getName().equals(networkPlayerInfo.getGameProfile().getName()))) {
-                    if (networkPlayerInfo.getResponseTime() <= 0) {
-                        ping = 0;
-                    } else {
-                        ping = networkPlayerInfo.getResponseTime();
-                    }
-                    break;
-                }
-        }
-        return ping;
-    }
-
-    public static boolean isInTabList(EntityPlayer player) {
-        final NetHandlerPlayClient var4 = mc.thePlayer.sendQueue;
-        final List players = GuiPlayerTabOverlay.playerInfoMap.sortedCopy(var4.getPlayerInfoMap());
+    public static boolean isInTabList(List<NetworkPlayerInfo> players, EntityPlayer player) {
         for (final Object o : players) {
             final NetworkPlayerInfo info = (NetworkPlayerInfo) o;
             if (info == null) {

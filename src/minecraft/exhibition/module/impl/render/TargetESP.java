@@ -10,6 +10,7 @@ import exhibition.event.Event;
 import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventRenderGui;
 import exhibition.management.PriorityManager;
+import exhibition.management.friend.FriendManager;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
@@ -52,10 +53,10 @@ public class TargetESP extends Module {
         EventRenderGui er = event.cast();
 
         List<EntityPlayer> players = new ArrayList<>();
-        for (Entity entity : mc.theWorld.loadedEntityList)
+        for (Entity entity : mc.theWorld.getLoadedEntityList())
             if (entity instanceof EntityPlayer) {
                 EntityPlayer player = (EntityPlayer) entity;
-                if (player != mc.thePlayer && TargetESP.isPriority(player))
+                if (player != mc.thePlayer && TargetESP.isPriority(player) && !FriendManager.isFriend(player.getName()))
                     players.add(player);
             }
 

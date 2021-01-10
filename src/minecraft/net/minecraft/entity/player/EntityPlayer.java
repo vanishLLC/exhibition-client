@@ -303,7 +303,9 @@ public abstract class EntityPlayer extends EntityLivingBase
     {
         if(this == Minecraft.getMinecraft().thePlayer || this instanceof EntityPlayerSP){
             Event e = EventSystem.getInstance(EventTick.class);
+            Minecraft.getMinecraft().mcProfiler.startSection("EventTick");
             e.fire();
+            Minecraft.getMinecraft().mcProfiler.endSection();
             if (e.isCancelled()) {
                 return;
             }

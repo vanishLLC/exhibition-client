@@ -1221,10 +1221,11 @@ public class SkeetMenu extends UI {
                 }
             }
             float globalsOffsetX = 290 - 95, globalsOffsetY = 178 + 75;
-            categoryPanel.groupBoxes.add(new GroupBox("Client Settings", categoryPanel, globalsOffsetX, globalsOffsetY, 30.5F, true));
+            categoryPanel.groupBoxes.add(new GroupBox("Client Settings", categoryPanel, globalsOffsetX, globalsOffsetY, 40.5F, true));
             categoryPanel.checkboxes.add(new Checkbox(categoryPanel, globalsOffsetX + 0.5F, globalsOffsetY + 10, GlobalValues.centerNotifs));
             categoryPanel.checkboxes.add(new Checkbox(categoryPanel, globalsOffsetX + 0.5F, globalsOffsetY + 20, GlobalValues.scaleFix));
             categoryPanel.checkboxes.add(new Checkbox(categoryPanel, globalsOffsetX + 0.5F, globalsOffsetY + 30, GlobalValues.showCape));
+            categoryPanel.checkboxes.add(new Checkbox(categoryPanel, globalsOffsetX + 0.5F, globalsOffsetY + 40, GlobalValues.showFlags));
 
             categoryPanel.checkboxes.add(new Checkbox(categoryPanel, globalsOffsetX + 44.5F, globalsOffsetY + 10, GlobalValues.showCursor));
             categoryPanel.checkboxes.add(new Checkbox(categoryPanel, globalsOffsetX + 44.5F, globalsOffsetY + 20, GlobalValues.allowDebug));

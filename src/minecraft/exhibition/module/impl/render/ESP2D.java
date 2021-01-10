@@ -889,7 +889,7 @@ public class ESP2D extends Module {
     public static int getPlayerPing(EntityPlayer player) {
         int ping = 0;
         final NetHandlerPlayClient var4 = mc.thePlayer.sendQueue;
-        List<NetworkPlayerInfo> list = GuiPlayerTabOverlay.playerInfoMap.sortedCopy(var4.getPlayerInfoMap());
+        List<NetworkPlayerInfo> list = new ArrayList<>(var4.getPlayerInfoMap());
         for (NetworkPlayerInfo networkPlayerInfo : list) {
             if (networkPlayerInfo.getGameProfile() != null)
                 if (player.getGameProfile().equals(networkPlayerInfo.getGameProfile()) || (player.getName().equals(networkPlayerInfo.getGameProfile().getName()))) {

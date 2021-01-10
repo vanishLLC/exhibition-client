@@ -20,6 +20,7 @@ public class GlobalValues {
     public static Setting<Boolean> allowDebug = new Setting<>("Debug", false, "Enables some debug features in the client.");
     public static Setting<Boolean> showCape = new Setting<>("Show Cape", false, "Renders a custom cape on your player.");
     public static Setting<Boolean> keepPriority = new Setting<>("Keep Priority", false, "Prioritized players are not reset each match.");
+    public static Setting<Boolean> showFlags = new Setting<>("Show Flags", false, "Shows predicted NCP flags in chat.");
 
     public static Setting<Boolean> centerNotifs = new Setting<>("Center Notifs", false, "Centers Notifications under your crosshair.");
     public static Setting<Boolean> showCursor = new Setting<Boolean>("Show Cursor", false, "Shows your real cursor in ClickGUI.") {
@@ -40,7 +41,7 @@ public class GlobalValues {
     };
 
     static {
-        globalValues.addAll(Arrays.asList(saveVisuals, loadVisuals, centerNotifs, showCursor, scaleFix, allowDebug, showCape, keepPriority));
+        globalValues.addAll(Arrays.asList(saveVisuals, loadVisuals, centerNotifs, showCursor, scaleFix, allowDebug, showCape, keepPriority, showFlags));
     }
 
 }
