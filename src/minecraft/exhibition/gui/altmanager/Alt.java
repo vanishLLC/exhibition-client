@@ -25,6 +25,7 @@ public final class Alt {
     private String password;
     private Status status;
     private long unbanDate = -1;
+    private boolean favorite = false;
 
     public Alt(final String username, final String password) {
         this(username, password, Status.Unchecked);
@@ -100,6 +101,14 @@ public final class Alt {
 
     public boolean isValid() {
         return !Client.altService.isVanilla() ? isAltening() : isGenerated();
+    }
+
+    public void setFavorite(boolean favorite) {
+        this.favorite = favorite;
+    }
+
+    public boolean isFavorite() {
+        return this.favorite;
     }
 
 }
