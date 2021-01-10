@@ -800,8 +800,7 @@ public class Killaura extends Module {
                         }
 
                         if (canAttackRightNow && shouldAttack) {
-                            if (!(boolean) noswing.getValue())
-                                mc.thePlayer.swingItem();
+
 
                             //ChatUtil.printChat("Attacked " + target.hurtTime + " " + target.waitTicks);
 
@@ -811,6 +810,8 @@ public class Killaura extends Module {
 //                                ChatUtil.printChat("\247a+Normal " + mc.thePlayer.ticksExisted + " " + mc.thePlayer.fallDistance + " " + isCritSetup + " " + target.waitTicks);
 //                            }
                             NetUtil.sendPacketNoEvents(new C02PacketUseEntity(target, C02PacketUseEntity.Action.ATTACK));
+                            if (!(boolean) noswing.getValue())
+                                mc.thePlayer.swingItem();
 
                             //ChatUtil.printChat(-(mc.thePlayer.posY - mc.thePlayer.lastTickPosY) + "");
 

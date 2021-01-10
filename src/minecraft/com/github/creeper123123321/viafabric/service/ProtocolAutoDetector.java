@@ -35,6 +35,12 @@ import io.netty.channel.*;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import net.minecraft.network.*;
+import net.minecraft.network.handshake.client.C00Handshake;
+import net.minecraft.network.status.INetHandlerStatusClient;
+import net.minecraft.network.status.client.C00PacketServerQuery;
+import net.minecraft.network.status.server.S00PacketServerInfo;
+import net.minecraft.network.status.server.S01PacketPong;
+import net.minecraft.util.*;
 import us.myles.ViaVersion.api.protocol.ProtocolRegistry;
 import us.myles.ViaVersion.api.protocol.ProtocolVersion;
 
@@ -42,80 +48,108 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
+/*public class ProtocolAutoDetector {
+    public static LoadingCache<InetSocketAddress, CompletableFuture<ProtocolVersion>> SERVER_VER;
+
+    static {
+        SERVER_VER = CacheBuilder.newBuilder().expireAfterAccess(100L, TimeUnit.SECONDS).build(CacheLoader.from(address -> {
+            CompletableFuture<ProtocolVersion> future = new CompletableFuture<>();
+            try {
+                final NetworkManager clientConnection = new NetworkManager(EnumPacketDirection.CLIENTBOUND);
+                ViaFabricAddress viaAddr = (new ViaFabricAddress()).parse(address.getHostString());
+                ChannelFuture ch = ((Bootstrap)((Bootstrap)((Bootstrap)(new Bootstrap()).group((EventLoopGroup)NetworkManager.field_181125_e.getValue())).channel(NioSocketChannel.class)).handler((ChannelHandler)new ChannelInitializer<Channel>() {
+                    protected void initChannel(Channel channel) {
+                        try {
+                            channel.config().setOption(ChannelOption.TCP_NODELAY, Boolean.valueOf(true));
+                            channel.config().setOption(ChannelOption.IP_TOS, Integer.valueOf(24));
+                        } catch (ChannelException channelException) {}
+                        channel.pipeline()
+                                .addLast("timeout", (ChannelHandler)new ReadTimeoutHandler(30))
+                                .addLast("splitter", (ChannelHandler)new MessageDeserializer2())
+                                .addLast("decoder", (ChannelHandler)new MessageDeserializer(EnumPacketDirection.CLIENTBOUND))
+                                .addLast("prepender", (ChannelHandler)new MessageSerializer2())
+                                .addLast("encoder", (ChannelHandler)new MessageSerializer(EnumPacketDirection.SERVERBOUND))
+                                .addLast("packet_handler", (ChannelHandler)clientConnection);
+                    }
+                })).connect(address);
+                ch.addListener();
+            } catch (Throwable throwable) {
+                future.completeExceptionally(throwable);
+            }
+            return future;
+        }));
+    }*/
+
 public class ProtocolAutoDetector {
     public static LoadingCache<InetSocketAddress, CompletableFuture<ProtocolVersion>> SERVER_VER = CacheBuilder.newBuilder()
             .expireAfterAccess(100, TimeUnit.SECONDS)
             .build(CacheLoader.from((address) -> {
                 CompletableFuture<ProtocolVersion> future = new CompletableFuture<>();
 
-//                try {
-//                    final NetworkManager clientConnection = new NetworkManager(EnumPacketDirection.CLIENTBOUND);
-//
-//                    ViaFabricAddress viaAddr = new ViaFabricAddress().parse(address.getHostString());
-//
-//                    ChannelFuture ch = new Bootstrap()
-//                            .group(NetworkManager.field_5955.get())
-//                            .channel(NioSocketChannel.class)
-//                            .handler(new ChannelInitializer<Channel>() {
-//                                protected void initChannel(Channel channel) {
-//                                    try {
-//                                        channel.config().setOption(ChannelOption.TCP_NODELAY, true);
-//                                        channel.config().setOption(ChannelOption.IP_TOS, 0x18); // Stolen from Velocity, low delay, high reliability
-//                                    } catch (ChannelException ignored) {
-//                                    }
-//
-//                                    channel.pipeline()
-//                                            .addLast("timeout", new ReadTimeoutHandler(30))
-//                                            .addLast("splitter", new SplitterHandler())
-//                                            .addLast("decoder", new DecoderHandler(EnumPacketDirection.CLIENTBOUND))
-//                                            .addLast("prepender", new SizePrepender())
-//                                            .addLast("encoder", new PacketEncoder(EnumPacketDirection.SERVERBOUND))
-//                                            .addLast("packet_handler", clientConnection);
-//                                }
-//                            })
-//                            .connect(address);
-//
-//                    ch.addListener(future1 -> {
-//                        if (!future1.isSuccess()) {
-//                            future.completeExceptionally(future1.cause());
-//                        } else {
-//                            ch.channel().eventLoop().execute(() -> { // needs to execute after channel init
-//                                clientConnection.setPacketListener(new ClientQueryPacketListener() {
-//                                    @Override
-//                                    public void onResponse(QueryResponseS2CPacket packet) {
-//                                        ServerMetadata meta = packet.getServerMetadata();
-//                                        ServerMetadata.Version version;
-//                                        if (meta != null && (version = meta.getVersion()) != null) {
-//                                            ProtocolVersion ver = ProtocolVersion.getProtocol(version.getProtocolVersion());
-//                                            future.complete(ver);
-//                                            ViaFabric.JLOGGER.info("Auto-detected " + ver + " for " + address);
-//                                        } else {
-//                                            future.completeExceptionally(new IllegalArgumentException("Null version in query response"));
-//                                        }
-//                                        clientConnection.disconnect(new LiteralText(""));
-//                                    }
-//
-//                                    @Override
-//                                    public void onPong(QueryPongS2CPacket packet) {
-//                                        clientConnection.disconnect(new LiteralText("Pong not requested!"));
-//                                    }
-//
-//                                    @Override
-//                                    public void onDisconnected(Text reason) {
-//                                        future.completeExceptionally(new IllegalStateException(reason.asString()));
-//                                    }
-//                                });
-//
-//                                clientConnection.send(new HandshakeC2SPacket(ProtocolRegistry.SERVER_PROTOCOL, viaAddr.realAddress,
-//                                        address.getPort(), NetworkState.STATUS));
-//                                clientConnection.send(new QueryRequestC2SPacket());
-//                            });
-//                        }
-//                    });
-//                } catch (Throwable throwable) {
-//                    future.completeExceptionally(throwable);
-//                }
+                try {
+                    final NetworkManager clientConnection = new NetworkManager(EnumPacketDirection.CLIENTBOUND);
+
+                    ViaFabricAddress viaAddr = new ViaFabricAddress().parse(address.getHostString());
+
+                    ChannelFuture ch = new Bootstrap()
+                            .group(NetworkManager.field_181125_e.getValue())
+                            .channel(NioSocketChannel.class)
+                            .handler(new ChannelInitializer<Channel>() {
+                                protected void initChannel(Channel channel) {
+                                    try {
+                                        channel.config().setOption(ChannelOption.TCP_NODELAY, true);
+                                        channel.config().setOption(ChannelOption.IP_TOS, 0x18); // Stolen from Velocity, low delay, high reliability
+                                    } catch (ChannelException ignored) {
+                                    }
+
+                                    channel.pipeline()
+                                            .addLast("timeout", (ChannelHandler) new ReadTimeoutHandler(30))
+                                            .addLast("splitter", (ChannelHandler) new MessageDeserializer2())
+                                            .addLast("decoder", (ChannelHandler) new MessageDeserializer(EnumPacketDirection.CLIENTBOUND))
+                                            .addLast("prepender", (ChannelHandler) new MessageSerializer2())
+                                            .addLast("encoder", (ChannelHandler) new MessageSerializer(EnumPacketDirection.SERVERBOUND))
+                                            .addLast("packet_handler", (ChannelHandler) clientConnection);
+                                }
+                            })
+                            .connect(address);
+
+
+                    ch.addListener(future1 -> {
+                        if (!future1.isSuccess()) {
+                            future.completeExceptionally(future1.cause());
+                        } else {
+                            ch.channel().eventLoop().execute(() -> { // needs to execute after channel init
+                                clientConnection.setNetHandler(new INetHandlerStatusClient() {
+                                    @Override
+                                    public void onDisconnect(IChatComponent reason) {
+                                        future.completeExceptionally(new IllegalStateException(reason.getFormattedText()));
+                                    }
+
+                                    @Override
+                                    public void handleServerInfo(S00PacketServerInfo packetIn) {
+                                        ProtocolVersion ver = ProtocolVersion.getProtocol(packetIn.getResponse().getProtocolVersionInfo().getProtocol());
+                                        future.complete(ver);
+                                        ViaFabric.JLOGGER.info("Auto-detected " + ver + " for " + address);
+                                        clientConnection.getNetHandler().onDisconnect(new ChatComponentText(""));
+                                    }
+
+                                    @Override
+                                    public void handlePong(S01PacketPong packetIn) {
+                                        clientConnection.getNetHandler().onDisconnect(new ChatComponentText("Pong not requested!"));
+                                    }
+                                });
+
+                                clientConnection.sendPacket(new C00Handshake(ProtocolRegistry.SERVER_PROTOCOL, viaAddr.realAddress,
+                                        address.getPort(), EnumConnectionState.STATUS));
+                                clientConnection.sendPacket(new C00PacketServerQuery());
+                            });
+                        }
+                    });
+                } catch (Throwable throwable) {
+                    future.completeExceptionally(throwable);
+                }
 
                 return future;
             }));
 }
+

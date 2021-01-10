@@ -4,6 +4,7 @@ import java.io.IOException;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
 
 public class S45PacketTitle implements Packet<INetHandlerPlayClient>
@@ -92,7 +93,7 @@ public class S45PacketTitle implements Packet<INetHandlerPlayClient>
 
     public IChatComponent getMessage()
     {
-        return this.message;
+        return this.message == null ? new ChatComponentText("") : this.message;
     }
 
     public int getFadeInTime()

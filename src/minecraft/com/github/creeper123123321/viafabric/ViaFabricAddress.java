@@ -35,39 +35,33 @@ public class ViaFabricAddress {
     public String realAddress = null;
 
     public ViaFabricAddress parse(String address) {
-        if (address == null) return null;
+        if (address == null)
+            return null;
         String[] parts = address.split("\\.");
-
         boolean foundDomain = false;
         boolean foundOptions = false;
-
         StringBuilder ourParts = new StringBuilder();
         StringBuilder realAddrBuilder = new StringBuilder();
-
         for (int i = parts.length - 1; i >= 0; i--) {
             String part = parts[i];
             boolean realAddrPart = false;
             if (foundDomain) {
-                if (!foundOptions) {
+                if (!foundOptions)
                     if (part.startsWith("_")) {
                         String arg = part.substring(2);
-                        if (part.toLowerCase(Locale.ROOT).startsWith("_v")) {
+                        if (part.toLowerCase(Locale.ROOT).startsWith("_v"))
                             try {
-                                protocol = Integer.parseInt(arg);
+                                this.protocol = Integer.parseInt(arg);
                             } catch (NumberFormatException e) {
                                 ProtocolVersion closest = ProtocolVersion.getClosest(arg.replace("_", "."));
-                                if (closest != null) {
-                                    protocol = closest.getId();
-                                }
+                                if (closest != null)
+                                    this.protocol = closest.getId();
                             }
-                        }
                     } else {
                         foundOptions = true;
                     }
-                }
-                if (foundOptions) {
+                if (foundOptions)
                     realAddrPart = true;
-                }
             } else if (part.equalsIgnoreCase("viafabric")) {
                 foundDomain = true;
             }
@@ -77,17 +71,14 @@ public class ViaFabricAddress {
                 ourParts.insert(0, part + ".");
             }
         }
-
         String realAddr = realAddrBuilder.toString().replaceAll("\\.$", "");
         String suffix = ourParts.toString().replaceAll("\\.$", "");
-
         if (realAddr.isEmpty()) {
             this.realAddress = address;
         } else {
             this.realAddress = realAddr;
             this.viaSuffix = suffix;
         }
-
         return this;
     }
 

@@ -47,13 +47,15 @@ public class AutoGG extends Module {
         if (castPacket instanceof S45PacketTitle) {
             S45PacketTitle packet = ((S45PacketTitle) castPacket);
             if (packet.getType().equals(S45PacketTitle.Type.TITLE)) {
-                String text = packet.getMessage().getUnformattedText();
-                if (text.equals("VICTORY!") || text.endsWith("YOU WON!")) {
-                    chatQueue.add("/achat " + settings.get("WORDS").getValue().toString());
-                    messageDelay.reset();
-                } else if (text.equals("GAME OVER") && Client.getModuleManager().get(Killaura.class).isEnabled()) {
-                    chatQueue.add("/achat gg");
-                    messageDelay.reset();
+                if(packet.getMessage() != null) {
+                    String text = packet.getMessage().getUnformattedText();
+                    if (text.equals("VICTORY!") || text.endsWith("YOU WON!")) {
+                        chatQueue.add("/achat " + settings.get("WORDS").getValue().toString());
+                        messageDelay.reset();
+                    } else if (text.equals("GAME OVER") && Client.getModuleManager().get(Killaura.class).isEnabled()) {
+                        chatQueue.add("/achat gg");
+                        messageDelay.reset();
+                    }
                 }
             }
         }
