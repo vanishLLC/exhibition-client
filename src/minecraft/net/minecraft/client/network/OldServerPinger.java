@@ -1,5 +1,7 @@
 package net.minecraft.client.network;
 
+import com.github.creeper123123321.viafabric.ViaFabric;
+import com.github.creeper123123321.viafabric.ViaFabricAddress;
 import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
@@ -42,6 +44,8 @@ import net.minecraft.util.MathHelper;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import us.myles.ViaVersion.api.protocol.ProtocolRegistry;
+import us.myles.ViaVersion.api.protocol.ProtocolVersion;
 
 public class OldServerPinger
 {
@@ -49,10 +53,20 @@ public class OldServerPinger
     private static final Logger logger = LogManager.getLogger();
     private final List<NetworkManager> pingDestinations = Collections.<NetworkManager>synchronizedList(Lists.<NetworkManager>newArrayList());
 
+    private InetAddress resolveViaFabricAddr(String address) throws UnknownHostException {
+        ViaFabricAddress viaAddr = new ViaFabricAddress().parse(address);
+        if (viaAddr.viaSuffix == null) {
+            return InetAddress.getByName(address);
+        }
+
+        InetAddress resolved = InetAddress.getByName(viaAddr.realAddress);
+        return InetAddress.getByAddress(resolved.getHostName() + "." + viaAddr.viaSuffix, resolved.getAddress());
+    }
+
     public void ping(final ServerData server) throws UnknownHostException
     {
-        ServerAddress serveraddress = ServerAddress.func_78860_a(server.serverIP);
-        final NetworkManager networkmanager = NetworkManager.func_181124_a(InetAddress.getByName(serveraddress.getIP()), serveraddress.getPort(), false);
+        ServerAddress serveraddress = ServerAddress.resolveServer(server.serverIP);
+        final NetworkManager networkmanager = NetworkManager.func_181124_a(resolveViaFabricAddr(serveraddress.getIP()), serveraddress.getPort(), false);
         this.pingDestinations.add(networkmanager);
         server.serverMOTD = "Pinging...";
         server.pingToServer = -1L;
@@ -173,7 +187,7 @@ public class OldServerPinger
 
         try
         {
-            networkmanager.sendPacket(new C00Handshake(47, serveraddress.getIP(), serveraddress.getPort(), EnumConnectionState.STATUS));
+            networkmanager.sendPacket(new C00Handshake(ViaFabric.config.getClientSideVersion(), serveraddress.getIP(), serveraddress.getPort(), EnumConnectionState.STATUS));
             networkmanager.sendPacket(new C00PacketServerQuery());
         }
         catch (Throwable throwable)
@@ -185,7 +199,7 @@ public class OldServerPinger
     private void tryCompatibilityPing(final ServerData server)
     {
         try {
-            final ServerAddress serveraddress = ServerAddress.func_78860_a(server.serverIP);
+            final ServerAddress serveraddress = ServerAddress.resolveServer(server.serverIP);
             ((Bootstrap) ((Bootstrap) ((Bootstrap) (new Bootstrap()).group((EventLoopGroup) NetworkManager.CLIENT_NIO_EVENTLOOP.getValue())).handler(new ChannelInitializer<Channel>() {
                 protected void initChannel(Channel p_initChannel_1_) throws Exception {
                     try {

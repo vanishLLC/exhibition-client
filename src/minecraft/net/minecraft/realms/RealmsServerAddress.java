@@ -25,7 +25,8 @@ public class RealmsServerAddress
 
     public static RealmsServerAddress parseString(String p_parseString_0_)
     {
-        ServerAddress serveraddress = ServerAddress.func_78860_a(p_parseString_0_);
+        ServerAddress serveraddress = ServerAddress.resolveServer(p_parseString_0_);
         return new RealmsServerAddress(serveraddress.getIP(), serveraddress.getPort());
     }
+
 }
