@@ -16,6 +16,7 @@ import exhibition.util.PlayerUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockAir;
 import net.minecraft.block.BlockHopper;
+import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
@@ -49,7 +50,7 @@ public class Phase extends Module {
 
     @Override
     public void onEnable() {
-        if (Client.getModuleManager().get(Step.class).isEnabled() && step.getValue()){
+        if (Client.getModuleManager().get(Step.class).isEnabled() && step.getValue()) {
             Client.getModuleManager().get(Step.class).toggle();
             wasStep = true;
         } else {
@@ -62,7 +63,7 @@ public class Phase extends Module {
 
     @Override
     public void onDisable() {
-        if (wasStep){
+        if (wasStep) {
             Client.getModuleManager().get(Step.class).toggle();
         }
         enablePos = null;
@@ -99,24 +100,23 @@ public class Phase extends Module {
         }
         if (event instanceof EventPacket && !currentPhase.equalsIgnoreCase("HCF")) {
             EventPacket ep = (EventPacket) event;
-            if (ep.isOutgoing()) {
-                if (isInsideBlock()) {
-                    return;
-                }
-                final double multiplier = 0.2;
-                final double mx = Math.cos(Math.toRadians(mc.thePlayer.rotationYaw + 90.0f));
-                final double mz = Math.sin(Math.toRadians(mc.thePlayer.rotationYaw + 90.0f));
-                final double x = mc.thePlayer.movementInput.moveForward * multiplier * mx + mc.thePlayer.movementInput.moveStrafe * multiplier * mz;
-                final double z = mc.thePlayer.movementInput.moveForward * multiplier * mz - mc.thePlayer.movementInput.moveStrafe * multiplier * mx;
-                if (mc.thePlayer.isCollidedHorizontally && ep.getPacket() instanceof C03PacketPlayer) {
-                    delay++;
-                    if (this.delay >= 5) {
-                        final C03PacketPlayer player = (C03PacketPlayer) ep.getPacket();
-                        player.x += x;
-                        player.z += z;
-                        --player.y;
-                        this.delay = 0;
-                    }
+            Packet packet = ep.getPacket();
+            if (isInsideBlock()) {
+                return;
+            }
+            if (mc.thePlayer.isCollidedHorizontally && packet instanceof C03PacketPlayer) {
+                delay++;
+                if (this.delay >= 5) {
+                    final C03PacketPlayer player = (C03PacketPlayer) packet;
+                    final double multiplier = 0.2;
+                    final double mx = Math.cos(Math.toRadians(mc.thePlayer.rotationYaw + 90.0f));
+                    final double mz = Math.sin(Math.toRadians(mc.thePlayer.rotationYaw + 90.0f));
+                    final double x = mc.thePlayer.movementInput.moveForward * multiplier * mx + mc.thePlayer.movementInput.moveStrafe * multiplier * mz;
+                    final double z = mc.thePlayer.movementInput.moveForward * multiplier * mz - mc.thePlayer.movementInput.moveStrafe * multiplier * mx;
+                    player.x += x;
+                    player.z += z;
+                    --player.y;
+                    this.delay = 0;
                 }
             }
         }
