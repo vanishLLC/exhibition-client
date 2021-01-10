@@ -357,7 +357,7 @@ public class RenderingUtil {
         float var8 = (color & 0xFF) / 255.0F;
         GlStateManager.enableBlend();
         GlStateManager.disableTexture2D();
-        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+        GlStateManager.tryBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, 1, 0);
         GlStateManager.color(var6, var7, var8, var11);
         GL11.glBegin(GL_QUADS);
         GL11.glVertex3d(left, bottom, 0.0D);
