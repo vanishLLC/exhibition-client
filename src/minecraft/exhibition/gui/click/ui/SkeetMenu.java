@@ -975,7 +975,7 @@ public class SkeetMenu extends UI {
                                 }
                             }
                         }
-                        if (!module.getName().equalsIgnoreCase("Waypoints") && !module.getName().equalsIgnoreCase("HUD") && !module.getName().equals("2DTags")) {
+                        if (!module.getName().equalsIgnoreCase("Waypoints") && !module.getName().equalsIgnoreCase("HUD") && !module.getName().equals("2DTags") && !module.getName().equals("3DTags")) {
                             if (x1 == 44.5f) {
                                 y += 10;
                             }
