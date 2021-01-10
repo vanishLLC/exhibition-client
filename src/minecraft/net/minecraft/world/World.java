@@ -1263,7 +1263,7 @@ public abstract class World implements IBlockAccess {
      */
     public void playSoundEffect(double x, double y, double z, String soundName, float volume, float pitch) {
         if (Client.instance.is1_16_4()) {
-            if (!soundName.toLowerCase().contains("lightn"))
+            if (!soundName.toLowerCase().contains("lightn") && !soundName.toLowerCase().contains("explo"))
                 Minecraft.getMinecraft().thePlayer.playSound(soundName, volume, pitch);
         } else {
             for (int i = 0; i < this.worldAccesses.size(); ++i) {
