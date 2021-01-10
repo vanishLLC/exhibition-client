@@ -111,7 +111,7 @@ public class GuiAltManager extends PanoramaScreen {
                     break;
                 final List<Alt> registry = AltManager.registry;
                 final Random random = new Random();
-                List<Alt> unbanned = registry.stream().filter(Alt::isUnbanned).filter(Alt::isValid).collect(Collectors.toList());
+                List<Alt> unbanned = registry.stream().filter(Alt::isUnbanned).filter(Alt::isValid).filter(o -> !o.isFavorite()).collect(Collectors.toList());
                 if (unbanned.isEmpty())
                     return;
                 final Alt randomAlt = unbanned.get(random.nextInt(unbanned.size()));

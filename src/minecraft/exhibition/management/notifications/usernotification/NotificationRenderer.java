@@ -36,9 +36,11 @@ public class NotificationRenderer implements INotificationRenderer {
         }
 
         boolean isTargetHudActive = false;
-        Killaura killaura = (Killaura) Client.getModuleManager().get(Killaura.class);
-        if (killaura.isEnabled() && killaura.getCurrentTarget() != null) {
-            isTargetHudActive = true;
+        if(Client.instance != null) {
+            Killaura killaura = (Killaura) Client.getModuleManager().get(Killaura.class);
+            if (killaura.isEnabled() && killaura.getCurrentTarget() != null) {
+                isTargetHudActive = true;
+            }
         }
 
         for (INotification notification : notifications) {

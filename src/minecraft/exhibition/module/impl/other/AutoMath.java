@@ -18,8 +18,6 @@ import java.util.PriorityQueue;
 
 public class AutoMath extends Module {
 
-    private PriorityQueue<String> chatQueue = new PriorityQueue(1);
-    private exhibition.util.Timer chatDelay = new Timer();
     private boolean listen = false;
 
     public AutoMath(ModuleData data) {
@@ -29,13 +27,6 @@ public class AutoMath extends Module {
     @RegisterEvent(events = {EventPacket.class})
     public void onEvent(Event event) {
         EventPacket ep = event.cast();
-        if (chatDelay.delay(750) && !chatQueue.isEmpty()) {
-            chatDelay.reset();
-            String message = chatQueue.poll();
-            if (message != null && !message.equals("")) {
-                ChatUtil.sendChat(message);
-            }
-        }
         Packet packet = ep.getPacket();
         if (packet instanceof S02PacketChat) {
             S02PacketChat packetChat = (S02PacketChat) packet;
@@ -47,8 +38,7 @@ public class AutoMath extends Module {
                     ScriptEngine engine = mgr.getEngineByName("JavaScript");
                     String result = String.valueOf(engine.eval(calculate.trim()));
                     ChatUtil.printChat(Command.chatPrefix + "\247e" + result);
-                    chatQueue.add(result);
-                    chatDelay.reset();
+                    ChatUtil.sendChat(result);
                 } catch (Exception ignored) {
                     ChatUtil.printChat(Command.chatPrefix + "\247cfailed to solve. " + ignored.getMessage());
                 }

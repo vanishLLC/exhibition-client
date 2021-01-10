@@ -445,7 +445,7 @@ public class WorldRenderer
         }
 
         Module module = Client.getModuleManager().get(Aimbot.class);
-        if (module.isEnabled()){
+        if (module != null && module.isEnabled()){
             Aimbot zombieAim = (Aimbot)module;
             if(zombieAim.usingAutowall() && zombieAim.showAutowall()) {
                 color = Colors.getColorOpacity(color, 150);

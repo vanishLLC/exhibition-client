@@ -441,7 +441,7 @@ public class Block {
         }
 
         Module module = Client.getModuleManager().get(Aimbot.class);
-        if (module.isEnabled()) {
+        if (module != null && module.isEnabled()) {
             Aimbot zombieAim = (Aimbot) module;
             if (zombieAim.usingAutowall() && zombieAim.showAutowall()) {
                 Block[] penetrableBlocks = new Block[]{Blocks.wooden_slab, Blocks.acacia_stairs, Blocks.oak_stairs, Blocks.planks, Blocks.double_wooden_slab, Blocks.birch_stairs, Blocks.dark_oak_stairs, Blocks.spruce_stairs, Blocks.jungle_stairs, Blocks.log, Blocks.log2};

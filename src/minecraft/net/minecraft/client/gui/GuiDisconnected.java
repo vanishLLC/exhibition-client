@@ -188,7 +188,7 @@ public class GuiDisconnected extends GuiScreen {
         } else if (button.id == 4 && !AltManager.registry.isEmpty()) {
             final List<Alt> registry = AltManager.registry;
             final Random random = new Random();
-            List<Alt> unbanned = registry.stream().filter(Alt::isUnbanned).filter(Alt::isValid).collect(Collectors.toList());
+            List<Alt> unbanned = registry.stream().filter(Alt::isUnbanned).filter(Alt::isValid).filter(o -> !o.isFavorite()).collect(Collectors.toList());
             if (unbanned.isEmpty()) {
                 Notifications.getManager().post("No Unbanned Alts", "Looks like you're all out of alts!", Notifications.Type.NOTIFY);
                 return;
