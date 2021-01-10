@@ -554,7 +554,7 @@ public class Killaura extends Module {
                                                 (attack.equals("Precise") ? target.waitTicks <= 0 :
                                                         target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
 
-                                        if(isAttacking && canAttackRightNow) {
+                                        if (isAttacking && canAttackRightNow) {
                                             em.setPitch(MathHelper.wrapAngleTo180_float(180 - em.getPitch()));
                                         } else {
                                             em.setPitch(em.getPitch() + 360);
@@ -800,7 +800,9 @@ public class Killaura extends Module {
                         }
 
                         if (canAttackRightNow && shouldAttack) {
-
+                            if (!Client.instance.is1_16_4())
+                                if (!(boolean) noswing.getValue())
+                                    mc.thePlayer.swingItem();
 
                             //ChatUtil.printChat("Attacked " + target.hurtTime + " " + target.waitTicks);
 
@@ -810,8 +812,10 @@ public class Killaura extends Module {
 //                                ChatUtil.printChat("\247a+Normal " + mc.thePlayer.ticksExisted + " " + mc.thePlayer.fallDistance + " " + isCritSetup + " " + target.waitTicks);
 //                            }
                             NetUtil.sendPacketNoEvents(new C02PacketUseEntity(target, C02PacketUseEntity.Action.ATTACK));
-                            if (!(boolean) noswing.getValue())
-                                mc.thePlayer.swingItem();
+
+                            if (Client.instance.is1_16_4())
+                                if (!(boolean) noswing.getValue())
+                                    mc.thePlayer.swingItem();
 
                             //ChatUtil.printChat(-(mc.thePlayer.posY - mc.thePlayer.lastTickPosY) + "");
 
