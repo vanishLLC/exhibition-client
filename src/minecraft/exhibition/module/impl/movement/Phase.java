@@ -30,8 +30,6 @@ public class Phase extends Module {
 
     private Vec3 enablePos;
 
-    private boolean wasStep;
-
     private String PM = "PHASEMODE";
     private Setting distance = new Setting<>("DIST", 0.5, "Distance for HCF phase.", 0.1, 0.1, 2);
     private Setting<Boolean> toggle = new Setting<>("TOGGLE", false, "Automatically disable when you move 5 blocks away.");
