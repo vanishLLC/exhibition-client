@@ -3,10 +3,7 @@ package exhibition.module.impl.movement;
 import exhibition.Client;
 import exhibition.event.Event;
 import exhibition.event.RegisterEvent;
-import exhibition.event.impl.EventBlockBounds;
-import exhibition.event.impl.EventMotionUpdate;
-import exhibition.event.impl.EventPacket;
-import exhibition.event.impl.EventPushBlock;
+import exhibition.event.impl.*;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.Options;
@@ -50,12 +47,6 @@ public class Phase extends Module {
 
     @Override
     public void onEnable() {
-        if (Client.getModuleManager().get(Step.class).isEnabled() && step.getValue()) {
-            Client.getModuleManager().get(Step.class).toggle();
-            wasStep = true;
-        } else {
-            wasStep = false;
-        }
         if (mc.thePlayer != null) {
             enablePos = new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ);
         }
@@ -63,18 +54,14 @@ public class Phase extends Module {
 
     @Override
     public void onDisable() {
-        if (wasStep) {
-            Client.getModuleManager().get(Step.class).toggle();
-        }
         enablePos = null;
     }
 
-    @RegisterEvent(events = {EventBlockBounds.class, EventMotionUpdate.class, EventPushBlock.class, EventPacket.class})
+    @RegisterEvent(events = {EventBlockBounds.class, EventMotionUpdate.class, EventPushBlock.class, EventPacket.class, EventStep.class})
     public void onEvent(Event event) {
         if (mc.thePlayer == null || mc.theWorld == null) {
             return;
         }
-
         String currentPhase = ((Options) settings.get(PM).getValue()).getSelected();
         this.setSuffix(currentPhase);
         if (currentPhase.equalsIgnoreCase("Hypixel") && mc.getIntegratedServer() == null) {
@@ -97,6 +84,13 @@ public class Phase extends Module {
                 event.setCancelled(true);
             }
             return;
+        }
+        if (event instanceof EventStep){
+            EventStep step = event.cast();
+            if (step.isPre() && this.step.getValue()) {
+                event.setCancelled(true);
+                step.setActive(false);
+            }
         }
         if (event instanceof EventPacket && !currentPhase.equalsIgnoreCase("HCF")) {
             EventPacket ep = (EventPacket) event;
