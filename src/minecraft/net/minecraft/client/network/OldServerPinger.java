@@ -1,13 +1,6 @@
 package net.minecraft.client.network;
 
-import com.github.creeper123123321.viafabric.ViaFabric;
 import com.github.creeper123123321.viafabric.ViaFabricAddress;
-import com.github.creeper123123321.viafabric.handler.FabricDecodeHandler;
-import com.github.creeper123123321.viafabric.handler.FabricEncodeHandler;
-import com.github.creeper123123321.viafabric.handler.clientside.VRDecodeHandler;
-import com.github.creeper123123321.viafabric.handler.clientside.VREncodeHandler;
-import com.github.creeper123123321.viafabric.platform.VRClientSideUserConnection;
-import com.github.creeper123123321.viafabric.protocol.ViaFabricHostnameProtocol;
 import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
@@ -52,11 +45,6 @@ import net.minecraft.util.MathHelper;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import us.myles.ViaVersion.api.data.UserConnection;
-import us.myles.ViaVersion.api.protocol.Protocol;
-import us.myles.ViaVersion.api.protocol.ProtocolPipeline;
-import us.myles.ViaVersion.api.protocol.ProtocolRegistry;
-import us.myles.ViaVersion.api.protocol.ProtocolVersion;
 
 public class OldServerPinger {
     private static final Splitter PING_RESPONSE_SPLITTER = Splitter.on('\u0000').limit(6);

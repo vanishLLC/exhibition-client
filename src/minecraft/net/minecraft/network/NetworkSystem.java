@@ -1,14 +1,8 @@
 package net.minecraft.network;
 
-import com.github.creeper123123321.viafabric.ViaFabric;
 import com.github.creeper123123321.viafabric.handler.CommonTransformer;
-import com.github.creeper123123321.viafabric.handler.clientside.ProtocolDetectionHandler;
-import com.github.creeper123123321.viafabric.handler.clientside.VRDecodeHandler;
-import com.github.creeper123123321.viafabric.handler.clientside.VREncodeHandler;
 import com.github.creeper123123321.viafabric.handler.serverside.FabricDecodeHandler;
 import com.github.creeper123123321.viafabric.handler.serverside.FabricEncodeHandler;
-import com.github.creeper123123321.viafabric.platform.VRClientSideUserConnection;
-import com.github.creeper123123321.viafabric.protocol.ViaFabricHostnameProtocol;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.netty.bootstrap.ServerBootstrap;

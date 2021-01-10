@@ -23,34 +23,30 @@
  * SOFTWARE.
  */
 
-package com.github.creeper123123321.viafabric.handler;
+package com.github.creeper123123321.viafabric.handler.serverside;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.MessageToMessageDecoder;
+import io.netty.handler.codec.MessageToMessageEncoder;
 import us.myles.ViaVersion.api.data.UserConnection;
 import us.myles.ViaVersion.exception.CancelCodecException;
-import us.myles.ViaVersion.exception.CancelDecoderException;
+import us.myles.ViaVersion.exception.CancelEncoderException;
 import us.myles.ViaVersion.util.PipelineUtil;
 
 import java.util.List;
 
 @ChannelHandler.Sharable
-public class FabricDecodeHandler extends MessageToMessageDecoder<ByteBuf> {
+public class FabricEncodeHandler extends MessageToMessageEncoder<ByteBuf> {
     private final UserConnection info;
 
-    public FabricDecodeHandler(UserConnection info) {
+    public FabricEncodeHandler(UserConnection info) {
         this.info = info;
     }
 
-    public UserConnection getInfo() {
-        return info;
-    }
-
     @Override
-    protected void decode(ChannelHandlerContext ctx, ByteBuf bytebuf, List<Object> out) throws Exception {
-        if (!info.checkIncomingPacket()) throw CancelDecoderException.generate(null);
+    protected void encode(final ChannelHandlerContext ctx, ByteBuf bytebuf, final List<Object> out) throws Exception {
+        if (!info.checkOutgoingPacket()) throw CancelEncoderException.generate(null);
         if (!info.shouldTransformPacket()) {
             out.add(bytebuf.retain());
             return;
@@ -58,7 +54,7 @@ public class FabricDecodeHandler extends MessageToMessageDecoder<ByteBuf> {
 
         ByteBuf transformedBuf = ctx.alloc().buffer().writeBytes(bytebuf);
         try {
-            info.transformIncoming(transformedBuf, CancelDecoderException::generate);
+            info.transformOutgoing(transformedBuf, CancelEncoderException::generate);
             out.add(transformedBuf.retain());
         } finally {
             transformedBuf.release();
