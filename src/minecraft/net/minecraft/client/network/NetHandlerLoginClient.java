@@ -9,7 +9,6 @@ import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import java.math.BigInteger;
 import java.security.PublicKey;
-import java.util.Arrays;
 import javax.crypto.SecretKey;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiDisconnected;
@@ -123,7 +122,7 @@ public class NetHandlerLoginClient implements INetHandlerLoginClient
 
         if (!this.networkManager.isLocalChannel())
         {
-            this.networkManager.setCompressionTreshold(packetIn.getCompressionTreshold());
+            this.networkManager.setCompressionThreshold(packetIn.getCompressionTreshold());
         }
     }
 }

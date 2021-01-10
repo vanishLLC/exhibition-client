@@ -120,7 +120,7 @@ public class NetHandlerLoginServer implements INetHandlerLoginServer, ITickable
                 {
                     public void operationComplete(ChannelFuture p_operationComplete_1_) throws Exception
                     {
-                        NetHandlerLoginServer.this.networkManager.setCompressionTreshold(NetHandlerLoginServer.this.server.getNetworkCompressionTreshold());
+                        NetHandlerLoginServer.this.networkManager.setCompressionThreshold(NetHandlerLoginServer.this.server.getNetworkCompressionTreshold());
                     }
                 }, new GenericFutureListener[0]);
             }

@@ -1,5 +1,6 @@
 package exhibition;
 
+import com.github.creeper123123321.viafabric.ViaFabric;
 import exhibition.event.Event;
 import exhibition.event.EventListener;
 import exhibition.event.EventSystem;
@@ -200,11 +201,18 @@ public class Client implements EventListener {
         this.progressScreenTask.incrementStage(); // Stage 4 passed basic hwid check
         Client.instance = this;
         instance.setupFonts();
+        dataDirectory = new File(Client.clientName);
         this.progressScreenTask.incrementStage(); // Stage 5
         commandManager = new CommandManager();
         this.progressScreenTask.incrementStage(); // Stage 6
         moduleManager = new ModuleManager(Module.class);
         this.progressScreenTask.incrementStage(); // Stage 7
+        try {
+            new ViaFabric().onInitialize();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(0);
+        }
         this.progressScreenTask.incrementStage(); // Stage 8
 
         // Client.mojang.connect();
@@ -246,7 +254,6 @@ public class Client implements EventListener {
 
     public void setup() {
         commandManager.setup();
-        dataDirectory = new File(Client.clientName);
         isNewUser = !getDataDir().exists();
         moduleManager.setup();
         /*accountManager.setup();*/

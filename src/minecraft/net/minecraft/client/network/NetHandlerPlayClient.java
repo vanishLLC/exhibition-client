@@ -5,11 +5,8 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.mojang.authlib.GameProfile;
 import exhibition.event.EventSystem;
-import exhibition.event.impl.EventSpawnEntity;
 import exhibition.event.impl.EventSpawnPlayer;
 import exhibition.gui.screen.impl.mainmenu.ClientMainMenu;
-import exhibition.management.notifications.dev.DevNotifications;
-import exhibition.util.misc.ChatUtil;
 import io.netty.buffer.Unpooled;
 
 import java.io.File;
@@ -30,7 +27,6 @@ import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.GuiDisconnected;
 import net.minecraft.client.gui.GuiDownloadTerrain;
-import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.GuiMerchant;
 import net.minecraft.client.gui.GuiMultiplayer;
 import net.minecraft.client.gui.GuiScreen;
@@ -1342,7 +1338,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
     public void handleSetCompressionLevel(S46PacketSetCompressionLevel packetIn) {
         if (!this.netManager.isLocalChannel()) {
-            this.netManager.setCompressionTreshold(packetIn.func_179760_a());
+            this.netManager.setCompressionThreshold(packetIn.func_179760_a());
         }
     }
 

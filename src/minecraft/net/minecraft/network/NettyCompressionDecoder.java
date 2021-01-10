@@ -54,7 +54,7 @@ public class NettyCompressionDecoder extends ByteToMessageDecoder
         }
     }
 
-    public void setCompressionTreshold(int treshold)
+    public void setCompressionThreshold(int treshold)
     {
         this.treshold = treshold;
     }

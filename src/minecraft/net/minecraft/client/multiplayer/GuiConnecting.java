@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
-import java.util.Base64;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.github.creeper123123321.viafabric.ViaFabric;
+import com.github.creeper123123321.viafabric.ViaFabricAddress;
 import exhibition.Client;
-import exhibition.module.impl.combat.Bypass;
 import exhibition.util.HypixelUtil;
 import exhibition.util.security.*;
 import net.minecraft.client.Minecraft;
@@ -25,6 +25,8 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatComponentTranslation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import us.myles.ViaVersion.api.protocol.ProtocolRegistry;
+import us.myles.ViaVersion.api.protocol.ProtocolVersion;
 
 public class GuiConnecting extends GuiScreen {
     private static final AtomicInteger CONNECTION_ID = new AtomicInteger(0);
@@ -36,7 +38,7 @@ public class GuiConnecting extends GuiScreen {
     public GuiConnecting(GuiScreen p_i1181_1_, Minecraft mcIn, ServerData p_i1181_3_) {
         this.mc = mcIn;
         this.previousGuiScreen = p_i1181_1_;
-        ServerAddress serveraddress = ServerAddress.func_78860_a(p_i1181_3_.serverIP);
+        ServerAddress serveraddress = ServerAddress.resolveServer(p_i1181_3_.serverIP);
         mcIn.loadWorld((WorldClient) null);
         mcIn.setServerData(p_i1181_3_);
         this.connect(serveraddress.getIP(), serveraddress.getPort());
@@ -78,6 +80,16 @@ public class GuiConnecting extends GuiScreen {
         }
     }
 
+    private InetAddress resolveViaFabricAddr(String address) throws UnknownHostException {
+        ViaFabricAddress viaAddr = new ViaFabricAddress().parse(address);
+        if (viaAddr.viaSuffix == null) {
+            return InetAddress.getByName(address);
+        }
+
+        InetAddress resolved = InetAddress.getByName(viaAddr.realAddress);
+        return InetAddress.getByAddress(resolved.getHostName() + "." + viaAddr.viaSuffix, resolved.getAddress());
+    }
+
     private void connect(final String ip, final int port) {
 
         logger.info("Connecting to " + ip + ", " + port);
@@ -90,10 +102,10 @@ public class GuiConnecting extends GuiScreen {
                         return;
                     }
 
-                    inetaddress = InetAddress.getByName(ip);
+                    inetaddress = resolveViaFabricAddr(ip);
                     GuiConnecting.this.networkManager = NetworkManager.func_181124_a(inetaddress, port, GuiConnecting.this.mc.gameSettings.func_181148_f());
                     GuiConnecting.this.networkManager.setNetHandler(new NetHandlerLoginClient(GuiConnecting.this.networkManager, GuiConnecting.this.mc, GuiConnecting.this.previousGuiScreen));
-                    GuiConnecting.this.networkManager.sendPacket(new C00Handshake(47, ip, port, EnumConnectionState.LOGIN));
+                    GuiConnecting.this.networkManager.sendPacket(new C00Handshake(ViaFabric.config.getClientSideVersion(), ip, port, EnumConnectionState.LOGIN));
                     GuiConnecting.this.networkManager.sendPacket(new C00PacketLoginStart(GuiConnecting.this.mc.getSession().getProfile()));
 
                     HypixelUtil.verifiedHypixel = false;
