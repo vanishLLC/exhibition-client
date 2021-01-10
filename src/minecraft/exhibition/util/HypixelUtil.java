@@ -24,7 +24,7 @@ public class HypixelUtil {
     public static boolean isVerifiedHypixel() {
         Minecraft mc = Minecraft.getMinecraft();
         if (!verifiedHypixel) {
-            if (scoreboardContains("www.hypixel.ne\uD83C\uDF82t")
+            if (scoreboardContains("www.hypixel.net")
                     && mc.ingameGUI.getTabList().getHeader() != null && mc.ingameGUI.getTabList().getHeader().getUnformattedText().contains("You are playing on MC.HYPIXEL.NET")
                     && mc.ingameGUI.getTabList().getFooter() != null && mc.ingameGUI.getTabList().getFooter().getUnformattedText().contains("STORE.HYPIXEL.NET"))
                 verifiedHypixel = true;
@@ -98,7 +98,7 @@ public class HypixelUtil {
 
                 for (Score score : arraylist1) {
                     ScorePlayerTeam scoreplayerteam1 = scoreboard.getPlayersTeam(score.getPlayerName());
-                    String s1 = ScorePlayerTeam.formatPlayerName(scoreplayerteam1, score.getPlayerName()).replace("\uD83D\uDC7D", "");
+                    String s1 = ScorePlayerTeam.formatPlayerName(scoreplayerteam1, score.getPlayerName()).replace("\uD83D\uDC7D", "").replace("\uD83C\uDF82", "").replace("\247g", "");
 
                     if (StringUtils.stripControlCodes(s1).toLowerCase().contains(str.toLowerCase())) {
                         return true;
