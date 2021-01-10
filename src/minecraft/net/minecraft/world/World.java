@@ -7,6 +7,7 @@ import com.google.common.collect.Sets;
 import java.util.*;
 import java.util.concurrent.Callable;
 
+import exhibition.Client;
 import exhibition.util.misc.ChatUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHopper;
@@ -16,6 +17,7 @@ import net.minecraft.block.BlockSnow;
 import net.minecraft.block.BlockStairs;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.Entity;
@@ -1260,8 +1262,13 @@ public abstract class World implements IBlockAccess {
      * 0.9F with i,j,k position of the block.
      */
     public void playSoundEffect(double x, double y, double z, String soundName, float volume, float pitch) {
-        for (int i = 0; i < this.worldAccesses.size(); ++i) {
-            ((IWorldAccess) this.worldAccesses.get(i)).playSound(soundName, x, y, z, volume, pitch);
+        if (Client.instance.is1_16_4()) {
+            if (!soundName.toLowerCase().contains("lightn"))
+                Minecraft.getMinecraft().thePlayer.playSound(soundName, volume, pitch);
+        } else {
+            for (int i = 0; i < this.worldAccesses.size(); ++i) {
+                ((IWorldAccess) this.worldAccesses.get(i)).playSound(soundName, x, y, z, volume, pitch);
+            }
         }
     }
 
