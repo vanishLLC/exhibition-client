@@ -139,9 +139,7 @@ public class GuiAltManager extends PanoramaScreen {
                 }
                 if (this.selectedAlt == null)
                     return;
-                int normal = AltManager.registry.size();
-                AltManager.registry.remove(this.selectedAlt);
-                if (normal > AltManager.registry.size())
+                if (AltManager.registry.remove(this.selectedAlt))
                     this.status = "\247aRemoved.";
                 try {
                     Client.getFileManager().getFile(Alts.class).saveFile();
@@ -235,7 +233,7 @@ public class GuiAltManager extends PanoramaScreen {
             case 16: {
                 try (PrintWriter alts = new PrintWriter(new FileWriter(new File(Client.getDataDir().getAbsolutePath() + File.separator + "AltExport.txt")))) {
                     for (final Alt alt : AltManager.registry) {
-                        if(alt.getStatus() == Alt.Status.Banned || alt.getStatus() == Alt.Status.TempBan || alt.isAltening())
+                        if (alt.getStatus() == Alt.Status.Banned || alt.getStatus() == Alt.Status.TempBan || alt.isAltening())
                             continue;
                         alts.println(alt.getUsername() + ":" + alt.getPassword());
                     }
@@ -342,28 +340,43 @@ public class GuiAltManager extends PanoramaScreen {
                     pass = alt.getPassword().replaceAll(".", "*");
                 }
                 if (alt == this.selectedAlt) {
-                    if (this.isMouseOverAlt(par1, par2, y - this.offset) && Mouse.isButtonDown(0)) {
-                        RenderingUtil.rectangleBordered(52.0f, y - this.offset - 4, this.width - 77, y - this.offset + 20, 1.0f, Colors.getColor(50, 60), -2142943931);
-                    } else if (this.isMouseOverAlt(par1, par2, y - this.offset)) {
-                        RenderingUtil.rectangleBordered(52.0f, y - this.offset - 4, this.width - 77, y - this.offset + 20, 1.0f, Colors.getColor(50, 60), -2142088622);
+                    boolean mouseOverAlt = par1 >= 78 && par2 >= (y - this.offset) - 4 && par1 <= this.width - 77 && par2 <= (y - this.offset) + 20 && par1 >= 0 && par2 >= 33 && par1 <= this.width && par2 <= this.height - 50;
+                    if (mouseOverAlt && Mouse.isButtonDown(0)) {
+                        RenderingUtil.rectangleBordered(52.0f + 26, y - this.offset - 4, this.width - 77, y - this.offset + 20, 1.0f, Colors.getColor(50, 60), -2142943931);
+                    } else if (mouseOverAlt) {
+                        RenderingUtil.rectangleBordered(52.0f + 26, y - this.offset - 4, this.width - 77, y - this.offset + 20, 1.0f, Colors.getColor(50, 60), -2142088622);
                     } else {
-                        RenderingUtil.rectangleBordered(52.0f, y - this.offset - 4, this.width - 77, y - this.offset + 20, 1.0f, Colors.getColor(50, 60), -2144259791);
+                        RenderingUtil.rectangleBordered(52.0f + 26, y - this.offset - 4, this.width - 77, y - this.offset + 20, 1.0f, Colors.getColor(50, 60), -2144259791);
                     }
-                    boolean hovering = par1 >= this.width - 76 && par1 <= this.width - 52 && par2 >= y - this.offset - 4 && par2 <= y - this.offset + 20;
-                    RenderingUtil.rectangleBordered(this.width - 76, y - this.offset - 4, this.width - 52, y - this.offset + 20, 1, Colors.getColor(50, 60), hovering ? -2142088622 : -2144259791);
-                    GlStateManager.pushMatrix();
-                    GlStateManager.translate(this.width - 74 + 10, y - this.offset, 0);
-                    GlStateManager.scale(0.5, 0.5, 0.5);
-                    mc.fontRendererObj.drawStringWithShadow("Change", -fontRendererObj.getStringWidth("Change") / 2D, 0, Colors.getColor(230, 255));
-                    mc.fontRendererObj.drawStringWithShadow("Account", 0 - fontRendererObj.getStringWidth("Account") / 2D, 12, Colors.getColor(230, 255));
-                    mc.fontRendererObj.drawStringWithShadow("Status", 0 - fontRendererObj.getStringWidth("Status") / 2D, 24, Colors.getColor(230, 255));
-                    GlStateManager.popMatrix();
+
+                    {
+                        boolean hovering = par1 >= this.width - 76 && par1 <= this.width - 52 && par2 >= y - this.offset - 4 && par2 <= y - this.offset + 20;
+                        RenderingUtil.rectangleBordered(this.width - 76, y - this.offset - 4, this.width - 52, y - this.offset + 20, 1, Colors.getColor(50, 60), hovering ? -2142088622 : -2144259791);
+                        GlStateManager.pushMatrix();
+                        GlStateManager.translate(this.width - 74 + 10, y - this.offset, 0);
+                        GlStateManager.scale(0.5, 0.5, 0.5);
+                        mc.fontRendererObj.drawStringWithShadow("Change", -fontRendererObj.getStringWidth("Change") / 2D, 0, Colors.getColor(230, 255));
+                        mc.fontRendererObj.drawStringWithShadow("Account", 0 - fontRendererObj.getStringWidth("Account") / 2D, 12, Colors.getColor(230, 255));
+                        mc.fontRendererObj.drawStringWithShadow("Status", 0 - fontRendererObj.getStringWidth("Status") / 2D, 24, Colors.getColor(230, 255));
+                        GlStateManager.popMatrix();
+                    }
+
+                    {
+                        boolean hovering = par1 >= 52 && par1 <= 52 + 25 && par2 >= y - this.offset - 4 && par2 <= y - this.offset + 20;
+                        RenderingUtil.rectangleBordered(52, y - this.offset - 4, 52 + 25, y - this.offset + 20, 1, Colors.getColor(50, 60), hovering ? -2142088622 : -2144259791);
+                        GlStateManager.pushMatrix();
+                        GlStateManager.translate(52 + 25/2D, y - this.offset, 0);
+                        GlStateManager.scale(0.5, 0.5, 0.5);
+                        mc.fontRendererObj.drawStringWithShadow("Favorite", -fontRendererObj.getStringWidth("Favorite") / 2D, 6, Colors.getColor(230, 255));
+                        mc.fontRendererObj.drawStringWithShadow("Account", 0 - fontRendererObj.getStringWidth("Account") / 2D, 18, Colors.getColor(230, 255));
+                        GlStateManager.popMatrix();
+                    }
                 } else if (this.isMouseOverAlt(par1, par2, y - this.offset) && Mouse.isButtonDown(0)) {
                     RenderingUtil.rectangleBordered(52.0f, y - this.offset - 4, this.width - 52, y - this.offset + 20, 1.0f, -Colors.getColor(50, 60), -2146101995);
                 } else if (this.isMouseOverAlt(par1, par2, y - this.offset)) {
                     RenderingUtil.rectangleBordered(52.0f, y - this.offset - 4, this.width - 52, y - this.offset + 20, 1.0f, Colors.getColor(50, 60), -2145180893);
                 }
-                String numberP = "\2477" + (AltManager.registry.indexOf(alt) + 1) + ". \247f";
+                String numberP = (alt.isFavorite() ? "\2476❤ \247f" : "\2477" + (AltManager.registry.indexOf(alt) + 1) + ". \247f");
                 this.drawCenteredString(this.fontRendererObj, numberP + name, this.width / 2, y - this.offset, -1);
                 this.drawCenteredString(this.fontRendererObj, (alt.getStatus().equals(Alt.Status.NotWorking) ? "\247m" : "") + pass, this.width / 2, y - this.offset + 10, Colors.getColor(110));
                 y += 26;
@@ -494,7 +507,6 @@ public class GuiAltManager extends PanoramaScreen {
         this.buttonList.add(new GuiMenuButton(16, this.width - 45, 130, 40, 20, "Export Alts"));
 
 
-
         this.buttonList.add(this.sortButton = new GuiMenuButton(10, this.width - 125, 5, 75, 20, sorting.toString()));
 
 
@@ -537,7 +549,7 @@ public class GuiAltManager extends PanoramaScreen {
     }
 
     private boolean isMouseOverAlt(final int x, final int y, final int y1) {
-        return x >= 52 && y >= y1 - 4 && x <= this.width - 77 && y <= y1 + 20 && x >= 0 && y >= 33 && x <= this.width && y <= this.height - 50;
+        return x >= 52 && y >= y1 - 4 && x <= this.width - 52 && y <= y1 + 20 && x >= 0 && y >= 33 && x <= this.width && y <= this.height - 50;
     }
 
     @Override
@@ -548,13 +560,6 @@ public class GuiAltManager extends PanoramaScreen {
         }
         int y = 38 - this.offset;
         for (final Alt alt : getAlts()) {
-            if (isMouseOverAlt(par1, par2, y)) {
-                if (alt == this.selectedAlt) {
-                    this.actionPerformed(login);
-                    return;
-                }
-                this.selectedAlt = alt;
-            }
             boolean hovering = par1 >= this.width - 76 && par1 <= this.width - 52 && par2 >= y - 4 && par2 <= y + 20;
             if (hovering && alt == this.selectedAlt) {
                 switch (alt.getStatus()) {
@@ -584,6 +589,27 @@ public class GuiAltManager extends PanoramaScreen {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                return;
+            }
+
+            boolean favorite = par1 >= 52 && par1 <= 52 + 25 && par2 >= y - this.offset - 4 && par2 <= y - this.offset + 20;
+            if (favorite && alt == this.selectedAlt) {
+                this.selectedAlt.setFavorite(!this.selectedAlt.isFavorite());
+                this.status = this.selectedAlt.isFavorite() ? "\2476Favorited Alt." : "\247cUnfavorited Alt.";
+                try {
+                    Client.getFileManager().getFile(Alts.class).saveFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return;
+            }
+            if (isMouseOverAlt(par1, par2, y)) {
+                if (alt == this.selectedAlt) {
+                    this.actionPerformed(login);
+                    return;
+                }
+                this.selectedAlt = alt;
+                return;
             }
             y += 26;
         }
@@ -611,8 +637,10 @@ public class GuiAltManager extends PanoramaScreen {
             }
             case TheAltening: {
                 altList.sort(Comparator.comparing(Alt::isGenerated));
+                break;
             }
         }
+        altList.sort(Comparator.comparing(o -> !o.isFavorite()));
 
         return altList;
     }

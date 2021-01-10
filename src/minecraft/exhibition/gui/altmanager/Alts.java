@@ -4,7 +4,6 @@
 
 package exhibition.gui.altmanager;
 
-import net.minecraft.client.Minecraft;
 import org.apache.logging.log4j.LogManager;
 
 import java.io.FileWriter;
@@ -26,14 +25,20 @@ public class Alts extends FileManager.CustomFile
             String line = scanner.nextLine();
             if(!line.startsWith("lastalt:")) {
                 final String[] arguments = line.split(" \\(")[0].split(":");
-                if (arguments.length == 5) {
-                    long time = (Long.valueOf(arguments[4]) > System.currentTimeMillis() ? Long.valueOf(arguments[4]) : -1);
-                    AltManager.registry.add(new Alt(arguments[0], arguments[1], arguments[2], arguments.length > 3 ? Alt.Status.valueOf(arguments[3]) : Alt.Status.Unchecked, time));
+                if (arguments.length >= 5) {
+                    long time = (Long.parseLong(arguments[4]) > System.currentTimeMillis() ? Long.parseLong(arguments[4]) : -1);
+                    Alt alt = new Alt(arguments[0], arguments[1], arguments[2], Alt.Status.valueOf(arguments[3]), time);
+
+                    if(arguments.length >= 6) {
+                        alt.setFavorite(Boolean.parseBoolean(arguments[5]));
+                    }
+
+                    AltManager.registry.add(alt);
                 } else {
                     AltManager.registry.add(new Alt(arguments[0], arguments[1]));
                 }
             } else if(line.startsWith("lastalt:")) {
-                altName = line.substring(8, line.length());
+                altName = line.substring(8);
             }
         }
         if(altName != null) {
@@ -52,13 +57,13 @@ public class Alts extends FileManager.CustomFile
         final PrintWriter alts = new PrintWriter(new FileWriter(this.getFile()));
         for (final Alt alt : AltManager.registry) {
             if (alt.getMask().equals("")) {
-                alts.println(String.valueOf(alt.getUsername()) + ":" + alt.getPassword() + ":" + alt.getUsername() + ":" + alt.getStatus() + ":" + alt.getUnbanDate());
+                alts.println(alt.getUsername() + ":" + alt.getPassword() + ":" + alt.getUsername() + ":" + alt.getStatus() + ":" + alt.getUnbanDate() + ":" + alt.isFavorite());
             } else {
-                alts.println(String.valueOf(alt.getUsername()) + ":" + alt.getPassword() + ":" + alt.getMask() + ":" + alt.getStatus() + ":" + alt.getUnbanDate());
+                alts.println(alt.getUsername() + ":" + alt.getPassword() + ":" + alt.getMask() + ":" + alt.getStatus() + ":" + alt.getUnbanDate() + ":" + alt.isFavorite());
             }
         }
         if(AltManager.lastAlt != null) {
-            alts.println(String.valueOf("lastalt:" + AltManager.lastAlt.getMask()));
+            alts.println("lastalt:" + AltManager.lastAlt.getMask());
         }
         alts.close();
     }
