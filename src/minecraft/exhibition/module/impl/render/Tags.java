@@ -4,6 +4,7 @@ import exhibition.event.Event;
 import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventNametagRender;
 import exhibition.event.impl.EventRender3D;
+import exhibition.management.command.impl.Settings;
 import exhibition.management.friend.FriendManager;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
@@ -29,8 +30,11 @@ import java.awt.*;
 
 public class Tags extends Module {
 
+    private String SCALE = "SCALE";
+
     public Tags(ModuleData data) {
         super(data);
+        settings.put(SCALE, new Setting<>(SCALE,1, "Scale", 1, 1,10));
         settings.put(ARMOR, new Setting<>(ARMOR, true, "Show armor."));
     }
 
@@ -60,7 +64,7 @@ public class Tags extends Module {
 
     public void renderNametag(final EntityPlayer player, final double x, final double y, final double z) {
         final double tempY = y + (player.isSneaking() ? 0.5 : 0.7);
-        final double size = this.getSize(player) * -0.02;
+        final double size = this.getSize(player) * (-0.01  * ((Number) settings.get(SCALE).getValue()).intValue());
         GlStateManager.pushMatrix();
         GL11.glEnable(3042);
         GL11.glEnable(3042);
