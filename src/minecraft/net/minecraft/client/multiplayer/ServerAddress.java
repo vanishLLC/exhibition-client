@@ -1,5 +1,7 @@
 package net.minecraft.client.multiplayer;
 
+import com.github.creeper123123321.viafabric.ViaFabricAddress;
+
 import java.net.IDN;
 import java.util.Hashtable;
 import javax.naming.directory.Attributes;
@@ -68,13 +70,22 @@ public class ServerAddress
 
             if (j == 25565)
             {
-                String[] astring1 = getServerAddress(s2);
+                String[] astring1 = modifySrvAddr(s2);
                 s2 = astring1[0];
                 j = parseIntWithDefault(astring1[1], 25565);
             }
 
             return new ServerAddress(s2, j);
         }
+    }
+
+    private static String[] modifySrvAddr(String address) {
+        ViaFabricAddress viaAddr = (new ViaFabricAddress()).parse(address);
+        if (viaAddr.viaSuffix == null)
+            return ServerAddress.getServerAddress(address);
+        String[] resolvedSrv = ServerAddress.getServerAddress(viaAddr.realAddress);
+        resolvedSrv[0] = resolvedSrv[0].replaceAll("\\.$", "") + "." + viaAddr.viaSuffix;
+        return resolvedSrv;
     }
 
     /**

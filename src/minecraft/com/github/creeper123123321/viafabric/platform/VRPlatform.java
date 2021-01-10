@@ -28,16 +28,11 @@ package com.github.creeper123123321.viafabric.platform;
 import com.github.creeper123123321.viafabric.ViaFabric;
 import com.github.creeper123123321.viafabric.util.FutureTaskId;
 import com.github.creeper123123321.viafabric.util.JLoggerToLog4j;
-import de.gerrygames.viarewind.api.ViaRewindConfigImpl;
-import de.gerrygames.viarewind.api.ViaRewindPlatform;
 import exhibition.Client;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
-import nl.matsv.viabackwards.ViaBackwards;
-import nl.matsv.viabackwards.ViaBackwardsConfig;
-import nl.matsv.viabackwards.api.ViaBackwardsPlatform;
 import org.apache.logging.log4j.LogManager;
 import us.myles.ViaVersion.api.ViaAPI;
 import us.myles.ViaVersion.api.ViaVersionConfig;
@@ -58,8 +53,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-public class VRPlatform implements ViaPlatform<UUID>, ViaBackwardsPlatform, ViaRewindPlatform {
-    private final Logger logger = new JLoggerToLog4j(LogManager.getLogger());
+public class VRPlatform implements ViaPlatform<UUID> {
+    private final Logger logger = new JLoggerToLog4j(LogManager.getLogger("ViaVersion"));
     private final VRViaConfig config;
     private final File dataFolder;
     private final ViaConnectionManager connectionManager;
@@ -71,8 +66,6 @@ public class VRPlatform implements ViaPlatform<UUID>, ViaBackwardsPlatform, ViaR
         dataFolder = configDir.toFile();
         connectionManager = new ViaConnectionManager();
         api = new VRViaAPI();
-
-
     }
 
     public static MinecraftServer getServer() {
@@ -85,12 +78,6 @@ public class VRPlatform implements ViaPlatform<UUID>, ViaBackwardsPlatform, ViaR
     public Logger getLogger() {
         return logger;
     }
-
-    @Override
-    public boolean isOutdated() {return false;}
-
-    @Override
-    public void disable() {}
 
     @Override
     public String getPlatformName() {

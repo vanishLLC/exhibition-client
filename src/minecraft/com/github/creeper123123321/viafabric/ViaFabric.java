@@ -26,10 +26,7 @@
 package com.github.creeper123123321.viafabric;
 
 import com.github.creeper123123321.viafabric.config.VRConfig;
-import com.github.creeper123123321.viafabric.platform.VRInjector;
-import com.github.creeper123123321.viafabric.platform.VRLoader;
-import com.github.creeper123123321.viafabric.platform.VRPlatform;
-import com.github.creeper123123321.viafabric.platform.VRViaBackwardsPlatform;
+import com.github.creeper123123321.viafabric.platform.*;
 import com.github.creeper123123321.viafabric.protocol.ViaFabricHostnameProtocol;
 import com.github.creeper123123321.viafabric.util.JLoggerToLog4j;
 import com.google.common.collect.Range;
@@ -44,9 +41,10 @@ import io.netty.channel.local.LocalEventLoopGroup;
 import org.apache.logging.log4j.LogManager;
 import us.myles.ViaVersion.ViaManager;
 import us.myles.ViaVersion.api.Via;
+import us.myles.ViaVersion.api.data.MappingDataLoader;
+import us.myles.ViaVersion.api.protocol.Protocol;
 import us.myles.ViaVersion.api.protocol.ProtocolRegistry;
 
-import java.io.File;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -68,7 +66,7 @@ public class ViaFabric {
     }
 
     public static String getVersion() {
-        return "47";
+        return "0.2.16";
     }
 
     public void onInitialize() {
@@ -77,18 +75,14 @@ public class ViaFabric {
                 .loader(new VRLoader())
                 .platform(new VRPlatform()).build());
 
+        MappingDataLoader.enableMappingsCache();
         Via.getManager().init();
+        ProtocolRegistry.registerBaseProtocol((Protocol)ViaFabricHostnameProtocol.INSTANCE, Range.lessThan(Integer.valueOf(-2147483648)));
 
-        ProtocolRegistry.registerBaseProtocol(ViaFabricHostnameProtocol.INSTANCE, Range.lessThan(Integer.MIN_VALUE));
+        new VRViaRewindPlatform();
+        new VRViaBackwardsPlatform();
 
         config = new VRConfig(Client.getDataDir().toPath().resolve("viafabric.yml").toFile());
-
-        ViaRewindConfigImpl conf = new ViaRewindConfigImpl(Client.getDataDir().toPath().resolve("config.yml").toFile());
-        conf.reloadConfig();
-        ((VRPlatform)Via.getPlatform()).init(conf);
-
-        File file = Client.getDataDir().toPath().resolve("viaback").toFile();
-        ((VRPlatform)Via.getPlatform()).init(file);
 
         INIT_FUTURE.complete(null);
     }

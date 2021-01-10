@@ -27,6 +27,7 @@ package com.github.creeper123123321.viafabric.providers;
 
 import com.github.creeper123123321.viafabric.ViaFabric;
 import com.github.creeper123123321.viafabric.ViaFabricAddress;
+import com.github.creeper123123321.viafabric.platform.VRClientSideUserConnection;
 import com.github.creeper123123321.viafabric.service.ProtocolAutoDetector;
 import com.github.creeper123123321.viafabric.util.ProtocolUtils;
 import com.google.common.primitives.Ints;
@@ -83,14 +84,13 @@ public class VRVersionProvider extends VersionProvider {
 
     @Override
     public int getServerProtocol(UserConnection connection) throws Exception {
-        if (connection.isClientSide()) {
+        if (connection instanceof VRClientSideUserConnection) {
             ProtocolInfo info = Objects.requireNonNull(connection.getProtocolInfo());
 
-            if (!true) {
+            if (!ViaFabric.config.isClientSideEnabled()) {
                 return info.getProtocolVersion();
             }
 
-            System.out.println("TEST");
             int serverVer = ViaFabric.config.getClientSideVersion();
             SocketAddress addr = connection.getChannel().remoteAddress();
 
@@ -99,19 +99,17 @@ public class VRVersionProvider extends VersionProvider {
                 if (addrVersion != 0) serverVer = addrVersion;
 
                 try {
-//                    if (serverVer == -2) {
-//                        // Hope protocol was autodetected
-//                        ProtocolVersion autoVer =
-//                                ProtocolAutoDetector.SERVER_VER.get((InetSocketAddress) addr).getNow(null);
-//                        if (autoVer != null) {
-//                            serverVer = autoVer.getId();
-//                        }
-//                    }
+                    if (serverVer == -2) {
+                        // Hope protocol was autodetected
+                        ProtocolVersion autoVer =
+                                ProtocolAutoDetector.SERVER_VER.get((InetSocketAddress) addr).getNow(null);
+                        if (autoVer != null) {
+                            serverVer = autoVer.getId();
+                        }
+                    }
                 } catch (Exception e) {
                     ViaFabric.JLOGGER.warning("Couldn't auto detect: " + e);
                 }
-
-                System.out.println(serverVer + " " + addrVersion + " " + connection.getProtocolInfo().getProtocolVersion() + " " + connection.getProtocolInfo().getServerProtocolVersion() + " " + ((InetSocketAddress) addr).getHostString());
             }
 
             boolean blocked = checkAddressBlocked(addr);
@@ -134,7 +132,11 @@ public class VRVersionProvider extends VersionProvider {
     }
 
     private void handleMulticonnectPing(UserConnection connection, ProtocolInfo info, boolean blocked, int serverVer) throws Exception {
-        if (info.getState() == State.STATUS && info.getProtocolVersion() == -1 && (blocked || ProtocolUtils.isSupported(serverVer, getVersionForMulticonnect(serverVer)))) { // Intercept the connection
+        if (info.getState() == State.STATUS
+                && info.getProtocolVersion() == -1
+                && connection.getChannel().pipeline().get(NetworkManager.class).getNetHandler()
+                .getClass().getName().startsWith("net.earthcomputer.multiconnect")
+                && (blocked || ProtocolUtils.isSupported(serverVer, getVersionForMulticonnect(serverVer)))) { // Intercept the connection
             int multiconnectSuggestion = blocked ? -1 : getVersionForMulticonnect(serverVer);
             ViaFabric.JLOGGER.info("Sending " + ProtocolVersion.getProtocol(multiconnectSuggestion) + " for multiconnect version detector");
             PacketWrapper newAnswer = new PacketWrapper(0x00, null, connection);
@@ -180,7 +182,12 @@ public class VRVersionProvider extends VersionProvider {
                 query = ((i != 0) ? "*." : "") + String.join(".", Arrays.stream(parts, i, parts.length)
                         .toArray(String[]::new));
             }
-            return false;
+            if (ViaFabric.config.isForcedDisable(query)) {
+                ViaFabric.JLOGGER.info(addr + " is force-disabled. (Matches " + query + ")");
+                return true;
+            } else {
+                return false;
+            }
         });
     }
 }
