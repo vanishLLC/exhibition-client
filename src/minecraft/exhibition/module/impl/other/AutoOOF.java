@@ -9,6 +9,9 @@ import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.impl.combat.AntiVelocity;
 import exhibition.module.impl.combat.Killaura;
+import exhibition.module.impl.movement.Fly;
+import exhibition.module.impl.movement.LongJump;
+import exhibition.module.impl.movement.Speed;
 import exhibition.util.HypixelUtil;
 import exhibition.util.Timer;
 import exhibition.util.misc.ChatUtil;
@@ -30,7 +33,7 @@ public class AutoOOF extends Module {
 
     @RegisterEvent(events = {EventPacket.class})
     public void onEvent(Event event) {
-        if(mc.thePlayer == null)
+        if (mc.thePlayer == null)
             return;
 
         if (event instanceof EventPacket) {
@@ -48,7 +51,8 @@ public class AutoOOF extends Module {
                 if (watchdogTimer.delay(1000) && unformatted.contains("Thanks for reporting it!")) {
                     Notifications.getManager().post("Staff Ban Detected", "Disabled Aura/KB and /oof'd", 5000, Notifications.Type.WARNING);
                     ChatUtil.sendChat("/oof");
-                    Module[] modules = new Module[]{Client.getModuleManager().get(Killaura.class), Client.getModuleManager().get(AntiVelocity.class)};
+                    Module[] modules = new Module[]{Client.getModuleManager().get(Killaura.class), Client.getModuleManager().get(AntiVelocity.class),
+                            Client.getModuleManager().get(Speed.class), Client.getModuleManager().get(Fly.class), Client.getModuleManager().get(LongJump.class)};
                     for (Module module : modules) {
                         if (module.isEnabled()) {
                             module.toggle();
