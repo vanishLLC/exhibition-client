@@ -1,9 +1,8 @@
 package net.minecraft.network;
 
-import com.github.creeper123123321.viafabric.ViaFabric;
 import com.github.creeper123123321.viafabric.handler.CommonTransformer;
-import com.github.creeper123123321.viafabric.handler.FabricDecodeHandler;
-import com.github.creeper123123321.viafabric.handler.FabricEncodeHandler;
+import com.github.creeper123123321.viafabric.handler.serverside.FabricDecodeHandler;
+import com.github.creeper123123321.viafabric.handler.serverside.FabricEncodeHandler;
 import com.github.creeper123123321.viafabric.handler.clientside.ProtocolDetectionHandler;
 import com.github.creeper123123321.viafabric.handler.clientside.VRDecodeHandler;
 import com.github.creeper123123321.viafabric.handler.clientside.VREncodeHandler;
@@ -65,10 +64,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 import us.myles.ViaVersion.api.data.UserConnection;
-import us.myles.ViaVersion.api.protocol.Protocol;
 import us.myles.ViaVersion.api.protocol.ProtocolPipeline;
-import us.myles.ViaVersion.api.protocol.ProtocolRegistry;
-import us.myles.ViaVersion.api.protocol.ProtocolVersion;
 
 public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
     private static final Logger logger = LogManager.getLogger();

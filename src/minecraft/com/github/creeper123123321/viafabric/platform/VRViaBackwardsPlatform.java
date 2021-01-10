@@ -1,5 +1,6 @@
 package com.github.creeper123123321.viafabric.platform;
 
+import com.github.creeper123123321.viafabric.ViaFabric;
 import de.gerrygames.viarewind.fabric.util.LoggerWrapper;
 import exhibition.Client;
 import nl.matsv.viabackwards.api.ViaBackwardsPlatform;
@@ -16,7 +17,7 @@ public class VRViaBackwardsPlatform implements ViaBackwardsPlatform {
     private File configDir;
 
     public VRViaBackwardsPlatform() {
-        Path file = Client.getDataDir().toPath().resolve("ViaBackwards");
+        Path file = ViaFabric.directoryPath.resolve("ViaBackwards");
         this.configDir = file.toFile();
         init(file.toFile());
     }
