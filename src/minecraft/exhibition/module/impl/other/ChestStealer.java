@@ -94,7 +94,7 @@ public class ChestStealer extends Module {
                 GuiChest guiChest = (GuiChest) esd.getGuiScreen();
                 IInventory inventry = guiChest.lowerChestInventory;
                 String name = guiChest.lowerChestInventory.getDisplayName().getUnformattedText().toLowerCase();
-                boolean isVanillaChest = !inventry.hasCustomName() || name.equalsIgnoreCase(new ChatComponentTranslation("container.chest").getUnformattedText().toLowerCase()) || name.equalsIgnoreCase("low");
+                boolean isVanillaChest = !inventry.hasCustomName() || name.equalsIgnoreCase(new ChatComponentTranslation("container.chest").getUnformattedText().toLowerCase().trim()) || name.equalsIgnoreCase("low") || name.equalsIgnoreCase("Chest");
                 chestContainer = guiChest;
 
                 if ((boolean) settings.get(IGNORE).getValue() && !isVanillaChest) {
@@ -157,7 +157,9 @@ public class ChestStealer extends Module {
                     GuiChest guiChest = chestContainer;
                     IInventory inventry = guiChest.lowerChestInventory;
                     String name = guiChest.lowerChestInventory.getDisplayName().getUnformattedText().toLowerCase();
-                    boolean isVanillaChest = !inventry.hasCustomName() || name.equalsIgnoreCase(new ChatComponentTranslation("container.chest").getUnformattedText().toLowerCase()) || name.equalsIgnoreCase("low");
+                    boolean isVanillaChest = !inventry.hasCustomName() || name.equalsIgnoreCase(new ChatComponentTranslation("container.chest").getUnformattedText().toLowerCase().trim()) || name.equalsIgnoreCase("low") || name.equalsIgnoreCase("Chest");
+                    chestContainer = guiChest;
+
                     if ((boolean) settings.get(IGNORE).getValue() && !isVanillaChest) {
                         return;
                     }

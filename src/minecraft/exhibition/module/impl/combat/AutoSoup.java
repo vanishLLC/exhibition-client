@@ -5,20 +5,27 @@
  */
 package exhibition.module.impl.combat;
 
+import exhibition.Client;
 import exhibition.event.Event;
 import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventMotionUpdate;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
+import exhibition.util.HypixelUtil;
 import exhibition.util.Timer;
+import exhibition.util.misc.ChatUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.play.client.C03PacketPlayer;
+import net.minecraft.network.play.client.C07PacketPlayerDigging;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
 import net.minecraft.network.play.client.C09PacketHeldItemChange;
 import net.minecraft.potion.Potion;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 
 public class AutoSoup extends Module {
 
@@ -63,11 +70,23 @@ public class AutoSoup extends Module {
                     else
                         swap(soupSlot, 6);
 
-                    int currentItem = mc.thePlayer.inventory.currentItem;
-                    mc.getNetHandler().addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem = swapTo));
+                    ItemStack stack = mc.thePlayer.inventory.getStackInSlot(36 + soupSlot);
 
-                    mc.getNetHandler().addToSendQueue(new C08PacketPlayerBlockPlacement(mc.thePlayer.inventory.getCurrentItem()));
-                    mc.getNetHandler().addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem = currentItem));
+                    if (Client.instance.is1_16_4() && HypixelUtil.isVerifiedHypixel() && stack != null && stack.getItem() == Items.golden_apple) {
+                        ChatUtil.printChat("BRUH");
+                        int currentItem = mc.thePlayer.inventory.currentItem;
+                        mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange((currentItem + 1) % 9));
+                        mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(swapTo));
+                        mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, mc.thePlayer.onGround));
+                        mc.thePlayer.sendQueue.addToSendQueue(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
+                        mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(currentItem));
+                    } else {
+                        int currentItem = mc.thePlayer.inventory.currentItem;
+                        mc.getNetHandler().addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem = swapTo));
+
+                        mc.getNetHandler().addToSendQueue(new C08PacketPlayerBlockPlacement(mc.thePlayer.inventory.getCurrentItem()));
+                        mc.getNetHandler().addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem = currentItem));
+                    }
                     timer.reset();
                     isHealing = true;
                 } else {
@@ -106,7 +125,8 @@ public class AutoSoup extends Module {
 
                 boolean shouldApple = (boolean) settings.get(HEADS).getValue() && (((Item.getIdFromItem(item) == Item.getIdFromItem(Items.skull) ||
                         Item.getIdFromItem(item) == Item.getIdFromItem(Items.baked_potato) ||
-                        Item.getIdFromItem(item) == Item.getIdFromItem(Items.magma_cream)) &&
+                        Item.getIdFromItem(item) == Item.getIdFromItem(Items.magma_cream) ||
+                        (Client.instance.is1_16_4() && Item.getIdFromItem(item) == Item.getIdFromItem(Items.golden_apple))) &&
                         (!mc.thePlayer.isPotionActive(Potion.regeneration) || (mc.thePlayer.getAbsorptionAmount() <= 0) ||
                                 (mc.thePlayer.isPotionActive(Potion.regeneration) && mc.thePlayer.getActivePotionEffect(Potion.regeneration).getDuration() < 5))) || shouldMutton);
                 if (Item.getIdFromItem(item) == 282 || shouldApple) {

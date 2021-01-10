@@ -61,7 +61,7 @@ public class VRPlatform implements ViaPlatform<UUID> {
     private final ViaAPI<UUID> api;
 
     public VRPlatform() {
-        Path configDir = Client.getDataDir().toPath();
+        Path configDir = ViaFabric.directoryPath;
         config = new VRViaConfig(configDir.resolve("viaversion.yml").toFile());
         dataFolder = configDir.toFile();
         connectionManager = new ViaConnectionManager();

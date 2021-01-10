@@ -87,10 +87,6 @@ public class VRVersionProvider extends VersionProvider {
         if (connection instanceof VRClientSideUserConnection) {
             ProtocolInfo info = Objects.requireNonNull(connection.getProtocolInfo());
 
-            if (!ViaFabric.config.isClientSideEnabled()) {
-                return info.getProtocolVersion();
-            }
-
             int serverVer = ViaFabric.config.getClientSideVersion();
             SocketAddress addr = connection.getChannel().remoteAddress();
 
@@ -171,23 +167,6 @@ public class VRVersionProvider extends VersionProvider {
     }
 
     private boolean isDisabled(String addr) {
-        String[] parts = addr.split("\\.");
-        boolean isNumericIp = parts.length == 4 && Arrays.stream(parts).map(Ints::tryParse).allMatch(Objects::nonNull);
-        return IntStream.range(0, parts.length).anyMatch(i -> {
-            String query;
-            if (isNumericIp) {
-                query = String.join(".", Arrays.stream(parts, 0, i + 1)
-                        .toArray(String[]::new)) + ((i != 3) ? ".*" : "");
-            } else {
-                query = ((i != 0) ? "*." : "") + String.join(".", Arrays.stream(parts, i, parts.length)
-                        .toArray(String[]::new));
-            }
-            if (ViaFabric.config.isForcedDisable(query)) {
-                ViaFabric.JLOGGER.info(addr + " is force-disabled. (Matches " + query + ")");
-                return true;
-            } else {
-                return false;
-            }
-        });
+        return false;
     }
 }

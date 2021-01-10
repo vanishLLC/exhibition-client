@@ -18,7 +18,7 @@ public class VRViaBackwardsPlatform implements ViaBackwardsPlatform {
     public VRViaBackwardsPlatform() {
         Path file = Client.getDataDir().toPath().resolve("ViaBackwards");
         this.configDir = file.toFile();
-        init(file.resolve("config.yml").toFile());
+        init(file.toFile());
     }
 
     @Override
