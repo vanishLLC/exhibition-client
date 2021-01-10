@@ -36,6 +36,7 @@ import net.minecraft.network.play.server.S05PacketSpawnPosition;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.util.CryptManager;
 import net.minecraft.util.ResourceLocation;
+import us.myles.ViaVersion.api.protocol.ProtocolVersion;
 
 import java.awt.*;
 import java.io.File;
@@ -216,6 +217,10 @@ public class Client implements EventListener {
         this.progressScreenTask.incrementStage(); // Stage 8
 
         // Client.mojang.connect();
+    }
+
+    public boolean is1_16_4() {
+        return ViaFabric.config.getClientSideVersion() == 754;
     }
 
     public void killSwitch() {

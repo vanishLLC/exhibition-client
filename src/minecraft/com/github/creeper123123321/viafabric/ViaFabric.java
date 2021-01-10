@@ -45,6 +45,8 @@ import us.myles.ViaVersion.api.data.MappingDataLoader;
 import us.myles.ViaVersion.api.protocol.Protocol;
 import us.myles.ViaVersion.api.protocol.ProtocolRegistry;
 
+import java.io.File;
+import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -58,6 +60,8 @@ public class ViaFabric {
     public static CompletableFuture<Void> INIT_FUTURE = new CompletableFuture<>();
     public static VRConfig config;
 
+    public static Path directoryPath;
+
     static {
         ThreadFactory factory = new ThreadFactoryBuilder().setDaemon(true).setNameFormat("ViaFabric-%d").build();
         ASYNC_EXECUTOR = Executors.newFixedThreadPool(8, factory);
@@ -70,6 +74,8 @@ public class ViaFabric {
     }
 
     public void onInitialize() {
+        directoryPath = new File(Client.getDataDir().getAbsolutePath() + File.separator + "Other" + File.separator + "ViaVer").toPath();
+
         Via.init(ViaManager.builder()
                 .injector(new VRInjector())
                 .loader(new VRLoader())
@@ -82,7 +88,7 @@ public class ViaFabric {
         new VRViaRewindPlatform();
         new VRViaBackwardsPlatform();
 
-        config = new VRConfig(Client.getDataDir().toPath().resolve("viafabric.yml").toFile());
+        config = new VRConfig(directoryPath.resolve("viafabric.yml").toFile());
 
         INIT_FUTURE.complete(null);
     }

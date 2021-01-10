@@ -179,6 +179,6 @@ public class ScorePlayerTeam extends Team
 
     public EnumChatFormatting getChatFormat()
     {
-        return this.chatFormat;
+        return this.chatFormat == null ? EnumChatFormatting.RESET : this.chatFormat;
     }
 }

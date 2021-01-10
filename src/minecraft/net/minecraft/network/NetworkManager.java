@@ -412,9 +412,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
                     channel.pipeline()
                             .addBefore("encoder", CommonTransformer.HANDLER_ENCODER_NAME, new VREncodeHandler(user))
                             .addBefore("decoder", CommonTransformer.HANDLER_DECODER_NAME, new VRDecodeHandler(user));
-                    if (ViaFabric.config.isClientSideEnabled()) {
-                        channel.pipeline().addAfter(CommonTransformer.HANDLER_ENCODER_NAME, "via-autoprotocol", new ProtocolDetectionHandler());
-                    }
+                    channel.pipeline().addAfter(CommonTransformer.HANDLER_ENCODER_NAME, "via-autoprotocol", new ProtocolDetectionHandler());
                 }
             }
         })).channel(oclass)).connect(p_181124_0_, p_181124_1_).syncUninterruptibly();

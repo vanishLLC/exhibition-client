@@ -113,7 +113,7 @@ public class GuiMultiplayer extends GuiScreen implements GuiYesNoCallback
         this.buttonList.add(new GuiButton(420, this.width / 2 + 4 + 154, this.height - 52, 50, 20, "Check IP"));
         this.buttonList.add(new GuiButton(6969, this.width / 2 + 4 + 154, this.height - 28, 50, 20, "Alt Man"));
 
-        this.buttonList.add(new GuiButton(44444, this.width / 2 + 4 + 154, this.height - 82, 50, 20, "1.16.4"));
+        this.buttonList.add(new GuiButton(44444, this.width - 102, 2, 100, 20, "Protocol: " + ProtocolVersion.getProtocol(ViaFabric.config.getClientSideVersion()).getName()));
 
         this.selectServer(this.serverListSelector.func_148193_k());
     }
@@ -209,7 +209,7 @@ public class GuiMultiplayer extends GuiScreen implements GuiYesNoCallback
             } else if(button.id == 6969) {
                 mc.displayGuiScreen(new GuiAltManager(this));
             } else if(button.id == 44444) {
-                ViaFabric.config.setClientSideVersion(ProtocolVersion.v1_16_4.getVersion());
+                ViaFabric.config.setClientSideVersion(Client.instance.is1_16_4() ? ProtocolVersion.v1_8.getVersion() : ProtocolVersion.v1_16_4.getVersion());
                 ViaFabric.config.saveConfig();
             }
         }
@@ -391,6 +391,8 @@ public class GuiMultiplayer extends GuiScreen implements GuiYesNoCallback
      */
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
+        this.buttonList.get(9).displayString = "Protocol: " + ProtocolVersion.getProtocol(ViaFabric.config.getClientSideVersion()).getName();
+
         this.hoveringText = null;
         this.drawDefaultBackground();
         this.serverListSelector.drawScreen(mouseX, mouseY, partialTicks);
@@ -408,10 +410,7 @@ public class GuiMultiplayer extends GuiScreen implements GuiYesNoCallback
             }
         }
 
-        String str = "Current Alt: " + currentAlt + " " + ProtocolVersion.getProtocol(ViaFabric.config.getClientSideVersion()).getName() + " " +
-                " " + ProtocolVersion.getProtocol(ProtocolRegistry.SERVER_PROTOCOL).getName() + " " +
-                ProtocolUtils.isSupported(ViaFabric.config.getClientSideVersion(), ProtocolRegistry.SERVER_PROTOCOL) + " " +
-                ProtocolRegistry.SERVER_PROTOCOL + " " + ProtocolRegistry.getBaseProtocol(ViaFabric.config.getClientSideVersion()).toString();
+        String str = "Current Alt: " + currentAlt;
 
         this.drawCenteredString(this.fontRendererObj, str, this.width / 2, 5, 16777215);
         this.drawCenteredString(this.fontRendererObj, I18n.format("multiplayer.title"), this.width / 2, 20, 16777215);

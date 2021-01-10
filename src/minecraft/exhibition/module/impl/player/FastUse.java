@@ -1,6 +1,7 @@
 
 package exhibition.module.impl.player;
 
+import exhibition.Client;
 import exhibition.event.Event;
 import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventMotionUpdate;
@@ -8,6 +9,7 @@ import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.Options;
 import exhibition.module.data.settings.Setting;
+import exhibition.util.HypixelUtil;
 import exhibition.util.NetUtil;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBow;
@@ -62,11 +64,18 @@ public class FastUse extends Module {
                     }
                     case "Packet": {
                         if (mc.thePlayer.getItemInUseDuration() >= ((Number) settings.get(TICKS).getValue()).intValue() && canUseItem(mc.thePlayer.getItemInUse().getItem())) {
-                            for (int i = 0; i < 20; ++i) {
-                                // zoom the bow
+                            if (Client.instance.is1_16_4() && HypixelUtil.isVerifiedHypixel()) {
                                 mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange((mc.thePlayer.inventory.currentItem + 1) % 9));
-                                mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, mc.thePlayer.onGround));
                                 mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem));
+                                mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, mc.thePlayer.onGround));
+                                mc.thePlayer.sendQueue.addToSendQueue(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
+                            } else {
+                                if (mc.thePlayer.ticksExisted % 2 == 0) {
+                                    for (int i = 0; i < 8; ++i) {
+                                        // zoom the bow
+                                        mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 1.0E-9, mc.thePlayer.posZ, false));
+                                    }
+                                }
                             }
                         }
                         break;
