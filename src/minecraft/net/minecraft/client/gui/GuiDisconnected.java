@@ -41,15 +41,18 @@ public class GuiDisconnected extends GuiScreen {
             this.timeDifference = -1;
         }
 
+        String unformatted = this.message.getUnformattedText();
+
         String playTime = getTimeLength(timeDifference);
         String banLength = "Permanent";
-        String banReason = this.message.getUnformattedText().contains("WATCHDOG") ? "Watchdog" : "Staff Ban";
+        String banReason = unformatted.contains("WATCHDOG") ? "Watchdog" :
+                (unformatted.toLowerCase().contains("compromised") || unformatted.toLowerCase().contains("alert")) ? "Security Alert" : "Staff Ban";
         String username = Client.getAuthUser().getDecryptedUsername();
 
-        if (this.message.getUnformattedText().split("\n")[0].contains("temporarily banned for")) {
+        if (unformatted.split("\n")[0].contains("temporarily banned for")) {
             for (Alt alt : AltManager.registry)
                 if ((alt.getMask() != null && alt.getMask().equals(Minecraft.getMinecraft().session.getUsername())) || alt.getUsername().equals(Minecraft.getMinecraft().session.getUsername())) {
-                    String parseDate = this.message.getUnformattedText().split("\n")[0].replace("\n", "");
+                    String parseDate = unformatted.split("\n")[0].replace("\n", "");
                     long timeToBeAdded = 0;
                     String timeString = parseDate.substring(31).replace(" from this server!", "");
                     String[] timeValues = parseDate.substring(31).replace(" from this server!", "").split(" ");
@@ -84,7 +87,7 @@ public class GuiDisconnected extends GuiScreen {
                     break;
                 }
 
-        } else if (this.message.getUnformattedText().split("\n")[0].contains("permanently banned from this server")) {
+        } else if (unformatted.split("\n")[0].contains("permanently banned from this server")) {
             for (Alt alt : AltManager.registry)
                 if (alt.getMask().equals(Minecraft.getMinecraft().session.getUsername()) || alt.getUsername().equals(Minecraft.getMinecraft().session.getUsername())) {
                     alt.setStatus(Alt.Status.Banned);
@@ -99,8 +102,8 @@ public class GuiDisconnected extends GuiScreen {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        if (this.message.getUnformattedText().contains("bann")) {
-            if (timeDifference >= 3000L) // Report if less than 3 seconds
+        if (unformatted.contains("bann")) {
+            if (timeDifference >= 10000L) // Don't report if < 10 Seconds
                 new SilentSnitch.BanReport(playTime, banReason, banLength, username).start();
             new Thread(IPUtil::setIPBanned).start();
         }
