@@ -202,7 +202,7 @@ public class GuiOverlayDebug extends Gui
                 arraylist.add(format("Looking at: %d %d %d", new Object[] {Integer.valueOf(blockpos1.getX()), Integer.valueOf(blockpos1.getY()), Integer.valueOf(blockpos1.getZ())}));
             }
 
-            arraylist.add("[ViaVer] Injected: " + Via.getManager().getConnections().size() + " (" + Via.getManager().getConnectedClients().size() + " frontend)");
+            arraylist.add("ViaVer: " + Via.getManager().getConnections().size() + " (" + Via.getManager().getConnectedClients().size() + " frontend)");
             ChannelHandler viaDecoder = (Minecraft.getMinecraft().getNetHandler().getNetworkManager()).channel.pipeline().get(CommonTransformer.HANDLER_DECODER_NAME);
             if (viaDecoder instanceof VRDecodeHandler) {
                 ProtocolInfo protocol = ((VRDecodeHandler) viaDecoder).getInfo().getProtocolInfo();
@@ -213,7 +213,7 @@ public class GuiOverlayDebug extends Gui
                     if (!protocol.getUser().isActive()) {
                         inactive = " (inactive)";
                     }
-                    arraylist.add("[ViaVer] Injected: C: " + clientVer.getName() + " S: " + serverVer.getName() + inactive);
+                    arraylist.add("C: " + clientVer.getName() + " S: " + serverVer.getName() + inactive);
                 }
             }
 
