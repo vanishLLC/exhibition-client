@@ -76,7 +76,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
             return new NioEventLoopGroup(0, (new ThreadFactoryBuilder()).setNameFormat("Netty Client IO #%d").setDaemon(true).build());
         }
     };
-    public static final LazyLoadBase<EpollEventLoopGroup> field_181125_e = new LazyLoadBase<EpollEventLoopGroup>() {
+    public static final LazyLoadBase<EpollEventLoopGroup> CLIENT_EPOLL_EVENTLOOP = new LazyLoadBase<EpollEventLoopGroup>() {
         protected EpollEventLoopGroup load() {
             return new EpollEventLoopGroup(0, (new ThreadFactoryBuilder()).setNameFormat("Netty Epoll Client IO #%d").setDaemon(true).build());
         }
@@ -385,7 +385,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
 
         if (Epoll.isAvailable() && p_181124_2_) {
             oclass = EpollSocketChannel.class;
-            lazyloadbase = field_181125_e;
+            lazyloadbase = CLIENT_EPOLL_EVENTLOOP;
         } else {
             oclass = NioSocketChannel.class;
             lazyloadbase = CLIENT_NIO_EVENTLOOP;

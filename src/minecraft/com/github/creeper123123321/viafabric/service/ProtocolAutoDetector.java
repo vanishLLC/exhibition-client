@@ -92,7 +92,7 @@ public class ProtocolAutoDetector {
                     ViaFabricAddress viaAddr = new ViaFabricAddress().parse(address.getHostString());
 
                     ChannelFuture ch = new Bootstrap()
-                            .group(NetworkManager.field_181125_e.getValue())
+                            .group(NetworkManager.CLIENT_EPOLL_EVENTLOOP.getValue())
                             .channel(NioSocketChannel.class)
                             .handler(new ChannelInitializer<Channel>() {
                                 protected void initChannel(Channel channel) {
