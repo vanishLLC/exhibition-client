@@ -1,5 +1,7 @@
 package net.minecraft.client.gui;
 
+import com.github.creeper123123321.viafabric.handler.CommonTransformer;
+import com.github.creeper123123321.viafabric.handler.clientside.VRDecodeHandler;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
@@ -7,6 +9,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+
+import io.netty.channel.ChannelHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
@@ -30,6 +34,9 @@ import optifine.Reflector;
 
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
+import us.myles.ViaVersion.api.Via;
+import us.myles.ViaVersion.api.protocol.ProtocolVersion;
+import us.myles.ViaVersion.protocols.base.ProtocolInfo;
 
 import static java.lang.String.format;
 
@@ -139,7 +146,7 @@ public class GuiOverlayDebug extends Gui
                     s = "Towards positive X";
             }
 
-            ArrayList arraylist = Lists.newArrayList("Minecraft 1.8.8 (" + this.mc.getVersion() + "/" + ClientBrandRetriever.getClientModName() + ")",
+            ArrayList<String> arraylist = Lists.newArrayList("Minecraft 1.8.8 (" + this.mc.getVersion() + "/" + ClientBrandRetriever.getClientModName() + ")",
                     this.mc.debug,
                     this.mc.renderGlobal.getDebugInfoRenders(),
                     this.mc.renderGlobal.getDebugInfoEntities(),
@@ -193,6 +200,21 @@ public class GuiOverlayDebug extends Gui
             {
                 BlockPos blockpos1 = this.mc.objectMouseOver.getBlockPos();
                 arraylist.add(format("Looking at: %d %d %d", new Object[] {Integer.valueOf(blockpos1.getX()), Integer.valueOf(blockpos1.getY()), Integer.valueOf(blockpos1.getZ())}));
+            }
+
+            arraylist.add("[ViaVer] Injected: " + Via.getManager().getConnections().size() + " (" + Via.getManager().getConnectedClients().size() + " frontend)");
+            ChannelHandler viaDecoder = (Minecraft.getMinecraft().getNetHandler().getNetworkManager()).channel.pipeline().get(CommonTransformer.HANDLER_DECODER_NAME);
+            if (viaDecoder instanceof VRDecodeHandler) {
+                ProtocolInfo protocol = ((VRDecodeHandler) viaDecoder).getInfo().getProtocolInfo();
+                if (protocol != null) {
+                    ProtocolVersion serverVer = ProtocolVersion.getProtocol(protocol.getServerProtocolVersion());
+                    ProtocolVersion clientVer = ProtocolVersion.getProtocol(protocol.getProtocolVersion());
+                    String inactive = "";
+                    if (!protocol.getUser().isActive()) {
+                        inactive = " (inactive)";
+                    }
+                    arraylist.add("[ViaVer] Injected: C: " + clientVer.getName() + " S: " + serverVer.getName() + inactive);
+                }
             }
 
             return arraylist;
