@@ -1,5 +1,7 @@
 package exhibition.module.impl.hud;
 
+import com.github.creeper123123321.viafabric.handler.CommonTransformer;
+import com.github.creeper123123321.viafabric.handler.clientside.VRDecodeHandler;
 import com.mojang.authlib.GameProfile;
 import exhibition.Client;
 import exhibition.event.Event;
@@ -19,6 +21,7 @@ import exhibition.module.impl.other.ChatCommands;
 import exhibition.util.MathUtils;
 import exhibition.util.RenderingUtil;
 import exhibition.util.render.Colors;
+import io.netty.channel.ChannelHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.GuiPlayerTabOverlay;
@@ -34,6 +37,8 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
+import us.myles.ViaVersion.api.protocol.ProtocolVersion;
+import us.myles.ViaVersion.protocols.base.ProtocolInfo;
 
 import java.awt.*;
 import java.text.SimpleDateFormat;
@@ -54,6 +59,7 @@ public class HUD extends Module {
     private Setting<Boolean> showUID = new Setting<>("SHOW-UID", false, "Shows your UID instead of your username.");
 
     private Setting<Boolean> showSessionTime = new Setting<>("SESSION TIME", false);
+    private Setting<Boolean> showProtocol = new Setting<>("PROTOCOL", true);
 
     private final ResourceLocation etb = new ResourceLocation("textures/shit.png"); // 512 x 512
 
@@ -68,6 +74,7 @@ public class HUD extends Module {
                 showSessionTime,
                 new Setting<>("NOSTALGIA", false),
                 new Setting<>("ARRAYLIST", true),
+                showProtocol,
                 new Setting<>("COORDS", false),
                 new Setting<>("SUFFIX", true),
                 new Setting<>("TIME", false),
@@ -301,6 +308,7 @@ public class HUD extends Module {
         boolean drawTime = (options.getValue("TIME"));
         boolean fpsTime = (options.getValue("FPS"));
         boolean drawPing = (options.getValue("PING"));
+        boolean drawProtocol = showProtocol.getValue();
         boolean nostalgia = (options.getValue("NOSTALGIA"));
         boolean suf = (options.getValue("SUFFIX"));
         boolean array = (options.getValue("ARRAYLIST"));
@@ -310,9 +318,11 @@ public class HUD extends Module {
             RenderingUtil.rectangleBordered(2.0D, 2.0D, 60.0D, 34.0D, 1.0D, -1603704471, -16777216);
             Client.blockyFont.drawStringWithShadow("Virtue 6", (29 - Client.blockyFont.getStringWidth("Virtue 6") / 2D + 2), 4.0D,
                     -4210753, 0.8F);
-            String time = getTime();
-            Client.blockyFont.drawStringWithShadow(time, (29 - Client.blockyFont.getStringWidth(time) / 2D + 2), 14.0D, -6513508, 1.2F);
-            Client.blockyFont.drawStringWithShadow("Fps: " + Minecraft.getDebugFPS(), (29 - Client.blockyFont.getStringWidth("Fps: " + Minecraft.getDebugFPS()) / 2D + 2), 24.0D, -6513508, 1.2F);
+
+            String serverVersion = getServerProtocol();
+
+            Client.blockyFont.drawStringWithShadow("Fps: " + Minecraft.getDebugFPS(), (29 - Client.blockyFont.getStringWidth("Fps: " + Minecraft.getDebugFPS()) / 2D + 2), 14.0D, -6513508, 1.2F);
+            Client.blockyFont.drawStringWithShadow(serverVersion, (29 - Client.blockyFont.getStringWidth(serverVersion) / 2D + 2), 24.0D, -6513508, 1.2F);
             List<Module> moduleList = Arrays.stream(Client.getModuleManager().getArray()).sorted((m1, m2) -> {
                 String s1 = getRenderName(m1);
                 String s2 = getRenderName(m2);
@@ -437,8 +447,12 @@ public class HUD extends Module {
                 Client.virtueFont.drawString("\2477Player", 29 - Client.virtueFont.getStringWidth("Player") / 2F, yOffset + 16 + 42, -1);
                 Client.virtueFont.drawString("\2477World", 29 - Client.virtueFont.getStringWidth("World") / 2F, yOffset + 16 + 56, -1);
                 int nigga = 0;
+                if (drawProtocol) {
+                    Client.virtueFont.drawStringWithShadow("\2477Ver: \247f" + getServerProtocol(), 3, yOffset + 85, -1);
+                    nigga += 10;
+                }
                 if (fpsTime) {
-                    Client.virtueFont.drawStringWithShadow("\2477FPS: \247f" + Minecraft.getDebugFPS(), 3, yOffset + 85, -1);
+                    Client.virtueFont.drawStringWithShadow("\2477FPS: \247f" + Minecraft.getDebugFPS(), 3, yOffset + 85 + nigga, -1);
                     nigga += 10;
                 }
                 if (drawPing)
@@ -454,8 +468,12 @@ public class HUD extends Module {
                 mc.fontRendererObj.drawString("\2477World", 6, yOffset + 63, -1);
 
                 int nigga = 0;
+                if (drawProtocol) {
+                    Client.virtueFont.drawStringWithShadow("\2477Ver: \247f" + getServerProtocol(), 3, yOffset + 77, -1);
+                    nigga += 10;
+                }
                 if (fpsTime) {
-                    mc.fontRendererObj.drawStringWithShadow("\2477FPS: \247f" + Minecraft.getDebugFPS(), 2, yOffset + 77, -1);
+                    mc.fontRendererObj.drawStringWithShadow("\2477FPS: \247f" + Minecraft.getDebugFPS(), 2, yOffset + 77 + nigga, -1);
                     nigga += 10;
                 }
                 if (drawPing)
@@ -480,6 +498,8 @@ public class HUD extends Module {
             SimpleDateFormat sdfDate = simpleDateFormat;
             Date now = new Date();
             String strDate = sdfDate.format(now);
+            if (drawProtocol)
+                ok += " \2477[\247r" + (font.renderMC ? "" : "\247l") + getServerProtocol() + "\2477]\247f";
             if (drawTime)
                 ok += " \2477[\247r" + (font.renderMC ? "" : "\247l") + strDate + "\2477]\247f";
             if (fpsTime)
@@ -537,6 +557,8 @@ public class HUD extends Module {
                 clientName = "Exhibition";
             }
             String ok = "\2477" + clientName;
+            if (drawProtocol)
+                ok += " \2477[\247f" + getServerProtocol() + "\2477]\247f";
             if (drawTime)
                 ok += " \2477[\247f" + strDate + "\2477]\247f";
             if (fpsTime)
@@ -626,6 +648,22 @@ public class HUD extends Module {
             }
 
         }
+    }
+
+    private String getServerProtocol() {
+        String serverProtocol = "N/A";
+
+        if(mc.getNetHandler() != null && mc.getNetHandler().getNetworkManager() != null) {
+            ChannelHandler viaDecoder = mc.getNetHandler().getNetworkManager().channel.pipeline().get(CommonTransformer.HANDLER_DECODER_NAME);
+            if (viaDecoder instanceof VRDecodeHandler) {
+                ProtocolInfo protocol = ((VRDecodeHandler) viaDecoder).getInfo().getProtocolInfo();
+                if (protocol != null) {
+                    ProtocolVersion serverVer = ProtocolVersion.getProtocol(protocol.getServerProtocolVersion());
+                    serverProtocol = serverVer.getName();
+                }
+            }
+        }
+        return serverProtocol;
     }
 
     public int getColor() {
