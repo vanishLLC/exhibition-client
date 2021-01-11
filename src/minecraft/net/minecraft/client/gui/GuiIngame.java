@@ -1,6 +1,5 @@
 package net.minecraft.client.gui;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
@@ -18,7 +17,6 @@ import exhibition.module.impl.hud.HUD;
 import exhibition.module.impl.other.StreamerMode;
 import exhibition.module.impl.render.Crosshair;
 import exhibition.util.render.Colors;
-import exhibition.util.security.AuthenticationUtil;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
