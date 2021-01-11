@@ -95,6 +95,8 @@ public class LongJump extends Module {
 
         if (mc.thePlayer == null)
             return;
+        velocityBoost = 0;
+
         if (waitTimer.delay(2500)) {
             waitTimer.reset();
         }
@@ -129,6 +131,7 @@ public class LongJump extends Module {
         if (autoPot.isEnabled()) {
             autoPot.resetTimer();
         }
+        velocityBoost = 0;
 
         randomIncrement = 10 + random.nextInt(6);
 
