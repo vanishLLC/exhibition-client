@@ -1165,7 +1165,7 @@ public class Killaura extends Module {
             loaded.sort(Comparator.comparingDouble(EntityLivingBase::getHealth));
         } else if (current.equalsIgnoreCase(/*Bounty*/ decodeByteArray(new byte[]{66, 111, 117, 110, 116, 121}))) {
             loaded.sort(Comparator.comparingDouble(EntityLivingBase::getHealth));
-            loaded.sort(Comparator.comparing((o) -> o instanceof EntityPlayer && TargetESP.isPriority((EntityPlayer) o)));
+            loaded.sort(Comparator.comparing((o) -> o instanceof EntityPlayer && !TargetESP.isPriority((EntityPlayer) o)));
         } else if (current.equalsIgnoreCase(/*FOV*/ decodeByteArray(new byte[]{70, 79, 86}))) {
             loaded.sort(Comparator.comparingDouble(o -> (Math.abs(RotationUtils.getYawChange(o.posX, o.posZ)))));
         } else if (current.equalsIgnoreCase(/*Angle*/ decodeByteArray(new byte[]{65, 110, 103, 108, 101}))) {

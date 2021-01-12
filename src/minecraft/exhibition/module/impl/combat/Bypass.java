@@ -16,6 +16,7 @@ import exhibition.module.impl.movement.Fly;
 import exhibition.module.impl.movement.LongJump;
 import exhibition.util.*;
 import exhibition.util.Timer;
+import exhibition.util.misc.ChatUtil;
 import exhibition.util.render.Colors;
 import net.minecraft.client.gui.GuiDisconnected;
 import net.minecraft.client.gui.GuiDownloadTerrain;
@@ -48,6 +49,7 @@ public class Bypass extends Module {
     private int state = 0;
 
     public int bruh;
+    public int randomDelay;
     private int lastUid;
     private int lastValid = -1;
 
@@ -168,7 +170,7 @@ public class Bypass extends Module {
                     if (bruh > 10) {
                         event.setCancelled(true);
 
-                        if (bruh % 100 == 0) {
+                        if (bruh % (45 + (randomDelay)) == 0) {
                             while (lastValid > packet.getUid()) {
                                 C0FPacketConfirmTransaction confirmTransaction = new C0FPacketConfirmTransaction(packet.getWindowId(), (short) --lastValid, packet.getAccepted());
                                 if (Client.getModuleManager().isEnabled(LongJump.class) || blorpFly) {
@@ -178,6 +180,8 @@ public class Bypass extends Module {
                                     NetUtil.sendPacketNoEvents(confirmTransaction);
                                 }
                             }
+                            randomDelay = random.nextInt(75 - 45);
+                            bruh = 10;
                         }
 
                         if (Math.abs(packet.getUid() - lastUid) > 3) {
