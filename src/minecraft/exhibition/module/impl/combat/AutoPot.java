@@ -384,11 +384,11 @@ public class AutoPot extends Module {
 
             EntityPlayer player = (EntityPlayer) entity;
 
-            if (PriorityManager.isPriority(player) && mc.thePlayer.getDistanceToEntity(player) <= 10) {
+            if (PriorityManager.isPriority(player) && mc.thePlayer.getDistanceToEntity(player) <= 15) {
 
                 double previousDistance = mc.thePlayer.getDistance(player.lastTickPosX, mc.thePlayer.posY, player.lastTickPosZ);
                 double currentDistance = mc.thePlayer.getDistance(player.posX, mc.thePlayer.posY, player.posZ);
-                if (currentDistance != previousDistance && previousDistance > currentDistance && currentDistance <= 10) {
+                if (currentDistance != previousDistance && previousDistance > currentDistance && currentDistance <= 15) {
                     return true;
                 }
             }
