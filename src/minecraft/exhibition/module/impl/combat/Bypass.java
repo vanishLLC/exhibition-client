@@ -71,9 +71,8 @@ public class Bypass extends Module {
         this.state = 0;
     }
 
-    @Override
-    public void onEnable() {
-
+    public boolean allowBypassing() {
+        return isEnabled() && (mc.thePlayer.isAllowEdit() || HypixelUtil.isInGame("HOUSING") || HypixelUtil.isInGame("ZOMBIE"));
     }
 
     public void worldChange() {
@@ -164,7 +163,7 @@ public class Bypass extends Module {
 
             if (p instanceof C0FPacketConfirmTransaction) {
                 C0FPacketConfirmTransaction packet = (C0FPacketConfirmTransaction) p;
-                if (packet.getUid() < 0 && HypixelUtil.isVerifiedHypixel()) {
+                if (packet.getUid() < 0 && HypixelUtil.isVerifiedHypixel() && allowBypassing()) {
                     this.bruh++;
 
                     if (bruh > 10) {

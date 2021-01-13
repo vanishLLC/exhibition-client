@@ -67,7 +67,7 @@ public class FastUse extends Module {
                             if (Client.instance.is1_16_4() && HypixelUtil.isVerifiedHypixel()) {
                                 mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange((mc.thePlayer.inventory.currentItem + 1) % 9));
                                 mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem));
-                                mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, mc.thePlayer.onGround));
+                                mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer(em.isOnground()));
                                 mc.thePlayer.sendQueue.addToSendQueue(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
                             } else {
                                 if (mc.thePlayer.ticksExisted % 2 == 0) {

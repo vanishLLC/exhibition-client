@@ -267,9 +267,9 @@ public class AutoPot extends Module {
                 }
                 haltTicks--;
             } else {
-                if (potting && (timer.delay(delay) || !splashPot) && haltTicks <= 0 && !mode.getSelected().equals("Jump Only")) {
+                if (potting && (timer.delay(delay) || !splashPot) && haltTicks <= 0) {
                     if (PlayerUtil.isMoving()) {
-                        if (splashPot) {
+                        if (splashPot && !mode.getSelected().equals("Jump Only")) {
                             if (mc.thePlayer.isBlocking()) {
                                 NetUtil.sendPacketNoEvents(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
                             }
@@ -288,14 +288,20 @@ public class AutoPot extends Module {
                                     NetUtil.sendPacketNoEvents(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
                                 }
                                 mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(6));
-                                mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, mc.thePlayer.onGround));
-                                mc.thePlayer.sendQueue.addToSendQueue(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
                                 mc.thePlayer.sendQueue.addToSendQueue(new C08PacketPlayerBlockPlacement(mc.thePlayer.inventory.getStackInSlot(6)));
+
+                                // Swap
                                 mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem));
                                 mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(6));
-                                mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, mc.thePlayer.onGround));
+
+                                mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer(e.isOnground()));
+
+                                mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem));
+                                mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(6));
+
+                                mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer(e.isOnground()));
+
                                 mc.thePlayer.sendQueue.addToSendQueue(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
-                                mc.thePlayer.sendQueue.addToSendQueue(new C08PacketPlayerBlockPlacement(mc.thePlayer.inventory.getStackInSlot(6)));
                                 mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem));
                                 if (mc.thePlayer.isBlocking()) {
                                     NetUtil.sendPacket(new C08PacketPlayerBlockPlacement(mc.thePlayer.getCurrentEquippedItem()));
@@ -404,7 +410,9 @@ public class AutoPot extends Module {
         int potStrength = -1;
 
         boolean noPlayersNearby = true;
-        boolean shouldHeal = shouldHeal() || (smartPot.getValue() && shouldPreSplash());
+        boolean shouldPreSplash = shouldPreSplash();
+        boolean shouldHeal = shouldHeal() || (smartPot.getValue() && shouldPreSplash);
+
 
         for (int i = 9; i < 45; i++) {
             if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
@@ -422,7 +430,7 @@ public class AutoPot extends Module {
                                         continue;
                                     }
                                 }
-                                if (effect.getPotionID() == Potion.heal.id && shouldHeal && !(smartPot.getValue() && shouldPreSplash())) {
+                                if (effect.getPotionID() == Potion.heal.id && shouldHeal && !(smartPot.getValue() && shouldPreSplash)) {
                                     currentPriority = 2;
                                     pot = i;
                                     continue;
@@ -472,7 +480,7 @@ public class AutoPot extends Module {
                                         continue;
                                     }
                                 }
-                                if (effect.getPotionID() == Potion.heal.id && shouldHeal && !(smartPot.getValue() && shouldPreSplash())) {
+                                if (effect.getPotionID() == Potion.heal.id && shouldHeal && !(smartPot.getValue() && shouldPreSplash)) {
                                     currentPriority = 2;
                                     pot = i;
                                     splashPot = true;
@@ -565,7 +573,7 @@ public class AutoPot extends Module {
                                 }
 
 
-                                if (!mc.thePlayer.isPotionActive(Potion.damageBoost) && shouldPreSplash()) {
+                                if (!mc.thePlayer.isPotionActive(Potion.damageBoost) && shouldPreSplash) {
                                     pot = i;
                                     splashPot = false;
                                 }

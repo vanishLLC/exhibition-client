@@ -72,7 +72,7 @@ public class AutoSoup extends Module {
                             swapTo = soupSlot - 36;
                         mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange((swapTo + 1) % 9));
                         mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(swapTo));
-                        mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, mc.thePlayer.onGround));
+                        mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer(em.isOnground()));
                         mc.thePlayer.sendQueue.addToSendQueue(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
                         mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem));
                         isHealing = false;
@@ -85,6 +85,7 @@ public class AutoSoup extends Module {
                         swapTo = soupSlot - 36;
                     else
                         swap(soupSlot, 6);
+
 
                     ItemStack stack = mc.thePlayer.inventoryContainer.getSlot(soupSlot).getStack();
 
