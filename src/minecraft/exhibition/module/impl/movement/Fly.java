@@ -340,6 +340,7 @@ public class Fly extends Module {
                 if (hypickle) {
                     speed = getBaseMoveSpeed();
                 }
+                if (HypixelUtil.isVerifiedHypixel())
                 em.setY(mc.thePlayer.motionY = 0);
                 if (boostDelay.delay(10000)) {
                     boostDelay.reset();
