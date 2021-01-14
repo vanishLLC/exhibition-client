@@ -377,6 +377,13 @@ public class AutoPot extends Module {
         return false;
     }
 
+    public boolean dumbStrengthThing() {
+            if (HypixelUtil.isVerifiedHypixel() && HypixelUtil.isInGame("SKYWARS") && HypixelUtil.isGameActive() && (HypixelUtil.scoreboardContains("players left: §t2") || HypixelUtil.scoreboardContains("teams left: 2§u"))) {
+                    return true;
+                }
+        return false;
+    }
+
     private int getPotionFromInv() {
         splashPot = true;
         int pot = -1;
@@ -501,7 +508,7 @@ public class AutoPot extends Module {
                                     }
 
 
-                                if (!mc.thePlayer.isPotionActive(Potion.damageBoost) && shouldPreSplash) {
+                                if (!mc.thePlayer.isPotionActive(Potion.damageBoost) && (shouldPreSplash || (dumbStrengthThing() && !noPlayersNearby))) {
                                     pot = i;
                                     splashPot = false;
                                 }
