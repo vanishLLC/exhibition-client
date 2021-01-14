@@ -64,7 +64,7 @@ public class FastUse extends Module {
                     }
                     case "Packet": {
                         if (mc.thePlayer.getItemInUseDuration() >= ((Number) settings.get(TICKS).getValue()).intValue() && canUseItem(mc.thePlayer.getItemInUse().getItem())) {
-                            if (Client.instance.is1_16_4() && HypixelUtil.isVerifiedHypixel()) {
+                            if (Client.instance.isOver1_9() && HypixelUtil.isVerifiedHypixel()) {
                                 mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange((mc.thePlayer.inventory.currentItem + 1) % 9));
                                 mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem));
                                 mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer(em.isOnground()));

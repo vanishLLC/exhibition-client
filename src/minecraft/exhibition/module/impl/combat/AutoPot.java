@@ -219,7 +219,7 @@ public class AutoPot extends Module {
                         }
 
                     } else {
-                        if (Client.instance.is1_16_4() && HypixelUtil.isVerifiedHypixel()) {
+                        if (Client.instance.isOver1_9() && HypixelUtil.isVerifiedHypixel()) {
                             int hotbarSlot = 6;
 
                             if ((potionSlot >= 36)) {

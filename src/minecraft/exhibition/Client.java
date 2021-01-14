@@ -223,6 +223,10 @@ public class Client implements EventListener {
         return ViaFabric.config.getClientSideVersion() == 754;
     }
 
+    public boolean isOver1_9(){
+        return ViaFabric.config.getClientSideVersion() >= 107;
+    }
+
     public void killSwitch() {
         killInstance();
         //sout(code);
