@@ -126,7 +126,7 @@ public class AntiBot extends Module {
 
                     double roundedY = MathUtils.roundToPlace(player.posY, 6);
 
-                    if (Math.abs(distance) > 3 && mc.thePlayer.ticksExisted > 260 && spawnedSinceUpdate < 2) {
+                    if (Math.abs(distance) > 3 && mc.thePlayer.ticksExisted > 260 && spawnedSinceUpdate < 5) {
 //                        DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "------------------------------------------------------------------------");
 //                        DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "Illegal Spawn: " + player.getDisplayName().getFormattedText() + " \247a Distance: " + MathUtils.roundToPlace(distance, 3) +
 //                                " \247bDX: " + MathUtils.roundToPlace(var7, 3) +
