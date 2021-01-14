@@ -1269,7 +1269,6 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
             PotionEffect potioneffect = new PotionEffect(packetIn.getEffectId(), packetIn.getDuration(), packetIn.getAmplifier(), false, packetIn.func_179707_f());
             potioneffect.setPotionDurationMax(packetIn.func_149429_c());
             ((EntityLivingBase) entity).addPotionEffect(potioneffect);
-            System.out.println(potioneffect);
         }
     }
 
@@ -1717,11 +1716,6 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
                     if (iattributeinstance == null) {
                         iattributeinstance = baseattributemap.registerAttribute(new RangedAttribute((IAttribute) null, s20packetentityproperties$snapshot.func_151409_a(), 0.0D, 2.2250738585072014E-308D, Double.MAX_VALUE));
-                    } else if (entity instanceof EntityPlayerSP) {
-                        System.out.println(iattributeinstance.getAttribute().getAttributeUnlocalizedName() + " " + iattributeinstance.getBaseValue());
-                        for (AttributeModifier attributeModifier : iattributeinstance.func_111122_c()) {
-                            System.out.println(attributeModifier.getName() + " " + attributeModifier.getAmount() + " " + attributeModifier.getID() + " " + attributeModifier.getOperation());
-                        }
                     }
 
                     iattributeinstance.setBaseValue(s20packetentityproperties$snapshot.func_151410_b());
