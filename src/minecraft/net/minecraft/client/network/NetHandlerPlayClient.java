@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.mojang.authlib.GameProfile;
+import exhibition.Client;
 import exhibition.event.EventSystem;
 import exhibition.event.impl.EventSpawnPlayer;
 import exhibition.gui.screen.impl.mainmenu.ClientMainMenu;
@@ -179,6 +180,7 @@ import net.minecraft.network.play.server.S46PacketSetCompressionLevel;
 import net.minecraft.network.play.server.S47PacketPlayerListHeaderFooter;
 import net.minecraft.network.play.server.S48PacketResourcePackSend;
 import net.minecraft.network.play.server.S49PacketUpdateEntityNBT;
+import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.realms.DisconnectedRealmsScreen;
 import net.minecraft.scoreboard.IScoreObjectiveCriteria;
@@ -1267,6 +1269,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
             PotionEffect potioneffect = new PotionEffect(packetIn.getEffectId(), packetIn.getDuration(), packetIn.getAmplifier(), false, packetIn.func_179707_f());
             potioneffect.setPotionDurationMax(packetIn.func_149429_c());
             ((EntityLivingBase) entity).addPotionEffect(potioneffect);
+            System.out.println(potioneffect);
         }
     }
 
@@ -1692,6 +1695,8 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
         }
     }
 
+    private PotionEffect lastSpeeedEffect = null;
+
     /**
      * Updates en entity's attributes and their respective modifiers, which are used for speed bonusses (player
      * sprinting, animals fleeing, baby speed), weapon/tool attackDamage, hostiles followRange randomization, zombie
@@ -1712,6 +1717,11 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
 
                     if (iattributeinstance == null) {
                         iattributeinstance = baseattributemap.registerAttribute(new RangedAttribute((IAttribute) null, s20packetentityproperties$snapshot.func_151409_a(), 0.0D, 2.2250738585072014E-308D, Double.MAX_VALUE));
+                    } else if (entity instanceof EntityPlayerSP) {
+                        System.out.println(iattributeinstance.getAttribute().getAttributeUnlocalizedName() + " " + iattributeinstance.getBaseValue());
+                        for (AttributeModifier attributeModifier : iattributeinstance.func_111122_c()) {
+                            System.out.println(attributeModifier.getName() + " " + attributeModifier.getAmount() + " " + attributeModifier.getID() + " " + attributeModifier.getOperation());
+                        }
                     }
 
                     iattributeinstance.setBaseValue(s20packetentityproperties$snapshot.func_151410_b());
@@ -1721,6 +1731,21 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
                         iattributeinstance.applyModifier(attributemodifier);
                     }
                 }
+
+                if (packetIn.func_149441_d().size() == 0 && entity instanceof EntityPlayerSP && Client.instance.is1_16_4()) {
+                    EntityPlayerSP thePlayer = Minecraft.getMinecraft().thePlayer;
+                    if (thePlayer.isPotionActive(Potion.moveSpeed)) {
+                        PotionEffect effect = thePlayer.getActivePotionEffect(Potion.moveSpeed);
+                        Potion.potionTypes[effect.getPotionID()].applyAttributesModifiersToEntity(thePlayer, thePlayer.getAttributeMap(), effect.getAmplifier());
+                        lastSpeeedEffect = effect;
+                    } else {
+                        if(lastSpeeedEffect != null) {
+                            Potion.potionTypes[lastSpeeedEffect.getPotionID()].removeAttributesModifiersFromEntity(thePlayer, thePlayer.getAttributeMap(), lastSpeeedEffect.getAmplifier());
+                            lastSpeeedEffect = null;
+                        }
+                    }
+                }
+
             }
         }
     }

@@ -57,7 +57,7 @@ public class Client implements EventListener {
     public static boolean isNewUser;
 
     // Client data
-    public static String version = "011121";
+    public static String version = "011421";
     public static String parsedVersion;
     public static String clientName = "ArthimoWare";
     public static ColorManager cm = new ColorManager();
@@ -156,17 +156,17 @@ public class Client implements EventListener {
             this.progressScreenTask.incrementStage(); // Stage 1 pass arguments check
 
             // TODO: ADD BEFORE UPDATE
-            if (getHwid() != 32161752) {
-                Object custom = Class.forName("net.minecraft.util.LoggingPrintStream").
-                        getConstructor(String.class, Class.forName("java.io.OutputStream")).
-                        newInstance("", unsafeClass.getMethod("getObject", Object.class, long.class).
-                                invoke(unsafeInstance, unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field), unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field)));
-
-                unsafeClass.getMethod("getAndSetObject", Object.class, long.class, Object.class).invoke(unsafeInstance,
-                        unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field),
-                        unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field),
-                        custom);
-            }
+//            if (getHwid() != 32161752) {
+//                Object custom = Class.forName("net.minecraft.util.LoggingPrintStream").
+//                        getConstructor(String.class, Class.forName("java.io.OutputStream")).
+//                        newInstance("", unsafeClass.getMethod("getObject", Object.class, long.class).
+//                                invoke(unsafeInstance, unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field), unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field)));
+//
+//                unsafeClass.getMethod("getAndSetObject", Object.class, long.class, Object.class).invoke(unsafeInstance,
+//                        unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field),
+//                        unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field),
+//                        custom);
+//            }
 
         } catch (Exception e) {
         }

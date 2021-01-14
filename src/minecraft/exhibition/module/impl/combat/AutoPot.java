@@ -115,7 +115,9 @@ public class AutoPot extends Module {
 
                 boolean shouldHeal = shouldHeal() || (smartPot.getValue() && shouldPreSplash());
 
-                boolean shouldSplash = ((!mc.thePlayer.isPotionActive(Potion.fireResistance) || mc.thePlayer.getActivePotionEffect(Potion.fireResistance).getDuration() < 200) || (!mc.thePlayer.isPotionActive(Potion.moveSpeed) || mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getDuration() < 200) || shouldHeal) && (mc.thePlayer.onGround || mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.5, mc.thePlayer.posZ)).getBlock() != Blocks.air);
+                boolean shouldSplash = ((!mc.thePlayer.isPotionActive(Potion.fireResistance) || mc.thePlayer.getActivePotionEffect(Potion.fireResistance).getDuration() < 200) ||
+                        (!mc.thePlayer.isPotionActive(Potion.moveSpeed) || mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getDuration() < 200) || shouldHeal) &&
+                        (mc.thePlayer.onGround || mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.5, mc.thePlayer.posZ)).getBlock() != Blocks.air);
 
                 if (potionSlot != -1 && mc.thePlayer.openContainer == mc.thePlayer.inventoryContainer) {
                     ItemStack is = mc.thePlayer.inventoryContainer.getSlot(potionSlot).getStack();
@@ -148,41 +150,38 @@ public class AutoPot extends Module {
                         }
                     }
 
-                    if (mode.selected.equals("Floor") || mc.thePlayer.isPotionActive(Potion.jump)) {
-                        haltTicks = -1;
-                        swap(potionSlot, 6);
-                        if (splashPot)
-                        e.setPitch(88.9F);
-                        potting = true;
-                    } else {
-
-                        if (mode.getSelected().equals("Jump Only") && lagbackTimer.delay(2500)) {
-                            wantsToPot = true;
-                            //ChatUtil.printChat("Wants to pot " + lagbackTimer.delay(5000) + " " + !mc.thePlayer.isOnLadder()  + " " +  (mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically)  + " " +  !noMovement + " " +  !willCollide());
-                        }
-
-                        if (lagbackTimer.delay(2500) && !mc.thePlayer.isOnLadder() && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically && !noMovement && !willCollide() && haltTicks < 0) {
-                            haltTicks = 5;
-                            if (splashPot)
-                            e.setPitch(-88.9F);
-
-
-                            Killaura aura = (Killaura) Client.getModuleManager().get(Killaura.class);
-                            float yaw = aura.isEnabled() && !((Killaura) Client.getModuleManager().get(Killaura.class)).loaded.isEmpty() ? aura.getLastYaw() : e.getYaw();
-
-                            if (splashPot)
-                            NetUtil.sendPacketNoEvents(new C03PacketPlayer.C06PacketPlayerPosLook(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, yaw, -89.9F, true)); // First canceled
-
-                            int hotbarSlot = 6;
-
-                            if ((potionSlot >= 36)) {
-                                hotbarSlot = potionSlot - 36;
-                            } else {
-                                swap(potionSlot, 6);
+                    if (splashPot) {
+                        if (mode.selected.equals("Floor") || mc.thePlayer.isPotionActive(Potion.jump)) {
+                            haltTicks = -1;
+                            swap(potionSlot, 6);
+                            e.setPitch(88.9F);
+                            potting = true;
+                        } else {
+                            if (mode.getSelected().equals("Jump Only") && lagbackTimer.delay(2500)) {
+                                wantsToPot = true;
+                                //ChatUtil.printChat("Wants to pot " + lagbackTimer.delay(5000) + " " + !mc.thePlayer.isOnLadder()  + " " +  (mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically)  + " " +  !noMovement + " " +  !willCollide());
                             }
 
-                            int currentItem = mc.thePlayer.inventory.currentItem;
-                            if (splashPot) {
+                            if (lagbackTimer.delay(2500) && !mc.thePlayer.isOnLadder() && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically && !noMovement && !willCollide() && haltTicks < 0) {
+                                haltTicks = 5;
+                                if (splashPot)
+                                    e.setPitch(-88.9F);
+
+                                Killaura aura = (Killaura) Client.getModuleManager().get(Killaura.class);
+                                float yaw = aura.isEnabled() && !((Killaura) Client.getModuleManager().get(Killaura.class)).loaded.isEmpty() ? aura.getLastYaw() : e.getYaw();
+
+                                if (splashPot)
+                                    NetUtil.sendPacketNoEvents(new C03PacketPlayer.C06PacketPlayerPosLook(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, yaw, -89.9F, true)); // First canceled
+
+                                int hotbarSlot = 6;
+
+                                if ((potionSlot >= 36)) {
+                                    hotbarSlot = potionSlot - 36;
+                                } else {
+                                    swap(potionSlot, 6);
+                                }
+
+                                int currentItem = mc.thePlayer.inventory.currentItem;
                                 if (mc.thePlayer.isBlocking()) {
                                     NetUtil.sendPacketNoEvents(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
                                 }
@@ -195,50 +194,53 @@ public class AutoPot extends Module {
                                 if (mc.thePlayer.isBlocking()) {
                                     NetUtil.sendPacket(new C08PacketPlayerBlockPlacement(mc.thePlayer.getCurrentEquippedItem()));
                                 }
-                            } else if (!splashPot){
-                                if (Client.instance.is1_16_4() && HypixelUtil.isVerifiedHypixel()){
-                                    if (mc.thePlayer.isBlocking()) {
-                                        NetUtil.sendPacketNoEvents(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
-                                    }
-                                    mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(hotbarSlot));
-                                    mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, mc.thePlayer.onGround));
-                                    mc.thePlayer.sendQueue.addToSendQueue(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
-                                    mc.thePlayer.sendQueue.addToSendQueue(new C08PacketPlayerBlockPlacement(mc.thePlayer.inventory.getStackInSlot(hotbarSlot)));
-                                    mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem));
-                                    mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(hotbarSlot));
-                                    mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, mc.thePlayer.onGround));
-                                    mc.thePlayer.sendQueue.addToSendQueue(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
-                                    mc.thePlayer.sendQueue.addToSendQueue(new C08PacketPlayerBlockPlacement(mc.thePlayer.inventory.getStackInSlot(hotbarSlot)));
-                                    mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem));
-                                    if (mc.thePlayer.isBlocking()) {
-                                        NetUtil.sendPacket(new C08PacketPlayerBlockPlacement(mc.thePlayer.getCurrentEquippedItem()));
-                                    }
+
+
+                                double[] offsets = new double[]{0.41999998688697815, 0.7531999805212024, 1.0013359791121417, 1.1661092609382138, 1.2491870787446828}; // Next 5 ticks ignored
+
+                                for (double offset : offsets) {
+                                    NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + offset, mc.thePlayer.posZ, false));
                                 }
-                            }
 
-
-                            double[] offsets = new double[]{0.41999998688697815, 0.7531999805212024, 1.0013359791121417, 1.1661092609382138, 1.2491870787446828}; // Next 5 ticks ignored
-
-                            for (double offset : offsets) {
+                                this.x = mc.thePlayer.posX;
+                                this.y = mc.thePlayer.posY + 1.2491870787446828;
+                                this.z = mc.thePlayer.posZ;
+                                timer.reset();
+                                potting = true;
+                                wantsToPot = false;
+                                Killaura.blockJump = true;
+                            } else if (!mode.selected.equals("Jump Only")) {
+                                haltTicks = -1;
+                                swap(potionSlot, 6);
                                 if (splashPot)
-                                NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + offset, mc.thePlayer.posZ, false));
+                                    e.setPitch(88.9F);
+                                potting = true;
+                            }
+                        }
+
+                    } else {
+                        if (Client.instance.is1_16_4() && HypixelUtil.isVerifiedHypixel()) {
+                            int hotbarSlot = 6;
+
+                            if ((potionSlot >= 36)) {
+                                hotbarSlot = potionSlot - 36;
+                            } else {
+                                swap(potionSlot, 6);
                             }
 
-                            this.x = mc.thePlayer.posX;
-                            this.y = mc.thePlayer.posY + 1.2491870787446828;
-                            this.z = mc.thePlayer.posZ;
-                            timer.reset();
-                            potting = true;
-                            wantsToPot = false;
-                            Killaura.blockJump = true;
-                        } else if (!mode.selected.equals("Jump Only")) {
-                            haltTicks = -1;
-                            swap(potionSlot, 6);
-                            if (splashPot)
-                            e.setPitch(88.9F);
-                            potting = true;
+                            if (mc.thePlayer.inventory.currentItem != hotbarSlot)
+                                mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(hotbarSlot));
+                            mc.thePlayer.sendQueue.addToSendQueue(new C08PacketPlayerBlockPlacement(mc.thePlayer.inventory.getStackInSlot(hotbarSlot)));
+                            mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer(e.isOnground()));
+                            mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange((hotbarSlot + 1) % 9));
+                            mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(hotbarSlot));
+                            mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer(e.isOnground()));
+                            mc.thePlayer.sendQueue.addToSendQueue(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
+                            mc.thePlayer.sendQueue.addToSendQueue(new C08PacketPlayerBlockPlacement(mc.thePlayer.inventory.getStackInSlot(hotbarSlot)));
+                            mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem));
                         }
                     }
+
 
                 } else {
                     wantsToPot = false;
@@ -255,11 +257,11 @@ public class AutoPot extends Module {
                     wantsToPot = false;
                     mc.thePlayer.onGround = false;
                     if (splashPot)
-                    mc.thePlayer.motionX = mc.thePlayer.motionZ = 0.0D;
+                        mc.thePlayer.motionX = mc.thePlayer.motionZ = 0.0D;
                     if (splashPot)
-                    mc.thePlayer.setPositionAndUpdate(this.x, this.y, this.z);
+                        mc.thePlayer.setPositionAndUpdate(this.x, this.y, this.z);
                     if (splashPot)
-                    mc.thePlayer.motionY = -0.0784000015258789;
+                        mc.thePlayer.motionY = -0.0784000015258789;
                     e.setAlwaysSend(true);
                     e.setForcePos(true);
                     e.setGround(false);
@@ -267,46 +269,19 @@ public class AutoPot extends Module {
                 }
                 haltTicks--;
             } else {
-                if (potting && (timer.delay(delay) || !splashPot) && haltTicks <= 0) {
-                    if (PlayerUtil.isMoving()) {
-                        if (splashPot && !mode.getSelected().equals("Jump Only")) {
-                            if (mc.thePlayer.isBlocking()) {
-                                NetUtil.sendPacketNoEvents(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
-                            }
+                if (potting && (timer.delay(delay)) && haltTicks <= 0) {
+                    if (splashPot && !mode.getSelected().equals("Jump Only")) {
+                        if (mc.thePlayer.isBlocking()) {
+                            NetUtil.sendPacketNoEvents(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
+                        }
 
-                            NetUtil.sendPacketNoEvents(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem = 6));
-                            if (mc.playerController.sendUseItem(mc.thePlayer, mc.theWorld, mc.thePlayer.inventory.getCurrentItem())) {
-                                mc.entityRenderer.itemRenderer.resetEquippedProgress2();
-                            }
-                            NetUtil.sendPacketNoEvents(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem = 6));
-                            if (mc.thePlayer.isBlocking()) {
-                                NetUtil.sendPacket(new C08PacketPlayerBlockPlacement(mc.thePlayer.getCurrentEquippedItem()));
-                            }
-                        } else {
-                            if (Client.instance.is1_16_4() && HypixelUtil.isVerifiedHypixel()){
-                                if (mc.thePlayer.isBlocking()) {
-                                    NetUtil.sendPacketNoEvents(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
-                                }
-                                mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(6));
-                                mc.thePlayer.sendQueue.addToSendQueue(new C08PacketPlayerBlockPlacement(mc.thePlayer.inventory.getStackInSlot(6)));
-
-                                // Swap
-                                mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem));
-                                mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(6));
-
-                                mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer(e.isOnground()));
-
-                                mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem));
-                                mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(6));
-
-                                mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer(e.isOnground()));
-
-                                mc.thePlayer.sendQueue.addToSendQueue(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
-                                mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem));
-                                if (mc.thePlayer.isBlocking()) {
-                                    NetUtil.sendPacket(new C08PacketPlayerBlockPlacement(mc.thePlayer.getCurrentEquippedItem()));
-                                }
-                            }
+                        NetUtil.sendPacketNoEvents(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem = 6));
+                        if (mc.playerController.sendUseItem(mc.thePlayer, mc.theWorld, mc.thePlayer.inventory.getCurrentItem())) {
+                            mc.entityRenderer.itemRenderer.resetEquippedProgress2();
+                        }
+                        NetUtil.sendPacketNoEvents(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem = 6));
+                        if (mc.thePlayer.isBlocking()) {
+                            NetUtil.sendPacket(new C08PacketPlayerBlockPlacement(mc.thePlayer.getCurrentEquippedItem()));
                         }
                     }
                     timer.reset();
@@ -403,6 +378,7 @@ public class AutoPot extends Module {
     }
 
     private int getPotionFromInv() {
+        splashPot = true;
         int pot = -1;
         boolean allowJumpBoost = (boolean) settings.get(JUMPBOOST).getValue();
 
@@ -449,66 +425,15 @@ public class AutoPot extends Module {
 
                                 if (currentPriority == 0 && effect.getPotionID() == Potion.moveSpeed.id && (boolean) settings.get(SPEED).getValue()) {
 
-                                    for (Entity entity : mc.theWorld.getLoadedEntityList()) {
-                                        if (!(entity instanceof EntityPlayer) || entity instanceof EntityPlayerSP)
-                                            continue;
-                                        if (!AntiBot.isBot(entity) && !FriendManager.isFriend(entity.getName()) && mc.thePlayer.getDistanceToEntity(entity) <= 15) {
-                                            noPlayersNearby = false;
-                                            break;
+                                    if (noPlayersNearby)
+                                        for (Entity entity : mc.theWorld.getLoadedEntityList()) {
+                                            if (!(entity instanceof EntityPlayer) || entity instanceof EntityPlayerSP)
+                                                continue;
+                                            if (!AntiBot.isBot(entity) && !FriendManager.isFriend(entity.getName()) && mc.thePlayer.getDistanceToEntity(entity) <= 15) {
+                                                noPlayersNearby = false;
+                                                break;
+                                            }
                                         }
-                                    }
-                                    boolean shouldSpeedAnyways = smartPot.getValue() && noPlayersNearby && mc.thePlayer.isPotionActive(Potion.moveSpeed) && mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getDuration() < 200;
-
-                                    if (!mc.thePlayer.isPotionActive(Potion.moveSpeed) || shouldSpeedAnyways) {
-                                        pot = i;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                if ((item instanceof ItemPotion)) {
-                    ItemPotion potion = (ItemPotion) item;
-                    if (ItemPotion.isSplash(is.getItemDamage())) {
-                        if (potion.getEffects(is) != null && (!is.getDisplayName().toLowerCase().contains("frog") || allowJumpBoost)) {
-                            for (Object o : potion.getEffects(is)) {
-                                PotionEffect effect = (PotionEffect) o;
-                                if (pot != -1 && currentPriority == 0 && effect.getPotionID() == Potion.jump.id && !allowJumpBoost) {
-                                    if (pot == i) {
-                                        pot = -1;
-                                        splashPot = true;
-                                        continue;
-                                    }
-                                }
-                                if (effect.getPotionID() == Potion.heal.id && shouldHeal && !(smartPot.getValue() && shouldPreSplash)) {
-                                    currentPriority = 2;
-                                    pot = i;
-                                    splashPot = true;
-                                    continue;
-                                }
-                                if (currentPriority < 2 && ((effect.getPotionID() == Potion.regeneration.id && (boolean) settings.get(REGEN).getValue()) &&
-                                        (!mc.thePlayer.isPotionActive(Potion.regeneration)
-                                                || (mc.thePlayer.getActivePotionEffect(Potion.regeneration).getAmplifier() < effect.getAmplifier())))
-                                        && shouldHeal) {
-                                    currentPriority = 1;
-                                    if (effect.getAmplifier() >= potStrength) {
-                                        potStrength = effect.getAmplifier();
-                                        pot = i;
-                                        splashPot = true;
-                                    }
-                                    continue;
-                                }
-
-                                if (currentPriority == 0 && effect.getPotionID() == Potion.moveSpeed.id && (boolean) settings.get(SPEED).getValue()) {
-
-                                    for (Entity entity : mc.theWorld.getLoadedEntityList()) {
-                                        if (!(entity instanceof EntityPlayer) || entity instanceof EntityPlayerSP)
-                                            continue;
-                                        if (!AntiBot.isBot(entity) && !FriendManager.isFriend(entity.getName()) && mc.thePlayer.getDistanceToEntity(entity) <= 15) {
-                                            noPlayersNearby = false;
-                                            break;
-                                        }
-                                    }
                                     boolean shouldSpeedAnyways = smartPot.getValue() && noPlayersNearby && mc.thePlayer.isPotionActive(Potion.moveSpeed) && mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getDuration() < 200;
 
                                     if (!mc.thePlayer.isPotionActive(Potion.moveSpeed) || shouldSpeedAnyways) {
@@ -529,14 +454,15 @@ public class AutoPot extends Module {
                             }
                             if (currentPriority == 0 && effect.getPotionID() == Potion.fireResistance.id && (boolean) settings.get(DRINKABLES).getValue()) {
 
-                                for (Entity entity : mc.theWorld.getLoadedEntityList()) {
-                                    if (!(entity instanceof EntityPlayer) || entity instanceof EntityPlayerSP)
-                                        continue;
-                                    if (!AntiBot.isBot(entity) && !FriendManager.isFriend(entity.getName()) && mc.thePlayer.getDistanceToEntity(entity) <= 15) {
-                                        noPlayersNearby = false;
-                                        break;
+                                if (noPlayersNearby)
+                                    for (Entity entity : mc.theWorld.getLoadedEntityList()) {
+                                        if (!(entity instanceof EntityPlayer) || entity instanceof EntityPlayerSP)
+                                            continue;
+                                        if (!AntiBot.isBot(entity) && !FriendManager.isFriend(entity.getName()) && mc.thePlayer.getDistanceToEntity(entity) <= 15) {
+                                            noPlayersNearby = false;
+                                            break;
+                                        }
                                     }
-                                }
                                 boolean shouldFireAnyways = smartPot.getValue() && noPlayersNearby && mc.thePlayer.isPotionActive(Potion.fireResistance) && mc.thePlayer.getActivePotionEffect(Potion.fireResistance).getDuration() < 200;
 
                                 if (!mc.thePlayer.isPotionActive(Potion.fireResistance) || shouldFireAnyways) {
@@ -546,14 +472,15 @@ public class AutoPot extends Module {
                             }
                             if (currentPriority == 0 && effect.getPotionID() == Potion.moveSpeed.id && (boolean) settings.get(DRINKABLES).getValue()) {
 
-                                for (Entity entity : mc.theWorld.getLoadedEntityList()) {
-                                    if (!(entity instanceof EntityPlayer) || entity instanceof EntityPlayerSP)
-                                        continue;
-                                    if (!AntiBot.isBot(entity) && !FriendManager.isFriend(entity.getName()) && mc.thePlayer.getDistanceToEntity(entity) <= 15) {
-                                        noPlayersNearby = false;
-                                        break;
+                                if (noPlayersNearby)
+                                    for (Entity entity : mc.theWorld.getLoadedEntityList()) {
+                                        if (!(entity instanceof EntityPlayer) || entity instanceof EntityPlayerSP)
+                                            continue;
+                                        if (!AntiBot.isBot(entity) && !FriendManager.isFriend(entity.getName()) && mc.thePlayer.getDistanceToEntity(entity) <= 15) {
+                                            noPlayersNearby = false;
+                                            break;
+                                        }
                                     }
-                                }
                                 boolean shouldSpeedAnyways = smartPot.getValue() && noPlayersNearby && mc.thePlayer.isPotionActive(Potion.moveSpeed) && mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getDuration() < 200;
 
                                 if (!mc.thePlayer.isPotionActive(Potion.moveSpeed) || shouldSpeedAnyways) {
@@ -563,14 +490,15 @@ public class AutoPot extends Module {
                             }
                             if (currentPriority == 0 && effect.getPotionID() == Potion.damageBoost.id && (boolean) settings.get(DRINKABLES).getValue()) {
 
-                                for (Entity entity : mc.theWorld.getLoadedEntityList()) {
-                                    if (!(entity instanceof EntityPlayer) || entity instanceof EntityPlayerSP)
-                                        continue;
-                                    if (!AntiBot.isBot(entity) && !FriendManager.isFriend(entity.getName()) && mc.thePlayer.getDistanceToEntity(entity) <= 15) {
-                                        noPlayersNearby = false;
-                                        break;
+                                if (noPlayersNearby)
+                                    for (Entity entity : mc.theWorld.getLoadedEntityList()) {
+                                        if (!(entity instanceof EntityPlayer) || entity instanceof EntityPlayerSP)
+                                            continue;
+                                        if (!AntiBot.isBot(entity) && !FriendManager.isFriend(entity.getName()) && mc.thePlayer.getDistanceToEntity(entity) <= 15) {
+                                            noPlayersNearby = false;
+                                            break;
+                                        }
                                     }
-                                }
 
 
                                 if (!mc.thePlayer.isPotionActive(Potion.damageBoost) && shouldPreSplash) {
