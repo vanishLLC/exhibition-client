@@ -42,8 +42,9 @@ public class NoSlowdown extends Module {
         if (event instanceof EventMotionUpdate) {
             if ((boolean) settings.get("VANILLA").getValue())
                 return;
-            if (mc.thePlayer.isAirBorne || !isTouchingGround(mc.thePlayer))
+            if (!isTouchingGround(mc.thePlayer)){
                 return;
+            }
             EventMotionUpdate em = (EventMotionUpdate) event;
             Killaura killaura = ((Killaura) Client.getModuleManager().get(Killaura.class));
             if (shouldUnblock && !(Boolean) settings.get("VANILLA").getValue()) {
