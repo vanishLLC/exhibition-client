@@ -6,6 +6,7 @@ import exhibition.event.impl.EventMotionUpdate;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
+import exhibition.util.HypixelUtil;
 import exhibition.util.NetUtil;
 import exhibition.util.PlayerUtil;
 import net.minecraft.block.BlockAir;
@@ -43,6 +44,10 @@ public class NoFall extends Module {
             if (dist > mc.thePlayer.fallDistance) dist = 0;
 
             if (mc.thePlayer.motionY < 0 && mc.thePlayer.fallDistance > 2.124) {
+                if(!HypixelUtil.isVerifiedHypixel()) {
+                    em.setGround(true);
+                }
+
                 double fallY = mc.thePlayer.motionY;
                 double fallen = mc.thePlayer.fallDistance - dist;
                 double predictedFallen = fallen + -((fallY - 0.08D) * 0.9800000190734863D);
