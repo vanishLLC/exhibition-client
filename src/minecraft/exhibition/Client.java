@@ -49,7 +49,7 @@ import static exhibition.util.security.AuthenticationUtil.getHwid;
 import static exhibition.util.security.Snitch.snitch;
 
 // Credits to LPK for initial base
-public class Client implements EventListener {
+public class Client extends Castable implements EventListener {
 
 
     public static Client instance;
@@ -113,14 +113,14 @@ public class Client implements EventListener {
 
     public ProgressScreen progressScreenTask;
 
-    public Client(ProgressScreen progressScreenTask) {
+    public Client(Object[] args) {
         try {
             Class var2 = Class.forName("java.lang.management.ManagementFactory");
-            Object var3 = var2.getDeclaredMethod("getRuntimeMXBean", new Class[0]).invoke((Object) null, new Object[0]);
+            Object var3 = var2.getDeclaredMethod("getRuntimeMXBean", new Class[0]).invoke(null);
             Method method = var3.getClass().getMethod("getInputArguments");
             method.setAccessible(true);
             List<String> list = (List) method.invoke(var3, new Object[0]);
-            this.progressScreenTask = progressScreenTask;
+            this.progressScreenTask = (ProgressScreen) args[2];
             Class unsafeClass = Class.forName("sun.misc.Unsafe");
             Object bruh = unsafeClass.getDeclaredField("theUnsafe");
 
@@ -168,6 +168,7 @@ public class Client implements EventListener {
 //                        custom);
 //            }
 
+            this.progressScreenTask = (ProgressScreen) args[35];
         } catch (Exception e) {
         }
 
@@ -199,8 +200,22 @@ public class Client implements EventListener {
 //            exhibition.module.impl.combat.AutoPot.snitch(11);
 //            killSwitch();
 //        }
+
+        try {
+            this.progressScreenTask = (ProgressScreen) args[8334];
+        } catch (Exception e) {
+
+        }
+
         this.progressScreenTask.incrementStage(); // Stage 4 passed basic hwid check
         Client.instance = this;
+
+        try {
+            Client.instance = ((Castable) args[8334]).cast();
+        } catch (Exception e) {
+
+        }
+
         instance.setupFonts();
         dataDirectory = new File(Client.clientName);
         this.progressScreenTask.incrementStage(); // Stage 5
@@ -216,6 +231,11 @@ public class Client implements EventListener {
         }
         this.progressScreenTask.incrementStage(); // Stage 8
 
+        try {
+            Client.authUser = ((Castable) args[323]).cast();
+        } catch (Exception e) {
+
+        }
         // Client.mojang.connect();
     }
 
@@ -223,7 +243,7 @@ public class Client implements EventListener {
         return ViaFabric.config.getClientSideVersion() == 754;
     }
 
-    public boolean isOver1_9(){
+    public boolean is1_9orGreater() {
         return ViaFabric.config.getClientSideVersion() >= 107;
     }
 
@@ -241,8 +261,8 @@ public class Client implements EventListener {
         return authUser;
     }
 
-    public static void setAuthUser(AuthenticatedUser authUser) {
-        Client.authUser = authUser;
+    public static void setAuthUser(Object authUser) {
+        Client.authUser = ((Castable) authUser).cast();
     }
 
     public static ClickGui getClickGui() {

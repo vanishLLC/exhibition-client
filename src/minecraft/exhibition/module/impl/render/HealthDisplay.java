@@ -13,9 +13,9 @@ import exhibition.module.data.ModuleData;
 
 import java.awt.*;
 
-public class DONOTFUCKINGDIEYOURETARD extends Module {
+public class HealthDisplay extends Module {
 
-	public DONOTFUCKINGDIEYOURETARD(ModuleData data) {
+	public HealthDisplay(ModuleData data) {
 		super(data);
 	}
 

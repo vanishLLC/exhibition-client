@@ -14,7 +14,6 @@ import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
 import exhibition.util.HypixelUtil;
 import exhibition.util.Timer;
-import exhibition.util.misc.ChatUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -66,7 +65,7 @@ public class AutoSoup extends Module {
                 if (soupSlot != -1 && shouldHeal && isHealing) {
                     ItemStack stack = mc.thePlayer.inventoryContainer.getSlot(soupSlot).getStack();
 
-                    if (Client.instance.isOver1_9() && HypixelUtil.isVerifiedHypixel() && stack != null && stack.getItem() == Items.golden_apple) {
+                    if (Client.instance.is1_9orGreater() && HypixelUtil.isVerifiedHypixel() && stack != null && stack.getItem() == Items.golden_apple) {
                         int swapTo = 6;
                         if (soupSlot > 36)
                             swapTo = soupSlot - 36;
@@ -89,7 +88,7 @@ public class AutoSoup extends Module {
 
                     ItemStack stack = mc.thePlayer.inventoryContainer.getSlot(soupSlot).getStack();
 
-                    if (Client.instance.isOver1_9() && HypixelUtil.isVerifiedHypixel() && stack != null && stack.getItem() == Items.golden_apple) {
+                    if (Client.instance.is1_9orGreater() && HypixelUtil.isVerifiedHypixel() && stack != null && stack.getItem() == Items.golden_apple) {
                         mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(swapTo));
                         mc.thePlayer.sendQueue.addToSendQueue(new C08PacketPlayerBlockPlacement(stack));
                     } else {
@@ -138,7 +137,7 @@ public class AutoSoup extends Module {
                 boolean shouldApple = (boolean) settings.get(HEADS).getValue() && (((Item.getIdFromItem(item) == Item.getIdFromItem(Items.skull) ||
                         Item.getIdFromItem(item) == Item.getIdFromItem(Items.baked_potato) ||
                         Item.getIdFromItem(item) == Item.getIdFromItem(Items.magma_cream) ||
-                        (Client.instance.isOver1_9() && Item.getIdFromItem(item) == Item.getIdFromItem(Items.golden_apple))) &&
+                        (Client.instance.is1_9orGreater() && Item.getIdFromItem(item) == Item.getIdFromItem(Items.golden_apple))) &&
                         (!mc.thePlayer.isPotionActive(Potion.regeneration) || (mc.thePlayer.getAbsorptionAmount() <= 0) ||
                                 (mc.thePlayer.isPotionActive(Potion.regeneration) && mc.thePlayer.getActivePotionEffect(Potion.regeneration).getDuration() < 5))) || shouldMutton);
                 if (Item.getIdFromItem(item) == 282 || shouldApple) {

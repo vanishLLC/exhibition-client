@@ -94,7 +94,7 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
                 while ((length = in.read(block)) > 0) {
                     md.getMethod("update", byte[].class, int.class, int.class).invoke(mdInstance, block, 0, length);
                 }
-                boolean bruh = (boolean) (Class.forName("net.minecraft.client.Minecraft").getDeclaredField("isIsRunningOnWindows").get(null));
+                boolean bruh = (boolean) Minecraft.isIsRunningOnWindows;
 
                 String checkSum = (String) Class.forName("javax.xml.bind.DatatypeConverter").getMethod("printHexBinary", byte[].class).invoke(null, (byte[]) md.getMethod("digest").invoke(mdInstance));
                 if (183572818 != checkSum.hashCode() && checkSum.hashCode() != 589290158 && -927836280 != checkSum.hashCode() && 1791589503 != checkSum.hashCode() && bruh) {
@@ -117,7 +117,7 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
                     add(new SpeedMine(new ModuleData(Player, "SpeedMine", "Mine blocks faster.")));
                     add(new Brightness(new ModuleData(Visuals, "Brightness", "Applies night vision.")));
                     add(new Lines(new ModuleData(Visuals, "Lines", "Draws lines at entities.")));
-                    add(new DONOTFUCKINGDIEYOURETARD(new ModuleData(Visuals, "Health", "Shows your health in the middle of the screen.")));
+                    add(new HealthDisplay(new ModuleData(Visuals, "Health", "Shows your health in the middle of the screen.")));
                     add(new AutoTool(new ModuleData(Player, "AutoTool", "Switches to best tool.")));
                     add(new Scaffold(new ModuleData(Movement, "Scaffold", "Automatically places blocks under for you.")));
                     add(new NoFall(new ModuleData(Player, "NoFall", "Take no fall damage.")));
@@ -185,11 +185,12 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
                     add(new StreamerMode(new ModuleData(Player, "StreamerMode", "Hides certain identifiable information.")));
                     add(new AutoOOF(new ModuleData(Other, "AutoOOF", "Automatically runs /oof and disables Aura/KB when someone is staff banned.")));
 
-                    if (Boolean.parseBoolean(System.getProperty("NEoBuMASs"))) {
+                    if (Boolean.parseBoolean((String) (Class.forName("java.lang.System").getMethod("getProperty", String.class)).invoke(null, "NEoBuMASs"))) {
                         add(new Aimbot(new ModuleData(Minigames, "Aimbot", "Cops n Crims aimbot.")));
                     }
 
-                    if (Boolean.parseBoolean(System.getProperty("NEoBuMASs")) && Boolean.parseBoolean(System.getProperty("nEoSuCKsBruhReallyNeighbor"))) {
+                    if (Boolean.parseBoolean((String) (Class.forName("java.lang.System").getMethod("getProperty", String.class)).invoke(null, "NEoBuMASs"))
+                            && Boolean.parseBoolean((String) (Class.forName("java.lang.System").getMethod("getProperty", String.class)).invoke(null, "nEoSuCKsBruhReallyNeighbor"))) {
                         add(new ZombieAim(new ModuleData(Minigames, "ZombieAim", "Aimbot for Hypixel Zombies.")));
                     }
 

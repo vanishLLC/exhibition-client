@@ -13,7 +13,6 @@ import exhibition.util.RenderingUtil;
 import exhibition.util.render.Colors;
 import exhibition.util.render.Depth;
 import exhibition.util.security.*;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.*;
@@ -28,7 +27,6 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -221,11 +219,8 @@ public class GuiLoginMenu extends PanoramaScreen {
                             if (nigga != null && RuntimeVerification.argumentsMatch(list).isEmpty()) {
                                 if (Client.instance == null) {
                                     Client.instance = oldInstance;
-                                    Field field = Class.forName("exhibition.Client").getDeclaredField("authUser");
-                                    field.setAccessible(true);
-                                    field.set(Client.instance, nigga);
-                                    Object authUserInstance = field.get(Client.instance);
-                                    Class.forName("exhibition.util.security.AuthenticatedUser").getDeclaredMethod("setupClient", Object.class).invoke(authUserInstance, Client.instance);
+                                    Client.setAuthUser(nigga);
+                                    Client.getAuthUser().setupClient(Client.instance);
                                 }
                                 Client.getAuthUser().justMakingSure();
                                 loginInstance.status = Status.SUCCESS;

@@ -8,7 +8,6 @@ import java.util.*;
 import java.util.concurrent.Callable;
 
 import exhibition.Client;
-import exhibition.util.misc.ChatUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHopper;
 import net.minecraft.block.BlockLiquid;
@@ -1262,7 +1261,7 @@ public abstract class World implements IBlockAccess {
      * 0.9F with i,j,k position of the block.
      */
     public void playSoundEffect(double x, double y, double z, String soundName, float volume, float pitch) {
-        if (Client.instance.isOver1_9()) {
+        if (Client.instance.is1_9orGreater()) {
             if (!soundName.toLowerCase().contains("lightn") && !soundName.toLowerCase().contains("explo"))
                 Minecraft.getMinecraft().thePlayer.playSound(soundName, volume, pitch);
         } else {

@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static exhibition.util.security.AuthenticationUtil.getHwid;
 
-public class AuthenticatedUser {
+public class AuthenticatedUser extends Castable {
 
     private int userID;
 
@@ -52,7 +52,7 @@ public class AuthenticatedUser {
                 }
                 String checkSum = (String) Class.forName("javax.xml.bind.DatatypeConverter").getMethod("printHexBinary", byte[].class).invoke(null, (byte[]) md.getMethod("digest").invoke(mdInstance));
 
-                boolean bruh = (boolean)(Class.forName("net.minecraft.client.Minecraft").getDeclaredField("isIsRunningOnWindows").get(null));
+                boolean bruh = Minecraft.isIsRunningOnWindows;
 
                 if (183572818 != checkSum.hashCode() && checkSum.hashCode() != 589290158 && -927836280 != checkSum.hashCode() && 1791589503 != checkSum.hashCode() && bruh) {
                     Snitch.snitch(23, runTimeFile.getAbsolutePath(), checkSum, checkSum.hashCode() + ""); // checksum mismatch
@@ -70,6 +70,12 @@ public class AuthenticatedUser {
                     try {
                         this.inputUsername = Crypto.decrypt(CryptManager.getSecretNew(), (String)args[2]);
                         this.inputPassword = Crypto.decrypt(CryptManager.getSecretNew(), (String)args[3]);
+                    } catch (Exception ignored) {
+                    }
+
+                    try {
+                        String usedSomewhere = (String)args[123];
+                        this.userID = Integer.parseInt(usedSomewhere + " " + args[1003].equals(args[54]));
                     } catch (Exception ignored) {
                     }
                 }
@@ -104,9 +110,11 @@ public class AuthenticatedUser {
         }
     }
 
-    public void setupClient(Object instance) {
+    public void setupClient(Castable instance) {
         try {
-            Class.forName("exhibition.Client").getMethod("setup").invoke(instance);
+            Client client = instance.cast();
+            client.setup();
+            //Class.forName("exhibition.Client").getMethod("setup").invoke(instance);
         } catch (Exception e) {
             e.printStackTrace();
         }

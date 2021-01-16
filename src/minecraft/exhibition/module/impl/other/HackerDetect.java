@@ -395,18 +395,22 @@ public class HackerDetect extends Module {
 
                     int speedFlags = 0;
 
+                    float yawDirection;
+
+                    if ((motionZ < 0.0D) && (motionX < 0.0D)) {
+                        yawDirection = 90.0F + (float) Math.toDegrees(Math.atan(motionZ / motionX));
+                    } else if ((motionZ < 0.0D) && (motionX > 0.0D)) {
+                        yawDirection = -90.0F + (float) Math.toDegrees(Math.atan(motionZ / motionX));
+                    } else {
+                        yawDirection = (float) Math.toDegrees(-Math.atan(motionX / motionZ));
+                    }
+
+                    if (Float.isNaN(yawDirection)) {
+                        yawDirection = ent.rotationYaw;
+                    }
+
                     if (jumped) {
                         ent.jumpedTick = ent.ticksExisted;
-
-                        float yawDirection;
-
-                        if ((motionZ < 0.0D) && (motionX < 0.0D)) {
-                            yawDirection = 90.0F + (float) Math.toDegrees(Math.atan(motionZ / motionX));
-                        } else if ((motionZ < 0.0D) && (motionX > 0.0D)) {
-                            yawDirection = -90.0F + (float) Math.toDegrees(Math.atan(motionZ / motionX));
-                        } else {
-                            yawDirection = (float) Math.toDegrees(-Math.atan(motionX / motionZ));
-                        }
 
                         if (Float.isNaN(yawDirection)) {
                             yawDirection = ent.rotationYaw;
@@ -423,21 +427,15 @@ public class HackerDetect extends Module {
                         }
                     }
 
+//                    if (ent.onGround && Math.abs(motionY) < 0.2) {
+//                        float diff = Math.abs(MathHelper.wrapAngleTo180_float(-(MathHelper.wrapAngleTo180_float(ent.rotationYaw) - (float) MathHelper.wrapAngleTo180_float(yawDirection))));
+//
+//                        if (diff > 120 && ent.isSprinting() && velocity >= 0.2) {
+//                            ChatUtil.debug(ent.getName() + " omni sprint " + diff + " " + velocity + " " + ent.onGround);
+//                        }
+//                    }
+
                     if (tickInAir > 0 && tickInAir < 10) {
-                        float yawDirection;
-
-                        if ((motionZ < 0.0D) && (motionX < 0.0D)) {
-                            yawDirection = 90.0F + (float) Math.toDegrees(Math.atan(motionZ / motionX));
-                        } else if ((motionZ < 0.0D) && (motionX > 0.0D)) {
-                            yawDirection = -90.0F + (float) Math.toDegrees(Math.atan(motionZ / motionX));
-                        } else {
-                            yawDirection = (float) Math.toDegrees(-Math.atan(motionX / motionZ));
-                        }
-
-                        if (Float.isNaN(yawDirection)) {
-                            yawDirection = ent.rotationYaw;
-                        }
-
                         float diff = Math.abs(MathHelper.wrapAngleTo180_float(-(MathHelper.wrapAngleTo180_float(ent.lastAirYaw) - (float) MathHelper.wrapAngleTo180_float(yawDirection))));
 
                         if (diff > 60 && MathUtils.roundToPlace(velocity, 1) >= 0.36 && velocity < 2) {
@@ -451,7 +449,7 @@ public class HackerDetect extends Module {
                     if (tickInAir > 0 && !jumped && motionY > -0.3 && motionY < 0 && (ent.ticksExisted - ent.jumpedTick) <= 2 && mc.theWorld.getBlockState(new BlockPos(ent.posX, ent.posY + 2, ent.posZ)).getBlock() == Blocks.air) {
                         speedFlags += 5;
                         ent.lowhopFlags++;
-                        if (ent.ticksExisted - ent.lastFlaggedTick < 15 && ent.lowhopFlags > 2 && !PriorityManager.isPriority(ent) && velocity > 0.2) {
+                        if (ent.ticksExisted - ent.lastFlaggedTick < 15 && ent.lowhopFlags > 2 && !PriorityManager.isPriority(ent) && velocity > 0.28) {
                             Notifications.getManager().post("Hacker Detected", ent.getName() + " is using LowHop.", 7500, Notifications.Type.WARNING);
                             if ((boolean) settings.get("REPORT").getValue())
                                 ChatUtil.sendChat("/wdr " + ent.getName() + " killaura fly speed scaffold");

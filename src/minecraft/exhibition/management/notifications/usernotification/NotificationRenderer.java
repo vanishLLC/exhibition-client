@@ -3,6 +3,7 @@ package exhibition.management.notifications.usernotification;
 import exhibition.Client;
 import exhibition.management.GlobalValues;
 import exhibition.module.impl.combat.Killaura;
+import exhibition.module.impl.hud.TargetHUD;
 import exhibition.util.MathUtils;
 import exhibition.util.RenderingUtil;
 import exhibition.util.render.Colors;
@@ -36,7 +37,7 @@ public class NotificationRenderer implements INotificationRenderer {
         }
 
         boolean isTargetHudActive = false;
-        if(Client.instance != null) {
+        if(Client.instance != null && Client.getModuleManager().isEnabled(TargetHUD.class)) {
             Killaura killaura = (Killaura) Client.getModuleManager().get(Killaura.class);
             if (killaura.isEnabled() && killaura.getCurrentTarget() != null) {
                 isTargetHudActive = true;

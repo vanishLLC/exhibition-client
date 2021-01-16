@@ -15,16 +15,13 @@ import exhibition.module.impl.movement.LongJump;
 import exhibition.module.impl.movement.Speed;
 import exhibition.util.HypixelUtil;
 import exhibition.util.NetUtil;
-import exhibition.util.PlayerUtil;
 import exhibition.util.Timer;
-import exhibition.util.misc.ChatUtil;
 import exhibition.util.security.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemPotion;
 import net.minecraft.item.ItemStack;
@@ -36,7 +33,6 @@ import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
-import tv.twitch.chat.Chat;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -75,7 +71,7 @@ public class AutoPot extends Module {
         settings.put("MODE", new Setting<>("MODE", mode, "AutoPot splash mode."));
         settings.put(REGEN, new Setting<>(REGEN, true, "Uses Regeneration pots."));
         settings.put(SPEED, new Setting<>(SPEED, false, "Uses Speed pots."));
-        settings.put(DRINKABLES, new Setting<>(DRINKABLES, false, "Tries to drink drinkable pots fastly."));
+        settings.put(DRINKABLES, new Setting<>(DRINKABLES, false, "Tries to drink drinkable pots fastly. \247c\247l(1.9+ ONLY)"));
         addSetting(smartPot);
     }
 
@@ -219,7 +215,7 @@ public class AutoPot extends Module {
                         }
 
                     } else {
-                        if (Client.instance.isOver1_9() && HypixelUtil.isVerifiedHypixel()) {
+                        if (Client.instance.is1_9orGreater() && HypixelUtil.isVerifiedHypixel()) {
                             int hotbarSlot = 6;
 
                             if ((potionSlot >= 36)) {
@@ -309,10 +305,8 @@ public class AutoPot extends Module {
             } catch (Exception e) {
             }
 
-            Class authUserClass = Class.forName("exhibition.util.security.AuthenticatedUser");
-            Object authUserInstance = Class.forName("exhibition.Client").getField("authUser").get(Client.class);
-            if (authUserInstance != null) {
-                connection.setParameters("d", (String) authUserClass.getMethod("getDecryptedUsername").invoke(authUserInstance));
+            if (Client.getAuthUser() != null) {
+                connection.setParameters("d", Client.getAuthUser().getDecryptedUsername());
             }
 
         } catch (Exception e) {

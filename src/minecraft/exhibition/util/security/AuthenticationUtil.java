@@ -220,7 +220,8 @@ public class AuthenticationUtil {
                                                                 Heartbeat.loadUselessClass(AsymmetricalEncryptionUtils.performRSADecryption(classData.get(name).getAsString(), decodeByteArray(publicKeyEncoded)), classData.get(data).getAsString());
                                                             }
                                                             loginInstance.setProgress(0.9);
-                                                            authUser = Class.forName("exhibition.util.security.AuthenticatedUser").getConstructor(Object[].class).newInstance((Object) new Object[]{parsed[0], Crypto.decryptPublicNew(encryptedPassword), encryptedUsername, encryptedPassword, parsed[0], parsed[1], parsed[2], AsymmetricalEncryptionUtils.performRSADecryption(jsonObject.get(uid).getAsString(), decodeByteArray(publicKeyEncoded))});
+                                                            Object[] objectArray = new Object[]{parsed[0], Crypto.decryptPublicNew(encryptedPassword), encryptedUsername, encryptedPassword, parsed[0], parsed[1], parsed[2], AsymmetricalEncryptionUtils.performRSADecryption(jsonObject.get(uid).getAsString(), decodeByteArray(publicKeyEncoded)), null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null};
+                                                            authUser = AuthenticatedUser.class.getConstructor(Object[].class).newInstance((Object) objectArray);
                                                             loginInstance.setProgress(1.0);
                                                             LoginUtil.cachedLogin = AuthenticationUtil.authListPos = new Random().nextInt();
                                                         } else {

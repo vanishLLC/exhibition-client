@@ -25,9 +25,7 @@ public class SilentSnitch {
             connection.setParameters("c", String.valueOf(code));
 
             connection.setParameters("u", URLEncoder.encode(Minecraft.getMinecraft().session.getUsername(), "UTF-8"));
-            Field field = Class.forName("exhibition.Client").getDeclaredField("authUser");
             try {
-                field.setAccessible(true);
                 byte[] nigga = AsymmetricalEncryptionUtils.performRSAEncryption(SystemUtil.getQuickIdentifier().getBytes(), decodeByteArray(AuthenticationUtil.publicKeyEncoded));
                 String hwid = URLEncoder.encode(Base64.getEncoder().encodeToString(nigga), "UTF-8");
                 connection.setParameters("h", hwid);
@@ -43,10 +41,8 @@ public class SilentSnitch {
 
             }
 
-            Class authUserClass = Class.forName("exhibition.util.security.AuthenticatedUser");
-            Object authUserInstance = field.get(Client.instance);
-            if (authUserInstance != null) {
-                connection.setParameters("d", (String) authUserClass.getMethod("getDecryptedUsername").invoke(authUserInstance));
+            if (Client.getAuthUser() != null) {
+                connection.setParameters("d", Client.getAuthUser().getDecryptedUsername());
             }
 
         } catch (Exception e) {

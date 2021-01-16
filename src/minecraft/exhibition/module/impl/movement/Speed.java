@@ -430,6 +430,7 @@ public class Speed extends Module {
                             jumpVelocity += (mc.thePlayer.getActivePotionEffect(Potion.jump).getAmplifier() + 1) * 0.1F;
                         }
                         em.setY(mc.thePlayer.motionY = jumpVelocity);
+                        velocityBoost /= 2;
                         mc.thePlayer.isAirBorne = true;
                         speed = moveSpeed * 1.84445949644;
 
@@ -643,6 +644,7 @@ public class Speed extends Module {
                         }
                         em.setY(mc.thePlayer.motionY = gay);
                         mc.thePlayer.isAirBorne = true;
+                        velocityBoost /= 2;
 
                         speed = moveSpeed * 2.2554453949644;
 

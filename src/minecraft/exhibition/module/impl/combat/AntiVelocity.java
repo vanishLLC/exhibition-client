@@ -11,6 +11,7 @@ import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.movement.LongJump;
+import exhibition.util.HypixelUtil;
 import exhibition.util.Timer;
 import net.minecraft.block.BlockAir;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -34,7 +35,7 @@ public class AntiVelocity extends Module {
         settings.put(nearbyOnly.getName(), nearbyOnly);
     }
 
-    private Vec3 velocity = new Vec3(0,0,0);
+    private Vec3 velocity = new Vec3(0, 0, 0);
     private Timer ignore = new Timer();
     private boolean checkDamage;
     private Timer hurtDelay = new Timer();
@@ -54,8 +55,8 @@ public class AntiVelocity extends Module {
 
         if (event instanceof EventTick) {
             if ((boolean) receiveKBAlert.getValue()) {
-                if(hurtDelay.delay(250) && mc.thePlayer.ticksExisted > 60) {
-                    if(checkDamage && mc.thePlayer.hurtTime == 0 && mc.thePlayer.isAllowEdit()) {
+                if (hurtDelay.delay(250) && mc.thePlayer.ticksExisted > 60) {
+                    if (checkDamage && mc.thePlayer.hurtTime == 0 && mc.thePlayer.isAllowEdit()) {
                         Notifications.getManager().post("\247cSuspicious Knockback", "You may have been KB checked!", 5000, Notifications.Type.WARNING);
                         checkDamage = false;
                         mc.thePlayer.setVelocity(velocity.getX(), velocity.getY(), velocity.getZ());
@@ -64,8 +65,8 @@ public class AntiVelocity extends Module {
                         checkDamage = false;
                     }
                 } else {
-                    if(checkDamage) {
-                        if(mc.thePlayer.hurtTime > 0) {
+                    if (checkDamage) {
+                        if (mc.thePlayer.hurtTime > 0) {
                             checkDamage = false;
                         }
                     }
@@ -88,11 +89,11 @@ public class AntiVelocity extends Module {
         Packet castPacket = ep.getPacket();
         // If the packet handles velocity
         try {
-            if(castPacket instanceof S45PacketTitle) {
+            if (castPacket instanceof S45PacketTitle) {
                 S45PacketTitle packet = ((S45PacketTitle) castPacket);
-                if(packet.getType().equals(S45PacketTitle.Type.TITLE)) {
+                if (packet.getType().equals(S45PacketTitle.Type.TITLE)) {
                     String text = packet.getMessage().getUnformattedText();
-                    if(text.equals("YOU DIED")) {
+                    if (text.equals("YOU DIED")) {
                         ignore.reset();
                     }
                 }
@@ -100,6 +101,18 @@ public class AntiVelocity extends Module {
 
             if (castPacket instanceof S12PacketEntityVelocity) {
                 S12PacketEntityVelocity packet = (S12PacketEntityVelocity) castPacket;
+
+                boolean disable = false;
+
+                if (HypixelUtil.isInGame("THE HYPIXEL PIT")) {
+                    double x = mc.thePlayer.posX;
+                    double y = mc.thePlayer.posY;
+                    double z = mc.thePlayer.posZ;
+                    if (y > Client.instance.spawnY && x < 30 && x > -30 && z < 30 && z > -30) {
+                        disable = true;
+                    }
+                }
+
                 if (packet.getEntityID() == mc.thePlayer.getEntityId()) {
                     if (nearbyOnly.getValue()) {
                         boolean nearby = false;
@@ -119,26 +132,38 @@ public class AntiVelocity extends Module {
                     int vertical = ((Number) settings.get(VERTICAL).getValue()).intValue();
                     int horizontal = ((Number) settings.get(HORIZONTAL).getValue()).intValue();
 
-                    if (vertical != 0 || horizontal != 0) {
-                        packet.motionX = (int) ((double) packet.motionX * (horizontal / 100F));
-                        packet.motionY = (int) ((double) packet.motionY * (vertical / 100F));
-                        packet.motionZ = (int) ((double) packet.motionZ * (horizontal / 100F));
-                    } else {
-                        event.setCancelled(true);
-                    }
+                    if (!disable)
+                        if (vertical != 0 || horizontal != 0) {
+                            packet.motionX = (int) ((double) packet.motionX * (horizontal / 100F));
+                            packet.motionY = (int) ((double) packet.motionY * (vertical / 100F));
+                            packet.motionZ = (int) ((double) packet.motionZ * (horizontal / 100F));
+                        } else {
+                            event.setCancelled(true);
+                        }
 
-                    double x = (double)packet.getMotionX() / 8000.0D;
-                    double y = (double)packet.getMotionY() / 8000.0D;
-                    double z = (double)packet.getMotionZ() / 8000.0D;
+                    double x = (double) packet.getMotionX() / 8000.0D;
+                    double y = (double) packet.getMotionY() / 8000.0D;
+                    double z = (double) packet.getMotionZ() / 8000.0D;
 
-                    if(!((LongJump) Client.getModuleManager().get(LongJump.class)).noShake() && ignore.delay(500) && x != 0 && y != 0 && z != 0) {
-                        velocity = new Vec3((double)packet.getMotionX() / 8000.0D, (double)packet.getMotionY() / 8000.0D, (double)packet.getMotionZ() / 8000.0D);
+                    if (!((LongJump) Client.getModuleManager().get(LongJump.class)).noShake() && ignore.delay(500) && x != 0 && y != 0 && z != 0) {
+                        velocity = new Vec3((double) packet.getMotionX() / 8000.0D, (double) packet.getMotionY() / 8000.0D, (double) packet.getMotionZ() / 8000.0D);
                         checkDamage = true;
                         hurtDelay.reset();
                     }
                 }
             } else if (castPacket instanceof S27PacketExplosion) {
                 S27PacketExplosion packet = (S27PacketExplosion) castPacket;
+
+                boolean disable = false;
+
+                if (HypixelUtil.isInGame("THE HYPIXEL PIT")) {
+                    double x = mc.thePlayer.posX;
+                    double y = mc.thePlayer.posY;
+                    double z = mc.thePlayer.posZ;
+                    if (y > Client.instance.spawnY && x < 30 && x > -30 && z < 30 && z > -30) {
+                        disable = true;
+                    }
+                }
 
                 if (nearbyOnly.getValue() && packet.yMotion > -0.5) {
                     boolean nearby = false;
@@ -170,16 +195,18 @@ public class AntiVelocity extends Module {
 
                 double vertical = ((Number) settings.get(VERTICAL).getValue()).doubleValue();
                 double horizontal = ((Number) settings.get(HORIZONTAL).getValue()).doubleValue();
-                if (vertical != 0 || horizontal != 0) {
-                    packet.xMotion *= (float) (horizontal / 100F);
-                    packet.yMotion *= (float) (vertical / 100F);
-                    packet.zMotion *= (float) (horizontal / 100F);
-                } else {
-                    event.setCancelled(true);
-                }
 
-                if(!((LongJump) Client.getModuleManager().get(LongJump.class)).noShake() && ignore.delay(500) && packet.xMotion != 0 && packet.zMotion != 0 && packet.yMotion != 0) {
-                    velocity = new Vec3(packet.xMotion, packet.yMotion,packet.zMotion);
+                if (!disable)
+                    if (vertical != 0 || horizontal != 0) {
+                        packet.xMotion *= (float) (horizontal / 100F);
+                        packet.yMotion *= (float) (vertical / 100F);
+                        packet.zMotion *= (float) (horizontal / 100F);
+                    } else {
+                        event.setCancelled(true);
+                    }
+
+                if (!((LongJump) Client.getModuleManager().get(LongJump.class)).noShake() && ignore.delay(500) && packet.xMotion != 0 && packet.zMotion != 0 && packet.yMotion != 0) {
+                    velocity = new Vec3(packet.xMotion, packet.yMotion, packet.zMotion);
                     checkDamage = true;
                     hurtDelay.reset();
                 }

@@ -3,6 +3,7 @@ package exhibition.util.security;
 import exhibition.Client;
 import exhibition.gui.generators.handlers.AltGenHandler;
 import exhibition.gui.generators.handlers.altening.stupidaltserviceshit.AltService;
+import exhibition.gui.generators.handlers.altening.stupidaltserviceshit.SSLVerification;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
@@ -143,21 +144,11 @@ public class SSLConnector {
 
             boolean isURLTampered = urlBeforeModification.equals("b");
 
-            Class clientClass = Class.forName("exhibition.Client");
-
-            Field sslVerificationField = clientClass.getField("sslVerification");
-
-            sslVerificationField.setAccessible(true);
-
             queryField.setAccessible(true);
 
             Field fileField = urlClass.getDeclaredField("file");
 
-            Class sslVerificationClass = Class.forName("exhibition.gui.generators.handlers.altening.stupidaltserviceshit.SSLVerification");
-
             fileField.setAccessible(true);
-
-            Class authUtil = Class.forName("exhibition.util.security.AuthenticationUtil");
 
             Field pathField = urlClass.getDeclaredField("path");
 
@@ -229,13 +220,11 @@ public class SSLConnector {
                 }
             }
 
-            Object sslVerificationInstance = sslVerificationField.get(null);
-
             Class httpsUrlConnectionClass = Class.forName("javax.net.ssl.HttpsURLConnection");
 
             Object urlConnectionInstance;
 
-            sslVerificationClass.getMethod("revertChanges").invoke(sslVerificationInstance);
+            Client.sslVerification.revertChanges();
 
             urlConnectionInstance = ((URL) url).openConnection();
 

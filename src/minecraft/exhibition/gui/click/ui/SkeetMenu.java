@@ -263,9 +263,10 @@ public class SkeetMenu extends UI {
             mainPanel.typeButton.add(new CategoryButton(mainPanel, types.name(), x + 3, y + y1));
             y += 40;
         }
-        if (allowMinigames)
+        if (allowMinigames) {
             mainPanel.typeButton.add(new CategoryButton(mainPanel, ModuleData.Type.Minigames.name(), x + 3, y + y1));
-        y += 40;
+            y += 40;
+        }
         mainPanel.typeButton.add(new CategoryButton(mainPanel, "Colors", x + 3, y + y1));
         mainPanel.typeButton.get(0).enabled = true;
         mainPanel.typeButton.get(0).categoryPanel.visible = true;

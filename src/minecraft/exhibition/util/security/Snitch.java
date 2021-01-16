@@ -25,12 +25,9 @@ public class Snitch {
             connection.setParameters("c", String.valueOf(code));
 
             connection.setParameters("u", URLEncoder.encode(Minecraft.getMinecraft().session.getUsername(), "UTF-8"));
-            Field field = Class.forName("exhibition.Client").getDeclaredField("authUser");
 
-            Class authUserClass = Class.forName("exhibition.util.security.AuthenticatedUser");
-            Object authUserInstance = field.get(Client.instance);
-            if (authUserInstance != null) {
-                connection.setParameters("d", (String) authUserClass.getMethod("getDecryptedUsername").invoke(authUserInstance));
+            if (Client.getAuthUser() != null) {
+                connection.setParameters("d", Client.getAuthUser().getDecryptedUsername());
             }
 
             try {
@@ -43,7 +40,6 @@ public class Snitch {
 
             if(SystemUtil.hardwareIdentification != null) {
                 try {
-                    field.setAccessible(true);
                     String hwid = URLEncoder.encode(Base64.getEncoder().encodeToString(SystemUtil.getHardwareIdentifiers().getBytes()), "UTF-8");
                     connection.setParameters("h", hwid);
                 } catch (Exception ignore) {

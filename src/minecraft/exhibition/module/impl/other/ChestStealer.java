@@ -166,11 +166,21 @@ public class ChestStealer extends Module {
                     if (!isStealing) {
                         canMissAgain = random.nextBoolean();
                     }
-                    this.slotList = new ArrayList<>();
-                    for (int i = 0; i < guiChest.lowerChestInventory.getSizeInventory(); i++) {
-                        this.slotList.add(i);
+                    if (!Client.instance.is1_9orGreater() || !isStealing) {
+                        this.slotList = new ArrayList<>();
+                        for (int i = 0; i < guiChest.lowerChestInventory.getSizeInventory(); i++) {
+                            ItemStack stack = guiChest.lowerChestInventory.getStackInSlot(i);
+
+                            if (stack != null) {
+                                this.slotList.add(i);
+                                canMissAgain = random.nextBoolean();
+                            } else if (randomMiss.getValue() && canMissAgain && Math.random() > 0.95) {
+                                canMissAgain = false;
+                                this.slotList.add(i);
+                            }
+                        }
+                        Collections.shuffle(this.slotList);
                     }
-                    Collections.shuffle(this.slotList);
                     isStealing = true;
 
                     boolean full = true;
@@ -186,14 +196,17 @@ public class ChestStealer extends Module {
                     }
                     boolean containsItems = false;
                     if (!full) {
-                        for (int index = 0; index < guiChest.lowerChestInventory.getSizeInventory(); index++) {
+                        for (int index : slotList) {
                             ItemStack stack = guiChest.lowerChestInventory.getStackInSlot(index);
                             if (stack != null && !isBad(stack)) {
                                 containsItems = true;
                                 break;
                             }
                         }
+
                         if (containsItems) {
+                            int remove = -1337;
+
                             for (int index : slotList) {
                                 ItemStack stack = guiChest.lowerChestInventory.getStackInSlot(index);
                                 if (timer.delay(delayMS)) {
@@ -207,17 +220,20 @@ public class ChestStealer extends Module {
 //                                            guiChest.handleMouseClick(slot, slot.slotNumber, 0, 1);
 //                                            //guiChest.handleMouseClick(slot, slot.slotNumber, 0, 6);
 //                                        }
-                                            guiChest.handleMouseClick(slot, slot.slotNumber, 0, 1);
-                                            //guiChest.handleMouseClick(slot, slot.slotNumber, 0, 6);
-
-                                        canMissAgain = random.nextBoolean();
-                                    } else if (randomMiss.getValue() && canMissAgain && stack == null && Math.random() > 0.95) {
-                                        canMissAgain = false;
-                                        timer.setDifference(100);
-                                        Slot slot = guiChest.inventorySlots.inventorySlots.get(index);
                                         guiChest.handleMouseClick(slot, slot.slotNumber, 0, 1);
+                                        //guiChest.handleMouseClick(slot, slot.slotNumber, 0, 6);
+
+                                        if (Client.instance.is1_9orGreater()) {
+                                            remove = index;
+                                        }
+
+                                        break;
                                     }
                                 }
+                            }
+
+                            if (remove != -1337) {
+                                this.slotList.remove((Integer) remove);
                             }
                         } else if ((Boolean) settings.get(CLOSE).getValue() && timer.delay(100)) {
                             if (mc.currentScreen == chestContainer) {
@@ -271,7 +287,7 @@ public class ChestStealer extends Module {
         if (item.getItem() instanceof ItemArmor) {
             if (!(canEquip(item) || (betterCheck(item) && !canEquip(item)))) return true;
         }
-        if(item.getItem() instanceof ItemTool) {
+        if (item.getItem() instanceof ItemTool) {
             return !tools.getValue() || isToolWorst(item);
         }
         return !(item.getItem() instanceof ItemArmor) &&

