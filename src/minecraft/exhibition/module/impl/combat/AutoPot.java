@@ -8,6 +8,7 @@ import exhibition.management.PriorityManager;
 import exhibition.management.friend.FriendManager;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
+import exhibition.module.data.MultiBool;
 import exhibition.module.data.Options;
 import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.movement.Fly;
@@ -16,6 +17,7 @@ import exhibition.module.impl.movement.Speed;
 import exhibition.util.HypixelUtil;
 import exhibition.util.NetUtil;
 import exhibition.util.Timer;
+import exhibition.util.misc.ChatUtil;
 import exhibition.util.security.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -33,6 +35,7 @@ import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import tv.twitch.chat.Chat;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -45,12 +48,9 @@ public class AutoPot extends Module {
 
     private String DELAY = "DELAY";
     private String HEALTH = "HEALTH";
-    private String JUMPBOOST = "JUMPBOOST";
-    private String REGEN = "REGEN";
-    private String SPEED = "SPEED";
-    private String DRINKABLES = "DRINKABLES";
     private Options mode = new Options("Pot Mode", "Jump", "Floor", "Jump", "Jump Only");
     private Setting<Boolean> smartPot = new Setting<>("SMART-POT", false, "Avoids using potions around players. Splashes during your hurt time.");
+    private MultiBool options;
     private Timer timer = new Timer();
     private Timer lagbackTimer = new Timer();
     private boolean splashPot;
@@ -67,11 +67,15 @@ public class AutoPot extends Module {
         haltTicks = -1;
         settings.put(HEALTH, new Setting<>(HEALTH, 5, "Maximum health before healing.", 0.5, 0.5, 10));
         settings.put(DELAY, new Setting<>(DELAY, 350, "Delay before healing again.", 50, 100, 1000));
-        settings.put(JUMPBOOST, new Setting<>(JUMPBOOST, false, "Uses jump boost speed pots.."));
         settings.put("MODE", new Setting<>("MODE", mode, "AutoPot splash mode."));
-        settings.put(REGEN, new Setting<>(REGEN, true, "Uses Regeneration pots."));
-        settings.put(SPEED, new Setting<>(SPEED, false, "Uses Speed pots."));
-        settings.put(DRINKABLES, new Setting<>(DRINKABLES, false, "Tries to drink drinkable pots fastly. \247c\247l(1.9+ ONLY)"));
+        Setting[] ents = new Setting[]{
+                new Setting<>("Speed", true),
+                new Setting<>("JumpBoost", true),
+                new Setting<>("Healing", true),
+                new Setting<>("Regeneration", true),
+                new Setting<>("FireResistance", true),
+                new Setting<>("Strength", true)};
+        settings.put("OPTIONS", new Setting<>("OPTIONS", options = new MultiBool("Potions", ents), "Potions to AutoPot"));
         addSetting(smartPot);
     }
 
@@ -123,7 +127,7 @@ public class AutoPot extends Module {
                         if (potion.getEffects(is) != null) {
                             for (Object o : potion.getEffects(is)) {
                                 PotionEffect effect = (PotionEffect) o;
-                                if ((effect.getPotionID() == Potion.moveSpeed.id && (boolean) settings.get(SPEED).getValue()) && !mc.thePlayer.isPotionActive(Potion.moveSpeed)) {
+                                if ((effect.getPotionID() == Potion.moveSpeed.id && options.getValue("Speed")) && !mc.thePlayer.isPotionActive(Potion.moveSpeed)) {
                                     shouldSplash = true;
                                 }
                             }
@@ -386,7 +390,7 @@ public class AutoPot extends Module {
     private int getPotionFromInv() {
         splashPot = true;
         int pot = -1;
-        boolean allowJumpBoost = (boolean) settings.get(JUMPBOOST).getValue();
+        boolean allowJumpBoost = options.getValue("JumpBoost");
 
         int currentPriority = 0; // 1 = regen, 2 = healing
         int potStrength = -1;
@@ -400,6 +404,10 @@ public class AutoPot extends Module {
             if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
                 ItemStack is = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
                 Item item = is.getItem();
+                /*
+                Splash Potions
+                 */
+
                 if ((item instanceof ItemPotion)) {
                     ItemPotion potion = (ItemPotion) item;
                     if (ItemPotion.isSplash(is.getItemDamage())) {
@@ -409,15 +417,17 @@ public class AutoPot extends Module {
                                 if (pot != -1 && currentPriority == 0 && effect.getPotionID() == Potion.jump.id && !allowJumpBoost) {
                                     if (pot == i) {
                                         pot = -1;
+                                        splashPot = true;
                                         continue;
                                     }
                                 }
-                                if (effect.getPotionID() == Potion.heal.id && shouldHeal && !(smartPot.getValue() && shouldPreSplash)) {
+                                if (effect.getPotionID() == Potion.heal.id && shouldHeal && !(smartPot.getValue() && shouldPreSplash) && options.getValue("Healing")) {
                                     currentPriority = 2;
                                     pot = i;
+                                    splashPot = true;
                                     continue;
                                 }
-                                if (currentPriority < 2 && ((effect.getPotionID() == Potion.regeneration.id && (boolean) settings.get(REGEN).getValue()) &&
+                                if (currentPriority < 2 && ((effect.getPotionID() == Potion.regeneration.id && options.getValue("Regeneration")) &&
                                         (!mc.thePlayer.isPotionActive(Potion.regeneration)
                                                 || (mc.thePlayer.getActivePotionEffect(Potion.regeneration).getAmplifier() < effect.getAmplifier())))
                                         && shouldHeal) {
@@ -425,12 +435,12 @@ public class AutoPot extends Module {
                                     if (effect.getAmplifier() >= potStrength) {
                                         potStrength = effect.getAmplifier();
                                         pot = i;
+                                        splashPot = true;
                                     }
                                     continue;
                                 }
 
-                                if (currentPriority == 0 && effect.getPotionID() == Potion.moveSpeed.id && (boolean) settings.get(SPEED).getValue()) {
-
+                                if (currentPriority == 0 && effect.getPotionID() == Potion.moveSpeed.id && options.getValue("Speed")) {
                                     if (noPlayersNearby)
                                         for (Entity entity : mc.theWorld.getLoadedEntityList()) {
                                             if (!(entity instanceof EntityPlayer) || entity instanceof EntityPlayerSP)
@@ -447,18 +457,40 @@ public class AutoPot extends Module {
                                         splashPot = true;
                                     }
                                 }
+                                if (currentPriority == 0 && effect.getPotionID() == Potion.damageBoost.id && options.getValue("Strength")) {
+
+                                    if (noPlayersNearby)
+                                        for (Entity entity : mc.theWorld.getLoadedEntityList()) {
+                                            if (!(entity instanceof EntityPlayer) || entity instanceof EntityPlayerSP)
+                                                continue;
+                                            if (!AntiBot.isBot(entity) && !FriendManager.isFriend(entity.getName()) && mc.thePlayer.getDistanceToEntity(entity) <= 15) {
+                                                noPlayersNearby = false;
+                                                break;
+                                            }
+                                        }
+
+
+                                    if (!mc.thePlayer.isPotionActive(Potion.damageBoost) && (shouldPreSplash || (dumbStrengthThing() && !noPlayersNearby))) {
+                                        pot = i;
+                                        splashPot = true;
+                                    }
+                                }
                             }
                         }
-                    } else {
+                    } else if (Client.instance.is1_9orGreater()) {
+                        /*
+                        Full Potions (drinkables)
+                         */
                         for (Object o : potion.getEffects(is)) {
                             PotionEffect effect = (PotionEffect) o;
                             if (pot != -1 && currentPriority == 0 && effect.getPotionID() == Potion.jump.id && !allowJumpBoost) {
                                 if (pot == i) {
                                     pot = -1;
+                                    splashPot = false;
                                     continue;
                                 }
                             }
-                            if (currentPriority == 0 && effect.getPotionID() == Potion.fireResistance.id && (boolean) settings.get(DRINKABLES).getValue()) {
+                            if (currentPriority == 0 && effect.getPotionID() == Potion.fireResistance.id && options.getValue("FireResistance")) {
 
                                 if (noPlayersNearby)
                                     for (Entity entity : mc.theWorld.getLoadedEntityList()) {
@@ -476,7 +508,7 @@ public class AutoPot extends Module {
                                     splashPot = false;
                                 }
                             }
-                            if (currentPriority == 0 && effect.getPotionID() == Potion.moveSpeed.id && (boolean) settings.get(DRINKABLES).getValue()) {
+                            if (currentPriority == 0 && effect.getPotionID() == Potion.moveSpeed.id && options.getValue("Speed")) {
 
                                 if (noPlayersNearby)
                                     for (Entity entity : mc.theWorld.getLoadedEntityList()) {
@@ -494,7 +526,7 @@ public class AutoPot extends Module {
                                     splashPot = false;
                                 }
                             }
-                            if (currentPriority == 0 && effect.getPotionID() == Potion.damageBoost.id && (boolean) settings.get(DRINKABLES).getValue()) {
+                            if (currentPriority == 0 && effect.getPotionID() == Potion.damageBoost.id && options.getValue("Strength")) {
 
                                 if (noPlayersNearby)
                                     for (Entity entity : mc.theWorld.getLoadedEntityList()) {
@@ -511,6 +543,24 @@ public class AutoPot extends Module {
                                     pot = i;
                                     splashPot = false;
                                 }
+                            }
+                            if (effect.getPotionID() == Potion.heal.id && shouldHeal && !(smartPot.getValue() && shouldPreSplash) && options.getValue("Healing")) {
+                                currentPriority = 2;
+                                pot = i;
+                                splashPot = false;
+                                continue;
+                            }
+                            if (currentPriority < 2 && ((effect.getPotionID() == Potion.regeneration.id && options.getValue("Regeneration")) &&
+                                    (!mc.thePlayer.isPotionActive(Potion.regeneration)
+                                            || (mc.thePlayer.getActivePotionEffect(Potion.regeneration).getAmplifier() < effect.getAmplifier())))
+                                    && shouldHeal) {
+                                currentPriority = 1;
+                                if (effect.getAmplifier() >= potStrength) {
+                                    potStrength = effect.getAmplifier();
+                                    pot = i;
+                                    splashPot = false;
+                                }
+                                continue;
                             }
                         }
                     }

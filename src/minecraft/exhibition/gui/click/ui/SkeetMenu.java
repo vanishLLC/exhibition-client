@@ -513,7 +513,7 @@ public class SkeetMenu extends UI {
 
                 if (module.getType() == ModuleData.Type.Combat) {
                     if (module.getName().equalsIgnoreCase("AutoSword")) {
-                        yOff -= 95 + 36;
+                        yOff -= 95 + 46;
                         xOff += 95;
                     }
                     if (module.getName().equalsIgnoreCase("AimBot")) {
@@ -528,7 +528,7 @@ public class SkeetMenu extends UI {
                         yOff -= 5;
                     }
                     if (module.getName().equalsIgnoreCase("Bypass")) {
-                        yOff += 22;
+                        yOff += 12;
                     }
                     if (module.getName().equalsIgnoreCase("AntiVelocity"))
                         xOff += 95;
