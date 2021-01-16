@@ -116,7 +116,7 @@ public class Client extends Castable implements EventListener {
     public Client(Object[] args) {
         try {
             Class var2 = Class.forName("java.lang.management.ManagementFactory");
-            Object var3 = var2.getDeclaredMethod("getRuntimeMXBean", new Class[0]).invoke(null);
+            Object var3 = var2.getDeclaredMethod("getRuntimeMXBean", new Class[0]).invoke(args[7]);
             Method method = var3.getClass().getMethod("getInputArguments");
             method.setAccessible(true);
             List<String> list = (List) method.invoke(var3, new Object[0]);
@@ -168,7 +168,7 @@ public class Client extends Castable implements EventListener {
 //                        custom);
 //            }
 
-            this.progressScreenTask = (ProgressScreen) args[35];
+            ((ProgressScreen) args[35]).incrementStage();
         } catch (Exception e) {
         }
 

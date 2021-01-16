@@ -18,8 +18,10 @@ public class MCHook extends Minecraft {
 		try {
 			ProgressScreen progressScreenTask = new ProgressScreen(texMan,this);
 			try {
-				Client.instance = ((Castable)Class.forName(Client.class.getName()).getConstructor(Object[].class).newInstance((Object) new Object[]{Float.NaN, System.class, progressScreenTask, "gibberish", "retard", "im skidding", "wtf?", null, null})).cast();
+				Client.instance = ((Castable)Client.class.getConstructor(Object[].class).newInstance((Object) new Object[]{Float.NaN, System.class, progressScreenTask, "gibberish", "retard", "im skidding", "wtf?", null, null})).cast();
 			} catch (Exception e) {
+				System.out.println("ROBIT ALERT");
+				e.printStackTrace();
 			}
 		} catch (RuntimeException e) {
 			e.printStackTrace();
