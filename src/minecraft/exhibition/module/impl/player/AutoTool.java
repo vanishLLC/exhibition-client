@@ -57,7 +57,7 @@ public class AutoTool extends Module {
 
         if (event instanceof EventDamageBlock) {
             EventDamageBlock edb = event.cast();
-            Block block = mc.theWorld.getBlockState(edb.getCurrentBlock()).getBlock();
+            Block block = mc.theWorld.getBlockState(edb.getBlockPos()).getBlock();
             float strength = 1.0F;
             int bestItemIndex = -1;
             for (int i = 0; i < 36; i++) {

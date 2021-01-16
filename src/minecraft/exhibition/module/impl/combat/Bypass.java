@@ -198,6 +198,10 @@ public class Bypass extends Module {
                         }
 
                     } else {
+                        event.setCancelled(true);
+                        C0FPacketConfirmTransaction confirmTransaction = new C0FPacketConfirmTransaction(packet.getWindowId(), packet.getUid(), packet.getAccepted());
+                        NetUtil.sendPacketNoEvents(confirmTransaction);
+
                         lastValid = packet.getUid();
                     }
                     lastUid = packet.getUid();

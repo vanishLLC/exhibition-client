@@ -651,25 +651,26 @@ public class SkeetMenu extends UI {
                 if (module.getType() == ModuleData.Type.Player) {
                     y = 20;
                     if (module.getName().equalsIgnoreCase("ChestStealer"))
-                        yOff -= 20;
+                        yOff -= 10;
+                    if (module.getName().equalsIgnoreCase("FastPlace"))
+                        yOff -= 11;
                     if (module.getName().equalsIgnoreCase("Inventory")) {
                         xOff = 290.0F;
-                        yOff = 127.0F;
+                        yOff = 125.0F;
                     }
                     if (module.getName().equalsIgnoreCase("InventoryCleaner"))
                         yOff -= 20;
                     if (module.getName().equalsIgnoreCase("SurvivalNuker")) {
-                        yOff -= 31;
+                        yOff -= 0;
                         xOff = 50 + categoryButton.panel.x + 95;
                     }
                     if (module.getName().equalsIgnoreCase("AutoArmor")) {
                         xOff = 50 + categoryButton.panel.x + 95 * 2;
-                        yOff = 158.0F;
+                        yOff = 156.0F;
                     }
                     if (module.getName().equalsIgnoreCase("StreamerMode")) {
-                        yOff += 45;
+                        yOff += 4;
                     }
-
                     if (getSettings(module) != null) {
                         categoryPanel.buttons.add(new Button(categoryPanel, module.getName(), xOff + 0.5f, yOff + 10, module));
                         float x1 = 0.5f;

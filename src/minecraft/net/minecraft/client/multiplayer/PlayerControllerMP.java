@@ -294,10 +294,11 @@ public class PlayerControllerMP
     public boolean onPlayerDamageBlock(BlockPos posBlock, EnumFacing directionFacing)
     {
         EventDamageBlock event = (EventDamageBlock) EventSystem.getInstance(EventDamageBlock.class);
-        event.fire(posBlock);
+        event.fire(posBlock, directionFacing, curBlockDamageMP);
         if (event.isCancelled()) {
             return false;
         }
+        curBlockDamageMP = event.getProgress();
         this.syncCurrentPlayItem();
 
         if (this.blockHitDelay > 0)

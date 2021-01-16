@@ -3,7 +3,11 @@ package net.minecraft.block.state;
 import com.google.common.collect.ImmutableMap;
 import java.util.Collection;
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
+import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.multiplayer.WorldClient;
+import net.minecraft.util.BlockPos;
 
 public interface IBlockState
 {
@@ -18,4 +22,13 @@ public interface IBlockState
     ImmutableMap<IProperty, Comparable> getProperties();
 
     Block getBlock();
+
+    default Material getMaterial() {
+        return this.getBlock().getMaterial();
+    }
+
+    default float getPlayerRelativeBlockHardness(EntityPlayerSP player, WorldClient world, BlockPos blockPos) {
+        return this.getBlock().getPlayerRelativeBlockHardness(player, world, blockPos);
+    }
+
 }

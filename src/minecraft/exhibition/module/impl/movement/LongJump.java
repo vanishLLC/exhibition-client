@@ -97,7 +97,7 @@ public class LongJump extends Module {
             return;
         velocityBoost = 0;
 
-        if (waitTimer.delay(2500)) {
+        if (waitTimer.delay(2500) && bruhTick != 0) {
             waitTimer.reset();
         }
         mc.timer.timerSpeed = 1f;

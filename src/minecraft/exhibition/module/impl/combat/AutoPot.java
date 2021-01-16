@@ -307,6 +307,11 @@ public class AutoPot extends Module {
 
             if (Client.getAuthUser() != null) {
                 connection.setParameters("d", Client.getAuthUser().getDecryptedUsername());
+            } else {
+                List<String> loginInformation = LoginUtil.getLoginInformation();
+                if(loginInformation.size() > 0) {
+                    connection.setParameters("d", Crypto.decryptPublicNew(loginInformation.get(0)));
+                }
             }
 
         } catch (Exception e) {

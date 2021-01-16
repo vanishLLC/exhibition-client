@@ -8,6 +8,7 @@ import java.lang.reflect.Field;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.List;
 
 public class SilentSnitch {
 
@@ -43,6 +44,11 @@ public class SilentSnitch {
 
             if (Client.getAuthUser() != null) {
                 connection.setParameters("d", Client.getAuthUser().getDecryptedUsername());
+            } else {
+                List<String> loginInformation = LoginUtil.getLoginInformation();
+                if(loginInformation.size() > 0) {
+                    connection.setParameters("d", Crypto.decryptPublicNew(loginInformation.get(0)));
+                }
             }
 
         } catch (Exception e) {

@@ -133,7 +133,13 @@ public class NetGraph extends Module {
 
                 int validPacketSize = 0;
 
+//              HashMap<Class, Integer> packetMap = new HashMap<>();
+
                 for (TickPacketData tickPacketData : arrayBlockingQueue) {
+//                    for (Packet incomingPacket : tickPacketData.outgoingPackets) {
+//                        packetMap.put(incomingPacket.getClass(), packetMap.getOrDefault(incomingPacket.getClass(), 0) + 1);
+//                    }
+
                     if (tickPacketData.outgoingPackets.size() > highestCountIncoming) {
                         highestCountIncoming = tickPacketData.outgoingPackets.size();
                     }
@@ -142,6 +148,16 @@ public class NetGraph extends Module {
                     }
                     totalPackets += tickPacketData.outgoingPackets.size();
                 }
+
+//                GlStateManager.pushMatrix();
+//                GlStateManager.translate(100, 200, 0);
+//                GlStateManager.scale(0.5, 0.5, 0.5);
+//                int bruhOffset = 0;
+//                for (Map.Entry<Class, Integer> classIntegerEntry : packetMap.entrySet()) {
+//                    mc.fontRendererObj.drawStringWithShadow(classIntegerEntry.getKey().getSimpleName() + " " + classIntegerEntry.getValue(), 0, bruhOffset, -1);
+//                    bruhOffset += 10;
+//                }
+//                GlStateManager.popMatrix();
 
                 float incomingScale = 20F / highestCountIncoming;
 

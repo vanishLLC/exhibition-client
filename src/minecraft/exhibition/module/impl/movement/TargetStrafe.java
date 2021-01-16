@@ -182,7 +182,7 @@ public class TargetStrafe extends Module {
                         double diffZ = (target.posZ + rotY) - mc.thePlayer.posZ;
                         double diffY = (target.posY - mc.thePlayer.posY);
 
-                        boolean isVoid = true;
+                        boolean isVoid = !(Client.getModuleManager().isEnabled(LongJump.class) || Client.getModuleManager().isEnabled(Fly.class));
 
                         for (int _y = (int) target.posY; _y >= 0; _y--) {
                             if (!(mc.theWorld.getBlockState(new BlockPos(target.posX + rotX, _y, target.posZ + rotY)).getBlock() instanceof BlockAir)) {
@@ -191,7 +191,7 @@ public class TargetStrafe extends Module {
                             }
                         }
 
-                        boolean isFineTick = !isSmart() || (mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(diffX, diffY, diffZ).expand(var41, 0, var41)).isEmpty() && !isVoid) && lastRad == -1;
+                        boolean isFineTick = !isSmart() || (mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(diffX, diffY/2, diffZ).expand(var41, 0, var41)).isEmpty() && !isVoid) && lastRad == -1;
 
                         GlStateManager.pushMatrix();
                         RenderingUtil.pre3D();
@@ -220,9 +220,9 @@ public class TargetStrafe extends Module {
                                 double diffPosX = (target.posX + rotPosX) - mc.thePlayer.posX;
                                 double diffPosZ = (target.posZ + rotPosY) - mc.thePlayer.posZ;
 
-                                boolean willNotCollide = mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(diffPosX, diffY, diffPosZ).expand(var41, 0, var41)).isEmpty();
+                                boolean willNotCollide = mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(diffPosX, diffY/2, diffPosZ).expand(var41, 0, var41)).isEmpty();
 
-                                boolean isCurrentlyVoid = true;
+                                boolean isCurrentlyVoid = !(Client.getModuleManager().isEnabled(LongJump.class) || Client.getModuleManager().isEnabled(Fly.class));
 
                                 for (int _y = (int) target.posY; _y >= 0; _y--) {
                                     if (!(mc.theWorld.getBlockState(new BlockPos(target.posX + rotPosX, _y, target.posZ + rotPosY)).getBlock() instanceof BlockAir)) {
@@ -263,9 +263,9 @@ public class TargetStrafe extends Module {
                                 double diffPosX = (target.posX + rotPosX) - mc.thePlayer.posX;
                                 double diffPosZ = (target.posZ + rotPosY) - mc.thePlayer.posZ;
 
-                                boolean willNotCollide = mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(diffPosX, diffY, diffPosZ).expand(var41, 0, var41)).isEmpty();
+                                boolean willNotCollide = mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(diffPosX, diffY/2, diffPosZ).expand(var41, 0, var41)).isEmpty();
 
-                                boolean isCurrentlyVoid = true;
+                                boolean isCurrentlyVoid = !(Client.getModuleManager().isEnabled(LongJump.class) || Client.getModuleManager().isEnabled(Fly.class));
 
                                 for (int _y = (int) target.posY; _y >= 0; _y--) {
                                     if (!(mc.theWorld.getBlockState(new BlockPos(target.posX + rotPosX, _y, target.posZ + rotPosY)).getBlock() instanceof BlockAir)) {
@@ -448,7 +448,7 @@ public class TargetStrafe extends Module {
                 double diffZ = (target.posZ + rotY) - mc.thePlayer.posZ;
                 double diffY = (target.posY - mc.thePlayer.posY);
 
-                boolean isVoid = true;
+                boolean isVoid = !(Client.getModuleManager().isEnabled(LongJump.class) || Client.getModuleManager().isEnabled(Fly.class));
 
                 for (int _y = (int) target.posY; _y >= 0; _y--) {
                     if (!(mc.theWorld.getBlockState(new BlockPos(target.posX + rotX, _y, target.posZ + rotY)).getBlock() instanceof BlockAir)) {
@@ -457,7 +457,7 @@ public class TargetStrafe extends Module {
                     }
                 }
 
-                boolean isFineTick = !isSmart() || (mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(diffX, diffY, diffZ).expand(var41, 0, var41)).isEmpty() && !isVoid) && lastRad == -1;
+                boolean isFineTick = !isSmart() || (mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(diffX, diffY/2, diffZ).expand(var41, 0, var41)).isEmpty() && !isVoid) && lastRad == -1;
 
                 double increment = 0.1;
 
@@ -476,9 +476,9 @@ public class TargetStrafe extends Module {
                         double diffPosX = (target.posX + rotPosX) - mc.thePlayer.posX;
                         double diffPosZ = (target.posZ + rotPosY) - mc.thePlayer.posZ;
 
-                        boolean willNotCollide = mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(diffPosX, diffY, diffPosZ).expand(var41, 0, var41)).isEmpty();
+                        boolean willNotCollide = mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(diffPosX, diffY/2, diffPosZ).expand(var41, 0, var41)).isEmpty();
 
-                        boolean isCurrentlyVoid = true;
+                        boolean isCurrentlyVoid = !(Client.getModuleManager().isEnabled(LongJump.class) || Client.getModuleManager().isEnabled(Fly.class));
 
                         for (int _y = (int) target.posY; _y >= 0; _y--) {
                             if (!(mc.theWorld.getBlockState(new BlockPos(target.posX + rotPosX, _y, target.posZ + rotPosY)).getBlock() instanceof BlockAir)) {
@@ -509,9 +509,9 @@ public class TargetStrafe extends Module {
                         double diffPosX = (target.posX + rotPosX) - mc.thePlayer.posX;
                         double diffPosZ = (target.posZ + rotPosY) - mc.thePlayer.posZ;
 
-                        boolean willNotCollide = mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(diffPosX, diffY, diffPosZ).expand(var41, 0, var41)).isEmpty();
+                        boolean willNotCollide = mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(diffPosX, diffY/2, diffPosZ).expand(var41, 0, var41)).isEmpty();
 
-                        boolean isCurrentlyVoid = true;
+                        boolean isCurrentlyVoid = !(Client.getModuleManager().isEnabled(LongJump.class) || Client.getModuleManager().isEnabled(Fly.class));
 
                         for (int _y = (int) target.posY; _y >= 0; _y--) {
                             if (!(mc.theWorld.getBlockState(new BlockPos(target.posX + rotPosX, _y, target.posZ + rotPosY)).getBlock() instanceof BlockAir)) {
