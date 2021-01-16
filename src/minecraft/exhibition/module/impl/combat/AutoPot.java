@@ -68,14 +68,14 @@ public class AutoPot extends Module {
         settings.put(HEALTH, new Setting<>(HEALTH, 5, "Maximum health before healing.", 0.5, 0.5, 10));
         settings.put(DELAY, new Setting<>(DELAY, 350, "Delay before healing again.", 50, 100, 1000));
         settings.put("MODE", new Setting<>("MODE", mode, "AutoPot splash mode."));
-        Setting[] ents = new Setting[]{
+        Setting[] potions = new Setting[]{
                 new Setting<>("Speed", true),
-                new Setting<>("JumpBoost", true),
+                new Setting<>("JumpBoost", false),
                 new Setting<>("Healing", true),
                 new Setting<>("Regeneration", true),
                 new Setting<>("FireResistance", true),
                 new Setting<>("Strength", true)};
-        settings.put("OPTIONS", new Setting<>("OPTIONS", options = new MultiBool("Potions", ents), "Potions to AutoPot"));
+        settings.put("OPTIONS", new Setting<>("OPTIONS", options = new MultiBool("Potions", potions), "Potions to AutoPot"));
         addSetting(smartPot);
     }
 
