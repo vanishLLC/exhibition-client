@@ -15,7 +15,7 @@ public class SourceConsole {
     }
 
     public void addStringList(String str) {
-        if(stringList.size() > 75)
+        if(stringList.size() > 85)
             stringList.remove(stringList.get(0));
         stringList.add(str);
     }

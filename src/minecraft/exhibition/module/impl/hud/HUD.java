@@ -651,7 +651,7 @@ public class HUD extends Module {
     }
 
     private String getServerProtocol() {
-        String serverProtocol = "N/A";
+        String serverProtocol = "1.8.x";
 
         if(mc.getNetHandler() != null && mc.getNetHandler().getNetworkManager() != null) {
             ChannelHandler viaDecoder = mc.getNetHandler().getNetworkManager().channel.pipeline().get(CommonTransformer.HANDLER_DECODER_NAME);

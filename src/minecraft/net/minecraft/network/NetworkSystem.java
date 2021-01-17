@@ -1,5 +1,6 @@
 package net.minecraft.network;
 
+import com.github.creeper123123321.viafabric.ViaFabric;
 import com.github.creeper123123321.viafabric.handler.CommonTransformer;
 import com.github.creeper123123321.viafabric.handler.serverside.FabricDecodeHandler;
 import com.github.creeper123123321.viafabric.handler.serverside.FabricEncodeHandler;
@@ -50,6 +51,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import us.myles.ViaVersion.api.data.UserConnection;
 import us.myles.ViaVersion.api.protocol.ProtocolPipeline;
+import us.myles.ViaVersion.api.protocol.ProtocolVersion;
 
 public class NetworkSystem
 {
@@ -132,7 +134,7 @@ public class NetworkSystem
                     channel.pipeline().addLast((String)"packet_handler", (ChannelHandler)networkmanager);
                     networkmanager.setNetHandler(new NetHandlerHandshakeTCP(NetworkSystem.this.mcServer, networkmanager));
 
-                    if (channel instanceof SocketChannel) {
+                    if (channel instanceof SocketChannel && ViaFabric.config.getClientSideVersion() != ProtocolVersion.v1_8.getVersion()) {
                         UserConnection user = new UserConnection(channel);
                         new ProtocolPipeline(user);
 

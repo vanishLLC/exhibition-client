@@ -438,7 +438,7 @@ public class Speed extends Module {
                             double forward = mc.thePlayer.movementInput.moveForward;
                             double strafe = mc.thePlayer.movementInput.moveStrafe;
                             TargetStrafe targetStrafe = (TargetStrafe) Client.getModuleManager().get(TargetStrafe.class);
-                            float yaw = strafe == 0 && forward > 0 ? targetStrafe.getTargetYaw(mc.thePlayer.rotationYaw, speed) : mc.thePlayer.rotationYaw;
+                            float yaw = strafe == 0 && forward > 0 ? targetStrafe.getTargetYaw(mc.thePlayer.rotationYaw, em.getY()) : mc.thePlayer.rotationYaw;
                             boolean isCircleStrafing = mc.thePlayer.rotationYaw != yaw;
                             if (forward == 0.0f && strafe == 0.0f) {
                                 mc.thePlayer.setPosition(mc.thePlayer.posX + 1, mc.thePlayer.posY, mc.thePlayer.posZ + 1);
@@ -513,7 +513,7 @@ public class Speed extends Module {
                         double forward = mc.thePlayer.movementInput.moveForward;
                         double strafe = mc.thePlayer.movementInput.moveStrafe;
                         TargetStrafe targetStrafe = (TargetStrafe) Client.getModuleManager().get(TargetStrafe.class);
-                        float yaw = strafe == 0 && forward > 0 ? targetStrafe.getTargetYaw(mc.thePlayer.rotationYaw, speed) : mc.thePlayer.rotationYaw;
+                        float yaw = strafe == 0 && forward > 0 ? targetStrafe.getTargetYaw(mc.thePlayer.rotationYaw, em.getY()) : mc.thePlayer.rotationYaw;
                         boolean isCircleStrafing = mc.thePlayer.rotationYaw != yaw;
                         if (forward == 0.0f && strafe == 0.0f) {
                             mc.thePlayer.setPosition(mc.thePlayer.posX + 1, mc.thePlayer.posY, mc.thePlayer.posZ + 1);
@@ -652,7 +652,7 @@ public class Speed extends Module {
                             double forward = mc.thePlayer.movementInput.moveForward;
                             double strafe = mc.thePlayer.movementInput.moveStrafe;
                             TargetStrafe targetStrafe = (TargetStrafe) Client.getModuleManager().get(TargetStrafe.class);
-                            float yaw = strafe == 0 && forward > 0 ? targetStrafe.getTargetYaw(mc.thePlayer.rotationYaw, speed) : mc.thePlayer.rotationYaw;
+                            float yaw = strafe == 0 && forward > 0 ? targetStrafe.getTargetYaw(mc.thePlayer.rotationYaw, em.getY()) : mc.thePlayer.rotationYaw;
                             boolean isCircleStrafing = mc.thePlayer.rotationYaw != yaw;
                             if (forward == 0.0f && strafe == 0.0f) {
                                 mc.thePlayer.setPosition(mc.thePlayer.posX + 1, mc.thePlayer.posY, mc.thePlayer.posZ + 1);
@@ -739,7 +739,7 @@ public class Speed extends Module {
                         double forward = mc.thePlayer.movementInput.moveForward;
                         double strafe = mc.thePlayer.movementInput.moveStrafe;
                         TargetStrafe targetStrafe = (TargetStrafe) Client.getModuleManager().get(TargetStrafe.class);
-                        float yaw = strafe == 0 && forward > 0 ? targetStrafe.getTargetYaw(mc.thePlayer.rotationYaw, speed) : mc.thePlayer.rotationYaw;
+                        float yaw = strafe == 0 && forward > 0 ? targetStrafe.getTargetYaw(mc.thePlayer.rotationYaw, em.getY()) : mc.thePlayer.rotationYaw;
                         boolean isCircleStrafing = mc.thePlayer.rotationYaw != yaw;
                         if (forward == 0.0f && strafe == 0.0f) {
                             mc.thePlayer.setPosition(mc.thePlayer.posX + 1, mc.thePlayer.posY, mc.thePlayer.posZ + 1);
@@ -1078,7 +1078,7 @@ public class Speed extends Module {
         double forward = mc.thePlayer.movementInput.moveForward;
         double strafe = mc.thePlayer.movementInput.moveStrafe;
         TargetStrafe targetStrafe = (TargetStrafe) Client.getModuleManager().get(TargetStrafe.class);
-        float yaw = strafe == 0 && forward > 0 ? targetStrafe.getTargetYaw(mc.thePlayer.rotationYaw, speed) : mc.thePlayer.rotationYaw;
+        float yaw = strafe == 0 && forward > 0 ? targetStrafe.getTargetYaw(mc.thePlayer.rotationYaw, em.getY()) : mc.thePlayer.rotationYaw;
         boolean isCircleStrafing = mc.thePlayer.rotationYaw != yaw;
         if (forward == 0.0f && strafe == 0.0f) {
             mc.thePlayer.setPosition(mc.thePlayer.posX + 1, mc.thePlayer.posY, mc.thePlayer.posZ + 1);

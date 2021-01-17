@@ -1,6 +1,7 @@
 package exhibition.management.notifications.usernotification;
 
 import exhibition.Client;
+import exhibition.management.notifications.dev.DevNotifications;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 
@@ -39,6 +40,7 @@ public final class Notifications {
 	}
 
 	public void post(String header, String subtext, long displayTime, Type type) {
+		DevNotifications.getManager().post("[" + type.name() + "]: " + header + " | " + subtext);
 		if(!notifications.isEmpty()) {
 			for (INotification not : notifications) {
 				if(not.getHeader().startsWith(header) && not.getType().equals(type)) {

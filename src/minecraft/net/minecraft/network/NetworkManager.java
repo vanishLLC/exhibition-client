@@ -1,5 +1,6 @@
 package net.minecraft.network;
 
+import com.github.creeper123123321.viafabric.ViaFabric;
 import com.github.creeper123123321.viafabric.handler.CommonTransformer;
 import com.github.creeper123123321.viafabric.handler.serverside.FabricDecodeHandler;
 import com.github.creeper123123321.viafabric.handler.serverside.FabricEncodeHandler;
@@ -65,6 +66,7 @@ import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 import us.myles.ViaVersion.api.data.UserConnection;
 import us.myles.ViaVersion.api.protocol.ProtocolPipeline;
+import us.myles.ViaVersion.api.protocol.ProtocolVersion;
 
 public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
     private static final Logger logger = LogManager.getLogger();
@@ -401,7 +403,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
 
                 channel.pipeline().addLast((String) "timeout", (ChannelHandler) (new ReadTimeoutHandler(30))).addLast((String) "splitter", (ChannelHandler) (new MessageDeserializer2())).addLast((String) "decoder", (ChannelHandler) (new MessageDeserializer(EnumPacketDirection.CLIENTBOUND))).addLast((String) "prepender", (ChannelHandler) (new MessageSerializer2())).addLast((String) "encoder", (ChannelHandler) (new MessageSerializer(EnumPacketDirection.SERVERBOUND))).addLast((String) "packet_handler", (ChannelHandler) networkmanager);
 
-                if (channel instanceof SocketChannel) {
+                if (channel instanceof SocketChannel && ViaFabric.config.getClientSideVersion() != ProtocolVersion.v1_8.getVersion()) {
                     UserConnection user = new VRClientSideUserConnection(channel);
                     new ProtocolPipeline(user).add(ViaFabricHostnameProtocol.INSTANCE);
 
@@ -475,17 +477,20 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
     }
 
     public void setCompressionThreshold(int treshold) {
+
+        boolean useViaVer = ViaFabric.config.getClientSideVersion() != ProtocolVersion.v1_8.getVersion();
+
         if (treshold >= 0) {
             if (this.channel.pipeline().get("decompress") instanceof NettyCompressionDecoder) {
                 ((NettyCompressionDecoder) this.channel.pipeline().get("decompress")).setCompressionThreshold(treshold);
             } else {
-                this.channel.pipeline().addBefore("via-decoder", "decompress", new NettyCompressionDecoder(treshold));
+                this.channel.pipeline().addBefore(useViaVer ? "via-decoder" : "decoder", "decompress", new NettyCompressionDecoder(treshold));
             }
 
             if (this.channel.pipeline().get("compress") instanceof NettyCompressionEncoder) {
                 ((NettyCompressionEncoder) this.channel.pipeline().get("decompress")).setCompressionThreshold(treshold);
             } else {
-                this.channel.pipeline().addBefore("via-encoder", "compress", new NettyCompressionEncoder(treshold));
+                this.channel.pipeline().addBefore(useViaVer ? "via-encoder" : "encoder", "compress", new NettyCompressionEncoder(treshold));
             }
         } else {
             if (this.channel.pipeline().get("decompress") instanceof NettyCompressionDecoder) {
@@ -497,16 +502,18 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
             }
         }
 
-        if (channel.pipeline().get(FabricEncodeHandler.class) == null) return;
-        if (channel.pipeline().names().indexOf("compress")
-                < channel.pipeline().names().indexOf(CommonTransformer.HANDLER_ENCODER_NAME)) {
-            return; // Order is correct or compression is disabled
+        if(ViaFabric.config.getClientSideVersion() != ProtocolVersion.v1_8.getVersion()) {
+            if (channel.pipeline().get(FabricEncodeHandler.class) == null) return;
+            if (channel.pipeline().names().indexOf("compress")
+                    < channel.pipeline().names().indexOf(CommonTransformer.HANDLER_ENCODER_NAME)) {
+                return; // Order is correct or compression is disabled
+            }
+            // Fixes the handler order
+            FabricDecodeHandler decode = channel.pipeline().remove(FabricDecodeHandler.class);
+            FabricEncodeHandler encode = channel.pipeline().remove(FabricEncodeHandler.class);
+            channel.pipeline().addAfter("decompress", "via-decoder", decode);
+            channel.pipeline().addAfter("compress", "via-encoder", encode);
         }
-        // Fixes the handler order
-        FabricDecodeHandler decode = channel.pipeline().remove(FabricDecodeHandler.class);
-        FabricEncodeHandler encode = channel.pipeline().remove(FabricEncodeHandler.class);
-        channel.pipeline().addAfter("decompress", "via-decoder", decode);
-        channel.pipeline().addAfter("compress", "via-encoder", encode);
     }
 
     public void checkDisconnected() {

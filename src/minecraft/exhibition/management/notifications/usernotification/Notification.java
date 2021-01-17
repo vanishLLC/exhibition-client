@@ -30,7 +30,6 @@ public class Notification implements INotification {
 		float headerWidth = (Client.header.getWidth(header));
 		this.tarX = (GlobalValues.centerNotifs.getValue() && Minecraft.getMinecraft() != null && (Minecraft.getMinecraft().currentScreen == null || Minecraft.getMinecraft().currentScreen instanceof GuiChat)) ? (XD.getScaledWidth()/2F - (25 - (Math.max(headerWidth, subHeaderWidth)))) :  XD.getScaledWidth() - 25 - (Math.max(headerWidth, subHeaderWidth));
 		translate = new Translate(x, y);
-		DevNotifications.getManager().post("[" + type.name() + "]: " + header + " | " + subtext);
 	}
 	
 	@Override

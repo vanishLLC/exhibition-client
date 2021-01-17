@@ -463,7 +463,7 @@ public class AutoPot extends Module {
                                         for (Entity entity : mc.theWorld.getLoadedEntityList()) {
                                             if (!(entity instanceof EntityPlayer) || entity instanceof EntityPlayerSP)
                                                 continue;
-                                            if (!AntiBot.isBot(entity) && !FriendManager.isFriend(entity.getName()) && mc.thePlayer.getDistanceToEntity(entity) <= 15) {
+                                            if (!AntiBot.isBot(entity) && !FriendManager.isFriend(entity.getName()) && mc.thePlayer.getDistanceToEntity(entity) <= 10) {
                                                 noPlayersNearby = false;
                                                 break;
                                             }

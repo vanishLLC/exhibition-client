@@ -24,7 +24,7 @@ public class Alts extends FileManager.CustomFile
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine();
             if(!line.startsWith("lastalt:")) {
-                final String[] arguments = line.split(" \\(")[0].split(":");
+                final String[] arguments = line.split(" \\(")[0].replace(" - SFA", "").split(":");
                 if (arguments.length >= 5) {
                     long time = (Long.parseLong(arguments[4]) > System.currentTimeMillis() ? Long.parseLong(arguments[4]) : -1);
                     Alt alt = new Alt(arguments[0], arguments[1], arguments[2], Alt.Status.valueOf(arguments[3]), time);

@@ -66,6 +66,7 @@ public class SkeetMenu extends UI {
     public void mainConstructor(ClickGui p0) {
     }
 
+    private ResourceLocation tex = new ResourceLocation("textures/tex.png");
     private ResourceLocation texture = new ResourceLocation("textures/skeetchainmail.png");
     private ResourceLocation cursor = new ResourceLocation("textures/cursor.png");
 
@@ -109,9 +110,14 @@ public class SkeetMenu extends UI {
         Depth.render(GL11.GL_LESS);
         GlStateManager.enableAlpha();
         GlStateManager.enableBlend();
+        Depth.mask();
         mc.getTextureManager().bindTexture(texture);
         GlStateManager.translate(panel.x + panel.dragX + 2.5, panel.dragY + panel.y + 3f, 0);
         drawIcon(1, 1, 0, 0, 340 - 6.5, 310 - 7, 812 / 2F, 688 / 2F);
+        Depth.render(GL11.GL_EQUAL);
+        mc.getTextureManager().bindTexture(tex);
+        drawIcon(1, 1, 0, 0, 340 - 6.5, 310 - 7, 812 / 2F, 688 / 2F);
+        Depth.post();
         GlStateManager.disableBlend();
         GlStateManager.disableAlpha();
         Depth.post();

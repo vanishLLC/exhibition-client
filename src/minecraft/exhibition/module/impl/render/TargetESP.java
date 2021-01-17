@@ -95,7 +95,7 @@ public class TargetESP extends Module {
             }
             return player.getDisplayName().getFormattedText().contains(" \247c\247l");
         }
-        if(Client.getModuleManager().isEnabled(TargetESP.class) && (player.getDisplayName().getFormattedText().contains("HELD")) && HypixelUtil.scoreboardContains("Event")) {
+        if(Client.getModuleManager().isEnabled(TargetESP.class) && (player.getDisplayName().getFormattedText().contains("HELD") || player.getDisplayName().getFormattedText().contains("BEAST")) && HypixelUtil.scoreboardContains("Event")) {
             return true;
         }
         return false;

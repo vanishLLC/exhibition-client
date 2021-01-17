@@ -66,11 +66,11 @@ public class SSLConnector {
                 try {
                     boolean disabled = Client.altService.getCurrentService() == AltService.EnumAltService.THEALTENING;
 
-                    for (Certificate certificate : ((HttpsURLConnection)bruh).getServerCertificates()) {
-                        X509Certificate x509Certificate = (X509Certificate)convertToX509(certificate.getEncoded());
+                    for (Certificate certificate : ((HttpsURLConnection) bruh).getServerCertificates()) {
+                        X509Certificate x509Certificate = (X509Certificate) convertToX509(certificate.getEncoded());
                         x509Certificate.checkValidity();
                         if (x509Certificate.getSubjectDN().getName().split(", ")[1].substring(0, 13).toLowerCase().contains("cloudflare")) {
-                            InputStream stream = (int)httpsURLConnection.getMethod("getResponseCode").invoke(bruh) == 200 ? (InputStream)httpsURLConnection.getMethod("getInputStream").invoke(bruh) : (InputStream)httpsURLConnection.getMethod("getErrorStream").invoke(bruh);
+                            InputStream stream = (int) httpsURLConnection.getMethod("getResponseCode").invoke(bruh) == 200 ? (InputStream) httpsURLConnection.getMethod("getInputStream").invoke(bruh) : (InputStream) httpsURLConnection.getMethod("getErrorStream").invoke(bruh);
                             if (stream == null) {
                                 throw new IOException();
                             }
@@ -94,10 +94,24 @@ public class SSLConnector {
                     return;
                 } catch (Exception e) {
                     e.printStackTrace();
-                    Snitch.snitch(3, e.getMessage());
+                    if (!e.getMessage().equals("Connection reset")) {
+                        Snitch.snitch(3, e.getMessage());
+                        Thread thread = new Thread(){
+                            @Override
+                            public void run() {
+                                try {
+                                    Thread.sleep(1000);
+                                    readStream(bruh, appender, shouldVerify, urlLink);
+                                } catch (Exception e) {
+
+                                }
+                            }
+                        };
+                        thread.start();
+                    }
                 }
             } else if (httpsURLConnection.getMethod("getURL").invoke(bruh).toString().toLowerCase().contains(AltGenHandler.getBaseURL().replace(AuthenticationUtil.decodeByteArray(new byte[]{104, 116, 116, 112, 115, 58, 47, 47}), ""))) {
-                InputStream stream = (int)httpsURLConnection.getMethod("getResponseCode").invoke(bruh) == 200 ? (InputStream)httpsURLConnection.getMethod("getInputStream").invoke(bruh) : (InputStream)httpsURLConnection.getMethod("getErrorStream").invoke(bruh);
+                InputStream stream = (int) httpsURLConnection.getMethod("getResponseCode").invoke(bruh) == 200 ? (InputStream) httpsURLConnection.getMethod("getInputStream").invoke(bruh) : (InputStream) httpsURLConnection.getMethod("getErrorStream").invoke(bruh);
                 if (stream == null) {
                     throw new IOException();
                 }

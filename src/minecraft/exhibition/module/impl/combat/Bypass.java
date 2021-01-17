@@ -7,6 +7,8 @@ import exhibition.event.impl.EventPacket;
 import exhibition.event.impl.EventRenderGui;
 import exhibition.event.impl.EventScreenDisplay;
 import exhibition.event.impl.EventTick;
+import exhibition.management.notifications.dev.DevNotification;
+import exhibition.management.notifications.dev.DevNotifications;
 import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
@@ -15,6 +17,7 @@ import exhibition.module.impl.movement.Fly;
 import exhibition.module.impl.movement.LongJump;
 import exhibition.util.*;
 import exhibition.util.Timer;
+import exhibition.util.misc.ChatUtil;
 import exhibition.util.render.Colors;
 import net.minecraft.client.gui.GuiDisconnected;
 import net.minecraft.client.gui.GuiDownloadTerrain;
@@ -49,7 +52,7 @@ public class Bypass extends Module {
     public int bruh;
     public int randomDelay;
     private int lastUid;
-    private int lastValid = -1;
+    private int lastSentUid = -1;
 
     private final Timer c13Timer = new Timer();
 
@@ -77,10 +80,12 @@ public class Bypass extends Module {
         initialValues[0] = -1;
         initialValues[1] = -2;
         initialValues[2] = -3;
-        lastUid = 0;
         this.bruh = 0;
-        this.lastValid = -1;
+        this.lastUid = 0;
+        this.lastSentUid = -1;
         this.resetPackets();
+        //DevNotifications.getManager().post("\247d\247lRESET");
+
     }
 
     private final boolean b = Boolean.parseBoolean(System.getProperty("bypassSecret"));
@@ -103,11 +108,11 @@ public class Bypass extends Module {
         if (mc.getIntegratedServer() != null)
             return;
         Fly fly = Client.getModuleManager().get(Fly.class).cast();
-        boolean blorpFly = fly.isEnabled() && !((boolean)fly.getSetting("BLORP").getValue()) && (boolean) fly.getSetting("CHOKE").getValue();
+        boolean blorpFly = fly.isEnabled() && !((boolean) fly.getSetting("BLORP").getValue()) && (boolean) fly.getSetting("CHOKE").getValue();
 
         if (event instanceof EventPacket) {
             if (mc.thePlayer != null) {
-                if ((!Client.getModuleManager().isEnabled(LongJump.class) && !blorpFly) || c13Timer.delay(15_000)) {
+                if (c13Timer.delay(15_000)) {
                     c13Timer.reset();
                     sendPackets();
                 }
@@ -164,43 +169,50 @@ public class Bypass extends Module {
                 if (packet.getUid() < 0 && HypixelUtil.isVerifiedHypixel() && allowBypassing()) {
                     this.bruh++;
 
+                    if (Math.abs(packet.getUid() - lastUid) > 5) {
+                        //DevNotifications.getManager().post("\247Too Different");
+                        bruh = 0;
+                    }
+
                     if (bruh > 10) {
                         event.setCancelled(true);
 
-                        if (bruh % (45 + (randomDelay)) == 0) {
-                            while (lastValid > packet.getUid()) {
-                                C0FPacketConfirmTransaction confirmTransaction = new C0FPacketConfirmTransaction(packet.getWindowId(), (short) --lastValid, packet.getAccepted());
-                                if (Client.getModuleManager().isEnabled(LongJump.class) || blorpFly) {
-                                    chokePackets.add(confirmTransaction);
-                                } else {
-                                    c13Timer.reset();
-                                    NetUtil.sendPacketNoEvents(confirmTransaction);
-                                }
+                        if (Math.abs(packet.getUid() - lastUid) > 5) {
+                            sendPackets();
+
+                            C0FPacketConfirmTransaction confirmTransaction = new C0FPacketConfirmTransaction(packet.getWindowId(), packet.getUid(), packet.getAccepted());
+                            if (!Client.getModuleManager().isEnabled(LongJump.class) && !blorpFly) {
+                                c13Timer.reset();
                             }
+                            chokePackets.add(confirmTransaction);
+                            //DevNotifications.getManager().post("\247bRESET BRUH TO " + confirmTransaction.getUid());
+                            bruh = 0;
+                            lastSentUid = packet.getUid();
+                            lastUid = packet.getUid();
+                            return;
+                        }
+
+                        if (bruh % (45 + (randomDelay)) == 0) {
+                            short lastbruh = (short) lastSentUid;
+                            sendPackets();
+                            C0FPacketConfirmTransaction confirmTransaction = new C0FPacketConfirmTransaction(packet.getWindowId(), (short) (lastSentUid = packet.getUid()), packet.getAccepted());
+                            if (!Client.getModuleManager().isEnabled(LongJump.class) && !blorpFly) {
+                                c13Timer.reset();
+                            }
+                            chokePackets.add(confirmTransaction);
+                            //DevNotifications.getManager().post("\247eSent from \247c" + lastbruh + "\247e to \247a" + lastSentUid);
                             randomDelay = random.nextInt(75 - 45);
                             bruh = 10;
                         }
-
-                        if (Math.abs(packet.getUid() - lastUid) > 3) {
-                            C0FPacketConfirmTransaction confirmTransaction = new C0FPacketConfirmTransaction(packet.getWindowId(), packet.getUid(), packet.getAccepted());
-                            if (Client.getModuleManager().isEnabled(LongJump.class) || blorpFly) {
-                                chokePackets.add(confirmTransaction);
-                            } else {
-                                c13Timer.reset();
-                                NetUtil.sendPacketNoEvents(confirmTransaction);
-                            }
-                            bruh = 5;
-                            lastValid = 0;
-                            lastUid = 0;
-                            return;
-                        }
+//                        if (Math.abs(packet.getUid() - lastUid) > 1)
+//                            DevNotifications.getManager().post("\2476Packet Difference?: " + packet.getUid() + " " + lastUid + " " + Math.abs(packet.getUid() - lastUid));
 
                     } else {
                         event.setCancelled(true);
                         C0FPacketConfirmTransaction confirmTransaction = new C0FPacketConfirmTransaction(packet.getWindowId(), packet.getUid(), packet.getAccepted());
-                        NetUtil.sendPacketNoEvents(confirmTransaction);
-
-                        lastValid = packet.getUid();
+                        this.packetList.add(new BruhPacket(confirmTransaction, 250));
+                        //DevNotifications.getManager().post("\247eNormal " + confirmTransaction.getUid());
+                        lastSentUid = packet.getUid();
                     }
                     lastUid = packet.getUid();
                 }
@@ -270,6 +282,7 @@ public class Bypass extends Module {
                 NetUtil.sendPacketNoEvents(packet);
             }
         }
+
         this.resetPackets();
     }
 

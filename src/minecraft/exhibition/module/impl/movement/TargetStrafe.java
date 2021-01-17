@@ -191,7 +191,7 @@ public class TargetStrafe extends Module {
                             }
                         }
 
-                        boolean isFineTick = !isSmart() || (mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(diffX, diffY/2, diffZ).expand(var41, 0, var41)).isEmpty() && !isVoid) && lastRad == -1;
+                        boolean isFineTick = !isSmart() || (mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(diffX, 0, diffZ).expand(var41, 0, var41)).isEmpty() && !isVoid) && lastRad == -1;
 
                         GlStateManager.pushMatrix();
                         RenderingUtil.pre3D();
@@ -220,7 +220,7 @@ public class TargetStrafe extends Module {
                                 double diffPosX = (target.posX + rotPosX) - mc.thePlayer.posX;
                                 double diffPosZ = (target.posZ + rotPosY) - mc.thePlayer.posZ;
 
-                                boolean willNotCollide = mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(diffPosX, diffY/2, diffPosZ).expand(var41, 0, var41)).isEmpty();
+                                boolean willNotCollide = mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(diffPosX, 0, diffPosZ).expand(var41, 0, var41)).isEmpty();
 
                                 boolean isCurrentlyVoid = !(Client.getModuleManager().isEnabled(LongJump.class) || Client.getModuleManager().isEnabled(Fly.class));
 
@@ -263,7 +263,7 @@ public class TargetStrafe extends Module {
                                 double diffPosX = (target.posX + rotPosX) - mc.thePlayer.posX;
                                 double diffPosZ = (target.posZ + rotPosY) - mc.thePlayer.posZ;
 
-                                boolean willNotCollide = mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(diffPosX, diffY/2, diffPosZ).expand(var41, 0, var41)).isEmpty();
+                                boolean willNotCollide = mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(diffPosX, 0, diffPosZ).expand(var41, 0, var41)).isEmpty();
 
                                 boolean isCurrentlyVoid = !(Client.getModuleManager().isEnabled(LongJump.class) || Client.getModuleManager().isEnabled(Fly.class));
 
@@ -419,7 +419,7 @@ public class TargetStrafe extends Module {
         return MathHelper.wrapAngleTo180_float(-((entity.rotationYaw + lastDelta + offset.getValue().floatValue()) - (float) yawToEntity));
     }
 
-    public float getTargetYaw(float speedYaw, double speed) {
+    public float getTargetYaw(float speedYaw, double motionY) {
         float newYaw = speedYaw;
         if (target != null && isEnabled() && !Client.getModuleManager().isEnabled(Scaffold.class)) {
             double rad = ((Number) radius.getValue()).doubleValue();
@@ -457,7 +457,21 @@ public class TargetStrafe extends Module {
                     }
                 }
 
-                boolean isFineTick = !isSmart() || (mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(diffX, diffY/2, diffZ).expand(var41, 0, var41)).isEmpty() && !isVoid) && lastRad == -1;
+                double correctedY = motionY;
+
+                AxisAlignedBB playerBoundingBox = mc.thePlayer.getEntityBoundingBox();
+                AxisAlignedBB tempBoundingBox = new AxisAlignedBB(playerBoundingBox.minX, playerBoundingBox.minY, playerBoundingBox.minZ, playerBoundingBox.maxX, playerBoundingBox.maxY, playerBoundingBox.maxZ).offset(diffX, 0, diffZ);
+
+                final List<AxisAlignedBB> var15 = mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, tempBoundingBox.addCoord(0, correctedY, 0));
+                for (final AxisAlignedBB var18 : var15) {
+                    correctedY = var18.calculateYOffset(tempBoundingBox, correctedY);
+                }
+
+                if(correctedY != motionY) {
+                    correctedY += 0.1;
+                }
+
+                boolean isFineTick = !isSmart() || (mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(diffX, correctedY, diffZ).expand(var41, 0, var41)).isEmpty() && !isVoid) && lastRad == -1;
 
                 double increment = 0.1;
 
@@ -476,7 +490,20 @@ public class TargetStrafe extends Module {
                         double diffPosX = (target.posX + rotPosX) - mc.thePlayer.posX;
                         double diffPosZ = (target.posZ + rotPosY) - mc.thePlayer.posZ;
 
-                        boolean willNotCollide = mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(diffPosX, diffY/2, diffPosZ).expand(var41, 0, var41)).isEmpty();
+                        double correctedYTemp = motionY;
+
+                        AxisAlignedBB tempBoundingBoxTemp = new AxisAlignedBB(playerBoundingBox.minX, playerBoundingBox.minY, playerBoundingBox.minZ, playerBoundingBox.maxX, playerBoundingBox.maxY, playerBoundingBox.maxZ).offset(diffPosX, 0, diffPosZ);
+
+                        final List<AxisAlignedBB> var15Temp = mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, tempBoundingBoxTemp.addCoord(0, correctedYTemp, 0));
+                        for (final AxisAlignedBB var18 : var15Temp) {
+                            correctedYTemp = var18.calculateYOffset(tempBoundingBoxTemp, correctedYTemp);
+                        }
+
+                        if(correctedYTemp != motionY) {
+                            correctedYTemp += 0.1;
+                        }
+
+                        boolean willNotCollide = mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(diffPosX, correctedYTemp, diffPosZ).expand(var41, 0, var41)).isEmpty();
 
                         boolean isCurrentlyVoid = !(Client.getModuleManager().isEnabled(LongJump.class) || Client.getModuleManager().isEnabled(Fly.class));
 
@@ -509,7 +536,20 @@ public class TargetStrafe extends Module {
                         double diffPosX = (target.posX + rotPosX) - mc.thePlayer.posX;
                         double diffPosZ = (target.posZ + rotPosY) - mc.thePlayer.posZ;
 
-                        boolean willNotCollide = mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(diffPosX, diffY/2, diffPosZ).expand(var41, 0, var41)).isEmpty();
+                        double correctedYTemp = motionY;
+
+                        AxisAlignedBB tempBoundingBoxTemp = new AxisAlignedBB(playerBoundingBox.minX, playerBoundingBox.minY, playerBoundingBox.minZ, playerBoundingBox.maxX, playerBoundingBox.maxY, playerBoundingBox.maxZ).offset(diffPosX, 0, diffPosZ);
+
+                        final List<AxisAlignedBB> var15Temp = mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, tempBoundingBoxTemp.addCoord(0, correctedYTemp, 0));
+                        for (final AxisAlignedBB var18 : var15Temp) {
+                            correctedYTemp = var18.calculateYOffset(tempBoundingBoxTemp, correctedYTemp);
+                        }
+
+                        if(correctedYTemp != motionY) {
+                            correctedYTemp += 0.1;
+                        }
+
+                        boolean willNotCollide = mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(diffPosX, correctedYTemp, diffPosZ).expand(var41, 0, var41)).isEmpty();
 
                         boolean isCurrentlyVoid = !(Client.getModuleManager().isEnabled(LongJump.class) || Client.getModuleManager().isEnabled(Fly.class));
 

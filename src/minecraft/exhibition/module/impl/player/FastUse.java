@@ -69,6 +69,8 @@ public class FastUse extends Module {
                                 mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer(em.isOnground()));
                                 mc.thePlayer.sendQueue.addToSendQueue(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
                             } else {
+                                if(HypixelUtil.isVerifiedHypixel())
+                                    return;
                                 if (mc.thePlayer.ticksExisted % 2 == 0) {
                                     for (int i = 0; i < 8; ++i) {
                                         // zoom the bow

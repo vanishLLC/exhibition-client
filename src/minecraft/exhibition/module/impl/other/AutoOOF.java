@@ -43,6 +43,13 @@ public class AutoOOF extends Module {
                 if (!HypixelUtil.isInGame("HYPIXEL PIT"))
                     return;
 
+                double x = mc.thePlayer.posX;
+                double y = mc.thePlayer.posY;
+                double z = mc.thePlayer.posZ;
+                if (y > Client.instance.spawnY && x < 30 && x > -30 && z < 30 && z > -30) {
+                    return;
+                }
+
                 S02PacketChat packetChat = (S02PacketChat) packet;
                 String unformatted = packetChat.getChatComponent().getUnformattedText();
                 if (unformatted.contains("[WATCHDOG CHEAT DETECTION]")) {

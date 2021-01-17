@@ -12,26 +12,38 @@ import exhibition.event.RegisterEvent;
 import exhibition.event.impl.*;
 import exhibition.management.ColorManager;
 import exhibition.management.command.impl.Damage;
+import exhibition.management.friend.FriendManager;
 import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
+import exhibition.module.impl.combat.AntiBot;
 import exhibition.module.impl.combat.AutoPot;
 import exhibition.module.impl.player.Scaffold;
 import exhibition.util.*;
 import exhibition.util.render.Colors;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.PlayerCapabilities;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemBow;
+import net.minecraft.item.ItemPotion;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.client.C03PacketPlayer;
-import net.minecraft.network.play.client.C13PacketPlayerAbilities;
+import net.minecraft.network.play.client.*;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.network.play.server.S12PacketEntityVelocity;
 import net.minecraft.network.play.server.S27PacketExplosion;
 import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 
+import java.awt.*;
 import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -59,6 +71,12 @@ public class LongJump extends Module {
     private boolean wasOnGround;
     private int zoom;
     private int blinkTicks;
+
+    private int bowTicks = 0;
+
+    public boolean isBruhing() {
+        return bowTicks > 14;
+    }
 
     private double velocityBoost;
 
@@ -98,7 +116,7 @@ public class LongJump extends Module {
         velocityBoost = 0;
 
         if (waitTimer.delay(2500) && bruhTick != 0) {
-            waitTimer.reset();
+            //waitTimer.reset();
         }
         mc.timer.timerSpeed = 1f;
         if (mc.thePlayer.onGround && !mc.thePlayer.isCollidedVertically) {
@@ -148,9 +166,14 @@ public class LongJump extends Module {
 //            }
 //        }
 
-        if (!waitTimer.delay(1500)) {
+        boolean bowMode = HypixelUtil.isInGame("PIT") || HypixelUtil.isInGame("UHC");
+
+
+        long time = bowMode ? 1000 : 1500;
+
+        if (!waitTimer.delay(time)) {
             toggle();
-            Notifications.getManager().post("LongJump Disabled", "Please wait {s} s before enabling.", 1500 - waitTimer.getDifference(), Notifications.Type.WARNING);
+            Notifications.getManager().post("LongJump Disabled", "Please wait {s} s before enabling.", time - waitTimer.getDifference(), Notifications.Type.WARNING);
             return;
         }
 
@@ -178,6 +201,8 @@ public class LongJump extends Module {
             Notifications.getManager().post("Movement Check", "Disabled extra modules.", 1000, Notifications.Type.NOTIFY);
         }
 
+        bowTicks = 0;
+
         if ((boolean) settings.get(AUTISM).getValue()) {
             if (!mc.thePlayer.onGround && !mc.thePlayer.isCollidedVertically) {
                 Notifications.getManager().post("LongJump Disabled", "Disabled to prevent in air lagback.");
@@ -185,7 +210,36 @@ public class LongJump extends Module {
                 return;
             }
 
-            Damage.damagePlayer();
+            if (bowMode) {
+                boolean bowFound = false;
+                boolean arrowsFound = false;
+                for (int i = 9; i < 45; i++) {
+                    if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
+                        ItemStack is = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
+                        Item item = is.getItem();
+                        if (i >= 36 && item instanceof ItemBow) {
+                            bowFound = true;
+                        }
+                        if(item == Items.arrow) {
+                            arrowsFound = true;
+                        }
+                    }
+                }
+
+                if (!bowFound) {
+                    Notifications.getManager().post("Cannot LongJump", "Place a bow in your hotbar.");
+                    this.toggle();
+                    return;
+                }
+                if (!arrowsFound) {
+                    Notifications.getManager().post("Cannot LongJump", "You are out of Arrows.");
+                    this.toggle();
+                    return;
+                }
+                bowTicks = 20;
+            } else {
+                Damage.damagePlayer();
+            }
 
             timer.reset();
             this.zoom = 40;
@@ -200,7 +254,7 @@ public class LongJump extends Module {
 
         sendC13Packet();
 
-        waitTimer.reset();
+        //waitTimer.reset();
     }
 
     private double speed;
@@ -233,33 +287,67 @@ public class LongJump extends Module {
         }
 
         boolean autism = (boolean) settings.get(AUTISM).getValue();
-        if (event instanceof EventRenderGui && useBlink.getValue() && (boolean) settings.get(PROGRESS).getValue() && autism) {
-            int chokePackets = ((Number) settings.get(CHOKE).getValue()).intValue();
-            ScaledResolution res = new ScaledResolution(mc);
+        if (event instanceof EventRenderGui && (boolean) settings.get(PROGRESS).getValue() && autism) {
+            if (useBlink.getValue()) {
+                int chokePackets = ((Number) settings.get(CHOKE).getValue()).intValue();
+                ScaledResolution res = new ScaledResolution(mc);
 
-            double centerX = res.getScaledWidth_double() / 2, centerY = res.getScaledHeight_double() / 2 - 30;
+                double centerX = res.getScaledWidth_double() / 2, centerY = res.getScaledHeight_double() / 2 - 30;
 
-            int barWidth = 80;
-            double barHalf = barWidth / 2D;
+                int barWidth = 80;
+                double barHalf = barWidth / 2D;
 
-            RenderingUtil.rectangleBordered(centerX - barHalf, centerY - 2, centerX + barHalf, centerY + 2, 1, Colors.getColor(0, 100), Colors.getColor(0, 150));
+                RenderingUtil.rectangleBordered(centerX - barHalf, centerY - 2, centerX + barHalf, centerY + 2, 1, Colors.getColor(0, 100), Colors.getColor(0, 150));
 
-            float lastHealth = blinkTicks;
-            float health = blinkTicks;
-            if (PlayerUtil.isMoving() && !mc.thePlayer.isCollidedVertically)
-                lastHealth = (int) health - 1;
+                float lastHealth = blinkTicks;
+                float health = blinkTicks;
+                if (PlayerUtil.isMoving() && !mc.thePlayer.isCollidedVertically)
+                    lastHealth = (int) health - 1;
 
-            if (health == 0) {
-                lastHealth = 0;
+                if (health == 0) {
+                    lastHealth = 0;
+                }
+                if (health == chokePackets) {
+                    lastHealth = health;
+                }
+                float healthProgress = health + (lastHealth - health) * mc.timer.renderPartialTicks;
+                double width = (barWidth - 2) * Math.max(Math.min((1 - (healthProgress / (double) chokePackets)), 1), 0);
+                RenderingUtil.rectangle(centerX - barHalf + 1, centerY - 1, centerX - barHalf + 1 + width, centerY + 1, ColorManager.hudColor.getColorHex());
+
+                return;
             }
-            if (health == chokePackets) {
-                lastHealth = health;
-            }
-            float healthProgress = health + (lastHealth - health) * mc.timer.renderPartialTicks;
-            double width = (barWidth - 2) * Math.max(Math.min((1 - (healthProgress / (double) chokePackets)), 1), 0);
-            RenderingUtil.rectangle(centerX - barHalf + 1, centerY - 1, centerX - barHalf + 1 + width, centerY + 1, ColorManager.hudColor.getColorHex());
+            if (bowTicks > 0) {
+                int chokePackets = 20;
+                ScaledResolution res = new ScaledResolution(mc);
 
-            return;
+                double centerX = res.getScaledWidth_double() / 2, centerY = res.getScaledHeight_double() / 2 - 40;
+
+                int barWidth = 80;
+                double barHalf = barWidth / 2D;
+
+                RenderingUtil.rectangleBordered(centerX - barHalf, centerY - 2, centerX + barHalf, centerY + 2, 1, Colors.getColor(0, 100), Colors.getColor(0, 150));
+
+                float lastHealth = bowTicks;
+                float health = bowTicks;
+                if (PlayerUtil.isMoving() && !mc.thePlayer.isCollidedVertically)
+                    lastHealth = (int) health - 1;
+
+                if (health == 0) {
+                    lastHealth = 0;
+                }
+                if (health == chokePackets) {
+                    lastHealth = health;
+                }
+                float healthProgress = health + (lastHealth - health) * mc.timer.renderPartialTicks;
+                double width = (barWidth - 2) * Math.max(Math.min(((healthProgress / (double) chokePackets)), 1), 0);
+
+                float[] hsbVals = new float[3];
+                Color.RGBtoHSB(ColorManager.hudColor.getRed(), ColorManager.hudColor.getGreen(), ColorManager.hudColor.getBlue(), hsbVals);
+
+                RenderingUtil.rectangle(centerX - barHalf + 1, centerY - 1, centerX - barHalf + 1 + width, centerY + 1, Color.getHSBColor((hsbVals[0] + 0.5F) % 1.0F, hsbVals[1], hsbVals[2]).getRGB());
+
+                return;
+            }
         }
 
         if (event instanceof EventPacket) {
@@ -283,20 +371,22 @@ public class LongJump extends Module {
                 }
             }
 
-            if (packet instanceof S12PacketEntityVelocity) {
-                S12PacketEntityVelocity velocity = (S12PacketEntityVelocity) packet;
-                if (velocity.getEntityID() == mc.thePlayer.getEntityId()) {
-                    double x = (double) velocity.getMotionX() / 8000.0D;
-                    double y = (double) velocity.getMotionY() / 8000.0D;
-                    double z = (double) velocity.getMotionZ() / 8000.0D;
-                    if (x != 0 && y != 0 && z != 0)
-                        velocityBoost = Math.sqrt(x * x + z * z) * boostScale.getValue().doubleValue();
+            if (delay < 0) {
+                if (packet instanceof S12PacketEntityVelocity) {
+                    S12PacketEntityVelocity velocity = (S12PacketEntityVelocity) packet;
+                    if (velocity.getEntityID() == mc.thePlayer.getEntityId()) {
+                        double x = (double) velocity.getMotionX() / 8000.0D;
+                        double y = (double) velocity.getMotionY() / 8000.0D;
+                        double z = (double) velocity.getMotionZ() / 8000.0D;
+                        if (x != 0 && y != 0 && z != 0)
+                            velocityBoost = Math.sqrt(x * x + z * z) * boostScale.getValue().doubleValue();
+                    }
                 }
-            }
-            if (packet instanceof S27PacketExplosion) {
-                S27PacketExplosion velocity = (S27PacketExplosion) packet;
-                if (velocity.xMotion != 0 && velocity.yMotion != 0 && velocity.zMotion != 0)
-                    velocityBoost = Math.sqrt(velocity.xMotion * velocity.xMotion + velocity.zMotion * velocity.zMotion) * boostScale.getValue().doubleValue();
+                if (packet instanceof S27PacketExplosion) {
+                    S27PacketExplosion velocity = (S27PacketExplosion) packet;
+                    if (velocity.xMotion != 0 && velocity.yMotion != 0 && velocity.zMotion != 0)
+                        velocityBoost = Math.sqrt(velocity.xMotion * velocity.xMotion + velocity.zMotion * velocity.zMotion) * boostScale.getValue().doubleValue();
+                }
             }
         }
         if (event instanceof EventMove) {
@@ -304,155 +394,162 @@ public class LongJump extends Module {
             double boost = ((Number) settings.get(BOOST).getValue()).doubleValue();
             float autBoost = ((Number) settings.get(TIMER).getValue()).floatValue();
 
-            if ((mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f))
-                delay--;
+            if(bowTicks <= 0) {
+                if ((mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f))
+                    delay--;
 
-            if (autism && delay > 5) {
-                em.setX(mc.thePlayer.motionX = 0);
-                em.setZ(mc.thePlayer.motionZ = 0);
-                boostDelay.reset();
-                return;
-            }
-
-            if ((mc.thePlayer.moveForward == 0.0f && mc.thePlayer.moveStrafing == 0.0f) || mc.theWorld == null || PlayerUtil.isOnLiquid() || PlayerUtil.isInLiquid()) {
-                if (autism && !mc.thePlayer.onGround) {
-                    em.setY(mc.thePlayer.motionY = 0);
+                if (autism && delay > 5) {
                     em.setX(mc.thePlayer.motionX = 0);
                     em.setZ(mc.thePlayer.motionZ = 0);
+                    boostDelay.reset();
+                    return;
                 }
-                speed = defaultSpeed();
-                return;
-            }
 
-            if (mc.thePlayer.onGround) {
-                if (onGroundLastTick) { // B
-                    speed *= 1.83949644F;
-                    double gay = (double) (0.42F) - 0.07840000152587834;
-                    em.setY(mc.thePlayer.motionY = gay);
-
-                } else { // A
-                    double baseSpeed = 0.25999999999999997;
-                    if (mc.thePlayer.isPotionActive(Potion.moveSpeed)) {
-                        int amplifier = mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getAmplifier();
-                        baseSpeed *= (1.0D + 0.105D * (amplifier + 1));
+                if ((mc.thePlayer.moveForward == 0.0f && mc.thePlayer.moveStrafing == 0.0f) || mc.theWorld == null || PlayerUtil.isOnLiquid() || PlayerUtil.isInLiquid()) {
+                    if (autism && !mc.thePlayer.onGround) {
+                        em.setY(mc.thePlayer.motionY = 0);
+                        em.setX(mc.thePlayer.motionX = 0);
+                        em.setZ(mc.thePlayer.motionZ = 0);
                     }
-                    speed = (boost + (0.0000000011324D * Math.random())) * baseSpeed;
+                    speed = defaultSpeed();
+                    return;
                 }
-            } else if (onGroundLastTick) { // C
-                if (distance < 1.73949644) {
-                    distance = 1.73949644;
-                }
-                em.setY(mc.thePlayer.motionY = 0);
+
+                if (mc.thePlayer.onGround) {
+                    if (onGroundLastTick) { // B
+                        speed *= 1.83949644F;
+                        double gay = (double) (0.42F) - 0.07840000152587834;
+                        em.setY(mc.thePlayer.motionY = gay);
+
+                    } else { // A
+                        double baseSpeed = 0.25999999999999997;
+                        if (mc.thePlayer.isPotionActive(Potion.moveSpeed)) {
+                            int amplifier = mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getAmplifier();
+                            baseSpeed *= (1.0D + 0.105D * (amplifier + 1));
+                        }
+                        boolean bowMode = HypixelUtil.isInGame("PIT") || HypixelUtil.isInGame("UHC");
+
+                        speed = ((boost * (bowMode ? 1 : 1)) + (0.0000000011324D * Math.random())) * baseSpeed;
+                    }
+                } else if (onGroundLastTick) { // C
+                    if (distance < 1.73949644) {
+                        distance = 1.73949644;
+                    }
+                    em.setY(mc.thePlayer.motionY = 0);
 //                if (lower.getValue()) {
 //                    em.setY(mc.thePlayer.motionY = -0.07840000152587834);
 //                }
-                mc.thePlayer.onGround = false;
+                    mc.thePlayer.onGround = false;
 
-                double difference = (0.66D) * (distance - defaultSpeed());
-                speed = distance - (float) difference;
-                wasOnGround = true;
-            } else { // D
-                speed = distance - distance / 160D;
+                    double difference = (0.66D) * (distance - defaultSpeed());
+                    speed = distance - (float) difference;
+                    wasOnGround = true;
+                } else { // D
+                    speed = distance - distance / 160D;
 
-                double a = distance - distance / 160;
-                double b = distance - (distance - defaultSpeed()) / 33.3;
-                double c = distance - (distance - defaultSpeed()) / 50;
+                    double a = distance - distance / 160;
+                    double b = distance - (distance - defaultSpeed()) / 33.3;
+                    double c = distance - (distance - defaultSpeed()) / 50;
 
-                if (speed < c) {
-                    speed = (c - 0.0000125F);
-                } else {
-                    speed = (distance - distance / 160D - 0.0000125F);
-                }
+                    if (speed < c) {
+                        speed = (c - 0.0000125F);
+                    } else {
+                        speed = (distance - distance / 160D - 0.0000125F);
+                    }
 
-                if (autism) {
-                    if (delay <= 4)
-                        if (zoom > 0 && !boostDelay.delay(5000)) {
-                            mc.timer.timerSpeed = 1 + (autBoost + (float) (0.005325F * Math.random()));
-                            if (zoom < 10) {
-                                float percent = zoom / 10;
-                                if (percent > 0.5) {
-                                    percent = 1;
+                    if (autism) {
+                        if (delay <= 4)
+                            if (zoom > 0 && !boostDelay.delay(5000)) {
+                                mc.timer.timerSpeed = 1 + (autBoost + (float) (0.005325F * Math.random()));
+                                if (zoom < 10) {
+                                    float percent = zoom / 10;
+                                    if (percent > 0.5) {
+                                        percent = 1;
+                                    }
+                                    mc.timer.timerSpeed = 1 + ((autBoost + (float) (0.015325F * Math.random())) * percent);
                                 }
-                                mc.timer.timerSpeed = 1 + ((autBoost + (float) (0.015325F * Math.random())) * percent);
+                            } else {
+                                mc.timer.timerSpeed = 0.95F + (float) (0.3F * Math.random());
                             }
-                        } else {
-                            mc.timer.timerSpeed = 0.95F + (float) (0.3F * Math.random());
+
+                        if (delay <= 4)
+                            zoom--;
+
+                        em.setY(mc.thePlayer.motionY = 0);
+
+                        if (wasOnGround) {
+                            wasOnGround = false;
                         }
-
-                    if (delay <= 4)
-                        zoom--;
-
-                    em.setY(mc.thePlayer.motionY = 0);
-
-                    if (wasOnGround) {
-                        wasOnGround = false;
                     }
                 }
+                onGroundLastTick = mc.thePlayer.onGround;
+                speed = Math.max(speed, defaultSpeed());
+
+                if (velocityBoost != 0) {
+                    speed += velocityBoost;
+                    velocityBoost *= 0.66;
+                }
+
+                TargetStrafe targetStrafe = (TargetStrafe) Client.getModuleManager().get(TargetStrafe.class);
+                float yaw = (allowTargetStrafe() && mc.thePlayer.movementInput.moveStrafe == 0 && mc.thePlayer.movementInput.moveForward > 0) ?
+                        targetStrafe.getTargetYaw(mc.thePlayer.rotationYaw, em.getY()) : mc.thePlayer.rotationYaw;
+
+                em.setX((float) (-(Math.sin(mc.thePlayer.getDirection(yaw)) * speed)));
+                em.setZ((float) (Math.cos(mc.thePlayer.getDirection(yaw)) * speed));
+            } else {
+                em.setX(mc.thePlayer.motionX = 0).setY(mc.thePlayer.motionY = 0).setZ(mc.thePlayer.motionZ = 0);
             }
-            onGroundLastTick = mc.thePlayer.onGround;
-            speed = Math.max(speed, defaultSpeed());
-
-            if (velocityBoost != 0 && delay < 2) {
-                speed += velocityBoost;
-                velocityBoost *= 0.66;
-            }
-
-            TargetStrafe targetStrafe = (TargetStrafe) Client.getModuleManager().get(TargetStrafe.class);
-            float yaw = (allowTargetStrafe() && mc.thePlayer.movementInput.moveStrafe == 0 && mc.thePlayer.movementInput.moveForward > 0) ?
-                    targetStrafe.getTargetYaw(mc.thePlayer.rotationYaw, speed) : mc.thePlayer.rotationYaw;
-
-            em.setX((float) (-(Math.sin(mc.thePlayer.getDirection(yaw)) * speed)));
-            em.setZ((float) (Math.cos(mc.thePlayer.getDirection(yaw)) * speed));
         } else if (event instanceof EventMotionUpdate) {
             EventMotionUpdate em = (EventMotionUpdate) event;
             if (em.isPre()) {
 
-                if (!mc.thePlayer.isCollidedVertically)
-                    blinkTicks--;
-                if (autism && packetList.size() > 0 && blinkTicks == 0) {
-                    this.sendPackets();
-                    this.resetPackets();
-                    blinkTicks = ((Number) settings.get(CHOKE).getValue()).intValue();
-                }
-                boolean isHypixel = mc.getCurrentServerData() != null && HypixelUtil.isVerifiedHypixel() && (mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net"));
-                boolean up = false;
+                if (bowTicks <= 0) {
+                    if (!mc.thePlayer.isCollidedVertically)
+                        blinkTicks--;
+                    if (autism && packetList.size() > 0 && blinkTicks == 0) {
+                        this.sendPackets();
+                        this.resetPackets();
+                        blinkTicks = ((Number) settings.get(CHOKE).getValue()).intValue();
+                    }
+                    boolean isHypixel = mc.getCurrentServerData() != null && HypixelUtil.isVerifiedHypixel() && (mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net"));
+                    boolean up = false;
 
-                if (autism && !mc.thePlayer.isCollidedVertically && !mc.thePlayer.onGround && delay < 3) {
-                    float bruh = 0;
-                    if (mc.getIntegratedServer() == null && mc.getCurrentServerData() != null) {
-                        if (isHypixel) {
-                            float min = 0.00000014F;
-                            float max = 0.00000043F;
+                    if (autism && !mc.thePlayer.isCollidedVertically && !mc.thePlayer.onGround && delay < 3) {
+                        float bruh = 0;
+                        if (mc.getIntegratedServer() == null && mc.getCurrentServerData() != null) {
+                            if (isHypixel) {
+                                float min = 0.00000014F;
+                                float max = 0.00000043F;
 
-                            int tickPassed = bruhTick % 5;
+                                int tickPassed = bruhTick % 5;
 
-                            if (tickPassed == 0) {
-                                bruh = 0.000014F + (float) (min + (max - min) * Math.random());
-                            }
-                            if (tickPassed == 1) {
-                                up = true;
-                                bruh = 0.000024F + (float) (min + (max - min) * Math.random()); // 0.00079
-                            }
-                            if (tickPassed == 2) {
-                                bruh = 0.000014F + (float) (min + (max - min) * Math.random()); // -0.00031
-                            }
-                            if (tickPassed == 3) {
-                                up = true;
-                                bruh = 0.000024F + (float) (min + (max - min) * Math.random()); // -0.00069
-                            }
-                            if (tickPassed == 4) {
-                                bruh = 0.000017F + (float) (min + (max - min) * Math.random()); // 0.0012
-                            }
+                                if (tickPassed == 0) {
+                                    bruh = 0.000014F + (float) (min + (max - min) * Math.random());
+                                }
+                                if (tickPassed == 1) {
+                                    up = true;
+                                    bruh = 0.000024F + (float) (min + (max - min) * Math.random()); // 0.00079
+                                }
+                                if (tickPassed == 2) {
+                                    bruh = 0.000014F + (float) (min + (max - min) * Math.random()); // -0.00031
+                                }
+                                if (tickPassed == 3) {
+                                    up = true;
+                                    bruh = 0.000024F + (float) (min + (max - min) * Math.random()); // -0.00069
+                                }
+                                if (tickPassed == 4) {
+                                    bruh = 0.000017F + (float) (min + (max - min) * Math.random()); // 0.0012
+                                }
 
-                            bruhTick++;
+                                bruhTick++;
 
-                            // Movement fix to make the movement > 0.00090D
-                            double var3 = mc.thePlayer.posX - mc.thePlayer.lastReportedPosX;
-                            double var5 = (em.getY() + bruh) - mc.thePlayer.lastReportedPosY;
-                            double var7 = mc.thePlayer.posZ - mc.thePlayer.lastReportedPosZ;
+                                // Movement fix to make the movement > 0.00090D
+                                double var3 = mc.thePlayer.posX - mc.thePlayer.lastReportedPosX;
+                                double var5 = (em.getY() + bruh) - mc.thePlayer.lastReportedPosY;
+                                double var7 = mc.thePlayer.posZ - mc.thePlayer.lastReportedPosZ;
 
-                            if (var3 * var3 + var5 * var5 + var7 * var7 <= 0.00090D) {
-                                em.setCancelled(true);
+                                if (var3 * var3 + var5 * var5 + var7 * var7 <= 0.00090D) {
+                                    em.setCancelled(true);
 //                                if (tickPassed == 1) {
 //                                    bruh = 0.000924F + (float) (min + (max - min) * Math.random()); // 0.00079
 //                                }
@@ -465,36 +562,62 @@ public class LongJump extends Module {
 //                                if (tickPassed == 4) {
 //                                    bruh = 0.000917F + (float) (min + (max - min) * Math.random()); // 0.0012
 //                                }
-                            }
+                                }
 
-                            if ((boolean) settings.get(C13PACKET).getValue() && bruhTick > 0 && (bruhTick % (20 * 6) == 0)) {
-                                sendC13Packet();
-                                distanceTraveled = 0;
+                                if ((boolean) settings.get(C13PACKET).getValue() && bruhTick > 0 && (bruhTick % (20 * 6) == 0)) {
+                                    sendC13Packet();
+                                    distanceTraveled = 0;
+                                }
+                            }
+                        }
+
+                        em.setY((float) (em.getY() + (double) bruh));
+                        em.setGround(false);
+                    }
+
+                    if (isHypixel && em.getY() % 0.015625 == 0 && delay == 6 & mc.thePlayer.onGround) {
+                        em.setForcePos(true);
+                        em.setY(em.getY() + 0.00625101F);
+                        em.setGround(false);
+                    }
+
+                    if (isHypixel && mc.thePlayer.motionY > 0.23) {
+                        em.setGround(true);
+                        em.setY(em.getY() + 0.07840000152587834);
+                    }
+
+                    if (delay < 3) {
+                        em.setGround(bruhTick % 7 == 0 && HypixelUtil.isVerifiedHypixel());
+                    }
+                } else {
+                    if (bowTicks == 19) {
+                        for (int i = 36; i < 45; i++) {
+                            if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
+                                ItemStack is = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
+                                Item item = is.getItem();
+                                if (item instanceof ItemBow) {
+                                    int hotbarSlot = i - 36;
+                                    NetUtil.sendPacketNoEvents(new C09PacketHeldItemChange(hotbarSlot));
+                                    NetUtil.sendPacketNoEvents(new C08PacketPlayerBlockPlacement(is));
+                                    break;
+                                }
                             }
                         }
                     }
 
-                    em.setY((float) (em.getY() + (double) bruh));
-                    em.setGround(false);
-                }
+                    if(bowTicks == 17)
+                        em.setPitch(-89.5F);
 
-                if (isHypixel && em.getY() % 0.015625 == 0 && delay == 6 & mc.thePlayer.onGround) {
-                    em.setForcePos(true);
-                    em.setY(em.getY() + 0.00625101F);
-                    em.setGround(false);
-                }
+                    if (bowTicks == 16) {
+                        NetUtil.sendPacketNoEvents(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
+                        NetUtil.sendPacketNoEvents(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem));
+                    }
 
-                if (isHypixel && mc.thePlayer.motionY > 0.23) {
-                    em.setGround(true);
-                    em.setY(em.getY() + 0.07840000152587834);
                 }
-
-                if (delay < 3) {
-                    em.setGround(bruhTick % 7 == 0 && HypixelUtil.isVerifiedHypixel());
-                }
-
                 distance = Math.hypot(mc.thePlayer.posX - mc.thePlayer.prevPosX, mc.thePlayer.posZ - mc.thePlayer.prevPosZ);
                 distanceTraveled += distance;
+            } else {
+                bowTicks--;
             }
         }
         if ((Boolean) settings.get(OFF).getValue() && !autism) {

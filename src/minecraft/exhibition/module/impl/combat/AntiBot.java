@@ -110,48 +110,7 @@ public class AntiBot extends Module {
 
             spawnedSinceUpdate++;
 
-            if (waitTimer.delay(1250)) {
-                EntityPlayer player = e.getPlayer();
-                if (player != mc.thePlayer) {
 
-                    spawnedList.add(player);
-
-                    double posX = mc.thePlayer.posX;
-                    double posY = mc.thePlayer.posY;
-                    double posZ = mc.thePlayer.posZ;
-                    double var7 = posX - player.posX;
-                    double var9 = posY - player.posY;
-                    double var11 = posZ - player.posZ;
-                    double distance = MathHelper.sqrt_double(var7 * var7 + var9 * var9 + var11 * var11);
-
-                    double roundedY = MathUtils.roundToPlace(player.posY, 6);
-
-                    if (Math.abs(distance) > 3 && mc.thePlayer.ticksExisted > 260 && spawnedSinceUpdate < 5) {
-//                        DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "------------------------------------------------------------------------");
-//                        DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "Illegal Spawn: " + player.getDisplayName().getFormattedText() + " \247a Distance: " + MathUtils.roundToPlace(distance, 3) +
-//                                " \247bDX: " + MathUtils.roundToPlace(var7, 3) +
-//                                " \247cDY: " + MathUtils.roundToPlace(var9, 3) + " " +
-//                                " \247dDZ: " + MathUtils.roundToPlace(var11, 3) + " \247e" +
-//                                spawnedSinceUpdate);
-//                        DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "Spawned player pos \247a" + MathUtils.roundToPlace(player.posX, 6) + " \247b" +
-//                                MathUtils.roundToPlace(player.posY, 6) + " \247c" +
-//                                MathUtils.roundToPlace(player.posZ, 6) + " \247dT: " +
-//                                isInTabList(player) + " \247eI: " +
-//                                player.isInvisibleToPlayer(mc.thePlayer));
-//                        DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "Local player pos   \247a" + MathUtils.roundToPlace(mc.thePlayer.posX, 6) + " \247b" +
-//                                MathUtils.roundToPlace(mc.thePlayer.posY, 6) + " \247c" +
-//                                MathUtils.roundToPlace(mc.thePlayer.posZ, 6));
-
-                        if ((roundedY == -200 || roundedY == 400)) {
-                            //DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " \247e" + "Weird bot spawn pos?");
-                        }
-
-                        DevNotifications.getManager().post("Suspicious Spawn " + player.getName() + " " + player.getDisplayName().getFormattedText());
-                        //DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "------------------------------------------------------------------------");
-                        player.illegalSpawn = true;
-                    }
-                }
-            }
         }
 
         if (event instanceof EventPacket) {
@@ -190,13 +149,7 @@ public class AntiBot extends Module {
                     waitTimer.reset();
                 }
 
-                if (spawnedSinceUpdate > 2) {
-                    for (EntityPlayer entityPlayer : spawnedList) {
-                        ticksOnGroundMap.put(entityPlayer.getName(), -20);
-                    }
-                }
 
-                spawnedSinceUpdate = 0;
                 spawnedList.clear();
                 if (mc.getIntegratedServer() == null && mc.getCurrentServerData() != null) {
                     if ((mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net")) && !currentSetting.equals("Hypixel")) {
@@ -213,6 +166,7 @@ public class AntiBot extends Module {
                             EntityPlayer ent = (EntityPlayer) o;
                             assert ent != mc.thePlayer;
                             if (ent.isPlayerSleeping() || ent.isDead) {
+                                DevNotifications.getManager().post("Removed " + ent.getName() + " " + ent.isPlayerSleeping() + " " + ent.isDead);
                                 mc.theWorld.removeEntity(ent);
                             }
                         }
@@ -226,6 +180,12 @@ public class AntiBot extends Module {
                 }
                 // Loop through entity list
 
+                if (spawnedSinceUpdate > 2) {
+                    for (EntityPlayer entityPlayer : spawnedList) {
+                        ticksOnGroundMap.put(entityPlayer.getName(), -20);
+                    }
+                }
+
                 for (Entity o : mc.theWorld.getLoadedEntityList()) {
                     if (o instanceof EntityPlayer) {
                         EntityPlayer ent = (EntityPlayer) o;
@@ -238,6 +198,47 @@ public class AntiBot extends Module {
                             }
                             if (ent.isInvisible() && !ent.lastTickInvisible && ent.ticksExisted > 5) {
                                 DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + ent.getName() + " has vanished.");
+                            }
+                        }
+
+                        if (waitTimer.delay(1250) && ent.ticksExisted <= 1 && !ent.illegalSpawn) {
+                            if (ent != mc.thePlayer) {
+                                spawnedList.add(ent);
+
+                                double posX = mc.thePlayer.posX;
+                                double posY = mc.thePlayer.posY;
+                                double posZ = mc.thePlayer.posZ;
+                                double var7 = posX - ent.posX;
+                                double var9 = posY - ent.posY;
+                                double var11 = posZ - ent.posZ;
+                                double distance = MathHelper.sqrt_double(var7 * var7 + var9 * var9 + var11 * var11);
+
+                                double roundedY = MathUtils.roundToPlace(ent.posY, 6);
+
+                                if (Math.abs(distance) > 3 && mc.thePlayer.ticksExisted > 260 && spawnedSinceUpdate <= 2) {
+//                        DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "------------------------------------------------------------------------");
+//                        DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "Illegal Spawn: " + player.getDisplayName().getFormattedText() + " \247a Distance: " + MathUtils.roundToPlace(distance, 3) +
+//                                " \247bDX: " + MathUtils.roundToPlace(var7, 3) +
+//                                " \247cDY: " + MathUtils.roundToPlace(var9, 3) + " " +
+//                                " \247dDZ: " + MathUtils.roundToPlace(var11, 3) + " \247e" +
+//                                spawnedSinceUpdate);
+//                        DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "Spawned player pos \247a" + MathUtils.roundToPlace(player.posX, 6) + " \247b" +
+//                                MathUtils.roundToPlace(player.posY, 6) + " \247c" +
+//                                MathUtils.roundToPlace(player.posZ, 6) + " \247dT: " +
+//                                isInTabList(player) + " \247eI: " +
+//                                player.isInvisibleToPlayer(mc.thePlayer));
+//                        DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "Local player pos   \247a" + MathUtils.roundToPlace(mc.thePlayer.posX, 6) + " \247b" +
+//                                MathUtils.roundToPlace(mc.thePlayer.posY, 6) + " \247c" +
+//                                MathUtils.roundToPlace(mc.thePlayer.posZ, 6));
+
+                                    if ((roundedY == -200 || roundedY == 400)) {
+                                        //DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " \247e" + "Weird bot spawn pos?");
+                                    }
+
+                                    DevNotifications.getManager().post("Suspicious Spawn " + ent.getName() + " " + ent.getDisplayName().getFormattedText() + " " + ent.ticksExisted + " " + Math.abs(distance));
+                                    //DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "------------------------------------------------------------------------");
+                                    ent.illegalSpawn = true;
+                                }
                             }
                         }
 
@@ -379,8 +380,8 @@ public class AntiBot extends Module {
                                     if (ent.isInvisible() && ticksOnGroundMap.getOrDefault(ent.getName(), 0) < 15 && botNameFormat) {
                                         invalid.add(ent);
                                         if (remove && ticksOnGroundMap.getOrDefault(ent.getName(), 0) < -20 && !isInTabList(list, ent)) {
-                                            DevNotifications.getManager().post("Removed " + ent.getName() + " B");
                                             mc.theWorld.removeEntity(ent);
+                                            DevNotifications.getManager().post("Removed " + ent.getName() + " B");
                                             continue;
                                         }
                                     }
@@ -415,6 +416,8 @@ public class AntiBot extends Module {
                         }
                     }
                 }
+
+                spawnedSinceUpdate = 0;
             }
         } else if (event instanceof EventAttack) {
             EventAttack eventAttack = event.cast();
