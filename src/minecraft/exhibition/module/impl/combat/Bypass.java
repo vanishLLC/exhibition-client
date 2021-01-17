@@ -174,7 +174,7 @@ public class Bypass extends Module {
                         bruh = 0;
                     }
 
-                    if (bruh > 10) {
+                    if (bruh > 5) {
                         event.setCancelled(true);
 
                         if (Math.abs(packet.getUid() - lastUid) > 5) {

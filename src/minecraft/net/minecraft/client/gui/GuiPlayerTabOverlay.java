@@ -8,10 +8,12 @@ import java.util.Comparator;
 import java.util.List;
 
 import exhibition.Client;
+import exhibition.management.PriorityManager;
 import exhibition.management.friend.Friend;
 import exhibition.management.friend.FriendManager;
 import exhibition.module.impl.other.StreamerMode;
 import exhibition.util.misc.ChatUtil;
+import exhibition.util.render.Colors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.network.NetworkPlayerInfo;
@@ -174,9 +176,18 @@ public class GuiPlayerTabOverlay extends Gui {
             GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
 
             if (k4 < list.size()) {
-                NetworkPlayerInfo networkplayerinfo1 = (NetworkPlayerInfo) list.get(k4);
+                NetworkPlayerInfo networkplayerinfo1 = list.get(k4);
                 String s1 = this.getPlayerName(networkplayerinfo1);
                 GameProfile gameprofile = networkplayerinfo1.getGameProfile();
+
+                String name = gameprofile.getName();
+                if(PriorityManager.isPriority(name)) {
+                    drawRect(j2, k2 - 1, j2 + i1, k2 + 9, Colors.getColor(255, 0, 0, 160));
+                    GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+                } else if(FriendManager.isFriend(name)) {
+                    drawRect(j2, k2 - 1, j2 + i1, k2 + 9, Colors.getColor(0, 255, 255, 160));
+                    GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+                }
 
                 if (flag) {
                     EntityPlayer entityplayer = this.mc.theWorld.getPlayerEntityByUUID(gameprofile.getId());
