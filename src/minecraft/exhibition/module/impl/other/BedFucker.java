@@ -67,7 +67,7 @@ public class BedFucker extends Module {
                                 final BlockPos pos = new BlockPos(mc.thePlayer.posX + x, mc.thePlayer.posY + y, mc.thePlayer.posZ + z);
 
                                 if ((mc.theWorld.getBlockState(pos).getBlock() != Blocks.air && this.blockChecks(mc.theWorld.getBlockState(pos).getBlock()) && this.getFacingDirection(pos) != null) && mc.thePlayer.getDistance(mc.thePlayer.posX + x, mc.thePlayer.posY + y, mc.thePlayer.posZ + z) < mc.playerController.getBlockReachDistance() - 0.5) {
-                                    final float[] rotations = this.getBlockRotations(mc.thePlayer.posX + x + 0.5, mc.thePlayer.posY + y + 0.5, mc.thePlayer.posZ + z + 0.5);
+                                    final float[] rotations = this.getBlockRotations(mc.thePlayer.posX + x + 0.5, mc.thePlayer.posY + y, mc.thePlayer.posZ + z + 0.5);
                                     em.setYaw(rotations[0]);
                                     em.setPitch(rotations[1]);
                                     this.blockBreaking = pos;
@@ -233,7 +233,7 @@ public class BedFucker extends Module {
     public float[] getBlockRotations(final double x, final double y, final double z) {
         final double var4 = x - mc.thePlayer.posX;
         final double var5 = z - mc.thePlayer.posZ;
-        final double var6 = y - mc.thePlayer.posY + mc.thePlayer.getEyeHeight();
+        final double var6 = y - (mc.thePlayer.posY + mc.thePlayer.getEyeHeight() - 1.0);
         final double var7 = MathHelper.sqrt_double(var4 * var4 + var5 * var5);
         final float var8 = (float) (Math.atan2(var5, var4) * 180.0 / 3.141592653589793) - 90.0f;
         return new float[]{var8, (float) (-(Math.atan2(var6, var7) * 180.0 / 3.141592653589793))};
