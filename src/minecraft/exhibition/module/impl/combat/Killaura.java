@@ -160,6 +160,7 @@ public class Killaura extends Module {
     public boolean isBlocking;
     public EntityLivingBase target;
     public EntityLivingBase vip;
+    public boolean shouldToggle;
     static boolean allowCrits;
     public static boolean wantsToStep;
 
@@ -180,11 +181,6 @@ public class Killaura extends Module {
             lastAngles.y = mc.thePlayer.rotationPitch;
         }
         deltaHashMap.clear();
-        try {
-            loaded.clear();
-        } catch (Exception e) {
-
-        }
         disabled = false;
         allowCrits = true;
         isBlocking = false;
@@ -193,7 +189,6 @@ public class Killaura extends Module {
         wantsToStep = false;
         wantedToJump = false;
         wait = -1;
-        target = null;
         stepDelay = -2;
         setupTick = 0;
 
@@ -202,11 +197,6 @@ public class Killaura extends Module {
     @Override
     public void onEnable() {
         deltaHashMap.clear();
-        try {
-            loaded.clear();
-        } catch (Exception e) {
-
-        }
         disabled = false;
         allowCrits = true;
         if (mc.thePlayer != null) {
@@ -220,16 +210,20 @@ public class Killaura extends Module {
         wantsToStep = false;
         wantedToJump = false;
         wait = 0;
-        target = null;
         stepDelay = -2;
         setupTick = 0;
     }
 
     @Override
     public void onToggle() {
+        shouldToggle = false;
         critWaitTicks = 0;
-        target = null;
-        loaded.clear();
+        try {
+            target = null;
+            loaded.clear();
+        } catch (Exception ignored) {
+
+        }
     }
 
     private boolean disabled;
@@ -287,9 +281,7 @@ public class Killaura extends Module {
                     if (titlePacket.getType().equals(S45PacketTitle.Type.TITLE)) {
                         String text = StringUtils.stripControlCodes(titlePacket.getMessage().getUnformattedText());
                         if ((text.contains("DIED") || text.contains("GAME OVER")) && isEnabled()) {
-                            target = null;
-                            loaded.clear();
-                            toggle();
+                            shouldToggle = true;
                             Notifications.getManager().post("Aura Death", "Aura disabled due to death.");
                         }
                     }
@@ -371,6 +363,10 @@ public class Killaura extends Module {
         boolean block = (Boolean) settings.get(AUTOBLOCK).getValue();
         EventMotionUpdate em = event.cast();
         if (em.isPre()) {
+            if(shouldToggle) {
+                toggle();
+            }
+
             tickEntities();
             if (stepDelay > 0) {
                 stepDelay--;
