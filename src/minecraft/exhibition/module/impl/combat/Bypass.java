@@ -7,8 +7,6 @@ import exhibition.event.impl.EventPacket;
 import exhibition.event.impl.EventRenderGui;
 import exhibition.event.impl.EventScreenDisplay;
 import exhibition.event.impl.EventTick;
-import exhibition.management.notifications.dev.DevNotification;
-import exhibition.management.notifications.dev.DevNotifications;
 import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
@@ -17,7 +15,6 @@ import exhibition.module.impl.movement.Fly;
 import exhibition.module.impl.movement.LongJump;
 import exhibition.util.*;
 import exhibition.util.Timer;
-import exhibition.util.misc.ChatUtil;
 import exhibition.util.render.Colors;
 import net.minecraft.client.gui.GuiDisconnected;
 import net.minecraft.client.gui.GuiDownloadTerrain;
@@ -61,6 +58,7 @@ public class Bypass extends Module {
         super(data);
         addSetting(DELAY);
         addSetting(AUTOBYPASS);
+        addSetting(KEEPALIVE);
     }
 
     @Override
@@ -113,18 +111,10 @@ public class Bypass extends Module {
 
         if (event instanceof EventPacket) {
             if (mc.thePlayer != null) {
-                if (c13Timer.delay(15_000)) {
-                    c13Timer.reset();
+                if (c13Timer.delay(10_000)) {
                     if (!Client.getModuleManager().isEnabled(LongJump.class) && !blorpFly) {
-                        if (chokePackets.peek() != null) {
-                            Packet packet = chokePackets.poll();
-                            if (packet != null) {
-                                NetUtil.sendPacketNoEvents(packet);
-                            }
-                        }
-                        ChatUtil.printChat("Mini bum");
-                    } else {
                         sendPackets();
+                        c13Timer.reset();
                     }
                 }
             } else {
@@ -297,10 +287,6 @@ public class Bypass extends Module {
                 b = true;
                 NetUtil.sendPacketNoEvents(packet);
             }
-        }
-
-        if (b) {
-            ChatUtil.printChat("BUM");
         }
         this.resetPackets();
     }
