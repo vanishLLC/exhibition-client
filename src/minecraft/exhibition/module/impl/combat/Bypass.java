@@ -45,6 +45,7 @@ public class Bypass extends Module {
 
     public Setting<Number> DELAY = new Setting<>("DELAY", 300, "Spoof offset. This should be 500 - (your ping).", 5, 0, 1000);
     public Setting<Boolean> AUTOBYPASS = new Setting<>("AUTOBYPASS", false, "Automatically detects optimal delay value.");
+    public Setting<Boolean> KEEPALIVE = new Setting<>("KEEPALIVE", false, "Testing moment.");
 
     private long startMS = -1;
     private int state = 0;
@@ -114,7 +115,17 @@ public class Bypass extends Module {
             if (mc.thePlayer != null) {
                 if (c13Timer.delay(15_000)) {
                     c13Timer.reset();
-                    sendPackets();
+                    if (!Client.getModuleManager().isEnabled(LongJump.class) && !blorpFly) {
+                        if (chokePackets.peek() != null) {
+                            Packet packet = chokePackets.poll();
+                            if (packet != null) {
+                                NetUtil.sendPacketNoEvents(packet);
+                            }
+                        }
+                        ChatUtil.printChat("Mini bum");
+                    } else {
+                        sendPackets();
+                    }
                 }
             } else {
                 resetPackets();
@@ -194,9 +205,9 @@ public class Bypass extends Module {
 
                         if (bruh % (45 + (randomDelay)) == 0) {
                             short lastbruh = (short) lastSentUid;
-                            sendPackets();
                             C0FPacketConfirmTransaction confirmTransaction = new C0FPacketConfirmTransaction(packet.getWindowId(), (short) (lastSentUid = packet.getUid()), packet.getAccepted());
                             if (!Client.getModuleManager().isEnabled(LongJump.class) && !blorpFly) {
+                                sendPackets();
                                 c13Timer.reset();
                             }
                             chokePackets.add(confirmTransaction);
@@ -219,6 +230,11 @@ public class Bypass extends Module {
             }
 
             if (p instanceof C00PacketKeepAlive) {
+                if (KEEPALIVE.getValue() && bruh > 10) {
+                    event.setCancelled(true);
+                    chokePackets.add(p);
+                }
+
                 if (DELAY.getValue().longValue() != 0) {
                     packetList.add(new BruhPacket(p, DELAY.getValue().longValue()));
                     event.setCancelled(true);
@@ -283,6 +299,9 @@ public class Bypass extends Module {
             }
         }
 
+        if (b) {
+            ChatUtil.printChat("BUM");
+        }
         this.resetPackets();
     }
 
