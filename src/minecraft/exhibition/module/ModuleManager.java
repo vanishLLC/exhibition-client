@@ -184,6 +184,7 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
                     add(new NetGraph(new ModuleData(Other, "NetInfo", "Shows network information.")));
                     add(new StreamerMode(new ModuleData(Player, "StreamerMode", "Hides certain identifiable information.")));
                     add(new AutoOOF(new ModuleData(Other, "AutoOOF", "Automatically runs /oof and disables Aura/KB when someone is staff banned.")));
+                    add(new NickDetector(new ModuleData(Other, "NickDetector", "Automatically checks if players are /nick'd.")));
 
                     if (Boolean.parseBoolean((String) (Class.forName("java.lang.System").getMethod("getProperty", String.class)).invoke(null, "NEoBuMASs"))) {
                         add(new Aimbot(new ModuleData(Minigames, "Aimbot", "Cops n Crims aimbot.")));
