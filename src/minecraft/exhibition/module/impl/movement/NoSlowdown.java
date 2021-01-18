@@ -49,7 +49,7 @@ public class NoSlowdown extends Module {
             Killaura killaura = ((Killaura) Client.getModuleManager().get(Killaura.class));
             if (shouldUnblock && !(Boolean) settings.get("VANILLA").getValue()) {
                 if (em.isPre() && (mc.thePlayer.isBlocking() && killaura.isBlocking)) {
-                    if (isTouchingGround(mc.thePlayer)) {
+                    if (mc.thePlayer.isCollidedVertically && mc.thePlayer.onGround) {
                         killaura.isBlocking = false;
                         NetUtil.sendPacketNoEvents(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, new BlockPos(-1, -1, -1), EnumFacing.DOWN));
                     }
