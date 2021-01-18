@@ -114,6 +114,10 @@ public class AntiVelocity extends Module {
                 }
 
                 if (packet.getEntityID() == mc.thePlayer.getEntityId()) {
+                    double x = (double) packet.getMotionX() / 8000.0D;
+                    double y = (double) packet.getMotionY() / 8000.0D;
+                    double z = (double) packet.getMotionZ() / 8000.0D;
+
                     if (nearbyOnly.getValue()) {
                         boolean nearby = false;
                         for (Entity entity : mc.theWorld.getLoadedEntityList()) {
@@ -125,6 +129,11 @@ public class AntiVelocity extends Module {
                             }
                         }
                         if (!nearby && !projectileNearby) {
+                            if (!((LongJump) Client.getModuleManager().get(LongJump.class)).noShake() && ignore.delay(500) && x != 0 && y != 0 && z != 0) {
+                                velocity = new Vec3((double) packet.getMotionX() / 8000.0D, (double) packet.getMotionY() / 8000.0D, (double) packet.getMotionZ() / 8000.0D);
+                                checkDamage = true;
+                                hurtDelay.reset();
+                            }
                             return;
                         }
                     }
@@ -141,9 +150,7 @@ public class AntiVelocity extends Module {
                             event.setCancelled(true);
                         }
 
-                    double x = (double) packet.getMotionX() / 8000.0D;
-                    double y = (double) packet.getMotionY() / 8000.0D;
-                    double z = (double) packet.getMotionZ() / 8000.0D;
+
 
                     if (!((LongJump) Client.getModuleManager().get(LongJump.class)).noShake() && ignore.delay(500) && x != 0 && y != 0 && z != 0) {
                         velocity = new Vec3((double) packet.getMotionX() / 8000.0D, (double) packet.getMotionY() / 8000.0D, (double) packet.getMotionZ() / 8000.0D);
@@ -176,6 +183,11 @@ public class AntiVelocity extends Module {
                         }
                     }
                     if (!nearby && !projectileNearby) {
+                        if (!((LongJump) Client.getModuleManager().get(LongJump.class)).noShake() && ignore.delay(500) && packet.xMotion != 0 && packet.zMotion != 0 && packet.yMotion != 0) {
+                            velocity = new Vec3(packet.xMotion, packet.yMotion, packet.zMotion);
+                            checkDamage = true;
+                            hurtDelay.reset();
+                        }
                         return;
                     }
                 }

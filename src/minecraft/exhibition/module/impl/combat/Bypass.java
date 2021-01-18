@@ -41,7 +41,7 @@ public class Bypass extends Module {
 
     private final ConcurrentLinkedQueue<BruhPacket> packetList = new ConcurrentLinkedQueue<>();
 
-    private final Queue<C0FPacketConfirmTransaction> chokePackets = new ConcurrentLinkedQueue<>();
+    private final Queue<Packet> chokePackets = new ConcurrentLinkedQueue<>();
 
     public Setting<Number> DELAY = new Setting<>("DELAY", 300, "Spoof offset. This should be 500 - (your ping).", 5, 0, 1000);
     public Setting<Boolean> AUTOBYPASS = new Setting<>("AUTOBYPASS", false, "Automatically detects optimal delay value.");
@@ -174,7 +174,7 @@ public class Bypass extends Module {
                         bruh = 0;
                     }
 
-                    if (bruh > 5) {
+                    if (bruh > 10) {
                         event.setCancelled(true);
 
                         if (Math.abs(packet.getUid() - lastUid) > 5) {
@@ -201,7 +201,7 @@ public class Bypass extends Module {
                             }
                             chokePackets.add(confirmTransaction);
                             //DevNotifications.getManager().post("\247eSent from \247c" + lastbruh + "\247e to \247a" + lastSentUid);
-                            randomDelay = random.nextInt(75 - 45);
+                            randomDelay = random.nextInt(30);
                             bruh = 10;
                         }
 //                        if (Math.abs(packet.getUid() - lastUid) > 1)
