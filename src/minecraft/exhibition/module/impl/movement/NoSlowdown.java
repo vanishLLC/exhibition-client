@@ -42,7 +42,7 @@ public class NoSlowdown extends Module {
         if (event instanceof EventMotionUpdate) {
             if ((boolean) settings.get("VANILLA").getValue())
                 return;
-            if (!isTouchingGround(mc.thePlayer)){
+            if (!mc.thePlayer.isCollidedVertically && !mc.thePlayer.onGround){
                 return;
             }
             EventMotionUpdate em = (EventMotionUpdate) event;
