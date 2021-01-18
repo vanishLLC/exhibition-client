@@ -7,7 +7,6 @@ import exhibition.management.UUIDResolver;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.util.Timer;
-import exhibition.util.misc.ChatUtil;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.scoreboard.ScorePlayerTeam;
@@ -15,7 +14,9 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 public class NickDetector extends Module {
 
@@ -34,7 +35,7 @@ public class NickDetector extends Module {
             return;
         }
 
-        List<String> usernameList = new ArrayList<>();
+        HashMap<String, UUID> usernameList = new HashMap<>();
 
         final NetHandlerPlayClient netHandler = mc.thePlayer.sendQueue;
         List<NetworkPlayerInfo> list = new ArrayList<>(netHandler.getPlayerInfoMap());
@@ -43,17 +44,16 @@ public class NickDetector extends Module {
                 IChatComponent e = new ChatComponentText(ScorePlayerTeam.formatPlayerName(playerInfo.getPlayerTeam(), playerInfo.getGameProfile().getName()));
                 String displayName = e.getFormattedText();
                 String name = playerInfo.getGameProfile().getName();
-                if (displayName.equals("\247r" + name) || displayName.equals(name)) {
+                if (displayName.equals("\247r" + name) || displayName.equals(name) || displayName.equals("\247r" + name + "\247r") || displayName.equals(name + "\247r")) {
+                    continue;
+                }
+                if (UUIDResolver.instance.isInvalidName(name)) {
                     continue;
                 }
                 if (UUIDResolver.instance.checkedUsernames.contains(name)) {
                     continue;
                 }
-                if (UUIDResolver.instance.isInvalidName(name)) {
-                    ChatUtil.printChat("Invalid Username? " + name);
-                    continue;
-                }
-                usernameList.add(name);
+                usernameList.put(name, playerInfo.getGameProfile().getId());
             }
         }
 

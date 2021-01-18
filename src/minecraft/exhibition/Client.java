@@ -21,21 +21,28 @@ import exhibition.management.config.ConfigManager;
 import exhibition.management.font.DynamicTTFFont;
 import exhibition.management.font.TTFFontRenderer;
 import exhibition.management.friend.FriendManager;
+import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.management.waypoints.WaypointManager;
 import exhibition.module.Module;
 import exhibition.module.ModuleManager;
+import exhibition.util.HypixelUtil;
 import exhibition.util.MathUtils;
 import exhibition.util.Timer;
 import exhibition.util.misc.ChatUtil;
 import exhibition.util.security.*;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.network.Packet;
+import net.minecraft.network.play.client.C00PacketKeepAlive;
+import net.minecraft.network.play.client.C03PacketPlayer;
+import net.minecraft.network.play.server.S02PacketChat;
 import net.minecraft.network.play.server.S05PacketSpawnPosition;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.util.CryptManager;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.StringUtils;
 import us.myles.ViaVersion.api.protocol.ProtocolVersion;
 
 import java.awt.*;
@@ -112,6 +119,8 @@ public class Client extends Castable implements EventListener {
     public boolean isHypixel;
 
     public ProgressScreen progressScreenTask;
+
+    public String hypixelApiKey = null;
 
     public Client(Object[] args) {
         try {
@@ -432,7 +441,7 @@ public class Client extends Castable implements EventListener {
         if (event instanceof EventPacket) {
             EventPacket eventPacket = event.cast();
             Packet packet = eventPacket.getPacket();
-            if (eventPacket.isIncoming()) {
+            if (eventPacket.isIncoming() && !(packet instanceof C00PacketKeepAlive)) {
                 packetTimer.reset();
             }
 
@@ -449,6 +458,23 @@ public class Client extends Castable implements EventListener {
 
                 if (distance < 20 && yOffset == 0.6) {
                     spawnY = y - 15;
+                }
+            }
+
+            if (Minecraft.getMinecraft().thePlayer != null) {
+                if (packet instanceof C03PacketPlayer && HypixelUtil.isVerifiedHypixel() && hypixelApiKey == null && Minecraft.getMinecraft().thePlayer.ticksExisted > 2) {
+                    ChatUtil.sendChat("/api new");
+                    hypixelApiKey = "";
+                    return;
+                }
+                if (packet instanceof S02PacketChat) {
+                    S02PacketChat packetChat = (S02PacketChat) packet;
+                    String unformatted = StringUtils.stripControlCodes(packetChat.getChatComponent().getUnformattedText());
+                    if (unformatted.contains("Your new API key is ")) {
+                        hypixelApiKey = unformatted.split("Your new API key is ")[1].trim();
+                        event.setCancelled(true);
+                        Notifications.getManager().post("New API Key", "Grabbed your Hypixel API key.", Notifications.Type.OKAY);
+                    }
                 }
             }
         }

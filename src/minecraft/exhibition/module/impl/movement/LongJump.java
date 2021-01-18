@@ -17,6 +17,7 @@ import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.combat.AutoPot;
+import exhibition.module.impl.combat.Bypass;
 import exhibition.module.impl.player.Scaffold;
 import exhibition.util.*;
 import exhibition.util.render.Colors;
@@ -213,7 +214,7 @@ public class LongJump extends Module {
                         if (i >= 36 && item instanceof ItemBow) {
                             bowFound = true;
                         }
-                        if(item == Items.arrow) {
+                        if (item == Items.arrow) {
                             arrowsFound = true;
                         }
                     }
@@ -258,7 +259,7 @@ public class LongJump extends Module {
     private Random random = new Random();
 
     public boolean noShake() {
-        return !timer.delay(1000) && autismEnabled();
+        return !timer.delay(1000) && autismEnabled() && !HypixelUtil.isInGame("PIT") && !HypixelUtil.isInGame("UHC");
     }
 
     public boolean autismEnabled() {
@@ -387,7 +388,7 @@ public class LongJump extends Module {
             double boost = ((Number) settings.get(BOOST).getValue()).doubleValue();
             float autBoost = ((Number) settings.get(TIMER).getValue()).floatValue();
 
-            if(bowTicks <= 0) {
+            if (bowTicks <= 0) {
                 if ((mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f))
                     delay--;
 
@@ -570,7 +571,7 @@ public class LongJump extends Module {
 
                     if (isHypixel && em.getY() % 0.015625 == 0 && delay == 6 & mc.thePlayer.onGround) {
                         em.setForcePos(true);
-                        em.setY(em.getY() + 0.00625101F);
+                        em.setY(em.getY() + 0.00053424);
                         em.setGround(false);
                     }
 
@@ -580,7 +581,8 @@ public class LongJump extends Module {
                     }
 
                     if (delay < 3) {
-                        em.setGround(bruhTick % 7 == 0 && HypixelUtil.isVerifiedHypixel());
+                        Bypass bypass = Client.getModuleManager().getCast(Bypass.class);
+                        em.setGround(bruhTick % 7 == 0 && HypixelUtil.isVerifiedHypixel() && bypass.bruh > 15);
                     }
                 } else {
                     if (bowTicks == 19) {
@@ -598,7 +600,7 @@ public class LongJump extends Module {
                         }
                     }
 
-                    if(bowTicks == 17)
+                    if (bowTicks == 17)
                         em.setPitch(-89.5F);
 
                     if (bowTicks == 16) {
@@ -610,7 +612,12 @@ public class LongJump extends Module {
                 distance = Math.hypot(mc.thePlayer.posX - mc.thePlayer.prevPosX, mc.thePlayer.posZ - mc.thePlayer.prevPosZ);
                 distanceTraveled += distance;
             } else {
-                bowTicks--;
+                if (bowTicks > 1 || mc.thePlayer.hurtTime != 0)
+                    bowTicks--;
+
+                if (bowTicks > 4 && mc.thePlayer.hurtTime != 0) {
+                    bowTicks = 0;
+                }
             }
         }
         if ((Boolean) settings.get(OFF).getValue() && !autism) {

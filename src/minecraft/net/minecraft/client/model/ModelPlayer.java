@@ -85,11 +85,11 @@ public class ModelPlayer extends ModelBiped
             float f = 2.0F;
             GlStateManager.scale(1.0F / f, 1.0F / f, 1.0F / f);
             GlStateManager.translate(0.0F, 24.0F * scale, 0.0F);
-            this.bipedLeftLegwear.render(scale);
-            this.bipedRightLegwear.render(scale);
-            this.bipedLeftArmwear.render(scale);
-            this.bipedRightArmwear.render(scale);
-            this.bipedBodyWear.render(scale);
+//            this.bipedLeftLegwear.render(scale);
+//            this.bipedRightLegwear.render(scale);
+//            this.bipedLeftArmwear.render(scale);
+//            this.bipedRightArmwear.render(scale);
+//            this.bipedBodyWear.render(scale);
         }
         else
         {
@@ -99,11 +99,11 @@ public class ModelPlayer extends ModelBiped
             }
 
             if((!(Client.getModuleManager().get(Chams.class).isEnabled() && (Boolean)Client.getModuleManager().get(Chams.class).getSetting("COLORED").getValue()) && !RendererLivingEntity.ignoreChams) && RendererLivingEntity.renderLayers) {
-                this.bipedLeftLegwear.render(scale);
-                this.bipedRightLegwear.render(scale);
-                this.bipedLeftArmwear.render(scale);
-                this.bipedRightArmwear.render(scale);
-                this.bipedBodyWear.render(scale);
+//                this.bipedLeftLegwear.render(scale);
+//                this.bipedRightLegwear.render(scale);
+//                this.bipedLeftArmwear.render(scale);
+//                this.bipedRightArmwear.render(scale);
+//                this.bipedBodyWear.render(scale);
             }
         }
 

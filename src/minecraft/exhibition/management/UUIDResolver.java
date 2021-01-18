@@ -1,9 +1,11 @@
 package exhibition.management;
 
 import com.google.gson.*;
+import exhibition.Client;
 import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.util.security.Connection;
 import exhibition.util.security.Connector;
+import net.minecraft.client.Minecraft;
 
 import java.util.*;
 
@@ -19,22 +21,26 @@ public class UUIDResolver {
     public List<String> checkedUsernames = new ArrayList<>();
 
     private final HashMap<String, Long> responseMap = new HashMap<>();
+    private final HashMap<String, Long> hypixelResponseMap = new HashMap<>();
     private boolean isRateLimited;
 
     public boolean isInvalidName(String username) {
-        if (isChecking)
+        if (!checkedUsernames.contains(username)) {
             return false;
+        }
 
-        if (!checkedUsernames.contains(username))
-            return false;
+        if (!validMap.containsKey(username)) {
+            return true;
+        }
 
-        validMap.entrySet().removeIf(map -> (map.getValue() + 600_000) > System.currentTimeMillis());
+        // Check hypixel api
 
-        return validMap.containsKey(username);
+        return false;
     }
 
-    public void checkNames(List<String> usernamesToCheck) {
-        responseMap.entrySet().removeIf(map -> (map.getValue() + 600_000) > System.currentTimeMillis());
+    public void checkNames(HashMap<String, UUID> usernamesToCheck) {
+        responseMap.entrySet().removeIf(map -> (map.getValue() + 600_000) < System.currentTimeMillis());
+        hypixelResponseMap.entrySet().removeIf(map -> (map.getValue() + 60_000) < System.currentTimeMillis());
 
         if (responseMap.size() < 600) {
             if (isRateLimited && responseMap.size() < 550) {
@@ -61,7 +67,6 @@ public class UUIDResolver {
 
             JsonArray jsonArray = new JsonArray();
             for (String name : names) {
-                checkedUsernames.add(name);
                 jsonArray.add(name);
             }
             testConnection.setJson(gson.toJson(jsonArray));
@@ -77,6 +82,13 @@ public class UUIDResolver {
             }
 
             responseMap.put(resultStr, current);
+
+            for (String name : names) {
+                checkedUsernames.add(name);
+                if (!validMap.containsKey(name)) {
+                    Notifications.getManager().post("Nick Detector", name + " is not a real player name!", 2500, Notifications.Type.WARNING);
+                }
+            }
         } catch (Exception ignored) {
 
         }
@@ -84,25 +96,64 @@ public class UUIDResolver {
 
     public class CheckThread extends Thread {
 
-        private final List<String> usernameList;
+        private final HashMap<String, UUID> usernameList;
 
-        public CheckThread(List<String> usernames) {
+        public CheckThread(HashMap<String, UUID> usernames) {
             this.usernameList = usernames;
         }
 
         @Override
         public void run() {
             isChecking = true;
-            List<String> tempList = new ArrayList<>();
-            for (String s : usernameList) {
-                tempList.add(s);
-                if (tempList.size() == 10) {
-                    resolveNames(tempList.toArray(new String[]{}));
-                    tempList.clear();
+            try {
+                List<String> tempList = new ArrayList<>();
+                for (String s : usernameList.keySet()) {
+                    if (!isChecking || Minecraft.getMinecraft().thePlayer == null)
+                        return;
+                    tempList.add(s);
+                    if (tempList.size() == 10) {
+                        resolveNames(tempList.toArray(new String[]{}));
+                        tempList.clear();
+                    }
                 }
-            }
-            if (!tempList.isEmpty() && tempList.size() <= 10) {
-                resolveNames(tempList.toArray(new String[]{}));
+                if (!tempList.isEmpty() && tempList.size() <= 10) {
+                    resolveNames(tempList.toArray(new String[]{}));
+                }
+
+                try {
+                    if (isChecking && Client.instance.hypixelApiKey != null && !Client.instance.hypixelApiKey.equals("") && hypixelResponseMap.size() < 120) {
+                        for (String username : usernameList.keySet()) {
+                            if (!isChecking || Minecraft.getMinecraft().thePlayer == null)
+                                return;
+                            if (validMap.containsKey(username) && checkedUsernames.contains(username)) {
+                                Connection hypixelApiConnection = new Connection("https://api.hypixel.net/player");
+
+                                hypixelApiConnection.setParameters("key", Client.instance.hypixelApiKey);
+                                hypixelApiConnection.setParameters("uuid", usernameList.get(username).toString());
+
+                                String response = Connector.get(hypixelApiConnection);
+
+                                JsonObject jsonObject = (JsonObject) JsonParser.parseString(response);
+
+                                boolean success = jsonObject.get("success").getAsBoolean();
+                                boolean playerNull = jsonObject.get("player").isJsonNull();
+
+                                if (success) {
+                                    if (playerNull) {
+                                        Notifications.getManager().post("Nick Detector", username + " is in /nick!", 2500, Notifications.Type.WARNING);
+                                        validMap.remove(username);
+                                    }
+                                }
+
+                                hypixelResponseMap.put(response, System.currentTimeMillis());
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+
+                }
+            } catch (Exception e) {
+                isChecking = false;
             }
             isChecking = false;
         }

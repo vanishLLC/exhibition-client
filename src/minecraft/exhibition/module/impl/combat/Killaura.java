@@ -364,7 +364,12 @@ public class Killaura extends Module {
         EventMotionUpdate em = event.cast();
         if (em.isPre()) {
             if(shouldToggle) {
+                if(isBlocking) {
+                    isBlocking = false;
+                    NetUtil.sendPacket(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
+                }
                 toggle();
+                return;
             }
 
             tickEntities();
@@ -518,7 +523,7 @@ public class Killaura extends Module {
                             else if (targetYaw < -maxAngleStep) targetYaw = -maxAngleStep;
 
                             Bypass bypass = Client.getModuleManager().getCast(Bypass.class);
-                            boolean allowInvalidAngles = bypass.allowBypassing() && (bypass.bruh > 10 && bypass.bruh % 100 > 10 && bypass.bruh % 100 < 99) && HypixelUtil.isVerifiedHypixel();
+                            boolean allowInvalidAngles = bypass.allowBypassing() && (bypass.bruh > 15) && HypixelUtil.isVerifiedHypixel();
 
                             if (shouldReduce) {
                                 float pitch = (float) -(Math.atan2(yDiff - (distance > 2.1 ? 0.75 : 1), dist) * 180.0D / 3.141592653589793D);

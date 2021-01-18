@@ -113,7 +113,7 @@ public class Nametags extends Module {
                 int dist = (int) mc.thePlayer.getDistanceToEntity(ent);
 
                 {
-                    boolean isPriority = ((TargetESP.isPriority(ent))) || FriendManager.isFriend(ent.getName());
+                    boolean isPriority = TargetESP.isPriority(ent) || FriendManager.isFriend(ent.getName());
 
                     String playerName = isPriority ? ent.getDisplayName().getFormattedText() : ent.getDisplayName().getFormattedText();
 

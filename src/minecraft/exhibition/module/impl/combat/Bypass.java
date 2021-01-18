@@ -7,6 +7,8 @@ import exhibition.event.impl.EventPacket;
 import exhibition.event.impl.EventRenderGui;
 import exhibition.event.impl.EventScreenDisplay;
 import exhibition.event.impl.EventTick;
+import exhibition.management.notifications.dev.DevNotification;
+import exhibition.management.notifications.dev.DevNotifications;
 import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
@@ -15,6 +17,7 @@ import exhibition.module.impl.movement.Fly;
 import exhibition.module.impl.movement.LongJump;
 import exhibition.util.*;
 import exhibition.util.Timer;
+import exhibition.util.misc.ChatUtil;
 import exhibition.util.render.Colors;
 import net.minecraft.client.gui.GuiDisconnected;
 import net.minecraft.client.gui.GuiDownloadTerrain;
@@ -107,16 +110,17 @@ public class Bypass extends Module {
         if (mc.getIntegratedServer() != null)
             return;
         Fly fly = Client.getModuleManager().get(Fly.class).cast();
-        boolean blorpFly = fly.isEnabled() && !((boolean) fly.getSetting("BLORP").getValue()) && (boolean) fly.getSetting("CHOKE").getValue();
+        boolean fallFly = fly.isEnabled() && !((boolean) fly.getSetting("BLORP").getValue()) && (boolean) fly.getSetting("CHOKE").getValue();
+
+        boolean isFlying = Client.getModuleManager().isEnabled(LongJump.class) || fallFly;
 
         if (event instanceof EventPacket) {
             if (mc.thePlayer != null) {
-                if (c13Timer.delay(10_000)) {
-                    if (!Client.getModuleManager().isEnabled(LongJump.class) && !blorpFly) {
-                        sendPackets();
-                        c13Timer.reset();
-                    }
-                }
+//                if (c13Timer.delay(7_500)) {
+//                    ChatUtil.printChat("Forced after " + MathUtils.roundToPlace((c13Timer.getDifference() / 1000D), 1) + "s");
+//                    sendPackets();
+//                    c13Timer.reset();
+//                }
             } else {
                 resetPackets();
             }
@@ -170,11 +174,6 @@ public class Bypass extends Module {
                 if (packet.getUid() < 0 && HypixelUtil.isVerifiedHypixel() && allowBypassing()) {
                     this.bruh++;
 
-                    if (Math.abs(packet.getUid() - lastUid) > 5) {
-                        //DevNotifications.getManager().post("\247Too Different");
-                        bruh = 0;
-                    }
-
                     if (bruh > 10) {
                         event.setCancelled(true);
 
@@ -182,7 +181,7 @@ public class Bypass extends Module {
                             sendPackets();
 
                             C0FPacketConfirmTransaction confirmTransaction = new C0FPacketConfirmTransaction(packet.getWindowId(), packet.getUid(), packet.getAccepted());
-                            if (!Client.getModuleManager().isEnabled(LongJump.class) && !blorpFly) {
+                            if (!isFlying) {
                                 c13Timer.reset();
                             }
                             chokePackets.add(confirmTransaction);
@@ -193,17 +192,17 @@ public class Bypass extends Module {
                             return;
                         }
 
-                        if (bruh % (45 + (randomDelay)) == 0) {
+                        if ((bruh - 10) % (45 + (randomDelay)) == 0) {
                             short lastbruh = (short) lastSentUid;
-                            C0FPacketConfirmTransaction confirmTransaction = new C0FPacketConfirmTransaction(packet.getWindowId(), (short) (lastSentUid = packet.getUid()), packet.getAccepted());
-                            if (!Client.getModuleManager().isEnabled(LongJump.class) && !blorpFly) {
-                                sendPackets();
-                                c13Timer.reset();
-                            }
-                            chokePackets.add(confirmTransaction);
+                            chokePackets.add(packet);
+                            sendPackets();
+                            c13Timer.reset();
+                            lastSentUid = packet.getUid();
                             //DevNotifications.getManager().post("\247eSent from \247c" + lastbruh + "\247e to \247a" + lastSentUid);
-                            randomDelay = random.nextInt(30);
+                            randomDelay = random.nextInt(5);
                             bruh = 10;
+                        } else {
+                            chokePackets.add(packet);
                         }
 //                        if (Math.abs(packet.getUid() - lastUid) > 1)
 //                            DevNotifications.getManager().post("\2476Packet Difference?: " + packet.getUid() + " " + lastUid + " " + Math.abs(packet.getUid() - lastUid));
@@ -280,13 +279,17 @@ public class Bypass extends Module {
     }
 
     public void sendPackets() {
-        boolean b = false;
+        int sent = 0;
         while (chokePackets.peek() != null) {
             Packet packet = chokePackets.poll();
             if (packet != null) {
-                b = true;
+                sent++;
                 NetUtil.sendPacketNoEvents(packet);
             }
+        }
+
+        if (sent > 0) {
+            ChatUtil.printChat("BUM " + sent);
         }
         this.resetPackets();
     }

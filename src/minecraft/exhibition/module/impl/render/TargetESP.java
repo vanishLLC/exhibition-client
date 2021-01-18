@@ -86,7 +86,10 @@ public class TargetESP extends Module {
             return true;
         if (PriorityManager.isPriority(player))
             return true;
-        if(Client.getModuleManager().isEnabled(TargetESP.class) && (player.getDisplayName().getFormattedText().contains("0g") || player.getDisplayName().getFormattedText().contains("5g"))) {
+
+        String formatted = player.getDisplayName().getFormattedText();
+
+        if(Client.getModuleManager().isEnabled(TargetESP.class) && ((formatted.contains("0g") && !formatted.contains("\2476\247l100g")) || formatted.contains("5g"))) {
             if (player.getDisplayName().getFormattedText().contains(" \2476\247l")) {
                 return true;
             }
@@ -95,7 +98,7 @@ public class TargetESP extends Module {
             }
             return player.getDisplayName().getFormattedText().contains(" \247c\247l");
         }
-        if(Client.getModuleManager().isEnabled(TargetESP.class) && (player.getDisplayName().getFormattedText().contains("HELD") || player.getDisplayName().getFormattedText().contains("BEAST")) && HypixelUtil.scoreboardContains("Event")) {
+        if(Client.getModuleManager().isEnabled(TargetESP.class) && (formatted.contains("HELD") || formatted.contains("BEAST")) && HypixelUtil.scoreboardContains("Event")) {
             return true;
         }
         return false;

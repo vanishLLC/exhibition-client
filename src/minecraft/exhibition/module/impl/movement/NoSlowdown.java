@@ -38,16 +38,16 @@ public class NoSlowdown extends Module {
     public void onEvent(Event event) {
         if (mc.thePlayer == null)
             return;
-        boolean shouldUnblock = (mc.thePlayer.isBlocking() || (mc.thePlayer.isUsingItem() && mc.thePlayer.getCurrentEquippedItem() != null && mc.thePlayer.getCurrentEquippedItem().getItem() instanceof ItemBow)) && PlayerUtil.isMoving();
+        boolean shouldUnblock = (mc.thePlayer.isBlocking()) && PlayerUtil.isMoving();
         if (event instanceof EventMotionUpdate) {
             if ((boolean) settings.get("VANILLA").getValue())
                 return;
-            if (!mc.thePlayer.isCollidedVertically && !mc.thePlayer.onGround){
+            if (!mc.thePlayer.isCollidedVertically || !mc.thePlayer.onGround) {
                 return;
             }
             EventMotionUpdate em = (EventMotionUpdate) event;
             Killaura killaura = ((Killaura) Client.getModuleManager().get(Killaura.class));
-            if (shouldUnblock && !(Boolean) settings.get("VANILLA").getValue()) {
+            if (shouldUnblock) {
                 if (em.isPre() && (mc.thePlayer.isBlocking() && killaura.isBlocking)) {
                     if (mc.thePlayer.isCollidedVertically && mc.thePlayer.onGround) {
                         killaura.isBlocking = false;
@@ -84,6 +84,7 @@ public class NoSlowdown extends Module {
         }
         return touchingGround;
     }
+
     public boolean isPosOnGround(double posX, double posY, double posZ) {
         boolean isOnSlab = MathUtils.roundToPlace((posY - (int) posY), 1) == 0.5;
 

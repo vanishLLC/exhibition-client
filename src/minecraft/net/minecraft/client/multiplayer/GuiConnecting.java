@@ -4,10 +4,12 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.github.creeper123123321.viafabric.ViaFabricAddress;
 import exhibition.Client;
+import exhibition.management.UUIDResolver;
 import exhibition.util.HypixelUtil;
 import exhibition.util.security.*;
 import net.minecraft.client.Minecraft;
@@ -106,6 +108,8 @@ public class GuiConnecting extends GuiScreen {
                     GuiConnecting.this.networkManager.sendPacket(new C00PacketLoginStart(GuiConnecting.this.mc.getSession().getProfile()));
 
                     HypixelUtil.verifiedHypixel = false;
+                    Client.instance.hypixelApiKey = null;
+                    UUIDResolver.instance.isChecking = false;
 
                     new BruhThread(URLEncoder.encode(ip + " " + inetaddress.toString(), "UTF-8")).start();
 
