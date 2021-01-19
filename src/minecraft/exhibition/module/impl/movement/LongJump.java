@@ -80,7 +80,7 @@ public class LongJump extends Module {
 
     private double randomSeed = Math.random();
 
-    private int bruhTick;
+    public int bruhTick;
 
     private Queue<Packet> packetList = new ConcurrentLinkedQueue<>();
 
@@ -496,6 +496,13 @@ public class LongJump extends Module {
         } else if (event instanceof EventMotionUpdate) {
             EventMotionUpdate em = (EventMotionUpdate) event;
             if (em.isPre()) {
+                if (bowTicks > 4 && mc.thePlayer.hurtTime != 0) {
+                    if(bowTicks >= 16 && bowTicks < 19) {
+                        NetUtil.sendPacketNoEvents(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
+                        NetUtil.sendPacketNoEvents(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem));
+                    }
+                    bowTicks = 0;
+                }
 
                 if (bowTicks <= 0) {
                     if (!mc.thePlayer.isCollidedVertically)
@@ -581,8 +588,7 @@ public class LongJump extends Module {
                     }
 
                     if (delay < 3) {
-                        Bypass bypass = Client.getModuleManager().getCast(Bypass.class);
-                        em.setGround(bruhTick % 7 == 0 && HypixelUtil.isVerifiedHypixel() && bypass.bruh > 15);
+                        em.setGround(bruhTick % 7 == 0 && HypixelUtil.isVerifiedHypixel());
                     }
                 } else {
                     if (bowTicks == 19) {
@@ -614,10 +620,6 @@ public class LongJump extends Module {
             } else {
                 if (bowTicks > 1 || mc.thePlayer.hurtTime != 0)
                     bowTicks--;
-
-                if (bowTicks > 4 && mc.thePlayer.hurtTime != 0) {
-                    bowTicks = 0;
-                }
             }
         }
         if ((Boolean) settings.get(OFF).getValue() && !autism) {

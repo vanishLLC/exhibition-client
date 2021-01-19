@@ -48,7 +48,7 @@ public class HypixelUtil {
         ScoreObjective scoreobjective1 = scoreobjective != null ? scoreobjective : scoreboard.getObjectiveInDisplaySlot(1);
 
         if (scoreobjective1 != null) {
-            String bruh = StringUtils.stripControlCodes(scoreobjective1.getDisplayName());
+            String bruh = StringUtils.stripHypixelControlCodes(scoreobjective1.getDisplayName());
             return bruh.toLowerCase().contains(gameString.toLowerCase());
         }
 
@@ -100,7 +100,7 @@ public class HypixelUtil {
                     ScorePlayerTeam scoreplayerteam1 = scoreboard.getPlayersTeam(score.getPlayerName());
                     String s1 = ScorePlayerTeam.formatPlayerName(scoreplayerteam1, score.getPlayerName()).replace("\uD83D\uDC7D", "").replace("\uD83C\uDF82", "").replace("\247g", "");
 
-                    if (StringUtils.stripControlCodes(s1).toLowerCase().contains(str.toLowerCase())) {
+                    if (StringUtils.stripHypixelControlCodes(s1).toLowerCase().contains(str.toLowerCase())) {
                         return true;
                     }
                 }

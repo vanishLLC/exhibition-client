@@ -235,7 +235,7 @@ public class AntiBot extends Module {
                                         //DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " \247e" + "Weird bot spawn pos?");
                                     }
 
-                                    DevNotifications.getManager().post("Suspicious Spawn " + ent.getName() + " " + ent.getDisplayName().getFormattedText() + " " + ent.ticksExisted + " " + Math.abs(distance));
+                                    //DevNotifications.getManager().post("Suspicious Spawn " + ent.getName() + " " + ent.getDisplayName().getFormattedText() + " " + ent.ticksExisted + " " + Math.abs(distance));
                                     //DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "------------------------------------------------------------------------");
                                     ent.illegalSpawn = true;
                                 }
