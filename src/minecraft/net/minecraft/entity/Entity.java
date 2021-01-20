@@ -10,6 +10,7 @@ import exhibition.event.EventSystem;
 import exhibition.event.impl.EventStep;
 import exhibition.module.impl.combat.Killaura;
 import exhibition.module.impl.movement.Fly;
+import exhibition.module.impl.movement.FreecamTP;
 import exhibition.module.impl.player.AntiObby;
 import exhibition.module.impl.player.Scaffold;
 import exhibition.module.impl.render.Freecam;
@@ -1810,7 +1811,7 @@ public abstract class Entity implements ICommandSender
      */
     public boolean isEntityInsideOpaqueBlock()
     {
-        if (this.noClip || Client.getModuleManager().isEnabled(Freecam.class) || Client.getModuleManager().isEnabled(AntiObby.class))
+        if (this.noClip || Client.getModuleManager().isEnabled(Freecam.class) || Client.getModuleManager().isEnabled(FreecamTP.class) || Client.getModuleManager().isEnabled(AntiObby.class))
         {
             return false;
         }

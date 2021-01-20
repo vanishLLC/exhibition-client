@@ -52,7 +52,9 @@ public class AntiFall extends Module {
             }
 
             int dist = ((Number) settings.get(DISTANCE).getValue()).intValue();
-            if (mc.thePlayer.fallDistance >= dist && !Client.getModuleManager().isEnabled(Fly.class) && !Client.getModuleManager().isEnabled(Freecam.class) && mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.5, mc.thePlayer.posZ)).getBlock() == Blocks.air) {
+            if (mc.thePlayer.fallDistance >= dist && !Client.getModuleManager().isEnabled(Fly.class) && !Client.getModuleManager().isEnabled(Freecam.class)
+                    && !Client.getModuleManager().isEnabled(FreecamTP.class)
+                    && mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.5, mc.thePlayer.posZ)).getBlock() == Blocks.air) {
                 if (!((Boolean) settings.get(VOID).getValue()) || !isBlockUnder()) {
                     if (!saveMe) {
                         saveMe = true;

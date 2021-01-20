@@ -110,7 +110,7 @@ public abstract class ChatComponentStyle implements IChatComponent
             }
 
             for (Friend friend : FriendManager.friendsList) {
-                if (unformatted.contains(friend.name)) {
+                if (unformatted.contains(friend.name) && friend.name.length() >= 3) {
                     s = s.replaceAll(friend.name, "\247d\247l" + friend.alias + "\247r");
                 }
             }

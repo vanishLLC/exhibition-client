@@ -869,7 +869,7 @@ public class Killaura extends Module {
                                 mc.thePlayer.onCriticalHit(target);
                             }
                         }
-                    } else {
+                    } /*else {
                         float yawDiff = RotationUtils.getYawChangeGiven(target.posX + p[0], target.posZ + p[2], em.getYaw());
                         double offOrig = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), v, target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height, 1.2);
 
@@ -878,7 +878,7 @@ public class Killaura extends Module {
                         ChatUtil.debug("\247a" + yawDiff + " \247b" + off + " \247c" + offOrig + " \247d" + willViolate);
                         ChatUtil.debug("\247a" + mc.thePlayer.getDistance(target.posX + p[0], target.posY + p[1], target.posZ + p[2]) + " " + angleTimer.getDifference());
                         ChatUtil.debug("----------------------------------");
-                    }
+                    }*/
                 }/* else {
                     if (isAttacking) {
                         ChatUtil.printChat("Blocking? " + isBlocking + " " + mc.thePlayer.ticksExisted);
@@ -1211,27 +1211,30 @@ public class Killaura extends Module {
 
     // This is for Health Vampire mode
     private double getTargetWeighted(EntityLivingBase entityLivingBase) {
-        double weight = entityLivingBase.getHealth() + Math.max(entityLivingBase.waitTicks, 0);
+        double weight = entityLivingBase.getHealth();
 
-        // If the player is hurt, we don't get any benefit?
-        if (entityLivingBase.hurtTime >= 6) {
-            weight += 10;
-        }
+        if(mc.thePlayer.getHealth() <= 19.5) {
+            weight += Math.max(entityLivingBase.waitTicks, 0);
+            // If the player is hurt, we don't get any benefit?
+            if (entityLivingBase.hurtTime >= 6) {
+                weight += 10;
+            }
 
-        float estimatedYawChange;
+            float estimatedYawChange;
 
-        float forwardYawDiff = Math.abs(MathHelper.clamp_float(RotationUtils.getYawChangeGiven(target.posX, target.posZ, lastAngles.x), -180, 180));
-        if (forwardYawDiff > 90) {
-            estimatedYawChange = Math.abs(MathHelper.clamp_float(RotationUtils.getYawChangeGiven(target.posX, target.posZ, lastAngles.x + 180), -180, 180));
-        } else {
-            estimatedYawChange = forwardYawDiff;
-        }
+            float forwardYawDiff = Math.abs(MathHelper.clamp_float(RotationUtils.getYawChangeGiven(entityLivingBase.posX, entityLivingBase.posZ, lastAngles.x), -180, 180));
+            if (forwardYawDiff > 90) {
+                estimatedYawChange = Math.abs(MathHelper.clamp_float(RotationUtils.getYawChangeGiven(entityLivingBase.posX, entityLivingBase.posZ, lastAngles.x + 180), -180, 180));
+            } else {
+                estimatedYawChange = forwardYawDiff;
+            }
 
-        estimatedYawChange = (float) MathUtils.getIncremental(estimatedYawChange, 20);
+            estimatedYawChange = (float) MathUtils.getIncremental(estimatedYawChange, 20);
 
-        // The bigger the difference, the less we prefer to swap to them.
-        if (estimatedYawChange >= 60) {
-            weight += estimatedYawChange / 20;
+            // The bigger the difference, the less we prefer to swap to them.
+            if (estimatedYawChange >= 60) {
+                weight += estimatedYawChange / 20;
+            }
         }
 
         return weight;

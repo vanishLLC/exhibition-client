@@ -77,11 +77,11 @@ public class SkeetMenu extends UI {
     public void mainPanelDraw(MainPanel panel, int p0, int p1) {
         opacity.interp(panel.opacity, 25);
 
-        RenderingUtil.rectangleBordered(panel.x + panel.dragX - 0.3, panel.y + panel.dragY - 0.3, panel.x + 340 + panel.dragX + 0.5, panel.y + 310 + panel.dragY + 0.3, 0.5, Colors.getColor(0, 0), Colors.getColor(10, (int) opacity.getOpacity()));//60 60 opaccity and 22
-        RenderingUtil.rectangleBordered(panel.x + panel.dragX, panel.y + panel.dragY, panel.x + 340 + panel.dragX, panel.y + 310 + panel.dragY, 0.5, Colors.getColor(0, 0), Colors.getColor(60, (int) opacity.getOpacity()));
-        RenderingUtil.rectangleBordered(panel.x + panel.dragX + 2, panel.y + panel.dragY + 2, panel.x + 340 + panel.dragX - 2, panel.y + 310 + panel.dragY - 2, 0.5, Colors.getColor(0, 0), Colors.getColor(60, (int) opacity.getOpacity()));
-        RenderingUtil.rectangleBordered(panel.x + panel.dragX + 0.6, panel.y + panel.dragY + 0.6, panel.x + 340 + panel.dragX - 0.5, panel.y + 310 + panel.dragY - 0.6, 1.3, Colors.getColor(0, 0), Colors.getColor(40, (int) opacity.getOpacity()));
-        RenderingUtil.rectangleBordered(panel.x + panel.dragX + 2.5, panel.y + panel.dragY + 2.5, panel.x + 340 + panel.dragX - 2.5, panel.y + 310 + panel.dragY - 2.5, 0.5, Colors.getColor(22, (int) opacity.getOpacity()), Colors.getColor(22, (int) opacity.getOpacity()));
+        RenderingUtil.rectangleBordered(panel.x + panel.dragX - 0.3, panel.y + panel.dragY - 0.3, panel.x + 340 + panel.dragX + 0.5, panel.y + 340 + panel.dragY + 0.3, 0.5, Colors.getColor(0, 0), Colors.getColor(10, (int) opacity.getOpacity()));//60 60 opaccity and 22
+        RenderingUtil.rectangleBordered(panel.x + panel.dragX, panel.y + panel.dragY, panel.x + 340 + panel.dragX, panel.y + 340 + panel.dragY, 0.5, Colors.getColor(0, 0), Colors.getColor(60, (int) opacity.getOpacity()));
+        RenderingUtil.rectangleBordered(panel.x + panel.dragX + 2, panel.y + panel.dragY + 2, panel.x + 340 + panel.dragX - 2, panel.y + 340 + panel.dragY - 2, 0.5, Colors.getColor(0, 0), Colors.getColor(60, (int) opacity.getOpacity()));
+        RenderingUtil.rectangleBordered(panel.x + panel.dragX + 0.6, panel.y + panel.dragY + 0.6, panel.x + 340 + panel.dragX - 0.5, panel.y + 340 + panel.dragY - 0.6, 1.3, Colors.getColor(0, 0), Colors.getColor(40, (int) opacity.getOpacity()));
+        RenderingUtil.rectangleBordered(panel.x + panel.dragX + 2.5, panel.y + panel.dragY + 2.5, panel.x + 340 + panel.dragX - 2.5, panel.y + 340 + panel.dragY - 2.5, 0.5, Colors.getColor(22, (int) opacity.getOpacity()), Colors.getColor(22, (int) opacity.getOpacity()));
         RenderingUtil.drawGradientSideways(panel.x + panel.dragX + 3, panel.y + panel.dragY + 3, panel.x + 178 + panel.dragX - 3, panel.dragY + panel.y + 4, Colors.getColor(55, 177, 218, (int) opacity.getOpacity()), Colors.getColor(204, 77, 198, (int) opacity.getOpacity()));
         RenderingUtil.drawGradientSideways(panel.x + panel.dragX + 175, panel.y + panel.dragY + 3, panel.x + 340 + panel.dragX - 3, panel.dragY + panel.y + 4, Colors.getColor(204, 77, 198, (int) opacity.getOpacity()), Colors.getColor(204, 227, 53, (int) opacity.getOpacity()));
 
@@ -106,17 +106,17 @@ public class SkeetMenu extends UI {
         Depth.pre();
         Depth.mask();
         RenderingUtil.rectangle(panel.x + panel.dragX + 3, panel.y + panel.dragY + 4F, panel.x + panel.dragX + 40, panel.y + panel.dragY + y, -1);
-        RenderingUtil.rectangle(panel.x + panel.dragX + 3, panel.y + panel.dragY + y + 40, panel.x + panel.dragX + 40, panel.y + panel.dragY + 308, -1);
+        RenderingUtil.rectangle(panel.x + panel.dragX + 3, panel.y + panel.dragY + y + 40, panel.x + panel.dragX + 40, panel.y + panel.dragY + 308 + 30, -1);
         Depth.render(GL11.GL_LESS);
         GlStateManager.enableAlpha();
         GlStateManager.enableBlend();
         Depth.mask();
         mc.getTextureManager().bindTexture(texture);
         GlStateManager.translate(panel.x + panel.dragX + 2.5, panel.dragY + panel.y + 3f, 0);
-        drawIcon(1, 1, 0, 0, 340 - 6.5, 310 - 7, 812 / 2F, 688 / 2F);
+        drawIcon(1, 1, 0, 0, 340 - 6.5, 310 - 7 + 30, 812 / 2F, 688 / 2F);
         Depth.render(GL11.GL_EQUAL);
         mc.getTextureManager().bindTexture(tex);
-        drawIcon(1, 1, 0, 0, 340 - 6.5, 310 - 7, 812 / 2F, 688 / 2F);
+        drawIcon(1, 1, 0, 0, 340 - 6.5, 310 - 7 + 30, 812 / 2F, 688 / 2F);
         Depth.post();
         GlStateManager.disableBlend();
         GlStateManager.disableAlpha();
@@ -133,7 +133,7 @@ public class SkeetMenu extends UI {
         Depth.pre();
         Depth.mask();
         RenderingUtil.rectangle(panel.x + panel.dragX + 3, panel.y + panel.dragY + 4F, panel.x + panel.dragX + 40, panel.y + panel.dragY + y + 1, -1);
-        RenderingUtil.rectangle(panel.x + panel.dragX + 3, panel.y + panel.dragY + y + 40, panel.x + panel.dragX + 40, panel.y + panel.dragY + 307.5, -1);
+        RenderingUtil.rectangle(panel.x + panel.dragX + 3, panel.y + panel.dragY + y + 40, panel.x + panel.dragX + 40, panel.y + panel.dragY + 307.5 + 30, -1);
 
         Depth.render();
         RenderingUtil.rectangleBordered(panel.x + panel.dragX + 2, panel.y + panel.dragY + 3, panel.x + panel.dragX + 40, panel.y + panel.dragY + y, 1, Colors.getColor(0, 0), Colors.getColor(0, (int) opacity.getOpacity()));
@@ -141,10 +141,10 @@ public class SkeetMenu extends UI {
 
         RenderingUtil.rectangle(panel.x + panel.dragX + 3, panel.y + panel.dragY + 4, panel.x + panel.dragX + 39, panel.y + panel.dragY + y - 1, Colors.getColor(12, (int) opacity.getOpacity()));
 
-        RenderingUtil.rectangleBordered(panel.x + panel.dragX + 2, panel.y + panel.dragY + y + 40, panel.x + panel.dragX + 40, panel.y + panel.dragY + 308, 1, Colors.getColor(0, 0), Colors.getColor(0, (int) opacity.getOpacity()));
-        RenderingUtil.rectangleBordered(panel.x + panel.dragX + 2, panel.y + panel.dragY + y + 40, panel.x + panel.dragX + 40, panel.y + panel.dragY + 308, 0.5, Colors.getColor(0, 0), Colors.getColor(48, (int) opacity.getOpacity()));
+        RenderingUtil.rectangleBordered(panel.x + panel.dragX + 2, panel.y + panel.dragY + y + 40, panel.x + panel.dragX + 40, panel.y + panel.dragY + 308 + 30, 1, Colors.getColor(0, 0), Colors.getColor(0, (int) opacity.getOpacity()));
+        RenderingUtil.rectangleBordered(panel.x + panel.dragX + 2, panel.y + panel.dragY + y + 40, panel.x + panel.dragX + 40, panel.y + panel.dragY + 308 + 30, 0.5, Colors.getColor(0, 0), Colors.getColor(48, (int) opacity.getOpacity()));
 
-        RenderingUtil.rectangle(panel.x + panel.dragX + 3, panel.y + panel.dragY + y + 41, panel.x + panel.dragX + 39, panel.y + panel.dragY + 307.5, Colors.getColor(12, (int) opacity.getOpacity()));
+        RenderingUtil.rectangle(panel.x + panel.dragX + 3, panel.y + panel.dragY + y + 41, panel.x + panel.dragX + 39, panel.y + panel.dragY + 307.5 + 30, Colors.getColor(12, (int) opacity.getOpacity()));
         Depth.post();
         GlStateManager.popMatrix();
 
@@ -168,7 +168,7 @@ public class SkeetMenu extends UI {
             if (panel.dragX < 2 - 50) {
                 panel.dragX = 2 - 50;
             }
-            double yBorder = (rs.getScaledHeight() / twoDscale - 362);
+            double yBorder = (rs.getScaledHeight() / twoDscale - 392);
 
             if (panel.dragY > yBorder) {
                 panel.dragY = (float) yBorder;
@@ -274,6 +274,8 @@ public class SkeetMenu extends UI {
             y += 40;
         }
         mainPanel.typeButton.add(new CategoryButton(mainPanel, "Colors", x + 3, y + y1));
+        y += 40;
+        mainPanel.typeButton.add(new CategoryButton(mainPanel, "Settings", x + 3, y + y1));
         mainPanel.typeButton.get(0).enabled = true;
         mainPanel.typeButton.get(0).categoryPanel.visible = true;
 /*        mainPanel.slButtons.add(new SLButton(mainPanel, "Save", 5, 275 - 49, false));
@@ -369,6 +371,9 @@ public class SkeetMenu extends UI {
                 break;
             case "Minigames":
                 Client.badCache.drawCenteredString("G", (p0.x + 18.5F + p0.panel.dragX), (p0.y + 20 + p0.panel.dragY), color);
+                break;
+            case "Settings":
+                Client.f.drawCenteredString("[+]", (p0.x + 18.5F + p0.panel.dragX), (p0.y + 20 + p0.panel.dragY), color);
                 break;
             default:
                 Client.f.drawStringWithShadow(p0.name.substring(0, 1), (p0.x + 12 + p0.panel.dragX), (p0.y + 13 + p0.panel.dragY), color);
@@ -496,9 +501,9 @@ public class SkeetMenu extends UI {
                         }
                     } else {
                         if (noSets >= 240) {
-                            categoryPanel.buttons.add(new Button(categoryPanel, module.getName(), 55 + categoryButton.panel.x + noSets - 240, 345, module));
+                            categoryPanel.buttons.add(new Button(categoryPanel, module.getName(), 55 + categoryButton.panel.x + noSets - 240, 345 + 30, module));
                         } else {
-                            categoryPanel.buttons.add(new Button(categoryPanel, module.getName(), 55 + categoryButton.panel.x + noSets, 330, module));
+                            categoryPanel.buttons.add(new Button(categoryPanel, module.getName(), 55 + categoryButton.panel.x + noSets, 360, module));
                         }
                         noSets += 40;
                     }
@@ -639,9 +644,9 @@ public class SkeetMenu extends UI {
                         }
                     } else {
                         if (noSets >= 240) {
-                            categoryPanel.buttons.add(new Button(categoryPanel, module.getName(), 55 + categoryButton.panel.x + noSets - 240, 345, module));
+                            categoryPanel.buttons.add(new Button(categoryPanel, module.getName(), 55 + categoryButton.panel.x + noSets - 240, 345 + 30, module));
                         } else {
-                            categoryPanel.buttons.add(new Button(categoryPanel, module.getName(), 55 + categoryButton.panel.x + noSets, 330, module));
+                            categoryPanel.buttons.add(new Button(categoryPanel, module.getName(), 55 + categoryButton.panel.x + noSets, 360, module));
                         }
                         noSets += 40;
                     }
@@ -774,9 +779,9 @@ public class SkeetMenu extends UI {
                         }
                     } else {
                         if (noSets >= 240) {
-                            categoryPanel.buttons.add(new Button(categoryPanel, module.getName(), 55 + categoryButton.panel.x + noSets - 240, 345, module));
+                            categoryPanel.buttons.add(new Button(categoryPanel, module.getName(), 55 + categoryButton.panel.x + noSets - 240, 345 + 30, module));
                         } else {
-                            categoryPanel.buttons.add(new Button(categoryPanel, module.getName(), 55 + categoryButton.panel.x + noSets, 330, module));
+                            categoryPanel.buttons.add(new Button(categoryPanel, module.getName(), 55 + categoryButton.panel.x + noSets, 360, module));
                         }
                         noSets += 40;
                     }
@@ -904,9 +909,9 @@ public class SkeetMenu extends UI {
                         }
                     } else {
                         if (noSets >= 240) {
-                            categoryPanel.buttons.add(new Button(categoryPanel, module.getName(), 55 + categoryButton.panel.x + noSets - 240, 345, module));
+                            categoryPanel.buttons.add(new Button(categoryPanel, module.getName(), 55 + categoryButton.panel.x + noSets - 240, 345 + 30, module));
                         } else {
-                            categoryPanel.buttons.add(new Button(categoryPanel, module.getName(), 55 + categoryButton.panel.x + noSets, 330, module));
+                            categoryPanel.buttons.add(new Button(categoryPanel, module.getName(), 55 + categoryButton.panel.x + noSets, 360, module));
                         }
                         noSets += 40;
                     }
@@ -1076,9 +1081,9 @@ public class SkeetMenu extends UI {
                         }
                     } else {
                         if (noSets >= 259) {
-                            categoryPanel.buttons.add(new Button(categoryPanel, module.getName(), 55 + categoryButton.panel.x + noSets - 259, 345, module));
+                            categoryPanel.buttons.add(new Button(categoryPanel, module.getName(), 55 + categoryButton.panel.x + noSets - 259, 345 + 30, module));
                         } else {
-                            categoryPanel.buttons.add(new Button(categoryPanel, module.getName(), 55 + categoryButton.panel.x + noSets, 330, module));
+                            categoryPanel.buttons.add(new Button(categoryPanel, module.getName(), 55 + categoryButton.panel.x + noSets, 360, module));
                         }
                         noSets += 37;
                     }
@@ -1107,23 +1112,20 @@ public class SkeetMenu extends UI {
                             yOff -= 28.5;
                         }
                         if (module.getName().equalsIgnoreCase("Spotify")) {
-                            xOff = 50 + categoryButton.panel.x;
-                            yOff += 65.5;
+                            yOff += 11;
                         }
                         if (module.getName().equalsIgnoreCase("SilentView")) {
-                            xOff = 50 + categoryButton.panel.x;
-                            yOff += 32;
+                            yOff += 7.5;
                         }
-                        if (module.getName().equalsIgnoreCase("AutoSkin")) {
-                            xOff = 50 + categoryButton.panel.x + 95;
-                            yOff += 37;
+                        if (module.getName().equalsIgnoreCase("AutoOOF")) {
+                            yOff += 1.5;
                         }
                         if (module.getName().equalsIgnoreCase("ChatFilter")) {
-                            yOff -= 52.5 - 4;
+                            yOff -= 18.5;
                         }
                         if (module.getName().equalsIgnoreCase("NetInfo")) {
                             //xOff = 50 + categoryButton.panel.x + 95;
-                            yOff -= 38;
+                            //yOff -= 38;
                         }
                         categoryPanel.buttons.add(new Button(categoryPanel, module.getName(), xOff + 0.5f, yOff + 10, module));
                         float x1 = 0.5f;
@@ -1217,9 +1219,9 @@ public class SkeetMenu extends UI {
                         }
                     } else {
                         if (noSets >= 240) {
-                            categoryPanel.buttons.add(new Button(categoryPanel, module.getName(), 55 + categoryButton.panel.x + noSets - 240, 345, module));
+                            categoryPanel.buttons.add(new Button(categoryPanel, module.getName(), 55 + categoryButton.panel.x + noSets - 240, 345 + 30, module));
                         } else {
-                            categoryPanel.buttons.add(new Button(categoryPanel, module.getName(), 55 + categoryButton.panel.x + noSets, 330, module));
+                            categoryPanel.buttons.add(new Button(categoryPanel, module.getName(), 55 + categoryButton.panel.x + noSets, 360, module));
                         }
                         noSets += 40;
                     }
@@ -1230,7 +1232,10 @@ public class SkeetMenu extends UI {
                     }
                 }
             }
-            float globalsOffsetX = 290 - 95, globalsOffsetY = 178 + 75;
+        }
+        if (categoryButton.name.equalsIgnoreCase("Settings")) {
+            float biggestY = yOff + y;
+            float globalsOffsetX = xOff + 95, globalsOffsetY = biggestY;
             categoryPanel.groupBoxes.add(new GroupBox("Client Settings", categoryPanel, globalsOffsetX, globalsOffsetY, 40.5F, true));
             categoryPanel.checkboxes.add(new Checkbox(categoryPanel, globalsOffsetX + 0.5F, globalsOffsetY + 10, GlobalValues.centerNotifs));
             categoryPanel.checkboxes.add(new Checkbox(categoryPanel, globalsOffsetX + 0.5F, globalsOffsetY + 20, GlobalValues.scaleFix));
@@ -1242,7 +1247,7 @@ public class SkeetMenu extends UI {
             categoryPanel.checkboxes.add(new Checkbox(categoryPanel, globalsOffsetX + 44.5F, globalsOffsetY + 30, GlobalValues.keepPriority));
 
 
-            float xOffsetXD = 290, yOffsetXD = 215 - 10;
+            float xOffsetXD = xOff, yOffsetXD = biggestY;
             categoryPanel.groupBoxes.add(new GroupBox("Configs", categoryPanel, xOffsetXD, yOffsetXD, 100, true));
             categoryPanel.configTextBox = new ConfigTextBox(xOffsetXD, yOffsetXD + 90, categoryPanel);
             categoryPanel.configList = new ConfigList(xOffsetXD, yOffsetXD + 10, categoryPanel);
@@ -1250,7 +1255,6 @@ public class SkeetMenu extends UI {
             //                                 categoryPanel.checkboxes.add(new Checkbox(categoryPanel, setting.getName(), xOff + x1, yOff + y, setting));
             categoryPanel.checkboxes.add(new Checkbox(categoryPanel, GlobalValues.saveVisuals.getName(), xOffsetXD + 0.5F, yOffsetXD + 100, GlobalValues.saveVisuals));
             categoryPanel.checkboxes.add(new Checkbox(categoryPanel, GlobalValues.loadVisuals.getName(), xOffsetXD + 44.5F, yOffsetXD + 100, GlobalValues.loadVisuals));
-
         }
         if (categoryButton.name.equalsIgnoreCase("Colors")) {
             categoryPanel.colorPreviews.add(new ColorPreview(ColorManager.fVis, "Friendly Visible", xOff + 77.5F, y, categoryButton));
@@ -1336,9 +1340,11 @@ public class SkeetMenu extends UI {
         for (GroupBox groupBox : categoryPanel.groupBoxes) {
             groupBox.draw(x, y);
         }
-        if (!categoryPanel.categoryButton.name.equalsIgnoreCase("Colors") && !categoryPanel.categoryButton.name.equalsIgnoreCase("Combat") && !categoryPanel.categoryButton.name.equals("Minigames")) {
+        String name = categoryPanel.categoryButton.name;
+        if (!name.equalsIgnoreCase("Colors") && !name.equalsIgnoreCase("Combat") &&
+                !name.equalsIgnoreCase("Settings") && !name.equals("Minigames")) {
             float xOff = 100 + categoryPanel.categoryButton.panel.dragX - 2.5F;
-            float yOff = 322 + categoryPanel.categoryButton.panel.dragY;
+            float yOff = 322 + categoryPanel.categoryButton.panel.dragY + 30;
             RenderingUtil.rectangleBordered(xOff, yOff - 6, xOff + 280, yOff + 33, 0.5, Colors.getColor(0, 0), Colors.getColor(10, (int) opacity.getOpacity()));
             RenderingUtil.rectangleBordered(xOff + 0.5, yOff - 5.5, xOff + 280 - 0.5, yOff + 33 - 0.5, 0.5, Colors.getColor(0, 0), Colors.getColor(48, (int) opacity.getOpacity()));
             RenderingUtil.rectangle(xOff + 1, yOff - 5, xOff + 279, yOff + 33 - 1, Colors.getColor(17, (int) opacity.getOpacity()));

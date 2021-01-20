@@ -59,11 +59,11 @@ public class GuiPlayerTabOverlay extends Gui {
         String bruh = networkPlayerInfoIn.getDisplayName() != null ? networkPlayerInfoIn.getDisplayName().getFormattedText() : ScorePlayerTeam.formatPlayerName(networkPlayerInfoIn.getPlayerTeam(), networkPlayerInfoIn.getGameProfile().getName());
 
         if (Client.getModuleManager().isEnabled(StreamerMode.class) && (boolean) Client.getModuleManager().get(StreamerMode.class).getSetting("PROTECT").getValue() && mc.thePlayer != null)
-            if (bruh.contains(mc.thePlayer.getName())) {
-                bruh = bruh.replaceAll(mc.thePlayer.getName(), "\247d\247l" + Client.getAuthUser().getDecryptedUsername() + "\247r");
+            if (bruh.contains(Minecraft.getMinecraft().session.getProfile().getName())) {
+                bruh = bruh.replaceAll(Minecraft.getMinecraft().session.getProfile().getName(), "\247d\247l" + Client.getAuthUser().getDecryptedUsername() + "\247r");
             } else {
                 for (Friend friend : FriendManager.friendsList) {
-                    if (bruh.contains(friend.name)) {
+                    if (bruh.contains(friend.name) && friend.name.length() >= 3) {
                         bruh = bruh.replaceAll(friend.name, "\247d\247l" + friend.alias + "\247r");
                     }
                 }

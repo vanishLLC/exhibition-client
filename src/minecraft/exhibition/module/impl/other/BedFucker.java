@@ -232,21 +232,8 @@ public class BedFucker extends Module {
         float green = (color >> 16 & 0xFF) / 255.0F;
         float blue = (color >> 8 & 0xFF) / 255.0F;
         float alpha = (color & 0xFF) / 255.0F;
-        GL11.glEnable(3042);
-        GL11.glBlendFunc(770, 771);
-        GL11.glDisable(2896);
-        GL11.glDisable(3553);
-        GL11.glEnable(2848);
-        GL11.glDisable(2929);
-        GL11.glDepthMask(false);
         GL11.glColor4f(red, green, blue, alpha);
         drawFilledBox(axisalignedbb);
-        GL11.glDisable(2848);
-        GL11.glEnable(3553);
-        GL11.glEnable(2896);
-        GL11.glEnable(2929);
-        GL11.glDepthMask(true);
-        GL11.glDisable(3042);
         GL11.glPopMatrix();
     }
 

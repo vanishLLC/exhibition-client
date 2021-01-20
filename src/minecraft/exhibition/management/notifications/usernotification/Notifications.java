@@ -50,7 +50,7 @@ public final class Notifications {
 					}
 
 					try {
-						if (not.getHeader().length() > header.length() && not.getHeader().substring(header.length()).startsWith(" (") && not.getHeader().substring(header.length()).endsWith(")")) {
+						if (type != Type.WARNING && type != Type.OKAY && not.getHeader().length() > header.length() && not.getHeader().substring(header.length()).startsWith(" (") && not.getHeader().substring(header.length()).endsWith(")")) {
 							String[] e = not.getHeader().split(" \\(");
 							int currentNumber = Integer.parseInt(e[1].replace(")", "")) + 1;
 							not.setHeader(e[0] + " (" + currentNumber + ")");
