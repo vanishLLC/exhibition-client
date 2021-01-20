@@ -30,18 +30,18 @@ public class BorderHop extends Module {
                 wasWater = false;
 
             if (mc.thePlayer.motionY > 0 && wasWater) {
-                if (mc.thePlayer.motionY <= 0.1127)
-                    mc.thePlayer.motionY *= 1.267;
-                mc.thePlayer.motionY += 0.05172;
+                if (mc.thePlayer.motionY <= 0.1127F)
+                    mc.thePlayer.motionY *= 1.267F;
+                mc.thePlayer.motionY += 0.05172F;
             }
 
             if (isInLiquid() && !mc.thePlayer.isSneaking()) {
                 if (ticks < 3) {
-                    mc.thePlayer.motionY = 0.13;
+                    mc.thePlayer.motionY = 0.13F;
                     ticks++;
                     wasWater = false;
                 } else {
-                    mc.thePlayer.motionY = 0.5;
+                    mc.thePlayer.motionY = 0.5F;
                     ticks = 0;
                     wasWater = true;
                 }

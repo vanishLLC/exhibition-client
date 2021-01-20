@@ -14,12 +14,22 @@ public class VRViaRewindPlatform implements ViaRewindPlatform {
             LogManager.getLogger("ViaRewind"));
 
     public VRViaRewindPlatform() {
-        ViaRewindConfigImpl conf = new ViaRewindConfigImpl(ViaFabric.directoryPath.resolve("ViaRewind").resolve("config.yml").toFile());
-        conf.reloadConfig();
-        init((ViaRewindConfig)conf);
-        conf.set("cooldown-indicator", "DISABLED");
-        conf.set("replace-particles", true);
-        conf.saveConfig();
+        init(new ViaRewindConfig() {
+            @Override
+            public CooldownIndicator getCooldownIndicator() {
+                return CooldownIndicator.DISABLED;
+            }
+
+            @Override
+            public boolean isReplaceAdventureMode() {
+                return true;
+            }
+
+            @Override
+            public boolean isReplaceParticles() {
+                return true;
+            }
+        });
     }
 
     @Override

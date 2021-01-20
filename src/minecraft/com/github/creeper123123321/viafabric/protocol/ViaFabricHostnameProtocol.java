@@ -25,7 +25,6 @@
 
 package com.github.creeper123123321.viafabric.protocol;
 
-import com.github.creeper123123321.viafabric.ViaFabricAddress;
 import us.myles.ViaVersion.api.PacketWrapper;
 import us.myles.ViaVersion.api.protocol.SimpleProtocol;
 import us.myles.ViaVersion.api.remapper.PacketRemapper;
@@ -45,7 +44,7 @@ public class ViaFabricHostnameProtocol extends SimpleProtocol {
                 map(Type.STRING, new ValueTransformer<String, String>(Type.STRING) {
                     @Override
                     public String transform(PacketWrapper packetWrapper, String s) {
-                        return new ViaFabricAddress().parse(s).realAddress;
+                        return s;
                     }
                 });
             }

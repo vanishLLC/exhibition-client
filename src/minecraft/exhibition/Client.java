@@ -431,7 +431,7 @@ public class Client extends Castable implements EventListener {
     private final Timer packetTimer = new Timer();
 
     public boolean isLagging() {
-        return packetTimer.roundDelay(250);
+        return packetTimer.roundDelay(350);
     }
 
     public double spawnY = 86;

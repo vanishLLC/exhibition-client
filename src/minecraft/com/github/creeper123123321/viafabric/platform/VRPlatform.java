@@ -28,7 +28,6 @@ package com.github.creeper123123321.viafabric.platform;
 import com.github.creeper123123321.viafabric.ViaFabric;
 import com.github.creeper123123321.viafabric.util.FutureTaskId;
 import com.github.creeper123123321.viafabric.util.JLoggerToLog4j;
-import exhibition.Client;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import net.minecraft.client.Minecraft;
@@ -49,6 +48,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -64,13 +64,13 @@ public class VRPlatform implements ViaPlatform<UUID> {
         Path configDir = ViaFabric.directoryPath;
         config = new VRViaConfig(configDir.resolve("viaversion.yml").toFile());
         dataFolder = configDir.toFile();
-        connectionManager = new ViaConnectionManager();
+        connectionManager = new VRConnectionManager();
         api = new VRViaAPI();
     }
 
     public static MinecraftServer getServer() {
         // In 1.8.9 integrated server instance exists even if it's not running
-        if (Minecraft.getMinecraft().getIntegratedServer() == null || !Minecraft.getMinecraft().isIntegratedServerRunning()) return null;
+        if (!Minecraft.getMinecraft().isIntegratedServerRunning()) return null;
         return MinecraftServer.getServer();
     }
 
@@ -91,12 +91,20 @@ public class VRPlatform implements ViaPlatform<UUID> {
 
     @Override
     public String getPluginVersion() {
-        return "UNKNOWN";
+        return "3.3.0";
     }
 
     @Override
     public TaskId runAsync(Runnable runnable) {
-        return null;
+        return new FutureTaskId(CompletableFuture
+                .runAsync(runnable, ViaFabric.ASYNC_EXECUTOR)
+                .exceptionally(throwable -> {
+                    if (!(throwable instanceof CancellationException)) {
+                        throwable.printStackTrace();
+                    }
+                    return null;
+                })
+        );
     }
 
     @Override
@@ -110,7 +118,8 @@ public class VRPlatform implements ViaPlatform<UUID> {
 
     private TaskId runServerSync(Runnable runnable) {
         // Kick task needs to be on main thread, it does already have error logger
-        return new FutureTaskId(CompletableFuture.runAsync(runnable, it -> getServer().callFromMainThread((Callable<Void>) () -> {
+        return new FutureTaskId(CompletableFuture.runAsync(runnable, it -> getServer().callFromMainThread((Callable
+                <Void>) () -> {
             it.run();
             return null;
         })));
@@ -161,20 +170,11 @@ public class VRPlatform implements ViaPlatform<UUID> {
 
     @Override
     public ViaCommandSender[] getOnlinePlayers() {
-        return null;
-    }
-
-    private ViaCommandSender[] getServerPlayers() {
-        return null;
+        return new ViaCommandSender[0];
     }
 
     @Override
     public void sendMessage(UUID uuid, String s) {
-        sendMessageServer(uuid, s);
-    }
-
-    private void sendMessageServer(UUID uuid, String s) {
-
     }
 
     @Override
@@ -203,7 +203,7 @@ public class VRPlatform implements ViaPlatform<UUID> {
 
     @Override
     public ConfigurationProvider getConfigurationProvider() {
-        return null;
+        return config;
     }
 
     @Override
@@ -218,7 +218,7 @@ public class VRPlatform implements ViaPlatform<UUID> {
 
     @Override
     public JsonObject getDump() {
-        return null;
+        return new JsonObject();
     }
 
     @Override

@@ -55,7 +55,7 @@ public class AutoSword extends Module {
 
     @RegisterEvent(events = {EventTick.class})
     public void onEvent(Event event) {
-        if (AutoArmor.swapped() || mc.currentScreen instanceof GuiContainer || AutoPot.potting || mc.thePlayer.openContainer != mc.thePlayer.inventoryContainer) {
+        if (AutoArmor.swapped() || mc.currentScreen instanceof GuiContainer || AutoSoup.isHealing || AutoPot.potting || mc.thePlayer.openContainer != mc.thePlayer.inventoryContainer) {
             timer.setDifference(0);
             swapped = false;
             return;

@@ -7,14 +7,17 @@ import exhibition.event.impl.EventPacket;
 import exhibition.event.impl.EventRenderGui;
 import exhibition.event.impl.EventScreenDisplay;
 import exhibition.event.impl.EventTick;
+import exhibition.management.notifications.dev.DevNotifications;
 import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
+import exhibition.module.data.Options;
 import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.movement.Fly;
 import exhibition.module.impl.movement.LongJump;
 import exhibition.util.*;
 import exhibition.util.Timer;
+import exhibition.util.misc.ChatUtil;
 import exhibition.util.render.Colors;
 import net.minecraft.client.gui.GuiDisconnected;
 import net.minecraft.client.gui.GuiDownloadTerrain;
@@ -26,6 +29,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C00PacketKeepAlive;
+import net.minecraft.network.play.client.C02PacketUseEntity;
 import net.minecraft.network.play.client.C0DPacketCloseWindow;
 import net.minecraft.network.play.client.C0FPacketConfirmTransaction;
 import net.minecraft.network.play.server.S2DPacketOpenWindow;
@@ -42,7 +46,7 @@ public class Bypass extends Module {
 
     public Setting<Number> DELAY = new Setting<>("DELAY", 300, "Spoof offset. This should be 500 - (your ping).", 5, 0, 1000);
     public Setting<Boolean> AUTOBYPASS = new Setting<>("AUTOBYPASS", false, "Automatically detects optimal delay value.");
-    public Setting<Boolean> KEEPALIVE = new Setting<>("KEEPALIVE", false, "Testing moment.");
+    public Options option = new Options("Mode", "Dong", "Dong", "Watchdog Off");
 
     private long startMS = -1;
     private int state = 0;
@@ -58,7 +62,7 @@ public class Bypass extends Module {
         super(data);
         addSetting(DELAY);
         addSetting(AUTOBYPASS);
-        addSetting(KEEPALIVE);
+        addSetting(new Setting<>("MODE", option, "Which bypass method should be used."));
     }
 
     @Override
@@ -82,7 +86,8 @@ public class Bypass extends Module {
         this.bruh = 0;
         this.lastUid = 0;
         this.lastSentUid = -1;
-        this.resetPackets();
+        if (option.getSelected().equals("Dong"))
+            this.resetPackets();
         //DevNotifications.getManager().post("\247d\247lRESET");
 
     }
@@ -113,24 +118,6 @@ public class Bypass extends Module {
         boolean isFlying = Client.getModuleManager().isEnabled(LongJump.class) || fallFly;
 
         if (event instanceof EventPacket) {
-            if (mc.thePlayer != null) {
-                boolean canSend = longJump.isEnabled() ? (longJump.bruhTick > 0 && longJump.bruhTick % 7 != 0) : mc.thePlayer.ticksExisted % 7 != 0;
-                if (isFlying && c13Timer.delay(7_500) && canSend) {
-                    int sent = 0;
-                    while (chokePackets.peek() != null && sent < 2) {
-                        Packet packet = chokePackets.poll();
-                        if (packet instanceof C0FPacketConfirmTransaction)
-                            sent++;
-                        if (packet != null) {
-                            NetUtil.sendPacketNoEvents(packet);
-                        }
-                    }
-                    c13Timer.reset();
-                }
-            } else {
-                resetPackets();
-            }
-
             List<BruhPacket> packetsToRemove = new ArrayList<>();
             for (BruhPacket bruhPacket : packetList) {
                 if (bruhPacket.timeToSend <= System.currentTimeMillis()) {
@@ -168,71 +155,129 @@ public class Bypass extends Module {
                 }
             }
 
-//            if (p instanceof S32PacketConfirmTransaction) {
-//                S32PacketConfirmTransaction packet = (S32PacketConfirmTransaction) p;
-////                if (packet.getActionNumber() < 0) {
-////                    event.setCancelled(true);
-////                }
-//            }
+            boolean debug = false;
 
-            if (p instanceof C0FPacketConfirmTransaction) {
-                C0FPacketConfirmTransaction packet = (C0FPacketConfirmTransaction) p;
-                if (packet.getUid() < 0 && HypixelUtil.isVerifiedHypixel() && allowBypassing()) {
-                    this.bruh++;
-
-                    if (bruh > 10) {
-                        event.setCancelled(true);
-
-                        if (Math.abs(packet.getUid() - lastUid) > 5) {
-                            sendPackets();
-
-                            C0FPacketConfirmTransaction confirmTransaction = new C0FPacketConfirmTransaction(packet.getWindowId(), packet.getUid(), packet.getAccepted());
-                            chokePackets.add(confirmTransaction);
-                            //DevNotifications.getManager().post("\247bRESET BRUH TO " + confirmTransaction.getUid());
-                            bruh = 0;
-                            lastSentUid = packet.getUid();
-                            lastUid = packet.getUid();
-                            return;
+            if (option.getSelected().equals("Dong")) {
+                if (mc.thePlayer != null) {
+                    boolean canSend = longJump.isEnabled() ? (longJump.bruhTick > 0 && longJump.bruhTick % 7 != 0) : mc.thePlayer.ticksExisted % 7 != 0;
+                    if (isFlying && c13Timer.delay(7_000) && canSend) {
+                        int sent = 0;
+                        while (chokePackets.peek() != null && sent < 2) {
+                            Packet packet = chokePackets.poll();
+                            if (packet instanceof C0FPacketConfirmTransaction)
+                                sent++;
+                            if (packet != null) {
+                                NetUtil.sendPacketNoEvents(packet);
+                            }
                         }
+                        c13Timer.reset();
+                    }
+                } else {
+                    resetPackets();
+                }
 
-                        boolean canSend = mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically;
+                if (Client.instance.is1_9orGreater())
+                    if (p instanceof C02PacketUseEntity) {
+                        C02PacketUseEntity packet = (C02PacketUseEntity) p;
+                        if (packet.getAction().equals(C02PacketUseEntity.Action.ATTACK)) {
+                            if (bruh != 0 && ((bruh - 10) >= (45 + randomDelay - 5) || (bruh - 10) <= 5)) {
+                                event.setCancelled(true);
+                            }
+                        }
+                    }
 
-                        if ((bruh - 10) >= ((isFlying ? 125 : 35) + randomDelay) && canSend) {
-                            short lastbruh = (short) lastSentUid;
-                            chokePackets.add(packet);
-                            sendPackets();
 
-                            lastSentUid = packet.getUid();
-                            //DevNotifications.getManager().post("\247eSent from \247c" + lastbruh + "\247e to \247a" + lastSentUid);
-                            randomDelay = random.nextInt(25);
-                            bruh = 10;
+                if (p instanceof C0FPacketConfirmTransaction) {
+                    C0FPacketConfirmTransaction packet = (C0FPacketConfirmTransaction) p;
+                    if (packet.getUid() < 0 && HypixelUtil.isVerifiedHypixel() && allowBypassing()) {
+                        this.bruh++;
+
+                        if (bruh > 10) {
+                            event.setCancelled(true);
+
+                            if (Math.abs(packet.getUid() - lastUid) > 5 && packet.getUid() != -1) {
+                                chokePackets.add(packet);
+                                sendPackets();
+                                if (debug)
+                                    DevNotifications.getManager().post("\247bRESET BRUH TO " + packet.getUid() + " " + lastUid);
+                                bruh = 0;
+                                lastUid = packet.getUid();
+                                return;
+                            }
+
+                            boolean canSend = mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically;
+
+                            if ((bruh - 10) >= (45 + randomDelay) && canSend) {
+                                short lastbruh = (short) lastSentUid;
+                                chokePackets.add(packet);
+                                sendPackets();
+
+                                lastSentUid = packet.getUid();
+                                if (debug)
+                                    DevNotifications.getManager().post("\247eSent from \247c" + (lastbruh - 1) + "\247e to \247a" + lastSentUid + " " + mc.thePlayer.ticksExisted);
+                                randomDelay = random.nextInt(30);
+                                bruh = 10;
+                            } else {
+                                chokePackets.add(packet);
+                            }
+
+                            if (!isFlying) {
+                                c13Timer.reset();
+                            }
+
                         } else {
-                            chokePackets.add(packet);
+                            event.setCancelled(true);
+                            C0FPacketConfirmTransaction confirmTransaction = new C0FPacketConfirmTransaction(packet.getWindowId(), packet.getUid(), packet.getAccepted());
+                            this.packetList.add(new BruhPacket(confirmTransaction, 250));
+                            if (debug)
+                                DevNotifications.getManager().post("\247eNormal " + confirmTransaction.getUid());
+                            lastSentUid = packet.getUid();
                         }
-//                        if (Math.abs(packet.getUid() - lastUid) > 1)
-//                            DevNotifications.getManager().post("\2476Packet Difference?: " + packet.getUid() + " " + lastUid + " " + Math.abs(packet.getUid() - lastUid));
+                        lastUid = packet.getUid();
+                    }
+                }
+            } else {
+                if (c13Timer.delay(150) && bruh > 0) {
+                    if (debug)
+                        ChatUtil.debug("\247bBypass is ready.");
+                    bruh = -1;
+                }
 
-                        if (!isFlying) {
+                if (p instanceof C0FPacketConfirmTransaction) {
+                    C0FPacketConfirmTransaction packet = (C0FPacketConfirmTransaction) p;
+                    if (packet.getUid() < 0 && HypixelUtil.isVerifiedHypixel() && allowBypassing()) {
+
+                        if (c13Timer.delay(1000) && bruh == -1) {
+                            if (debug)
+                                ChatUtil.debug("\247eSending burst");
+                            sendPackets();
+                            bruh = 0;
+                        }
+
+                        if (bruh < 20) {
+                            if (bruh == 0)
+                                sendPackets();
+                            if (bruh != 0) {
+                                event.setCancelled(true);
+                                chokePackets.add(packet);
+                            }
+                            if (debug)
+                                ChatUtil.debug("\247eChoking \247c" + packet.getUid() + " \247e" + mc.thePlayer.ticksExisted);
+                            if (!c13Timer.delay(50) || bruh == 0)
+                                bruh++;
                             c13Timer.reset();
                         }
 
-                    } else {
-                        event.setCancelled(true);
-                        C0FPacketConfirmTransaction confirmTransaction = new C0FPacketConfirmTransaction(packet.getWindowId(), packet.getUid(), packet.getAccepted());
-                        this.packetList.add(new BruhPacket(confirmTransaction, 250));
-                        //DevNotifications.getManager().post("\247eNormal " + confirmTransaction.getUid());
-                        lastSentUid = packet.getUid();
+                        if (!event.isCancelled()) {
+                            if (debug)
+                                ChatUtil.debug("\247dSent " + packet.getUid());
+                        }
+
                     }
-                    lastUid = packet.getUid();
                 }
             }
 
             if (p instanceof C00PacketKeepAlive) {
-                if (KEEPALIVE.getValue() && bruh > 10) {
-                    event.setCancelled(true);
-                    chokePackets.add(p);
-                }
-
                 if (DELAY.getValue().longValue() != 0) {
                     packetList.add(new BruhPacket(p, DELAY.getValue().longValue()));
                     event.setCancelled(true);
@@ -265,6 +310,7 @@ public class Bypass extends Module {
         }
 
         if (event instanceof EventTick) {
+            setSuffix(option.getSelected());
             if ((boolean) AUTOBYPASS.getValue()) {
                 if (mc.currentScreen == null && mc.thePlayer.ticksExisted > 25 && startMS == -1 && state == 0) {
                     if (mc.thePlayer.inventory.getCurrentItem() != null && mc.thePlayer.inventory.getCurrentItem().getItem() != null) {
@@ -298,7 +344,7 @@ public class Bypass extends Module {
         }
 
         if (sent > 0) {
-            //LongJump longJump = Client.getModuleManager().getCast(LongJump.class);
+            DevNotifications.getManager().post("\247b\247lSent " + sent);
         }
         this.resetPackets();
     }

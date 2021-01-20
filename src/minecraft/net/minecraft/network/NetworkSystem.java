@@ -2,8 +2,6 @@ package net.minecraft.network;
 
 import com.github.creeper123123321.viafabric.ViaFabric;
 import com.github.creeper123123321.viafabric.handler.CommonTransformer;
-import com.github.creeper123123321.viafabric.handler.serverside.FabricDecodeHandler;
-import com.github.creeper123123321.viafabric.handler.serverside.FabricEncodeHandler;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.netty.bootstrap.ServerBootstrap;
@@ -133,14 +131,6 @@ public class NetworkSystem
                     NetworkSystem.this.networkManagers.add(networkmanager);
                     channel.pipeline().addLast((String)"packet_handler", (ChannelHandler)networkmanager);
                     networkmanager.setNetHandler(new NetHandlerHandshakeTCP(NetworkSystem.this.mcServer, networkmanager));
-
-                    if (channel instanceof SocketChannel && ViaFabric.config.getClientSideVersion() != ProtocolVersion.v1_8.getVersion()) {
-                        UserConnection user = new UserConnection(channel);
-                        new ProtocolPipeline(user);
-
-                        channel.pipeline().addBefore("encoder", CommonTransformer.HANDLER_ENCODER_NAME, new FabricEncodeHandler(user));
-                        channel.pipeline().addBefore("decoder", CommonTransformer.HANDLER_DECODER_NAME, new FabricDecodeHandler(user));
-                    }
                 }
             }).group((EventLoopGroup)lazyloadbase.getValue()).localAddress(address, port)).bind().syncUninterruptibly());
         }

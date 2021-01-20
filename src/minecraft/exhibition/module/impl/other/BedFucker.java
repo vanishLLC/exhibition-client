@@ -11,8 +11,12 @@ import exhibition.module.data.MultiBool;
 import exhibition.module.data.settings.Setting;
 import exhibition.util.HypixelUtil;
 import exhibition.util.RenderingUtil;
+import exhibition.util.misc.ChatUtil;
 import exhibition.util.render.Colors;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockCrops;
+import net.minecraft.block.BlockMelon;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.init.Blocks;
 import net.minecraft.network.Packet;
@@ -30,7 +34,7 @@ public class BedFucker extends Module {
     private Vec3 teleported = null;
 
     private BlockPos blockBreaking;
-    private MultiBool multiBool = new MultiBool("Blocks", new Setting("BED", true), new Setting("CAKE", true), new Setting("EGG", true));
+    private MultiBool multiBool = new MultiBool("Blocks", new Setting<>("BED", true), new Setting<>("WHEAT", true), new Setting<>("CAKE", true), new Setting<>("EGG", true));
 
     public BedFucker(ModuleData data) {
         super(data);
@@ -40,7 +44,7 @@ public class BedFucker extends Module {
     @Override
     @RegisterEvent(events = {EventMotionUpdate.class, EventRender3D.class, EventPacket.class})
     public void onEvent(Event event) {
-        if(mc.thePlayer == null || mc.theWorld == null)
+        if (mc.thePlayer == null || mc.theWorld == null)
             return;
 
         if (event instanceof EventMotionUpdate) {
@@ -68,6 +72,16 @@ public class BedFucker extends Module {
 
                                 if ((mc.theWorld.getBlockState(pos).getBlock() != Blocks.air && this.blockChecks(mc.theWorld.getBlockState(pos).getBlock()) && this.getFacingDirection(pos) != null) && mc.thePlayer.getDistance(mc.thePlayer.posX + x, mc.thePlayer.posY + y, mc.thePlayer.posZ + z) < mc.playerController.getBlockReachDistance() - 0.5) {
                                     final float[] rotations = this.getBlockRotations(mc.thePlayer.posX + x + 0.5, mc.thePlayer.posY + y, mc.thePlayer.posZ + z + 0.5);
+
+                                    IBlockState blockState = mc.theWorld.getBlockState(pos);
+                                    Block block = blockState.getBlock();
+                                    if (block == Blocks.wheat && block instanceof BlockCrops) {
+                                        BlockCrops cropBlock = (BlockCrops) block;
+                                        if (cropBlock.canGrow(null, null, blockState, true)) {
+                                            continue;
+                                        }
+                                    }
+
                                     em.setYaw(rotations[0]);
                                     em.setPitch(rotations[1]);
                                     this.blockBreaking = pos;
@@ -85,12 +99,21 @@ public class BedFucker extends Module {
                     }
                     final EnumFacing direction = this.getFacingDirection(this.blockBreaking);
                     if (direction != null) {
-                        if (mc.theWorld.getBlockState(blockBreaking).getBlock() == Blocks.bed) {
+                        IBlockState blockState = mc.theWorld.getBlockState(blockBreaking);
+                        Block block = blockState.getBlock();
+                        if (block == Blocks.bed || block == Blocks.wheat) {
+                            if (block == Blocks.wheat && block instanceof BlockCrops) {
+                                BlockCrops cropBlock = (BlockCrops) block;
+                                if (cropBlock.canGrow(null, null, blockState, true)) {
+                                    return;
+                                }
+                            }
+
                             if (mc.playerController.onPlayerDamageBlock(this.blockBreaking, direction)) {
                                 mc.thePlayer.swingItem();
                             }
                         } else {
-                            if (mc.playerController.onPlayerRightClick(mc.thePlayer, mc.theWorld, mc.thePlayer.getCurrentEquippedItem(), blockBreaking, direction, new Vec3(blockBreaking).addVector(0.3F + randomFloat(1), 0.3F + randomFloat(2345),0.3F +  randomFloat(652436)))) {
+                            if (mc.playerController.onPlayerRightClick(mc.thePlayer, mc.theWorld, mc.thePlayer.getCurrentEquippedItem(), blockBreaking, direction, new Vec3(blockBreaking).addVector(0.3F + randomFloat(1), 0.3F + randomFloat(2345), 0.3F + randomFloat(652436)))) {
                                 mc.thePlayer.swingItem();
                             }
                         }
@@ -120,7 +143,8 @@ public class BedFucker extends Module {
 
     }
 
-    public void drawESP(final double x, final double y, final double z, final double x2, final double y2, final double z2, final double r, final double g, final double b) {
+    public void drawESP(final double x, final double y, final double z, final double x2, final double y2,
+                        final double z2, final double r, final double g, final double b) {
         final double x3 = x - RenderManager.renderPosX;
         final double y3 = y - RenderManager.renderPosY;
         final double z3 = z - RenderManager.renderPosZ;
@@ -227,7 +251,7 @@ public class BedFucker extends Module {
     }
 
     private boolean blockChecks(final Block block) {
-        return (block == Blocks.bed && multiBool.getValue("BED")) || (block == Blocks.cake && multiBool.getValue("CAKE") || (block == Blocks.dragon_egg && multiBool.getValue("EGG")));
+        return (block == Blocks.bed && multiBool.getValue("BED")) || (block == Blocks.wheat && multiBool.getValue("WHEAT")) || (block == Blocks.cake && multiBool.getValue("CAKE") || (block == Blocks.dragon_egg && multiBool.getValue("EGG")));
     }
 
     public float[] getBlockRotations(final double x, final double y, final double z) {

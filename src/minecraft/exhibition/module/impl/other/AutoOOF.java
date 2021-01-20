@@ -7,6 +7,7 @@ import exhibition.event.impl.EventPacket;
 import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
+import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.combat.AntiVelocity;
 import exhibition.module.impl.combat.Killaura;
 import exhibition.module.impl.movement.Fly;
@@ -22,8 +23,11 @@ public class AutoOOF extends Module {
 
     private Timer watchdogTimer = new Timer();
 
+    private Setting<Boolean> panicOnly = new Setting<>("PANIC-ONLY", false, "Disables modules only.");
+
     public AutoOOF(ModuleData data) {
         super(data);
+        addSetting(panicOnly);
     }
 
     @Override
@@ -57,7 +61,15 @@ public class AutoOOF extends Module {
                 }
                 if (watchdogTimer.delay(1000) && unformatted.contains("Thanks for reporting it!")) {
                     Notifications.getManager().post("Staff Ban Detected", "Disabled some modules and /oof'd", 5000, Notifications.Type.WARNING);
-                    ChatUtil.sendChat("/oof");
+                    boolean canSpawn = HypixelUtil.scoreboardContains("Status: Idling");
+
+                    if (!canSpawn && !panicOnly.getValue())
+                        ChatUtil.sendChat("/oof");
+
+                    if (canSpawn) {
+                        ChatUtil.sendChat("/spawn");
+                    }
+
                     Module[] modules = new Module[]{Client.getModuleManager().get(Killaura.class), Client.getModuleManager().get(AntiVelocity.class),
                             Client.getModuleManager().get(Speed.class), Client.getModuleManager().get(Fly.class), Client.getModuleManager().get(LongJump.class)};
                     for (Module module : modules) {

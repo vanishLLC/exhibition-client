@@ -1,5 +1,7 @@
 package io.github.alerithe.spotify;
 
+import exhibition.Client;
+import exhibition.module.impl.other.Spotify;
 import io.github.alerithe.spotify.components.Request;
 
 import java.io.IOException;
@@ -55,7 +57,7 @@ public class LocalSpotifyServer {
             LISTENING = true;
 
             new Thread(() -> {
-                while (LISTENING) {
+                while (LISTENING && Client.getModuleManager().isEnabled(Spotify.class)) {
                     try {
                         try (Request request = new Request(serverSocket.accept())) {
                             if (request.path.startsWith(LocalSpotifyServer.CALLBACK_PATH)) {

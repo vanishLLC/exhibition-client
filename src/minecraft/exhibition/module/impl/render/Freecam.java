@@ -22,6 +22,9 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C03PacketPlayer;
+import net.minecraft.network.play.client.C07PacketPlayerDigging;
+import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
+import net.minecraft.network.play.client.C0BPacketEntityAction;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.network.play.server.S12PacketEntityVelocity;
 import net.minecraft.network.play.server.S27PacketExplosion;
@@ -107,7 +110,7 @@ public class Freecam extends Module {
 
     @RegisterEvent(events = {EventMotionUpdate.class, EventPacket.class, EventBlockBounds.class, EventMove.class, EventPushBlock.class})
     public void onEvent(Event event) {
-        if(mc.thePlayer == null || mc.theWorld == null) {
+        if (mc.thePlayer == null || mc.theWorld == null) {
             return;
         }
 
@@ -115,9 +118,6 @@ public class Freecam extends Module {
         if (event instanceof EventMotionUpdate) {
             mc.thePlayer.noClip = true;
             EventMotionUpdate em = event.cast();
-            if (em.isPre()) {
-                ticks++;
-            }
         }
         if (event instanceof EventPacket) {
             EventPacket ep = event.cast();
@@ -171,18 +171,19 @@ public class Freecam extends Module {
             if (getPacket instanceof S12PacketEntityVelocity) {
                 S12PacketEntityVelocity packet = (S12PacketEntityVelocity) getPacket;
                 if (packet.getEntityID() == mc.thePlayer.getEntityId()) {
+                    double x = (double) packet.getMotionX() / 8000.0D;
+                    double y = (double) packet.getMotionY() / 8000.0D;
+                    double z = (double) packet.getMotionZ() / 8000.0D;
+
+                    double hP = 1;
+                    double vP = 1;
                     if (velocity.isEnabled()) {
                         int vertical = ((Number) velocity.getSettings().get("VERTICAL").getValue()).intValue();
                         int horizontal = ((Number) velocity.getSettings().get("HORIZONTAL").getValue()).intValue();
-                        if (vertical != 0 || horizontal != 0) {
-                            packet.motionX = (int) ((double) packet.motionX * (horizontal / 100D));
-                            packet.motionY = (int) ((double) packet.motionY * (vertical / 100D));
-                            packet.motionZ = (int) ((double) packet.motionZ * (horizontal / 100D));
-                        } else {
-                            return;
-                        }
+                        hP = horizontal / 100D;
+                        vP = vertical / 100D;
                     }
-                    freecamEntity.setVelocity((double) packet.getMotionX() / 8000.0D, (double) packet.getMotionY() / 8000.0D, (double) packet.getMotionZ() / 8000.0D);
+                    freecamEntity.setVelocity(x * hP, y * vP, z * hP);
                 }
             } else if (getPacket instanceof S27PacketExplosion) {
                 S27PacketExplosion packet = (S27PacketExplosion) getPacket;
@@ -193,8 +194,6 @@ public class Freecam extends Module {
                         packet.xMotion *= (horizontal / 100D);
                         packet.yMotion *= (vertical / 100D);
                         packet.zMotion *= (horizontal / 100D);
-                    } else {
-                        return;
                     }
                 }
                 freecamEntity.motionX += packet.func_149149_c();
@@ -202,11 +201,16 @@ public class Freecam extends Module {
                 freecamEntity.motionZ += packet.func_149147_e();
             }
 
-            if (getPacket.getClass().isAssignableFrom(C03PacketPlayer.class) || getPacket.getClass().isAssignableFrom(C03PacketPlayer.C04PacketPlayerPosition.class) ||
+            if (getPacket instanceof C03PacketPlayer || getPacket.getClass().isAssignableFrom(C03PacketPlayer.class) || getPacket.getClass().isAssignableFrom(C03PacketPlayer.C04PacketPlayerPosition.class) ||
                     getPacket.getClass().isAssignableFrom(C03PacketPlayer.C05PacketPlayerLook.class) || getPacket.getClass().isAssignableFrom(C03PacketPlayer.C06PacketPlayerPosLook.class)) {
                 event.setCancelled(true);
                 onUpdateWalkingPlayer(freecamEntity);
             }
+
+            if (getPacket instanceof C0BPacketEntityAction || getPacket instanceof C08PacketPlayerBlockPlacement || getPacket instanceof C07PacketPlayerDigging) {
+                event.setCancelled(true);
+            }
+
         }
         if (event instanceof EventBlockBounds) {
             EventBlockBounds ebb = (EventBlockBounds) event;
@@ -214,7 +218,9 @@ public class Freecam extends Module {
         }
         if (event instanceof EventMove) {
             EventMove em = (EventMove) event;
-            moveEntityWithHeading(freecamEntity, 0, 0);
+            if (mc.theWorld.isAreaLoaded(new BlockPos(oldPos), 2)) {
+                moveEntityWithHeading(freecamEntity, 0, 0);
+            }
             if (mc.thePlayer.movementInput.jump) {
                 em.setY(mc.thePlayer.motionY = speed / 2);
             } else if (mc.thePlayer.movementInput.sneak) {
@@ -268,9 +274,9 @@ public class Freecam extends Module {
         boolean var14 = var9 != 0.0D || var11 != 0.0D;
         if (player.ridingEntity == null) {
             if (var13 && var14) {
-                NetUtil.sendPacketNoEvents(new C03PacketPlayer.C06PacketPlayerPosLook(player.posX, player.posY, player.posZ, player.rotationYaw, player.rotationPitch, player.onGround));
+                NetUtil.sendPacketNoEvents(new C03PacketPlayer.C06PacketPlayerPosLook(player.posX, player.getEntityBoundingBox().minY, player.posZ, player.rotationYaw, player.rotationPitch, player.onGround));
             } else if (var13) {
-                NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(player.posX, player.posY, player.posZ, player.onGround));
+                NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(player.posX, player.getEntityBoundingBox().minY, player.posZ, player.onGround));
             } else if (var14) {
                 NetUtil.sendPacketNoEvents(new C03PacketPlayer.C05PacketPlayerLook(player.rotationYaw, player.rotationPitch, player.onGround));
             } else {

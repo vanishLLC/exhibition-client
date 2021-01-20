@@ -39,6 +39,16 @@ public class UUIDResolver {
     }
 
     public void checkNames(HashMap<String, UUID> usernamesToCheck) {
+
+        Iterator<Map.Entry<String, Long>> validMapIter = validMap.entrySet().iterator();
+        while(validMapIter.hasNext()) {
+            Map.Entry<String, Long> entry = validMapIter.next();
+            if(entry.getValue() + 1_800_000 < System.currentTimeMillis()) { // 30 Minutes
+                checkedUsernames.remove(entry.getKey());
+                validMapIter.remove();
+            }
+        }
+
         responseMap.entrySet().removeIf(map -> (map.getValue() + 600_000) < System.currentTimeMillis());
         hypixelResponseMap.entrySet().removeIf(map -> (map.getValue() + 60_000) < System.currentTimeMillis());
 

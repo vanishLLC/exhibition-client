@@ -17,7 +17,6 @@ import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.combat.AutoPot;
-import exhibition.module.impl.combat.Bypass;
 import exhibition.module.impl.player.Scaffold;
 import exhibition.util.*;
 import exhibition.util.render.Colors;
@@ -232,7 +231,11 @@ public class LongJump extends Module {
                 }
                 bowTicks = 20;
             } else {
+                if(mc.thePlayer.isSprinting())
+                    NetUtil.sendPacket(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.STOP_SPRINTING));
                 Damage.damagePlayer();
+                if(mc.thePlayer.isSprinting())
+                    NetUtil.sendPacket(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.START_SPRINTING));
             }
 
             timer.reset();

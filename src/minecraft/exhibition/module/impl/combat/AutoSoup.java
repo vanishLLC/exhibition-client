@@ -11,6 +11,7 @@ import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventMotionUpdate;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
+import exhibition.module.data.MultiBool;
 import exhibition.module.data.settings.Setting;
 import exhibition.util.HypixelUtil;
 import exhibition.util.Timer;
@@ -29,24 +30,30 @@ import net.minecraft.util.EnumFacing;
 public class AutoSoup extends Module {
 
     private Timer timer = new Timer();
-    private String HEADS = "HEADS";
     private String DELAY = "DELAY";
     private String HEALTH = "HEALTH";
-    private String DROP = "DROP";
+
+    private final Setting<Boolean> soup = new Setting<>("SOUP", true),
+            heads = new Setting<>("HEADS", true),
+            mutton = new Setting<>("MUTTON", true),
+            gapples = new Setting<>("GAPPLES", true),
+            steak = new Setting<>("STEAK", true),
+            bread = new Setting<>("BREAD", true);
 
     public AutoSoup(ModuleData data) {
         super(data);
-        settings.put(HEALTH, new Setting<>(HEALTH, 3, "Maximum health before healing."));
+        settings.put(HEALTH, new Setting<>(HEALTH, 15.5, "Maximum health before healing.", 0.5, 1, 20));
         settings.put(DELAY, new Setting<>(DELAY, 350, "Delay before healing again.", 50, 100, 1000));
-        settings.put(HEADS, new Setting<>(HEADS, false, "Use player heads."));
-        settings.put(DROP, new Setting<>(DROP, true, "Drops empty soup bowls."));
+        addSetting(new Setting<>("CONSUMABLES", new MultiBool("Consumables", soup, heads, mutton, gapples, steak, bread)));
     }
 
     public static boolean isHealing = false;
+    private int lastItem = -1;
+    private int lastCurrentItem = -1;
 
     @Override
     public Priority getPriority() {
-        return Priority.LOWEST;
+        return Priority.FIRST;
     }
 
     @RegisterEvent(events = {EventMotionUpdate.class})
@@ -60,22 +67,25 @@ public class AutoSoup extends Module {
 
                 double minimumPercent = minHealth / 20F;
 
-                boolean shouldHeal = mc.thePlayer.getMaxHealth() == 20 ? mc.thePlayer.getHealth() <= minHealth : (mc.thePlayer.getHealth() / mc.thePlayer.getMaxHealth()) <= minimumPercent;
+                boolean shouldEat = soupSlot != -1 && mc.thePlayer.inventoryContainer.getSlot(soupSlot).getHasStack() && mc.thePlayer.inventoryContainer.getSlot(soupSlot).getStack().getItem() == Items.cooked_beef;
 
-                if (soupSlot != -1 && shouldHeal && isHealing) {
-                    ItemStack stack = mc.thePlayer.inventoryContainer.getSlot(soupSlot).getStack();
+                Killaura killaura = Client.getModuleManager().getCast(Killaura.class);
 
-                    if (Client.instance.is1_9orGreater() && HypixelUtil.isVerifiedHypixel() && stack != null && (stack.getItem() == Items.golden_apple || stack.getItem() == Items.cooked_beef)) {
-                        int swapTo = 6;
-                        if (soupSlot > 36)
-                            swapTo = soupSlot - 36;
-                        mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange((swapTo + 1) % 9));
-                        mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(swapTo));
-                        mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer(em.isOnground()));
-                        mc.thePlayer.sendQueue.addToSendQueue(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
-                        mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem));
-                        isHealing = false;
+                boolean shouldHeal = (mc.thePlayer.getMaxHealth() == 20 ? mc.thePlayer.getHealth() <= minHealth : (mc.thePlayer.getHealth() / mc.thePlayer.getMaxHealth()) <= minimumPercent) || (shouldEat && mc.thePlayer.getFoodStats().needFood());
+
+                if (lastItem != -1 && isHealing) {
+                    mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer(em.isOnground()));
+                    mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange((lastItem + 1) % 9));
+                    mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(lastItem));
+                    mc.thePlayer.sendQueue.addToSendQueue(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
+                    mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem));
+                    if (killaura.isEnabled() && killaura.isBlocking && Killaura.getTarget() != null) {
+                        killaura.isBlocking = false;
                     }
+                    isHealing = false;
+                    lastItem = -1;
+                    lastCurrentItem = -1;
+                    return;
                 }
 
                 if (soupSlot != -1 && shouldHeal && timer.delay(((Number) settings.get(DELAY).getValue()).longValue())) {
@@ -85,39 +95,60 @@ public class AutoSoup extends Module {
                     else
                         swap(soupSlot, 6);
 
-
                     ItemStack stack = mc.thePlayer.inventoryContainer.getSlot(soupSlot).getStack();
 
-                    if (Client.instance.is1_9orGreater() && HypixelUtil.isVerifiedHypixel() && stack != null && (stack.getItem() == Items.golden_apple || stack.getItem() == Items.cooked_beef)) {
-                        mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(swapTo));
+                    if (Client.instance.is1_9orGreater() && HypixelUtil.isVerifiedHypixel() && stack != null && notInstantUse(stack.getItem())) {
+                        lastItem = swapTo;
+                        lastCurrentItem = mc.thePlayer.inventory.currentItem;
+                        if ((killaura.isEnabled() && killaura.isBlocking) || mc.thePlayer.isBlocking()) {
+                            mc.thePlayer.sendQueue.addToSendQueue(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
+                        }
+
+                        mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(lastItem));
                         mc.thePlayer.sendQueue.addToSendQueue(new C08PacketPlayerBlockPlacement(stack));
+                        mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange((lastItem + 1) % 9));
+                        mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(lastItem));
                     } else {
                         int currentItem = mc.thePlayer.inventory.currentItem;
                         mc.getNetHandler().addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem = swapTo));
-
                         mc.getNetHandler().addToSendQueue(new C08PacketPlayerBlockPlacement(mc.thePlayer.inventory.getCurrentItem()));
                         mc.getNetHandler().addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem = currentItem));
                     }
-                    timer.reset();
                     isHealing = true;
+                    timer.reset();
                 } else {
                     isHealing = false;
                 }
 
-                if ((boolean) settings.get(DROP).getValue()) {
-                    for (int i = 9; i < 45; i++) {
-                        if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
-                            ItemStack is = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
-                            Item item = is.getItem();
-                            if (item == Items.bowl) {
-                                mc.playerController.windowClick(mc.thePlayer.inventoryContainer.windowId, i, 0, 4, mc.thePlayer);
-                                break;
-                            }
-                        }
-                    }
+//                if ((boolean) settings.get(DROP).getValue()) {
+//                    for (int i = 9; i < 45; i++) {
+//                        if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
+//                            ItemStack is = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
+//                            Item item = is.getItem();
+//                            if (item == Items.bowl) {
+//                                mc.playerController.windowClick(mc.thePlayer.inventoryContainer.windowId, i, 0, 4, mc.thePlayer);
+//                                break;
+//                            }
+//                        }
+//                    }
+//                }
+            } else {
+                if (lastItem != -1 && lastCurrentItem == 1) {
+
                 }
             }
         }
+    }
+
+    private final Item[] instantItems = new Item[]{Items.skull, Items.baked_potato, Items.magma_cream, Items.mutton};
+
+    private boolean notInstantUse(Item item) {
+        for (Item instantItem : instantItems) {
+            if (item == instantItem) {
+                return false;
+            }
+        }
+        return true;
     }
 
     protected void swap(int slot, int hotbarNum) {
@@ -126,26 +157,88 @@ public class AutoSoup extends Module {
 
     private int getSoupFromInventory() {
         Minecraft mc = Minecraft.getMinecraft();
-        int soup = -1;
+        int slot = -1;
+        int priority = -1;
+        /*
+         * Soup = 0
+         * Golden Heads = 1 (all pit healing items)
+         * Golden Apples = 3
+         * Mutton = 2
+         * Steak = 0 normal 2 pit
+         * Bread = 0 normal 2 pit
+         *
+         * We want to Gapple first then consume steak/breads
+         */
+
+        boolean isInPit = HypixelUtil.isInGame("PIT");
+
+        boolean needsRegenOrAbsorption = (!mc.thePlayer.isPotionActive(Potion.regeneration) || (mc.thePlayer.getAbsorptionAmount() <= 0) ||
+                (mc.thePlayer.isPotionActive(Potion.regeneration) && mc.thePlayer.getActivePotionEffect(Potion.regeneration).getDuration() < 5));
+
         for (int i = 9; i < 45; i++) {
             if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
                 ItemStack is = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
                 Item item = is.getItem();
 
-                boolean shouldMutton = Item.getIdFromItem(item) == Item.getIdFromItem(Items.mutton) && !mc.thePlayer.isPotionActive(Potion.resistance);
+                boolean shouldMutton = mutton.getValue() && item == Items.mutton && !mc.thePlayer.isPotionActive(Potion.resistance);
 
-                boolean shouldApple = (boolean) settings.get(HEADS).getValue() && (((Item.getIdFromItem(item) == Item.getIdFromItem(Items.skull) ||
-                        Item.getIdFromItem(item) == Item.getIdFromItem(Items.baked_potato) ||
-                        Item.getIdFromItem(item) == Item.getIdFromItem(Items.magma_cream) ||
-                        (Client.instance.is1_9orGreater() && (item == Items.golden_apple || item == Items.cooked_beef))) &&
-                        (!mc.thePlayer.isPotionActive(Potion.regeneration) || (mc.thePlayer.getAbsorptionAmount() <= 0) ||
-                                (mc.thePlayer.isPotionActive(Potion.regeneration) && mc.thePlayer.getActivePotionEffect(Potion.regeneration).getDuration() < 5))) || shouldMutton);
-                if (Item.getIdFromItem(item) == 282 || shouldApple) {
-                    soup = i;
+                boolean shouldApple = heads.getValue() && needsRegenOrAbsorption && (item == Items.skull || item == Items.baked_potato || item == Items.magma_cream);
+
+                if (priority < 1 && shouldApple) {
+                    slot = i;
+                    priority = 1;
+                    continue;
+                }
+                if (priority < 3 && shouldMutton) {
+                    slot = i;
+                    priority = 3;
+                    continue;
+                }
+
+                if (Client.instance.is1_9orGreater() && (item == Items.golden_apple || item == Items.cooked_beef || item == Items.bread)) {
+                    if (isInPit) {
+                        if (priority < 3 && needsRegenOrAbsorption && item == Items.golden_apple) {
+                            slot = i;
+                            priority = 3;
+                            continue;
+                        }
+                        if (priority < 2 && needsRegenOrAbsorption && item == Items.cooked_beef) {
+                            slot = i;
+                            priority = 2;
+                            continue;
+                        }
+                        if (priority < 2 && mc.thePlayer.getAbsorptionAmount() < 2 && item == Items.bread) {
+                            slot = i;
+                            priority = 2;
+                            continue;
+                        }
+                    } else {
+                        if (priority < 3 && needsRegenOrAbsorption && item == Items.golden_apple) {
+                            slot = i;
+                            priority = 3;
+                            continue;
+                        }
+
+                        if (priority < 1 && mc.thePlayer.getFoodStats().needFood() && item == Items.cooked_beef) {
+                            slot = i;
+                            priority = 1;
+                            continue;
+                        }
+                        if (priority < 1 && mc.thePlayer.getFoodStats().needFood() && item == Items.bread) {
+                            slot = i;
+                            priority = 1;
+                            continue;
+                        }
+                    }
+                }
+
+                if (priority == -1 && item == Items.mushroom_stew) {
+                    slot = i;
+                    priority = 0;
                 }
             }
         }
-        return soup;
+        return slot;
     }
 
 }

@@ -2,6 +2,8 @@ package com.github.creeper123123321.viafabric.platform;
 
 import com.github.creeper123123321.viafabric.ViaFabric;
 import de.gerrygames.viarewind.fabric.util.LoggerWrapper;
+import nl.matsv.viabackwards.ViaBackwards;
+import nl.matsv.viabackwards.api.ViaBackwardsConfig;
 import nl.matsv.viabackwards.api.ViaBackwardsPlatform;
 import org.apache.logging.log4j.LogManager;
 
@@ -16,6 +18,28 @@ public class VRViaBackwardsPlatform implements ViaBackwardsPlatform {
     private File configDir;
 
     public VRViaBackwardsPlatform() {
+        ViaBackwards.init(this, new ViaBackwardsConfig() {
+            @Override
+            public boolean addCustomEnchantsToLore() {
+                return true;
+            }
+
+            @Override
+            public boolean addTeamColorTo1_13Prefix() {
+                return true;
+            }
+
+            @Override
+            public boolean isFix1_13FacePlayer() {
+                return true;
+            }
+
+            @Override
+            public boolean alwaysShowOriginalMobName() {
+                return true;
+            }
+        });
+
         Path file = ViaFabric.directoryPath.resolve("ViaBackwards");
         this.configDir = file.toFile();
         init(file.toFile());

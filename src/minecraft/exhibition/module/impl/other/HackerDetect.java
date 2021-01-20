@@ -198,22 +198,14 @@ public class HackerDetect extends Module {
                             if (!valid) {
                                 for (int i = 0; i < message.length(); i++) {
                                     char character = message.charAt(i);
-                                    if(!Character.isAlphabetic(character) && mc.fontRendererObj.getStringWidth(character + "") == 0) {
+                                    if (!Character.isAlphabetic(character) && mc.fontRendererObj.getStringWidth(character + "") == 0) {
                                         unicodeCount++;
                                         if (unicodeCount > 2 && unformatted.contains(ent.getName()) && !PriorityManager.isPriority(ent)) {
-                                            if(character == '\u05fc') {
-                                                Notifications.getManager().post("Hacker Detected", ent.getName() + " may be using Novoline (CB).", 7500, Notifications.Type.WARNING);
-                                                if ((boolean) settings.get("REPORT").getValue())
-                                                    ChatUtil.sendChat("/wdr " + ent.getName() + " fly");
-                                                PriorityManager.setAsPriority(ent);
-                                            } else {
-                                                Notifications.getManager().post("Hacker Detected", ent.getName() + " may be using Chat Bypass.", 7500, Notifications.Type.WARNING);
-                                                if ((boolean) settings.get("REPORT").getValue())
-                                                    ChatUtil.sendChat("/wdr " + ent.getName() + " fly");
-                                                PriorityManager.setAsPriority(ent);
+                                            Notifications.getManager().post("Hacker Detected", ent.getName() + " may be using " + (character == '\u05fc' ? "Novoline (CB)." : "Chat Bypass."), 7500, Notifications.Type.WARNING);
+                                            PriorityManager.setAsPriority(ent);
+                                            if ((boolean) settings.get("REPORT").getValue()) {
+                                                ChatUtil.sendChat("/wdr " + ent.getName() + " fly");
                                             }
-
-
                                             break;
                                         }
                                     }

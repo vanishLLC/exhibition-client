@@ -116,7 +116,16 @@ public class Killaura extends Module {
         settings.put(ANGLESTEP, new Setting<>(ANGLESTEP, 180, "The amount of degrees KillAura can step per tick.", 5, 0, 180));
         settings.put(DEATH, new Setting<>(DEATH, true, /*Disables killaura when you die.*/decodeByteArray(new byte[]{68, 105, 115, 97, 98, 108, 101, 115, 32, 107, 105, 108, 108, 97, 117, 114, 97, 32, 119, 104, 101, 110, 32, 121, 111, 117, 32, 100, 105, 101, 46})));
         settings.put(RAYTRACE, new Setting<>(RAYTRACE, true, /*Visible check for target.*/decodeByteArray(new byte[]{86, 105, 115, 105, 98, 108, 101, 32, 99, 104, 101, 99, 107, 32, 102, 111, 114, 32, 116, 97, 114, 103, 101, 116, 46})));
-        settings.put(TARGETMODE, new Setting<>(TARGETMODE, new Options(/*Priority*/decodeByteArray(new byte[]{80, 114, 105, 111, 114, 105, 116, 121}), /*Angle*/decodeByteArray(new byte[]{65, 110, 103, 108, 101}), new String[]{/*Angle*/decodeByteArray(new byte[]{65, 110, 103, 108, 101}), /*Range*/decodeByteArray(new byte[]{82, 97, 110, 103, 101}), /*FOV*/decodeByteArray(new byte[]{70, 79, 86}), /*Armor*/decodeByteArray(new byte[]{65, 114, 109, 111, 114}), /*Health*/decodeByteArray(new byte[]{72, 101, 97, 108, 116, 104}), /*Bounty*/decodeByteArray(new byte[]{66, 111, 117, 110, 116, 121})}), /*Target mode priority.*/decodeByteArray(new byte[]{84, 97, 114, 103, 101, 116, 32, 109, 111, 100, 101, 32, 112, 114, 105, 111, 114, 105, 116, 121, 46})));
+        settings.put(TARGETMODE, new Setting<>(TARGETMODE, new Options(/*Priority*/decodeByteArray(new byte[]{80, 114, 105, 111, 114, 105, 116, 121}),
+                /*Angle*/decodeByteArray(new byte[]{65, 110, 103, 108, 101}),
+                /*Angle*/decodeByteArray(new byte[]{65, 110, 103, 108, 101}),
+                /*Range*/decodeByteArray(new byte[]{82, 97, 110, 103, 101}),
+                /*FOV*/decodeByteArray(new byte[]{70, 79, 86}),
+                /*Armor*/decodeByteArray(new byte[]{65, 114, 109, 111, 114}),
+                /*Health*/decodeByteArray(new byte[]{72, 101, 97, 108, 116, 104}),
+                /*Bounty*/decodeByteArray(new byte[]{66, 111, 117, 110, 116, 121}),
+                "Health Vamp"),
+                /*Target mode priority.*/decodeByteArray(new byte[]{84, 97, 114, 103, 101, 116, 32, 109, 111, 100, 101, 32, 112, 114, 105, 111, 114, 105, 116, 121, 46})));
         settings.put(/*PARTICLES*/decodeByteArray(new byte[]{80, 65, 82, 84, 73, 67, 76, 69, 83}), new Setting<>(/*PARTICLES*/decodeByteArray(new byte[]{80, 65, 82, 84, 73, 67, 76, 69, 83}), false, /*Render enchant particles.*/decodeByteArray(new byte[]{82, 101, 110, 100, 101, 114, 32, 101, 110, 99, 104, 97, 110, 116, 32, 112, 97, 114, 116, 105, 99, 108, 101, 115, 46})));
         settings.put(/*STEPCOMPAT*/decodeByteArray(new byte[]{83, 84, 69, 80, 67, 79, 77, 80, 65, 84}), new Setting<>(/*STEPCOMPAT*/decodeByteArray(new byte[]{83, 84, 69, 80, 67, 79, 77, 80, 65, 84}), true, /*Adds extra compatability when stepping up blocks with Criticals.*/decodeByteArray(new byte[]{65, 100, 100, 115, 32, 101, 120, 116, 114, 97, 32, 99, 111, 109, 112, 97, 116, 97, 98, 105, 108, 105, 116, 121, 32, 119, 104, 101, 110, 32, 115, 116, 101, 112, 112, 105, 110, 103, 32, 117, 112, 32, 98, 108, 111, 99, 107, 115, 32, 119, 105, 116, 104, 32, 67, 114, 105, 116, 105, 99, 97, 108, 115, 46})));
 
@@ -363,8 +372,8 @@ public class Killaura extends Module {
         boolean block = (Boolean) settings.get(AUTOBLOCK).getValue();
         EventMotionUpdate em = event.cast();
         if (em.isPre()) {
-            if(shouldToggle) {
-                if(isBlocking) {
+            if (shouldToggle) {
+                if (isBlocking) {
                     isBlocking = false;
                     NetUtil.sendPacket(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
                 }
@@ -395,14 +404,14 @@ public class Killaura extends Module {
             }
             if (blockJump)
                 blockJump = false;
-            if (isBlocking && mc.thePlayer.getCurrentEquippedItem() != null && !(mc.thePlayer.getCurrentEquippedItem().getItem() instanceof ItemSword)) {
+            if (isBlocking && (mc.thePlayer.getCurrentEquippedItem() == null || !(mc.thePlayer.getCurrentEquippedItem().getItem() instanceof ItemSword) || AutoSoup.isHealing)) {
                 isBlocking = false;
             }
         }
         Scaffold scaffold = (Scaffold) Client.getModuleManager().get(Scaffold.class);
         LongJump longjump = (LongJump) Client.getModuleManager().get(LongJump.class);
         boolean disable = false;
-        if ((AutoPot.potting || AutoPot.haltTicks > 0) || scaffold.isEnabled() || scaffold.isPlacing() || longjump.allowAttack() || longjump.isBruhing()) {
+        if ((AutoPot.potting || AutoPot.haltTicks > 0 || AutoSoup.isHealing) || scaffold.isEnabled() || scaffold.isPlacing() || longjump.allowAttack() || longjump.isBruhing()) {
             disable = true;
         }
 
@@ -744,7 +753,7 @@ public class Killaura extends Module {
                 }
 
                 boolean packetMode = Client.getModuleManager().isEnabled(NoSlowdown.class);
-                if (mc.thePlayer.isBlocking() && isBlocking && packetMode && PlayerUtil.isMoving() && mc.thePlayer.ticksExisted % 2 == 0) {
+                if (mc.thePlayer.isBlocking() && isBlocking && packetMode && PlayerUtil.isMoving() && mc.thePlayer.ticksExisted % 2 == 0 && !AutoSoup.isHealing) {
                     isBlocking = false;
                     NetUtil.sendPacket(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
                     blockTimer.reset();
@@ -778,7 +787,7 @@ public class Killaura extends Module {
 
                 boolean canAttackRightNow = attack.equals("Always") || (attack.equals("Precise") ? target.waitTicks <= 0 : target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
 
-                if (isAttacking && shouldAttack && isBlocking && canAttackRightNow) {
+                if (isAttacking && shouldAttack && isBlocking && canAttackRightNow && !AutoSoup.isHealing) {
                     isBlocking = false;
                     NetUtil.sendPacket(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
                     blockTimer.reset();
@@ -787,7 +796,7 @@ public class Killaura extends Module {
                 if (isAttacking && !isBlocking && (!antiLag.getValue() || !Client.instance.isLagging())) {
                     Vec3 v = getDirection(em.getYaw(), em.getPitch());
                     double off = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), v, target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height,
-                            HypixelUtil.isInGame("DUEL") ? 1.2 :
+                            HypixelUtil.isInGame("DUEL") ? 1.85 :
                                     HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1);
 
                     if (((Number) settings.get(ANGLESTEP).getValue()).intValue() == 0 || (off <= 0.11 || (off <= 1 && off >= 0.22 && MathUtils.getIncremental(angleTimer.getDifference(), 50) < 100))) {
@@ -801,9 +810,12 @@ public class Killaura extends Module {
                         }
 
                         if (canAttackRightNow && shouldAttack) {
-                            if (!(boolean) noswing.getValue())
-                                mc.thePlayer.swingItem();
-
+                            if (!Client.instance.is1_9orGreater())
+                                if (!(boolean) noswing.getValue()) {
+                                    mc.thePlayer.swingItem();
+                                } else {
+                                    mc.thePlayer.swingItemFake();
+                                }
                             //ChatUtil.printChat("Attacked " + target.hurtTime + " " + target.waitTicks);
 
 //                            if(isCriticalAttack) {
@@ -811,7 +823,22 @@ public class Killaura extends Module {
 //                            } else {
 //                                ChatUtil.printChat("\247a+Normal " + mc.thePlayer.ticksExisted + " " + mc.thePlayer.fallDistance + " " + isCritSetup + " " + target.waitTicks);
 //                            }
+
+//                            if (mc.thePlayer.isSprinting() && lessKB.getValue())
+//                                NetUtil.sendPacketNoEvents(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.STOP_SPRINTING));
+
                             NetUtil.sendPacketNoEvents(new C02PacketUseEntity(target, C02PacketUseEntity.Action.ATTACK));
+
+//                            if (mc.thePlayer.isSprinting() && lessKB.getValue())
+//                                NetUtil.sendPacketNoEvents(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.START_SPRINTING));
+
+                            if (Client.instance.is1_9orGreater())
+                                if (!(boolean) noswing.getValue()) {
+                                    mc.thePlayer.swingItem();
+                                } else {
+                                    mc.thePlayer.swingItemFake();
+                                }
+
 
                             //ChatUtil.printChat(-(mc.thePlayer.posY - mc.thePlayer.lastTickPosY) + "");
 
@@ -842,7 +869,7 @@ public class Killaura extends Module {
                                 mc.thePlayer.onCriticalHit(target);
                             }
                         }
-                    } /*else {
+                    } else {
                         float yawDiff = RotationUtils.getYawChangeGiven(target.posX + p[0], target.posZ + p[2], em.getYaw());
                         double offOrig = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), v, target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height, 1.2);
 
@@ -851,7 +878,7 @@ public class Killaura extends Module {
                         ChatUtil.debug("\247a" + yawDiff + " \247b" + off + " \247c" + offOrig + " \247d" + willViolate);
                         ChatUtil.debug("\247a" + mc.thePlayer.getDistance(target.posX + p[0], target.posY + p[1], target.posZ + p[2]) + " " + angleTimer.getDifference());
                         ChatUtil.debug("----------------------------------");
-                    }*/
+                    }
                 }/* else {
                     if (isAttacking) {
                         ChatUtil.printChat("Blocking? " + isBlocking + " " + mc.thePlayer.ticksExisted);
@@ -861,7 +888,7 @@ public class Killaura extends Module {
                     }
                 }*/
 
-                if (wait <= 0 && mc.thePlayer.isBlocking() && !isBlocking) {
+                if (wait <= 0 && mc.thePlayer.isBlocking() && !isBlocking && !AutoSoup.isHealing) {
                     isBlocking = true;
                     NetUtil.sendPacket(new C08PacketPlayerBlockPlacement(mc.thePlayer.getCurrentEquippedItem()));
                 }
@@ -870,7 +897,7 @@ public class Killaura extends Module {
             if (em.isPost()) {
                 wait--;
 
-                if (loaded.isEmpty() && target == null && isBlocking && (blockTimer.delay(50)) && block) {
+                if (loaded.isEmpty() && target == null && isBlocking && (blockTimer.delay(50)) && block && !AutoSoup.isHealing) {
                     // Unblock, set next random blockWait
                     blockTimer.reset();
                     isBlocking = false;
@@ -892,7 +919,7 @@ public class Killaura extends Module {
                 }
             } else {
                 if (target != null) {
-                    if (mc.thePlayer.isBlocking() && target.waitTicks <= 1 && isBlocking) {
+                    if (mc.thePlayer.isBlocking() && target.waitTicks <= 1 && isBlocking && !AutoSoup.isHealing) {
                         isBlocking = false;
                         NetUtil.sendPacket(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
                     }
@@ -915,7 +942,7 @@ public class Killaura extends Module {
                         }
                         delay.reset();
                     }
-                } else if (isBlocking) {
+                } else if (isBlocking && !AutoSoup.isHealing) {
                     // Unblock
                     isBlocking = false;
                     NetUtil.sendPacket(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
@@ -1165,8 +1192,7 @@ public class Killaura extends Module {
         } else if (current.equalsIgnoreCase(/*Health*/ decodeByteArray(new byte[]{72, 101, 97, 108, 116, 104}))) {
             loaded.sort(Comparator.comparingDouble(EntityLivingBase::getHealth));
         } else if (current.equalsIgnoreCase(/*Bounty*/ decodeByteArray(new byte[]{66, 111, 117, 110, 116, 121}))) {
-            loaded.sort(Comparator.comparingDouble(EntityLivingBase::getHealth));
-            loaded.sort(Comparator.comparing((o) -> o instanceof EntityPlayer && !TargetESP.isPriority((EntityPlayer) o)));
+            loaded.sort(Comparator.comparingDouble(o -> o.getHealth() + (o instanceof EntityPlayer && TargetESP.isPriority((EntityPlayer) o) ? -100D : 0))); // Prioritize bounties over normal players, still puts lowest health bounty first.
         } else if (current.equalsIgnoreCase(/*FOV*/ decodeByteArray(new byte[]{70, 79, 86}))) {
             loaded.sort(Comparator.comparingDouble(o -> (Math.abs(RotationUtils.getYawChange(o.posX, o.posZ)))));
         } else if (current.equalsIgnoreCase(/*Angle*/ decodeByteArray(new byte[]{65, 110, 103, 108, 101}))) {
@@ -1174,12 +1200,43 @@ public class Killaura extends Module {
             loaded.sort(Comparator.comparingDouble(o -> MathUtils.roundToPlace(RotationUtils.getRotations(o)[0], 15)));
         } else if (current.equalsIgnoreCase(/*Armor*/ decodeByteArray(new byte[]{65, 114, 109, 111, 114}))) {
             loaded.sort(Comparator.comparingInt(o -> (o instanceof EntityPlayer ? ((EntityPlayer) o).inventory.getTotalArmorValue() : (int) o.getHealth())));
+        } else if (current.equals("Health Vamp")) {
+            loaded.sort(Comparator.comparingDouble(this::getTargetWeighted));
         }
 
         int maxTargets = this.maxTargets.getValue().intValue();
         loaded = loaded.subList(0, Math.min(maxTargets, loaded.size()));
 
     }
+
+    // This is for Health Vampire mode
+    private double getTargetWeighted(EntityLivingBase entityLivingBase) {
+        double weight = entityLivingBase.getHealth() + Math.max(entityLivingBase.waitTicks, 0);
+
+        // If the player is hurt, we don't get any benefit?
+        if (entityLivingBase.hurtTime >= 6) {
+            weight += 10;
+        }
+
+        float estimatedYawChange;
+
+        float forwardYawDiff = Math.abs(MathHelper.clamp_float(RotationUtils.getYawChangeGiven(target.posX, target.posZ, lastAngles.x), -180, 180));
+        if (forwardYawDiff > 90) {
+            estimatedYawChange = Math.abs(MathHelper.clamp_float(RotationUtils.getYawChangeGiven(target.posX, target.posZ, lastAngles.x + 180), -180, 180));
+        } else {
+            estimatedYawChange = forwardYawDiff;
+        }
+
+        estimatedYawChange = (float) MathUtils.getIncremental(estimatedYawChange, 20);
+
+        // The bigger the difference, the less we prefer to swap to them.
+        if (estimatedYawChange >= 60) {
+            weight += estimatedYawChange / 20;
+        }
+
+        return weight;
+    }
+
 
     private List<EntityLivingBase> getTargets() {
         List<EntityLivingBase> targets = new ArrayList<>();

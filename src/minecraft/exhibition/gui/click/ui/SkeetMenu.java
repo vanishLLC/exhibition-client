@@ -540,8 +540,10 @@ public class SkeetMenu extends UI {
                         xOff += 95;
                     if (module.getName().equalsIgnoreCase("Killaura"))
                         xOff -= 95 * 2;
-                    if (module.getName().equalsIgnoreCase("AutoPot"))
+                    if (module.getName().equalsIgnoreCase("AutoPot")) {
                         xOff += 95;
+                        yOff += 5;
+                    }
                     y = 20;
                     List<Setting> list = getSettings(module);
                     if (getSettings(module) != null) {
@@ -1372,26 +1374,36 @@ public class SkeetMenu extends UI {
         for (MultiDropdownBox db : multiList) {
             db.draw(x, y);
         }
-        for (MultiDropdownBox db : multiList) {
-            if (db.active) {
-                for (MultiDropdownButton b : db.buttons) {
-                    b.draw(x, y);
-                }
-            }
-        }
         List<DropdownBox> list = new ArrayList<>(categoryPanel.dropdownBoxes);
         Collections.reverse(list);
         for (DropdownBox db : list) {
             db.draw(x, y);
         }
+
         for (DropdownBox db : list) {
             if (db.active) {
+                int i = db.buttons.size();
+                float xOff = categoryPanel.categoryButton.panel.dragX;
+                float yOff = categoryPanel.categoryButton.panel.dragY;//40
+                RenderingUtil.rectangle(db.x + xOff - 0.3, db.y + 10 + yOff - 0.3, db.x + xOff + 40 + 0.3, db.y + yOff + 9 + (9 * i) + 0.3, Colors.getColor(10, (int) opacity.getOpacity()));
+                RenderingUtil.drawGradient(db.x + xOff, db.y + yOff + 10, db.x + xOff + 40, db.y + yOff + 9 + (9 * i), Colors.getColor(31, (int) opacity.getOpacity()), Colors.getColor(36, (int) opacity.getOpacity()));
                 for (DropdownButton b : db.buttons) {
                     b.draw(x, y);
                 }
             }
         }
-
+        for (MultiDropdownBox db : multiList) {
+            if (db.active) {
+                int i = db.buttons.size();
+                float xOff = categoryPanel.categoryButton.panel.dragX;
+                float yOff = categoryPanel.categoryButton.panel.dragY;//40
+                RenderingUtil.rectangle(db.x + xOff - 0.3, db.y + 10 + yOff - 0.3, db.x + xOff + 40 + 0.3, db.y + yOff + 9 + (9 * i) + 0.3, Colors.getColor(10, (int) opacity.getOpacity()));
+                RenderingUtil.drawGradient(db.x + xOff, db.y + yOff + 10, db.x + xOff + 40, db.y + yOff + 9 + (9 * i), Colors.getColor(31, (int) opacity.getOpacity()), Colors.getColor(36, (int) opacity.getOpacity()));
+                for (MultiDropdownButton b : db.buttons) {
+                    b.draw(x, y);
+                }
+            }
+        }
 
     }
 
@@ -1778,15 +1790,21 @@ public class SkeetMenu extends UI {
         RenderingUtil.rectangle(1.5 - 1, 1, 2 - 1, 1.5, Colors.getColor(151, (int) opacity.getOpacity()));
 
         GlStateManager.popMatrix();
+
+        GlStateManager.pushMatrix();
+        Depth.pre();
+        Depth.mask();
         Client.fss.drawString(p0.option.getSelected(), (p0.x + 4 + xOff) - 1, (p0.y + 3f + yOff), Colors.getColor(151, (int) opacity.getOpacity()));
         if (p0.option.getSelected().contains("180")) {
             mc.fontRendererObj.drawString("树屋", (p0.x + 3 + xOff) + Client.fss.getWidth(p0.option.getSelected()), (p0.y + yOff + 0.5f), Colors.getColor(151, (int) opacity.getOpacity()));
         }
-        if (p0.active) {
-            int i = p0.buttons.size();
-            RenderingUtil.rectangle(p0.x + xOff - 0.3, p0.y + 10 + yOff - 0.3, p0.x + xOff + 40 + 0.3, p0.y + yOff + 9 + (9 * i) + 0.3, Colors.getColor(10, (int) opacity.getOpacity()));
-            RenderingUtil.drawGradient(p0.x + xOff, p0.y + yOff + 10, p0.x + xOff + 40, p0.y + yOff + 9 + (9 * i), Colors.getColor(31, (int) opacity.getOpacity()), Colors.getColor(36, (int) opacity.getOpacity()));
-        }
+        Depth.render();
+        RenderingUtil.rectangle(p0.x + xOff, p0.y + yOff, p0.x + xOff + 30, p0.y + yOff + 9, Colors.getColor(151, (int) opacity.getOpacity()));
+        RenderingUtil.drawGradientSideways(p0.x + xOff + 30, p0.y + yOff, p0.x + xOff + 35, p0.y + yOff + 9, Colors.getColor(151, (int) opacity.getOpacity()), Colors.getColor(151, 0));
+
+        Depth.post();
+        GlStateManager.popMatrix();
+
         if (hovering) {
             Client.fss.drawStringWithShadow(getDescription(p0.setting), (panel.categoryButton.panel.x + 2 + panel.categoryButton.panel.dragX) + 55, (panel.categoryButton.panel.y + 9 + panel.categoryButton.panel.dragY), Colors.getColor(255, (int) opacity.getOpacity()));
         }
@@ -1906,14 +1924,12 @@ public class SkeetMenu extends UI {
 //        RenderingUtil.rectangle(p0.x +  xOff - 0.3, p0.y + yOff - 0.3, p0.x  + xOff + 40 + 0.3, p0.y + yOff + 6 + 0.3, Colors.getColor(010);
 //        RenderingUtil.drawGradient(p0.x +  xOff, p0.y + yOff, p0.x  + xOff + 40, p0.y + yOff + 6, Colors.getColor(46), Colors.getColor(27));
         boolean hovering = (x >= xOff + p0.x) && (y >= yOff + p0.y) && (x <= xOff + p0.x + 40) && (y <= yOff + p0.y + 8.5);
-        GlStateManager.pushMatrix();
         boolean active = (boolean) p0.setting.getValue();
         TTFFontRenderer font = hovering ? Client.test2 : Client.test3;
         font.drawStringWithShadow((hovering || active ? "\247l" : "") + p0.setting.getName().charAt(0) + p0.setting.getName().toLowerCase().substring(1), (p0.x + 3 + xOff), (p0.y + 2f + yOff), active && !hovering ? Colors.getColor(ColorManager.hudColor.red, ColorManager.hudColor.green, ColorManager.hudColor.blue, (int) opacity.getOpacity()) : Colors.getColor(255, (int) opacity.getOpacity()));
 //        if(hovering) {
 //            Client.fss.drawStringWithShadow(p0.multiBool.getDesc(), (p1.panel.categoryButton.panel.x + 2 + p1.panel.categoryButton.panel.dragX) + 55, (p1.panel.categoryButton.panel.y + 9 + p1.panel.categoryButton.panel.dragY), -1);
 //        }
-        GlStateManager.popMatrix();
     }
 
 

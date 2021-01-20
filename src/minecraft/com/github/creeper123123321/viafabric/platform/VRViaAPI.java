@@ -41,7 +41,15 @@ import java.util.UUID;
 public class VRViaAPI implements ViaAPI<UUID> {
     @Override
     public int getPlayerVersion(UUID uuid) {
-        throw new UnsupportedOperationException();
+        UserConnection con = Via.getManager().getConnection(uuid);
+        if (con != null) {
+            return con.getProtocolInfo().getProtocolVersion();
+        }
+        try {
+            return Via.getManager().getInjector().getServerProtocolVersion();
+        } catch (Exception e) {
+            throw new AssertionError(e);
+        }
     }
 
     @Override
@@ -72,6 +80,9 @@ public class VRViaAPI implements ViaAPI<UUID> {
 
     @Override
     public SortedSet<Integer> getSupportedVersions() {
-        return null;
+        SortedSet<Integer> outputSet = new TreeSet<>(ProtocolRegistry.getSupportedVersions());
+        outputSet.removeAll(Via.getPlatform().getConf().getBlockedProtocols());
+
+        return outputSet;
     }
 }

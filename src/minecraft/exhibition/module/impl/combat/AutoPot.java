@@ -99,7 +99,7 @@ public class AutoPot extends Module {
                 }
 
                 setSuffix(mode.getSelected());
-                if (!mc.thePlayer.capabilities.allowEdit || (haltTicks < 0 && mc.thePlayer.openContainer != mc.thePlayer.inventoryContainer) || Client.getModuleManager().isEnabled(LongJump.class)) {
+                if (!mc.thePlayer.capabilities.allowEdit || AutoSoup.isHealing || (haltTicks < 0 && mc.thePlayer.openContainer != mc.thePlayer.inventoryContainer) || Client.getModuleManager().isEnabled(LongJump.class)) {
                     AutoPot.potting = false;
                     haltTicks = -1;
                     wantsToPot = false;

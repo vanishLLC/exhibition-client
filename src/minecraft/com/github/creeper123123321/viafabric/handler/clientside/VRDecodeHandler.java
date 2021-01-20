@@ -28,6 +28,7 @@ public class VRDecodeHandler extends MessageToMessageDecoder<ByteBuf> {
         try {
             info.transformOutgoing(transformedBuf, CancelDecoderException::generate);
             out.add(transformedBuf.retain());
+        } catch (Exception ignored) {
         } finally {
             transformedBuf.release();
         }

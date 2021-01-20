@@ -8,6 +8,7 @@ import exhibition.event.impl.EventPacket;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
+import exhibition.module.impl.combat.AutoSoup;
 import exhibition.module.impl.combat.Killaura;
 import exhibition.util.MathUtils;
 import exhibition.util.NetUtil;
@@ -38,7 +39,7 @@ public class NoSlowdown extends Module {
     public void onEvent(Event event) {
         if (mc.thePlayer == null)
             return;
-        boolean shouldUnblock = (mc.thePlayer.isBlocking()) && PlayerUtil.isMoving();
+        boolean shouldUnblock = (mc.thePlayer.isBlocking() && !AutoSoup.isHealing) && PlayerUtil.isMoving();
         if (event instanceof EventMotionUpdate) {
             if ((boolean) settings.get("VANILLA").getValue())
                 return;

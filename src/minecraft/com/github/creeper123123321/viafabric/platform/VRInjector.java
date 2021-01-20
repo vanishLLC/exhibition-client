@@ -28,7 +28,11 @@ package com.github.creeper123123321.viafabric.platform;
 import com.github.creeper123123321.viafabric.handler.CommonTransformer;
 import net.minecraft.realms.RealmsSharedConstants;
 import us.myles.ViaVersion.api.platform.ViaInjector;
+import us.myles.ViaVersion.util.GsonUtil;
 import us.myles.viaversion.libs.gson.JsonObject;
+
+import java.lang.reflect.Method;
+import java.util.Arrays;
 
 public class VRInjector implements ViaInjector {
     @Override
@@ -43,11 +47,11 @@ public class VRInjector implements ViaInjector {
 
     @Override
     public int getServerProtocolVersion() throws NoSuchFieldException, IllegalAccessException {
-            return getClientProtocol();
+        return getClientProtocol();
     }
 
     private int getClientProtocol() throws NoSuchFieldException, IllegalAccessException {
-        return RealmsSharedConstants.class.getField("NETWORK_PROTOCOL_VERSION").getInt(null);
+        return 47;
     }
 
     @Override

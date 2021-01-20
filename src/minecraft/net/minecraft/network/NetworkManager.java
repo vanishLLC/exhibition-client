@@ -2,13 +2,11 @@ package net.minecraft.network;
 
 import com.github.creeper123123321.viafabric.ViaFabric;
 import com.github.creeper123123321.viafabric.handler.CommonTransformer;
-import com.github.creeper123123321.viafabric.handler.serverside.FabricDecodeHandler;
-import com.github.creeper123123321.viafabric.handler.serverside.FabricEncodeHandler;
-import com.github.creeper123123321.viafabric.handler.clientside.ProtocolDetectionHandler;
 import com.github.creeper123123321.viafabric.handler.clientside.VRDecodeHandler;
 import com.github.creeper123123321.viafabric.handler.clientside.VREncodeHandler;
 import com.github.creeper123123321.viafabric.platform.VRClientSideUserConnection;
 import com.github.creeper123123321.viafabric.protocol.ViaFabricHostnameProtocol;
+import com.github.creeper123123321.viafabric.util.Util;
 import com.google.common.collect.Queues;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import exhibition.event.EventSystem;
@@ -410,7 +408,6 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
                     channel.pipeline()
                             .addBefore("encoder", CommonTransformer.HANDLER_ENCODER_NAME, new VREncodeHandler(user))
                             .addBefore("decoder", CommonTransformer.HANDLER_DECODER_NAME, new VRDecodeHandler(user));
-                    channel.pipeline().addAfter(CommonTransformer.HANDLER_ENCODER_NAME, "via-autoprotocol", new ProtocolDetectionHandler());
                 }
             }
         })).channel(oclass)).connect(p_181124_0_, p_181124_1_).syncUninterruptibly();
@@ -423,11 +420,11 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
      */
     public static NetworkManager provideLocalClient(SocketAddress address) {
         final NetworkManager networkmanager = new NetworkManager(EnumPacketDirection.CLIENTBOUND);
-        ((Bootstrap) ((Bootstrap) ((Bootstrap) (new Bootstrap()).group((EventLoopGroup) CLIENT_LOCAL_EVENTLOOP.getValue())).handler(new ChannelInitializer<Channel>() {
+        (new Bootstrap()).group(CLIENT_LOCAL_EVENTLOOP.getValue()).handler(new ChannelInitializer<Channel>() {
             protected void initChannel(Channel p_initChannel_1_) throws Exception {
                 p_initChannel_1_.pipeline().addLast((String) "packet_handler", (ChannelHandler) networkmanager);
             }
-        })).channel(LocalChannel.class)).connect(address).syncUninterruptibly();
+        }).channel(LocalChannel.class).connect(address).syncUninterruptibly();
         return networkmanager;
     }
 
@@ -484,13 +481,13 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
             if (this.channel.pipeline().get("decompress") instanceof NettyCompressionDecoder) {
                 ((NettyCompressionDecoder) this.channel.pipeline().get("decompress")).setCompressionThreshold(treshold);
             } else {
-                this.channel.pipeline().addBefore(useViaVer ? "via-decoder" : "decoder", "decompress", new NettyCompressionDecoder(treshold));
+                Util.decodeEncodePlacement(channel.pipeline(), "decoder", "decompress", new NettyCompressionDecoder(treshold));
             }
 
             if (this.channel.pipeline().get("compress") instanceof NettyCompressionEncoder) {
                 ((NettyCompressionEncoder) this.channel.pipeline().get("decompress")).setCompressionThreshold(treshold);
             } else {
-                this.channel.pipeline().addBefore(useViaVer ? "via-encoder" : "encoder", "compress", new NettyCompressionEncoder(treshold));
+                Util.decodeEncodePlacement(channel.pipeline(), "encoder", "compress", new NettyCompressionEncoder(treshold));
             }
         } else {
             if (this.channel.pipeline().get("decompress") instanceof NettyCompressionDecoder) {
@@ -500,19 +497,6 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
             if (this.channel.pipeline().get("compress") instanceof NettyCompressionEncoder) {
                 this.channel.pipeline().remove("compress");
             }
-        }
-
-        if(ViaFabric.config.getClientSideVersion() != ProtocolVersion.v1_8.getVersion()) {
-            if (channel.pipeline().get(FabricEncodeHandler.class) == null) return;
-            if (channel.pipeline().names().indexOf("compress")
-                    < channel.pipeline().names().indexOf(CommonTransformer.HANDLER_ENCODER_NAME)) {
-                return; // Order is correct or compression is disabled
-            }
-            // Fixes the handler order
-            FabricDecodeHandler decode = channel.pipeline().remove(FabricDecodeHandler.class);
-            FabricEncodeHandler encode = channel.pipeline().remove(FabricEncodeHandler.class);
-            channel.pipeline().addAfter("decompress", "via-decoder", decode);
-            channel.pipeline().addAfter("compress", "via-encoder", encode);
         }
     }
 

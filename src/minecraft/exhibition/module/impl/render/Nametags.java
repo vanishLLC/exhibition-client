@@ -6,6 +6,8 @@ import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventNametagRender;
 import exhibition.event.impl.EventRender3D;
 import exhibition.event.impl.EventRenderGui;
+import exhibition.management.PriorityManager;
+import exhibition.management.UUIDResolver;
 import exhibition.management.font.TTFFontRenderer;
 import exhibition.management.friend.FriendManager;
 import exhibition.module.Module;
@@ -113,7 +115,19 @@ public class Nametags extends Module {
                 int dist = (int) mc.thePlayer.getDistanceToEntity(ent);
 
                 {
-                    boolean isPriority = TargetESP.isPriority(ent) || FriendManager.isFriend(ent.getName());
+
+                    boolean prioritized = PriorityManager.isPriority(ent);
+
+                    boolean isPriority = prioritized || TargetESP.isPriority(ent) || FriendManager.isFriend(ent.getName());
+
+
+                    boolean invalid = false;
+                    if(!isPriority) {
+                        if(UUIDResolver.instance.isInvalidName(ent.getName())) {
+                            invalid = true;
+                            isPriority = true;
+                        }
+                    }
 
                     String playerName = isPriority ? ent.getDisplayName().getFormattedText() : ent.getDisplayName().getFormattedText();
 
@@ -188,8 +202,19 @@ public class Nametags extends Module {
                     if (!(boolean) settings.get(OPACITY).getValue() || isPriority || AntiBot.isBot(ent)) {
                         percentage = 1;
                     }
-                    int backgroundColor = FriendManager.isFriend(ent.getName()) ? Colors.getColor(52, 229, 235, 200) : isPriority ? Colors.getColor(255, 0, 0, 200) : Colors.getColor(35, (int) (200 * percentage));
-                    int borderColor = FriendManager.isFriend(ent.getName()) ? Colors.getColor(52, 98, 235) : isPriority ? Colors.getColor(255) : Colors.getColor(28, (int) (200 * percentage));
+                    int backgroundColor = FriendManager.isFriend(ent.getName()) ? Colors.getColor(52, 229, 235, 200) :
+                            prioritized ? Colors.getColor(255, 0, 0, 200) :
+                                    Colors.getColor(35, (int) (200 * percentage));
+                    int borderColor = FriendManager.isFriend(ent.getName()) ? Colors.getColor(52, 98, 235) :
+                            prioritized ? Colors.getColor(255) :
+                                    isPriority ? Colors.getColor(255, 178, 0, 200) :
+                                            Colors.getColor(28, (int) (200 * percentage));
+
+                    if (invalid) {
+                        backgroundColor = Colors.getColor(55, 55, 0, (int) (200 * percentage));
+                        borderColor = Colors.getColor(255, 255, 0, (int) (200 * percentage));
+                    }
+
                     float strWidth = font.getWidth(str);
 
                     RenderingUtil.rectangleBordered(-strWidth / 2 - 2, -11, strWidth / 2 + 2, 0, 0.5, backgroundColor, borderColor);
@@ -411,7 +436,21 @@ public class Nametags extends Module {
             if (entity instanceof EntityPlayer) {
                 EntityPlayer ent = (EntityPlayer) entity;
 
-                if (ignorePit && !TargetESP.isPriority(ent) && !FriendManager.isFriend(ent.getName())) {
+                boolean prioritized = PriorityManager.isPriority(ent);
+
+                boolean isPriority = prioritized || TargetESP.isPriority(ent) || FriendManager.isFriend(ent.getName());
+
+                if(!isPriority) {
+                    if(UUIDResolver.instance.isInvalidName(ent.getName())) {
+                        isPriority = true;
+                    }
+                }
+
+                if (priorityOnly.getValue() && !isPriority) {
+                    continue;
+                }
+
+                if (ignorePit && !isPriority) {
                     double x = ent.posX;
                     double y = ent.posY;
                     double z = ent.posZ;
@@ -419,10 +458,6 @@ public class Nametags extends Module {
                         entityPositions.remove(entity);
                         continue;
                     }
-                }
-
-                if (priorityOnly.getValue() && !TargetESP.isPriority(ent) && !FriendManager.isFriend(ent.getName())) {
-                    continue;
                 }
 
                 if (ent != mc.thePlayer && (((Boolean) settings.get(INVISIBLES).getValue()) || !ent.isInvisible())) {

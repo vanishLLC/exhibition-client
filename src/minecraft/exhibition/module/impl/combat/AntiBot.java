@@ -397,7 +397,7 @@ public class AntiBot extends Module {
                                         }
                                     }
 
-                                    if (((str.equals(ent.getName() + "\247r") || str.equals("\247r" + ent.getName())) && !isInTabList(list, ent)) || str.contains("[NPC]")) {
+                                    if (((str.equals(ent.getName() + "\247r") || str.equals("\247r" + ent.getName()) || str.equals("\247r" + ent.getName() + "\247r")) && !isInTabList(list, ent)) || str.contains("[NPC]")) {
                                         invalid.add(ent);
                                         if (remove && ent.isInvisible() && ticksOnGroundMap.getOrDefault(ent.getName(), 0) < -20) {
                                             mc.theWorld.removeEntity(ent);

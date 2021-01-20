@@ -210,7 +210,7 @@ public class Teleport extends Command implements EventListener {
                     diffX = targetX - currentX;
                     diffZ = targetZ - currentZ;
 
-                    NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(currentX, mc.thePlayer.posY + dist, currentZ, false));
+                    NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(currentX, mc.thePlayer.posY + dist, currentZ, counter % 7 == 0));
                     counter++;
 
                     if (counter > 1000) {
@@ -243,7 +243,7 @@ public class Teleport extends Command implements EventListener {
                 if (stage == 1) {
                     S08PacketPlayerPosLook s = (S08PacketPlayerPosLook) packet;
                     Notifications.getManager().post("Teleporting", "Teleporting to " + (targetPlayer != null ? targetPlayer.getName() : targetX + " " + targetZ), 1000, Notifications.Type.OKAY);
-                    NetUtil.sendPacketNoEvents(new C03PacketPlayer.C06PacketPlayerPosLook(s.getX(), s.getY(), s.getZ(), s.getYaw(), s.getPitch(), true));
+                    NetUtil.sendPacketNoEvents(new C03PacketPlayer.C06PacketPlayerPosLook(s.getX(), s.getY(), s.getZ(), s.getYaw(), s.getPitch(), false));
                     stage = 2;
                     event.setCancelled(true);
                 }

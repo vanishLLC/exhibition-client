@@ -5,6 +5,7 @@ import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventRenderGui;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
+import net.minecraft.client.settings.KeyBinding;
 
 public class Sprint extends Module {
 	public Sprint(ModuleData data) {
@@ -14,7 +15,10 @@ public class Sprint extends Module {
 	@RegisterEvent(events = { EventRenderGui.class })
 	public void onEvent(Event event) {
 			if (canSprint()) {
-				mc.thePlayer.setSprinting(true);
+				if(!mc.gameSettings.keyBindSprint.getIsKeyPressed()) {
+					KeyBinding.setKeyBindState(mc.gameSettings.keyBindSprint.getKeyCode(), true);
+					KeyBinding.onTick(mc.gameSettings.keyBindSprint.getKeyCode());
+				}
 			}
 	}
 

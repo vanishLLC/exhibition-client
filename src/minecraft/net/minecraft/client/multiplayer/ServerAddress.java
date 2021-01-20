@@ -70,7 +70,7 @@ public class ServerAddress
 
             if (j == 25565)
             {
-                String[] astring1 = modifySrvAddr(s2);
+                String[] astring1 = getServerAddress(s2);
                 s2 = astring1[0];
                 j = parseIntWithDefault(astring1[1], 25565);
             }

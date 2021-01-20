@@ -212,9 +212,6 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
             get(ChatCommands.class).toggle();
         }
 
-        if (!get(Bypass.class).isHidden()) {
-            get(Bypass.class).setHidden(true);
-        }
     }
 
     public static void saveStatus() {
@@ -301,41 +298,46 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
             boolean isNew = false;
             List<String> fileContent = FileUtils.read(MODULE_DIR);
             for (String line : fileContent) {
-                String[] split = line.split(":");
-                // The client recognizes that the Mods file is new
-                if (split.length >= 3) {
-                    String displayName = split[0];
-                    for (Module module : Client.getModuleManager().getArray()) {
-                        if (module.getName().equalsIgnoreCase(displayName)) {
-                            String strEnabled = split[1];
-                            boolean enabled = Boolean.parseBoolean(strEnabled);
-                            if (enabled && !module.isEnabled()) {
-                                module.setEnabled(true);
-                                EventSystem.register(module);
-                                module.onEnable();
+                try {
+                    String[] split = line.split(":");
+                    // The client recognizes that the Mods file is new
+                    if (split.length >= 3) {
+                        String displayName = split[0];
+                        for (Module module : Client.getModuleManager().getArray()) {
+                            if (module.getName().equalsIgnoreCase(displayName)) {
+                                String strEnabled = split[1];
+                                boolean enabled = Boolean.parseBoolean(strEnabled);
+                                if (enabled && !module.isEnabled()) {
+                                    module.setEnabled(true);
+                                    EventSystem.register(module);
+                                    module.onEnable();
+                                }
+                                module.setHidden(Boolean.parseBoolean(split[2]));
+                                // displayName, enabled, hidden, onHeld
+                                if (split.length > 3) {
+                                    module.setHeld(Boolean.parseBoolean(split[3]));
+                                }
                             }
-                            module.setHidden(Boolean.parseBoolean(split[2]));
-                            // displayName, enabled, hidden, onHeld
-                            if (split.length > 3) {
-                                module.setHeld(Boolean.parseBoolean(split[3]));
+                        }
+                        isNew = true;
+                    } else {
+                        String displayName = split[0];
+                        for (Module module : Client.getModuleManager().getArray()) {
+                            if (module.getName().equalsIgnoreCase(displayName)) {
+                                boolean enabled = Boolean.parseBoolean(split[1]);
+                                module.setKeybind(new Keybind(module, Integer.parseInt(split[2])));
+                                if (enabled && !module.isEnabled()) {
+                                    module.setEnabled(true);
+                                    EventSystem.register(module);
+                                    module.onEnable();
+                                }
+                                module.setHidden(Boolean.parseBoolean(split[3]));
                             }
                         }
                     }
-                    isNew = true;
-                } else {
-                    String displayName = split[0];
-                    for (Module module : Client.getModuleManager().getArray()) {
-                        if (module.getName().equalsIgnoreCase(displayName)) {
-                            boolean enabled = Boolean.parseBoolean(split[1]);
-                            module.setKeybind(new Keybind(module, Integer.parseInt(split[2])));
-                            if (enabled && !module.isEnabled()) {
-                                module.setEnabled(true);
-                                EventSystem.register(module);
-                                module.onEnable();
-                            }
-                            module.setHidden(Boolean.parseBoolean(split[3]));
-                        }
-                    }
+                } catch (Exception e) {
+                    System.out.println(line);
+                    e.printStackTrace();
                 }
             }
             if (!isNew) {
@@ -365,84 +367,18 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
         try {
             List<String> fileContent = FileUtils.read(SETTINGS_DIR);
             for (String line : fileContent) {
-                lastLine = line;
-                String[] split = line.split(":");
-                if (split[0].equalsIgnoreCase("GlobalValue")) {
-                    for (Setting setting : GlobalValues.globalValues) {
-                        if (split.length < 3)
-                            continue;
-
-                        if (!setting.getName().equalsIgnoreCase(split[1]))
-                            continue;
-
-                        String settingValue = split[2];
-                        if (setting.getValue() instanceof Number) {
-                            if (settingValue.equalsIgnoreCase("true") || settingValue.equalsIgnoreCase("false"))
+                try {
+                    lastLine = line;
+                    String[] split = line.split(":");
+                    if (split[0].equalsIgnoreCase("GlobalValue")) {
+                        for (Setting setting : GlobalValues.globalValues) {
+                            if (split.length < 3)
                                 continue;
-                            Object newValue = (StringConversions.castNumber(settingValue, setting.getValue()));
-                            if (newValue != null) {
-                                setting.setValue(newValue);
-                            }
-                        } // If the multiBool is supposed to be a string
-                        else if (setting.getValue().getClass().equals(String.class)) {
-                            StringBuilder fixedString = new StringBuilder(settingValue);
 
-                            if (split.length > 3) {
-                                System.out.println("Has more bruh??");
+                            if (!setting.getName().equalsIgnoreCase(split[1]))
+                                continue;
 
-                                for (int i = 3; i < split.length; i++) {
-                                    fixedString.append(":");
-                                    fixedString.append(split[i]);
-                                }
-
-                                System.out.println("Fixed: " + fixedString);
-                            }
-
-                            String parsed = fixedString.toString();
-
-                            if (!setting.getName().equalsIgnoreCase("URL")) {
-                                parsed = parsed.replaceAll("_", " ");
-                            }
-
-                            setting.setValue(parsed);
-                        } // If the multiBool is supposed to be a boolean
-                        else if (setting.getValue().getClass().equals(Boolean.class)) {
-                            setting.setValue(Boolean.parseBoolean(settingValue));
-                        } // If the multiBool is supposed to be an option
-                        else if (setting.getValue().getClass().equals(Options.class)) {
-                            Options option = ((Options) setting.getValue());
-                            for (String options : option.getOptions()) {
-                                if (settingValue.equals(options)) {
-                                    option.setSelected(options);
-                                    break;
-                                }
-                            }
-                        } // If the multiBool is supposed to be a multibool
-                        else if (setting.getValue().getClass().equals(MultiBool.class)) {
-                            MultiBool multiBool = (MultiBool) setting.getValue();
-                            List<String> items = Arrays.asList(settingValue.replace("[", "").replace("]", "").split("\\s*,\\s*"));
-                            items.forEach(o -> multiBool.getBooleans().forEach(bool -> {
-                                if (o.startsWith(bool.getName())) {
-                                    String e = (o.split("=")[1]);
-                                    bool.setValue(e.equalsIgnoreCase("true"));
-                                }
-                            }));
-                        } // If the multiBool is supposed to be a multibool
-                        else if (setting.getValue().getClass().equals(BlockList.class)) {
-                            BlockList blockList = (BlockList) setting.getValue();
-                            int[] ids = Stream.of(settingValue.replace("[", "").replace("]", "").split("\\s*,\\s*")).mapToInt(Integer::parseInt).toArray();
-                            blockList.setBlockList(ids);
-                        }
-                    }
-                }
-
-                for (Module module : Client.getModuleManager().getArray()) {
-                    if (module.getName().equalsIgnoreCase(split[0])) {
-                        if (split.length < 3)
-                            continue;
-                        Setting setting = Module.getSetting(module.getSettings(), split[1]);
-                        String settingValue = split[2];
-                        if (setting != null) {
+                            String settingValue = split[2];
                             if (setting.getValue() instanceof Number) {
                                 if (settingValue.equalsIgnoreCase("true") || settingValue.equalsIgnoreCase("false"))
                                     continue;
@@ -455,10 +391,14 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
                                 StringBuilder fixedString = new StringBuilder(settingValue);
 
                                 if (split.length > 3) {
+                                    System.out.println("Has more bruh??");
+
                                     for (int i = 3; i < split.length; i++) {
                                         fixedString.append(":");
                                         fixedString.append(split[i]);
                                     }
+
+                                    System.out.println("Fixed: " + fixedString);
                                 }
 
                                 String parsed = fixedString.toString();
@@ -498,6 +438,73 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
                             }
                         }
                     }
+
+                    for (Module module : Client.getModuleManager().getArray()) {
+                        if (module.getName().equalsIgnoreCase(split[0])) {
+                            if (split.length < 3)
+                                continue;
+                            Setting setting = Module.getSetting(module.getSettings(), split[1]);
+                            String settingValue = split[2];
+                            if (setting != null) {
+                                if (setting.getValue() instanceof Number) {
+                                    if (settingValue.equalsIgnoreCase("true") || settingValue.equalsIgnoreCase("false"))
+                                        continue;
+                                    Object newValue = (StringConversions.castNumber(settingValue, setting.getValue()));
+                                    if (newValue != null) {
+                                        setting.setValue(newValue);
+                                    }
+                                } // If the multiBool is supposed to be a string
+                                else if (setting.getValue().getClass().equals(String.class)) {
+                                    StringBuilder fixedString = new StringBuilder(settingValue);
+
+                                    if (split.length > 3) {
+                                        for (int i = 3; i < split.length; i++) {
+                                            fixedString.append(":");
+                                            fixedString.append(split[i]);
+                                        }
+                                    }
+
+                                    String parsed = fixedString.toString();
+
+                                    if (!setting.getName().equalsIgnoreCase("URL")) {
+                                        parsed = parsed.replaceAll("_", " ");
+                                    }
+
+                                    setting.setValue(parsed);
+                                } // If the multiBool is supposed to be a boolean
+                                else if (setting.getValue().getClass().equals(Boolean.class)) {
+                                    setting.setValue(Boolean.parseBoolean(settingValue));
+                                } // If the multiBool is supposed to be an option
+                                else if (setting.getValue().getClass().equals(Options.class)) {
+                                    Options option = ((Options) setting.getValue());
+                                    for (String options : option.getOptions()) {
+                                        if (settingValue.equals(options)) {
+                                            option.setSelected(options);
+                                            break;
+                                        }
+                                    }
+                                } // If the multiBool is supposed to be a multibool
+                                else if (setting.getValue().getClass().equals(MultiBool.class)) {
+                                    MultiBool multiBool = (MultiBool) setting.getValue();
+                                    List<String> items = Arrays.asList(settingValue.replace("[", "").replace("]", "").split("\\s*,\\s*"));
+                                    items.forEach(o -> multiBool.getBooleans().forEach(bool -> {
+                                        if (o.startsWith(bool.getName())) {
+                                            String e = (o.split("=")[1]);
+                                            bool.setValue(e.equalsIgnoreCase("true"));
+                                        }
+                                    }));
+                                } // If the multiBool is supposed to be a multibool
+                                else if (setting.getValue().getClass().equals(BlockList.class)) {
+                                    BlockList blockList = (BlockList) setting.getValue();
+                                    int[] ids = Stream.of(settingValue.replace("[", "").replace("]", "").split("\\s*,\\s*")).mapToInt(Integer::parseInt).toArray();
+                                    blockList.setBlockList(ids);
+                                }
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    System.out.println(line);
+                    e.printStackTrace();
                 }
             }
         } catch (Exception e) {

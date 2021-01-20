@@ -30,7 +30,7 @@ public class AutoMath extends Module {
         Packet packet = ep.getPacket();
         if (packet instanceof S02PacketChat) {
             S02PacketChat packetChat = (S02PacketChat) packet;
-            String unformatted = StringUtils.stripControlCodes(packetChat.getChatComponent().getUnformattedText());
+            String unformatted = StringUtils.stripHypixelControlCodes(packetChat.getChatComponent().getUnformattedText());
             if (unformatted.contains("Solve: ")) {
                 try {
                     String calculate = unformatted.split("Solve: ")[1].replace("x", "*").replace("÷", "/");
