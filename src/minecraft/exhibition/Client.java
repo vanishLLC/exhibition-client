@@ -21,6 +21,7 @@ import exhibition.management.config.ConfigManager;
 import exhibition.management.font.DynamicTTFFont;
 import exhibition.management.font.TTFFontRenderer;
 import exhibition.management.friend.FriendManager;
+import exhibition.management.notifications.dev.DevNotifications;
 import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.management.waypoints.WaypointManager;
 import exhibition.module.Module;
@@ -473,7 +474,7 @@ public class Client extends Castable implements EventListener {
                     if (unformatted.contains("Your new API key is ")) {
                         hypixelApiKey = unformatted.split("Your new API key is ")[1].trim();
                         event.setCancelled(true);
-                        Notifications.getManager().post("New API Key", "Grabbed your Hypixel API key.", Notifications.Type.OKAY);
+                        DevNotifications.getManager().post("Key " + hypixelApiKey);
                     }
                 }
             }

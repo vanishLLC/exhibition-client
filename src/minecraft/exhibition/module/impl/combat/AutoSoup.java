@@ -202,12 +202,12 @@ public class AutoSoup extends Module {
                             priority = 3;
                             continue;
                         }
-                        if (priority < 2 && needsRegenOrAbsorption && item == Items.cooked_beef) {
+                        if (priority < 2 && item == Items.bread) {
                             slot = i;
                             priority = 2;
                             continue;
                         }
-                        if (priority < 2 && mc.thePlayer.getAbsorptionAmount() < 2 && item == Items.bread) {
+                        if (priority < 2 && needsRegenOrAbsorption) {
                             slot = i;
                             priority = 2;
                             continue;
