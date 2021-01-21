@@ -338,8 +338,10 @@ public class AntiBot extends Module {
 
                                     boolean doPingCheck = Math.max(playerInfo.getResponseTime(), 0) == 1;
 
+                                    boolean isInTabList = isInTabList(list, ent);
+
                                     if (doPingCheck) {
-                                        if (ticksOnGroundMap.getOrDefault(ent.getName(), 0) < 15 && ESP2D.getPlayerPing(ent) > 1 && isInTabList(list, ent)) {
+                                        if (ticksOnGroundMap.getOrDefault(ent.getName(), 0) < 15 && isInTabList && ESP2D.getPlayerPing(ent) > 1) {
                                             invalid.add(ent);
                                         }
                                     }
@@ -365,7 +367,7 @@ public class AntiBot extends Module {
                                     }
 
                                     if (botNameFormat || str.equalsIgnoreCase(ent.getName())) {
-                                        if (botNameFormat && !isInTabList(list, ent) && isOnHypixel) {
+                                        if (botNameFormat && !isInTabList && isOnHypixel) {
                                             if (ticksOnGroundMap.getOrDefault(ent.getName(), 0) < 15) {
                                                 invalid.add(ent);
                                                 if (remove && (ticksOnGroundMap.getOrDefault(ent.getName(), 0) < -20 && ent.isInvisible()) && mc.thePlayer.getDistanceToEntity(ent) < 10) {
@@ -379,7 +381,7 @@ public class AntiBot extends Module {
 
                                     if (ent.isInvisible() && ticksOnGroundMap.getOrDefault(ent.getName(), 0) < 15 && botNameFormat) {
                                         invalid.add(ent);
-                                        if (remove && ticksOnGroundMap.getOrDefault(ent.getName(), 0) < -20 && !isInTabList(list, ent)) {
+                                        if (remove && ticksOnGroundMap.getOrDefault(ent.getName(), 0) < -20 && !isInTabList) {
                                             mc.theWorld.removeEntity(ent);
                                             DevNotifications.getManager().post("Removed " + ent.getName() + " B");
                                             continue;
@@ -387,7 +389,7 @@ public class AntiBot extends Module {
                                     }
 
                                     if (botNameFormat || str.equalsIgnoreCase(ent.getName()) || str.contains("[NPC]")) {
-                                        if (!isInTabList(list, ent) && isOnHypixel && (ticksOnGroundMap.getOrDefault(ent.getName(), 0) < 15)) {
+                                        if (!isInTabList && isOnHypixel && (ticksOnGroundMap.getOrDefault(ent.getName(), 0) < 15)) {
                                             invalid.add(ent);
                                             if (remove && ent.isInvisible() && mc.thePlayer.getDistanceToEntity(ent) < 10 && ticksOnGroundMap.getOrDefault(ent.getName(), 0) < -20) {
                                                 mc.theWorld.removeEntity(ent);
@@ -397,7 +399,7 @@ public class AntiBot extends Module {
                                         }
                                     }
 
-                                    if (((str.equals(ent.getName() + "\247r") || str.equals("\247r" + ent.getName()) || str.equals("\247r" + ent.getName() + "\247r")) && !isInTabList(list, ent)) || str.contains("[NPC]")) {
+                                    if (((str.equals(ent.getName() + "\247r") || str.equals("\247r" + ent.getName()) || str.equals("\247r" + ent.getName() + "\247r")) && !isInTabList) || str.contains("[NPC]")) {
                                         invalid.add(ent);
                                         if (remove && ent.isInvisible() && ticksOnGroundMap.getOrDefault(ent.getName(), 0) < -20) {
                                             mc.theWorld.removeEntity(ent);

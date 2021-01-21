@@ -146,12 +146,9 @@ public class ESP2D extends Module {
                     event.setCancelled(true);
         }
         if (event instanceof EventRender3D) {
-            mc.mcProfiler.startSection("esp2DWorld");
             updatePositions();
-            mc.mcProfiler.endSection();
         }
         if (event instanceof EventRenderGui) {
-            mc.mcProfiler.startSection("esp2DGui");
             EventRenderGui er = (EventRenderGui) event;
             GlStateManager.pushMatrix();
             ScaledResolution scaledRes = er.getResolution();
@@ -405,7 +402,6 @@ public class ESP2D extends Module {
             GL11.glColor4f(1, 1, 1, 1);
             GlStateManager.popMatrix();
             RenderingUtil.rectangle(0, 0, 0, 0, -1);
-            mc.mcProfiler.endSection();
         }
     }
 
