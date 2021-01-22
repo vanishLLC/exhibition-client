@@ -21,9 +21,9 @@ import net.minecraft.network.play.server.S02PacketChat;
 
 public class AutoOOF extends Module {
 
-    private Timer watchdogTimer = new Timer();
+    private final Timer watchdogTimer = new Timer();
 
-    private Setting<Boolean> panicOnly = new Setting<>("PANIC-ONLY", false, "Disables modules only.");
+    private final Setting<Boolean> panicOnly = new Setting<>("PANIC-ONLY", false, "Disables modules only.");
 
     public AutoOOF(ModuleData data) {
         super(data);
