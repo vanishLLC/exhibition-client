@@ -1,11 +1,13 @@
 package exhibition.module.impl.player;
 
+import exhibition.Client;
 import exhibition.event.Event;
 import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventMotionUpdate;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
+import exhibition.module.impl.combat.Bypass;
 import exhibition.util.HypixelUtil;
 import exhibition.util.NetUtil;
 import exhibition.util.PlayerUtil;
@@ -54,6 +56,10 @@ public class NoFall extends Module {
                 if (predictedFallen >= 3.0) {
                     if (vanilla.getValue()) {
                         if (em.isPre()) {
+                            Bypass bypass = Client.getModuleManager().getCast(Bypass.class);
+                            if(bypass.option.getSelected().equals("Dong") && bypass.bruh >= 20) {
+                                bypass.bruh -= 2;
+                            }
                             em.setGround(true);
                             dist = mc.thePlayer.fallDistance;
                         }

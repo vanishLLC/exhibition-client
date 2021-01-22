@@ -15,6 +15,9 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+
+import exhibition.Client;
+import exhibition.management.keybinding.KeyHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.stream.GuiTwitchUserMode;
 import net.minecraft.client.renderer.GlStateManager;
@@ -573,6 +576,10 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback
         {
             while (Keyboard.next())
             {
+                if(Client.instance != null) {
+                    boolean isInGui = mc.currentScreen != null;
+                    KeyHandler.update(isInGui);
+                }
                 this.handleKeyboardInput();
             }
         }

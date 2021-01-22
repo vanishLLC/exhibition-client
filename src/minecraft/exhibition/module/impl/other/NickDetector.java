@@ -2,13 +2,17 @@ package exhibition.module.impl.other;
 
 import exhibition.event.Event;
 import exhibition.event.RegisterEvent;
+import exhibition.event.impl.EventPacket;
 import exhibition.event.impl.EventTick;
 import exhibition.management.UUIDResolver;
+import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.util.Timer;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.network.NetworkPlayerInfo;
+import net.minecraft.network.Packet;
+import net.minecraft.network.play.server.S38PacketPlayerListItem;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
@@ -26,8 +30,24 @@ public class NickDetector extends Module {
 
     private Timer timer = new Timer();
 
-    @RegisterEvent(events = EventTick.class)
+    @RegisterEvent(events = {EventTick.class, EventPacket.class})
     public void onEvent(Event event) {
+        if (event instanceof EventPacket) {
+            EventPacket ep = event.cast();
+            Packet packet = ep.getPacket();
+            if (packet instanceof S38PacketPlayerListItem) {
+                S38PacketPlayerListItem packetPlayerListItem = (S38PacketPlayerListItem) packet;
+                for (S38PacketPlayerListItem.AddPlayerData addPlayerData : packetPlayerListItem.getPlayerList()) {
+                    if (packetPlayerListItem.getAction() == S38PacketPlayerListItem.Action.REMOVE_PLAYER) {
+                        if(UUIDResolver.instance.isInvalidName(addPlayerData.getProfile().getName())) {
+                            Notifications.getManager().post("Nick Detector", addPlayerData.getProfile().getName() + " has left your game.", Notifications.Type.INFO);
+                        }
+                    }
+                }
+            }
+            return;
+        }
+
         if (UUIDResolver.instance.isChecking || mc.thePlayer == null || !mc.thePlayer.isAllowEdit() || mc.thePlayer.ticksExisted < 100)
             return;
 

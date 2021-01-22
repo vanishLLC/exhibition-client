@@ -40,11 +40,14 @@ public class AutoSoup extends Module {
             steak = new Setting<>("STEAK", true),
             bread = new Setting<>("BREAD", true);
 
+    private final Setting<Number> resHealth = new Setting<>("RES-HEALTH", 8.75, "Maximum health before consuming Mutton.", 0.25, 0.5, 10);
+
     public AutoSoup(ModuleData data) {
         super(data);
         settings.put(HEALTH, new Setting<>(HEALTH, 15.5, "Maximum health before healing.", 0.5, 1, 20));
         settings.put(DELAY, new Setting<>(DELAY, 350, "Delay before healing again.", 50, 100, 1000));
         addSetting(new Setting<>("CONSUMABLES", new MultiBool("Consumables", soup, heads, mutton, gapples, steak, bread)));
+        addSetting(resHealth);
     }
 
     public static boolean isHealing = false;
@@ -65,13 +68,14 @@ public class AutoSoup extends Module {
 
                 float minHealth = ((Number) settings.get(HEALTH).getValue()).floatValue();
 
-                double minimumPercent = minHealth / 20F;
-
                 boolean shouldEat = soupSlot != -1 && mc.thePlayer.inventoryContainer.getSlot(soupSlot).getHasStack() && mc.thePlayer.inventoryContainer.getSlot(soupSlot).getStack().getItem() == Items.cooked_beef;
 
-                Killaura killaura = Client.getModuleManager().getCast(Killaura.class);
+                boolean shouldResistance = mc.thePlayer.getMaxHealth() == 20 ? mc.thePlayer.getHealth() <= resHealth.getValue().floatValue() : (mc.thePlayer.getHealth() / mc.thePlayer.getMaxHealth()) <= resHealth.getValue().floatValue() / 10F;
 
-                boolean shouldHeal = (mc.thePlayer.getMaxHealth() == 20 ? mc.thePlayer.getHealth() <= minHealth : (mc.thePlayer.getHealth() / mc.thePlayer.getMaxHealth()) <= minimumPercent) || (shouldEat && mc.thePlayer.getFoodStats().needFood());
+                boolean shouldHeal = (mc.thePlayer.getMaxHealth() == 20 ? mc.thePlayer.getHealth() <= minHealth : (mc.thePlayer.getHealth() / mc.thePlayer.getMaxHealth()) <= minHealth / 20F) ||
+                        (shouldEat && mc.thePlayer.getFoodStats().needFood()) || shouldResistance;
+
+                Killaura killaura = Client.getModuleManager().getCast(Killaura.class);
 
                 if (lastItem != -1 && isHealing) {
                     mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer(em.isOnground()));
@@ -175,12 +179,14 @@ public class AutoSoup extends Module {
         boolean needsRegenOrAbsorption = (!mc.thePlayer.isPotionActive(Potion.regeneration) || (mc.thePlayer.getAbsorptionAmount() <= 0) ||
                 (mc.thePlayer.isPotionActive(Potion.regeneration) && mc.thePlayer.getActivePotionEffect(Potion.regeneration).getDuration() < 5));
 
+        boolean shouldResistance = mc.thePlayer.getMaxHealth() == 20 ? mc.thePlayer.getHealth() <= resHealth.getValue().floatValue() : (mc.thePlayer.getHealth() / mc.thePlayer.getMaxHealth()) <= resHealth.getValue().floatValue() / 10F;
+
         for (int i = 9; i < 45; i++) {
             if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
                 ItemStack is = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
                 Item item = is.getItem();
 
-                boolean shouldMutton = mutton.getValue() && item == Items.mutton && !mc.thePlayer.isPotionActive(Potion.resistance);
+                boolean shouldMutton = mutton.getValue() && item == Items.mutton && shouldResistance && !mc.thePlayer.isPotionActive(Potion.resistance);
 
                 boolean shouldApple = heads.getValue() && needsRegenOrAbsorption && (item == Items.skull || item == Items.baked_potato || item == Items.magma_cream);
 

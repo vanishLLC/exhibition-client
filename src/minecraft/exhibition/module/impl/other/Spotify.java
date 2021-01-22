@@ -485,7 +485,11 @@ public class Spotify extends Module {
         float yOffset = ((Number) settings.get(Y).getValue()).floatValue() * (float) twoDscale;
         EventRenderGui er = event.cast();
         GlStateManager.pushMatrix();
-        render(xOffset, yOffset, er.getResolution());
+        try {
+            render(xOffset, yOffset, er.getResolution());
+        } catch (Exception e) {
+
+        }
         GlStateManager.popMatrix();
     }
 

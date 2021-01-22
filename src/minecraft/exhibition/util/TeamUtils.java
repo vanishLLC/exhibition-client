@@ -25,14 +25,14 @@ public class TeamUtils {
     private static final Pattern p = Pattern.compile("§(.).*§r");
 
     private static String isTeam(EntityLivingBase player) {
-        boolean pitMode = HypixelUtil.isInGame("THE HYPIXEL PIT") && HypixelUtil.scoreboardContains("event:");
+        boolean pitMode = HypixelUtil.isInGame("HYPIXEL PIT") && HypixelUtil.scoreboardContains("Event:");
         String nameFormated = player.getDisplayName().getFormattedText();
-        if (HypixelUtil.scoreboardContains("Event: SQUADS")) {
-            if (pitMode && nameFormated.contains("[")) {
+        if (pitMode && HypixelUtil.scoreboardContains("SQUADS")) {
+            if (nameFormated.contains("[")) {
                 nameFormated = nameFormated.split("\\[")[1];
             }
-        } else if(!HypixelUtil.scoreboardContains("PIZZA")) {
-            if (pitMode && nameFormated.contains("] ")) {
+        } else if(pitMode && !HypixelUtil.scoreboardContains("PIZZA")) {
+            if (nameFormated.contains("] ")) {
                 nameFormated = nameFormated.split("] ")[1];
             }
         }

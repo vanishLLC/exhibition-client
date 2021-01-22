@@ -48,12 +48,14 @@ public class ChestStealer extends Module {
     private String IGNORE = "IGNORE";
     private String TRASH = "TRASH";
 
+
     private Options mode = new Options("Mode", "Normal", "Silent", "Render", "Normal");
 
     private Setting<Options> silent = new Setting<>("MODE", mode, "Chest stealer mode.");
     private Setting<Boolean> randomMiss = new Setting<>("MISS", false, "Randomly miss clicks.");
     private Setting<Boolean> rayTrace = new Setting<>("RAYTRACE", false, "Visible check for target.");
     private Setting<Boolean> tools = new Setting<>("TOOLS", false, "Takes better tools from chests.");
+    private Setting<Boolean> pitMode = new Setting<>("PIT-MODE", false, "Ignores Gold in chests. Prioritizes Fresh pants over anything.");
 
     private Timer timer = new Timer();
     private Timer stealTimer = new Timer();
@@ -75,6 +77,7 @@ public class ChestStealer extends Module {
         addSetting(silent);
         addSetting(rayTrace);
         addSetting(randomMiss);
+        addSetting(pitMode);
     }
 
     private TileEntityChest chest = null;
@@ -157,7 +160,7 @@ public class ChestStealer extends Module {
                     GuiChest guiChest = chestContainer;
                     IInventory inventry = guiChest.lowerChestInventory;
                     String name = guiChest.lowerChestInventory.getDisplayName().getUnformattedText().toLowerCase();
-                    boolean isVanillaChest = !inventry.hasCustomName() || name.equalsIgnoreCase(new ChatComponentTranslation("container.chest").getUnformattedText().toLowerCase().trim()) || name.equalsIgnoreCase("low") || name.equalsIgnoreCase("Chest");
+                    boolean isVanillaChest = !inventry.hasCustomName() || name.trim().equalsIgnoreCase(new ChatComponentTranslation("container.chest").getUnformattedText().trim()) || name.equalsIgnoreCase("low") || name.equalsIgnoreCase("Chest");
                     chestContainer = guiChest;
 
                     if ((boolean) settings.get(IGNORE).getValue() && !isVanillaChest) {
@@ -180,6 +183,30 @@ public class ChestStealer extends Module {
                             }
                         }
                         Collections.shuffle(this.slotList);
+
+                        if (pitMode.getValue()) {
+                            this.slotList.sort(Comparator.comparingDouble((o) -> {
+
+                                double weight = 0;
+                                ItemStack firstItem = guiChest.lowerChestInventory.getStackInSlot(o);
+                                if (firstItem != null) {
+                                    Item item = firstItem.getItem();
+                                    if (item instanceof ItemArmor) {
+                                        ItemArmor armor = (ItemArmor) item;
+                                        weight -= armor.hasColor(firstItem) ? 10 : 3;
+                                    }
+                                    if (item instanceof ItemSword) {
+                                        weight -= 2;
+                                    }
+                                    if (item instanceof ItemBow) {
+                                        weight -= 1;
+                                    }
+                                }
+
+                                return weight;
+                            }));
+                        }
+
                     }
                     isStealing = true;
 

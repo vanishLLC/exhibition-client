@@ -23,6 +23,7 @@ import exhibition.util.RenderingUtil;
 import exhibition.util.TeamUtils;
 import exhibition.util.render.Colors;
 import exhibition.util.render.Depth;
+import net.minecraft.block.Block;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.GuiPlayerTabOverlay;
 import net.minecraft.client.gui.ScaledResolution;
@@ -45,8 +46,12 @@ import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.passive.IAnimals;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.StatCollector;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
@@ -141,9 +146,29 @@ public class ESP2D extends Module {
 
         if (event instanceof EventNametagRender) {
             EventNametagRender er = event.cast();
-            if (er.getEntity() instanceof EntityPlayer)
-                if ((boolean) settings.get(NAME).getValue() || Client.getModuleManager().isEnabled(Nametags.class) || Client.getModuleManager().isEnabled(Tags.class))
-                    event.setCancelled(true);
+            Entity ent = er.getEntity();
+            float pTicks = mc.timer.renderPartialTicks;
+
+            boolean ignorePit = HypixelUtil.isInGame("THE HYPIXEL PIT") && IGNORESPAWN.getValue();
+
+            if (ent instanceof EntityPlayer)
+                if (ignorePit && !TargetESP.isPriority((EntityPlayer) ent) && !FriendManager.isFriend(ent.getName())) {
+                    double x = ent.posX;
+                    double y = ent.posY;
+                    double z = ent.posZ;
+                    if (y > Client.instance.spawnY && x < 30 && x > -30 && z < 30 && z > -30) {
+                        return;
+                    }
+                }
+
+            if (renderAll || ((ent instanceof EntityPlayer && renderPlayers) ||
+                    ((ent instanceof EntityAnimal || ent instanceof EntitySnowman || ent instanceof EntitySquid) && renderPassive) ||
+                    ((ent instanceof EntityMob || ent instanceof EntitySlime || ent instanceof EntityGhast || ent instanceof EntityDragon) && renderMobs) ||
+                    (ent instanceof EntityItem && renderItems) || (ent instanceof EntityVillager && renderVillagers) || (ent instanceof EntityGolem && renderGolems))) {
+                if (ent != mc.thePlayer) {
+                    er.setCancelled(true);
+                }
+            }
         }
         if (event instanceof EventRender3D) {
             updatePositions();
@@ -569,6 +594,9 @@ public class ESP2D extends Module {
     private void renderArmor(Entity ent, ScaledResolution scaledRes, double x, double y, double endx, double endy) {
         int mX = scaledRes.getScaledWidth(), mY = scaledRes.getScaledHeight();
         boolean hovering = mX > x - 15 && mX < endx + 15 && mY > y - 15 && mY < endy + 15;
+
+        List<ItemStack> renderStacks = new ArrayList<>();
+
         if ((boolean) settings.get(ARMOR).getValue()) {
             float var1 = (float) ((endy - y) / 4);
             ItemStack stack = ((EntityPlayer) ent).getEquipmentInSlot(4);
@@ -577,34 +605,6 @@ public class ESP2D extends Module {
                 float diff1 = (float) ((y + var1 - 1) - (y + 2));
                 double percent = 1 - (double) stack.getItemDamage() / (double) stack.getMaxDamage();
                 RenderingUtil.rectangle(endx + 2, y + var1 - 1, endx + 4, y + var1 - 1 - (diff1 * percent), Colors.getColor(78, 206, 229));
-                if (hovering) {
-                    mc.fontRendererObj.drawStringWithShadow(stack.getMaxDamage() - stack.getItemDamage() + "", (float) endx + 22, (float) (y + var1 - 1 - (diff1 / 2)), -1);
-                    GlStateManager.pushMatrix();
-                    GlStateManager.translate(endx + 4, (y + var1 - 6 - (diff1 / 2)), 0);
-                    RenderHelper.enableGUIStandardItemLighting();
-                    mc.getRenderItem().renderItemAndEffectIntoGUI(stack, 0, 0);
-                    mc.getRenderItem().renderItemOverlays(mc.fontRendererObj, stack, 0, 0);
-                    RenderHelper.disableStandardItemLighting();
-                    int pLevel = EnchantmentHelper
-                            .getEnchantmentLevel(Enchantment.protection.effectId, stack);
-                    int tLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.thorns.effectId,
-                            stack);
-                    int uLevel = EnchantmentHelper
-                            .getEnchantmentLevel(Enchantment.unbreaking.effectId, stack);
-                    int xOff = 0;
-                    if (pLevel > 0) {
-                        mc.fontRendererObj.drawStringWithShadow("P" + getColor(pLevel) + pLevel, 40, 5, -1);
-                        xOff += 15;
-                    }
-                    if (tLevel > 0) {
-                        mc.fontRendererObj.drawStringWithShadow("Th" + getColor(tLevel) + tLevel, 40 + xOff, 5, -1);
-                        xOff += 25;
-                    }
-                    if (uLevel > 0) {
-                        mc.fontRendererObj.drawStringWithShadow("Unb" + getColor(uLevel) + uLevel, 40 + xOff, 5, -1);
-                    }
-                    GlStateManager.popMatrix();
-                }
             }
             ItemStack stack2 = ((EntityPlayer) ent).getEquipmentInSlot(3);
             if (stack2 != null) {
@@ -612,34 +612,6 @@ public class ESP2D extends Module {
                 float diff1 = (float) ((y + var1 * 2) - (y + var1 + 2));
                 double percent = 1 - (double) stack2.getItemDamage() * 1 / (double) stack2.getMaxDamage();
                 RenderingUtil.rectangle(endx + 2, (y + var1 * 2), endx + 4, (y + var1 * 2) - (diff1 * percent), Colors.getColor(78, 206, 229));
-                if (hovering) {
-                    mc.fontRendererObj.drawStringWithShadow(stack2.getMaxDamage() - stack2.getItemDamage() + "", (float) endx + 22, (float) ((y + var1 * 2) - (diff1 / 2)), -1);
-                    GlStateManager.pushMatrix();
-                    GlStateManager.translate(endx + 4, (y + var1 * 2 - 6 - (diff1 / 2)), 0);
-                    RenderHelper.enableGUIStandardItemLighting();
-                    mc.getRenderItem().renderItemAndEffectIntoGUI(stack2, 0, 0);
-                    mc.getRenderItem().renderItemOverlays(mc.fontRendererObj, stack2, 0, 0);
-                    RenderHelper.disableStandardItemLighting();
-                    int pLevel = EnchantmentHelper
-                            .getEnchantmentLevel(Enchantment.protection.effectId, stack2);
-                    int tLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.thorns.effectId,
-                            stack2);
-                    int uLevel = EnchantmentHelper
-                            .getEnchantmentLevel(Enchantment.unbreaking.effectId, stack2);
-                    int xOff = 0;
-                    if (pLevel > 0) {
-                        mc.fontRendererObj.drawStringWithShadow("P" + getColor(pLevel) + pLevel, 40, 5, -1);
-                        xOff += 15;
-                    }
-                    if (tLevel > 0) {
-                        mc.fontRendererObj.drawStringWithShadow("Th" + getColor(tLevel) + tLevel, 40 + xOff, 5, -1);
-                        xOff += 25;
-                    }
-                    if (uLevel > 0) {
-                        mc.fontRendererObj.drawStringWithShadow("Unb" + getColor(uLevel) + uLevel, 40 + xOff, 5, -1);
-                    }
-                    GlStateManager.popMatrix();
-                }
             }
             ItemStack stack3 = ((EntityPlayer) ent).getEquipmentInSlot(2);
             if (stack3 != null) {
@@ -647,34 +619,6 @@ public class ESP2D extends Module {
                 float diff1 = (float) ((y + var1 * 3) - (y + var1 * 2 + 2));
                 double percent = 1 - (double) stack3.getItemDamage() * 1 / (double) stack3.getMaxDamage();
                 RenderingUtil.rectangle(endx + 2, (y + var1 * 3), endx + 4, (y + var1 * 3) - (diff1 * percent), Colors.getColor(78, 206, 229));
-                if (hovering) {
-                    mc.fontRendererObj.drawStringWithShadow(stack3.getMaxDamage() - stack3.getItemDamage() + "", (float) endx + 22, (float) ((y + var1 * 3) - (diff1 / 2)), -1);
-                    GlStateManager.pushMatrix();
-                    GlStateManager.translate(endx + 4, (y + var1 * 3 - 6 - (diff1 / 2)), 0);
-                    RenderHelper.enableGUIStandardItemLighting();
-                    mc.getRenderItem().renderItemAndEffectIntoGUI(stack3, 0, 0);
-                    mc.getRenderItem().renderItemOverlays(mc.fontRendererObj, stack3, 0, 0);
-                    RenderHelper.disableStandardItemLighting();
-                    int pLevel = EnchantmentHelper
-                            .getEnchantmentLevel(Enchantment.protection.effectId, stack3);
-                    int tLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.thorns.effectId,
-                            stack3);
-                    int uLevel = EnchantmentHelper
-                            .getEnchantmentLevel(Enchantment.unbreaking.effectId, stack3);
-                    int xOff = 0;
-                    if (pLevel > 0) {
-                        mc.fontRendererObj.drawStringWithShadow("P" + getColor(pLevel) + pLevel, 40, 5, -1);
-                        xOff += 15;
-                    }
-                    if (tLevel > 0) {
-                        mc.fontRendererObj.drawStringWithShadow("Th" + getColor(tLevel) + tLevel, 40 + xOff, 5, -1);
-                        xOff += 25;
-                    }
-                    if (uLevel > 0) {
-                        mc.fontRendererObj.drawStringWithShadow("Unb" + getColor(uLevel) + uLevel, 40 + xOff, 5, -1);
-                    }
-                    GlStateManager.popMatrix();
-                }
             }
             ItemStack stack4 = ((EntityPlayer) ent).getEquipmentInSlot(1);
             if (stack4 != null) {
@@ -682,20 +626,35 @@ public class ESP2D extends Module {
                 float diff1 = (float) ((y + var1 * 4) - (y + var1 * 3 + 2));
                 double percent = 1 - (double) stack4.getItemDamage() * 1 / (double) stack4.getMaxDamage();
                 RenderingUtil.rectangle(endx + 2, (y + var1 * 4) - 1, endx + 4, (y + var1 * 4) - (diff1 * percent), Colors.getColor(78, 206, 229));
-                if (hovering) {
-                    mc.fontRendererObj.drawStringWithShadow(stack4.getMaxDamage() - stack4.getItemDamage() + "", (float) endx + 22, (float) ((y + var1 * 4) - (diff1 / 2)), -1);
+            }
+
+            float center = (float) (y + (endy - y) / 2);
+
+            float original = var1;
+
+            var1 = Math.max(var1, 15);
+
+            float offset = -var1 * 2;
+
+            if (hovering)
+                for (int i = 4; i > 0; i--) {
+                    ItemStack renderStack = ((EntityPlayer) ent).getEquipmentInSlot(i);
+                    if (renderStack == null) {
+                        offset += var1;
+                        continue;
+                    }
+
+                    if (renderStack.isItemDamaged() && renderStack.isItemStackDamageable())
+                        mc.fontRendererObj.drawStringWithShadow((renderStack.getMaxDamage() - renderStack.getItemDamage()) + "", (float) endx + 22, center + offset, -1);
                     GlStateManager.pushMatrix();
-                    GlStateManager.translate(endx + 4, (y + var1 * 4 - 6 - (diff1 / 2)), 0);
+                    GlStateManager.translate(endx + 4, center + offset + original/4, 0);
                     RenderHelper.enableGUIStandardItemLighting();
-                    mc.getRenderItem().renderItemAndEffectIntoGUI(stack4, 0, 0);
-                    mc.getRenderItem().renderItemOverlays(mc.fontRendererObj, stack4, 0, 0);
+                    mc.getRenderItem().renderItemAndEffectIntoGUI(renderStack, 0, 0);
+                    mc.getRenderItem().renderItemOverlays(mc.fontRendererObj, renderStack, 0, 0);
                     RenderHelper.disableStandardItemLighting();
-                    int pLevel = EnchantmentHelper
-                            .getEnchantmentLevel(Enchantment.protection.effectId, stack4);
-                    int tLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.thorns.effectId,
-                            stack4);
-                    int uLevel = EnchantmentHelper
-                            .getEnchantmentLevel(Enchantment.unbreaking.effectId, stack4);
+                    int pLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.protection.effectId, renderStack);
+                    int tLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.thorns.effectId, renderStack);
+                    int uLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.unbreaking.effectId, renderStack);
                     int xOff = 0;
                     if (pLevel > 0) {
                         mc.fontRendererObj.drawStringWithShadow("P" + getColor(pLevel) + pLevel, 40, 5, -1);
@@ -709,8 +668,9 @@ public class ESP2D extends Module {
                         mc.fontRendererObj.drawStringWithShadow("Unb" + getColor(uLevel) + uLevel, 40 + xOff, 5, -1);
                     }
                     GlStateManager.popMatrix();
+                    offset += var1;
                 }
-            }
+
         }
     }
 
@@ -770,7 +730,7 @@ public class ESP2D extends Module {
         float r = (float) ratio;
         float ir = (float) 1.0 - r;
 
-        float rgb1[] = new float[3];
+        float[] rgb1 = new float[3];
         float rgb2[] = new float[3];
 
         color1.getColorComponents(rgb1);

@@ -30,6 +30,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.*;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.StringUtils;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
@@ -80,7 +81,9 @@ public class Nametags extends Module {
 
                 boolean ignorePit = HypixelUtil.isInGame("THE HYPIXEL PIT") && IGNORESPAWN.getValue();
 
-                if (ignorePit && !TargetESP.isPriority(ent) && !FriendManager.isFriend(ent.getName())) {
+                boolean isImportant = TargetESP.isPriority(ent) || FriendManager.isFriend(ent.getName()) || UUIDResolver.instance.isInvalidName(ent.getName());
+
+                if (ignorePit && !isImportant) {
                     double x = ent.posX;
                     double y = ent.posY;
                     double z = ent.posZ;
@@ -89,7 +92,7 @@ public class Nametags extends Module {
                     }
                 }
 
-                if (priorityOnly.getValue() && !TargetESP.isPriority(ent) && !FriendManager.isFriend(ent.getName())) {
+                if (priorityOnly.getValue() && !isImportant) {
                     return;
                 }
 
@@ -114,279 +117,312 @@ public class Nametags extends Module {
             for (EntityPlayer ent : entList) {
                 int dist = (int) mc.thePlayer.getDistanceToEntity(ent);
 
-                {
+                boolean prioritized = PriorityManager.isPriority(ent);
 
-                    boolean prioritized = PriorityManager.isPriority(ent);
-
-                    boolean isPriority = prioritized || TargetESP.isPriority(ent) || FriendManager.isFriend(ent.getName());
+                boolean isPriority = prioritized || TargetESP.isPriority(ent) || FriendManager.isFriend(ent.getName());
 
 
-                    boolean invalid = false;
-                    if(!isPriority) {
-                        if(UUIDResolver.instance.isInvalidName(ent.getName())) {
-                            invalid = true;
-                            isPriority = true;
-                        }
+                boolean invalid = false;
+                if (!isPriority) {
+                    if (UUIDResolver.instance.isInvalidName(ent.getName())) {
+                        invalid = true;
+                        isPriority = true;
                     }
+                }
 
-                    String playerName = isPriority ? ent.getDisplayName().getFormattedText() : ent.getDisplayName().getFormattedText();
+                String playerName = isPriority ? ent.getDisplayName().getFormattedText() : ent.getDisplayName().getFormattedText();
 
-                    String str = ((boolean) distance.getValue() ? "\247a" + dist + "m\247r " : "") + playerName;
-                    // System.out.println(str);
-                    str = str.replace(playerName, FriendManager.isFriend(ent.getName()) ? FriendManager.getAlias(ent.getName()) : "\247f\247l" + playerName);
+                String str = ((boolean) distance.getValue() ? "\247a" + dist + "m\247r " : "") + playerName;
+                // System.out.println(str);
+                str = str.replace(playerName, FriendManager.isFriend(ent.getName()) ? FriendManager.getAlias(ent.getName()) : "\247f\247l" + playerName);
 
-                    if ((boolean) settings.get(BOTS).getValue() && AntiBot.isBot(ent)) {
-                        boolean isNCP = str.contains("[NPC] ");
-                        str = str.replace("[NPC] ", "");
-                        str += " \247c[" + (isNCP ? "NPC" : "BOT") + "]";
-                    }
+                if ((boolean) settings.get(BOTS).getValue() && AntiBot.isBot(ent)) {
+                    boolean isNCP = str.contains("[NPC] ");
+                    str = str.replace("[NPC] ", "");
+                    str += " \247c[" + (isNCP ? "NPC" : "BOT") + "]";
+                }
 
-                    str = str.replace("\2478", "\247f");
+                str = str.replace("\2478", "\247f");
 
-                    double[] renderPositions = entityPositions.getOrDefault(ent, defaultTo).array;
+                double[] renderPositions = entityPositions.getOrDefault(ent, defaultTo).array;
 
-                    if ((renderPositions[2] < 0.0D) || (renderPositions[2] >= 1.0D)) {
-                        continue;
-                    }
+                if ((renderPositions[2] < 0.0D) || (renderPositions[2] >= 1.0D)) {
+                    continue;
+                }
 
-                    GlStateManager.pushMatrix();
+                GlStateManager.pushMatrix();
 
 
-                    GlStateManager.translate(renderPositions[0] / scaledRes.getScaleFactor(), renderPositions[1] / scaledRes.getScaleFactor(), 0.0D);
-                    scale();
+                GlStateManager.translate(renderPositions[0] / scaledRes.getScaleFactor(), renderPositions[1] / scaledRes.getScaleFactor(), 0.0D);
+                scale();
 
-                    double ex = ent.lastTickPosX + (ent.posX - ent.lastTickPosX) * mc.timer.renderPartialTicks;
-                    double ey = ent.lastTickPosY + (ent.posY - ent.lastTickPosY) * mc.timer.renderPartialTicks;
-                    double ez = ent.lastTickPosZ + (ent.posZ - ent.lastTickPosZ) * mc.timer.renderPartialTicks;
+                double ex = ent.lastTickPosX + (ent.posX - ent.lastTickPosX) * mc.timer.renderPartialTicks;
+                double ey = ent.lastTickPosY + (ent.posY - ent.lastTickPosY) * mc.timer.renderPartialTicks;
+                double ez = ent.lastTickPosZ + (ent.posZ - ent.lastTickPosZ) * mc.timer.renderPartialTicks;
 
-                    double px = mc.thePlayer.lastTickPosX + (mc.thePlayer.posX - mc.thePlayer.lastTickPosX) * mc.timer.renderPartialTicks;
-                    double py = mc.thePlayer.lastTickPosY + (mc.thePlayer.posY - mc.thePlayer.lastTickPosY) * mc.timer.renderPartialTicks;
-                    double pz = mc.thePlayer.lastTickPosZ + (mc.thePlayer.posZ - mc.thePlayer.lastTickPosZ) * mc.timer.renderPartialTicks;
+                double px = mc.thePlayer.lastTickPosX + (mc.thePlayer.posX - mc.thePlayer.lastTickPosX) * mc.timer.renderPartialTicks;
+                double py = mc.thePlayer.lastTickPosY + (mc.thePlayer.posY - mc.thePlayer.lastTickPosY) * mc.timer.renderPartialTicks;
+                double pz = mc.thePlayer.lastTickPosZ + (mc.thePlayer.posZ - mc.thePlayer.lastTickPosZ) * mc.timer.renderPartialTicks;
 
-                    double d0 = px - ex;
-                    double d1 = py - ey;
-                    double d2 = pz - ez;
+                double d0 = px - ex;
+                double d1 = py - ey;
+                double d2 = pz - ez;
 
-                    double distance = MathHelper.sqrt_double(d0 * d0 + d1 * d1 + d2 * d2);
-                    if (distance <= 4) {
-                        double scale = Math.max(Math.min(((4 - distance) / 2.75), 1), 0);
-                        GlStateManager.scale(1 + (1.25 * scale), 1 + (1.25 * scale), 1 + (1.25 * scale));
-                    } else {
-                        double centerX = (er.getResolution().getScaledWidth() / 2D);
-                        double centerY = (er.getResolution().getScaledHeight() / 2D) + 11;
+                double distance = MathHelper.sqrt_double(d0 * d0 + d1 * d1 + d2 * d2);
+                if (distance <= 4) {
+                    double scale = Math.max(Math.min(((4 - distance) / 2.75), 1), 0);
+                    GlStateManager.scale(1 + (1.25 * scale), 1 + (1.25 * scale), 1 + (1.25 * scale));
+                } else {
+                    double centerX = (er.getResolution().getScaledWidth() / 2D);
+                    double centerY = (er.getResolution().getScaledHeight() / 2D) + 11;
 
-                        double translateX = renderPositions[0] / scaledRes.getScaleFactor();
-                        double translateY = renderPositions[1] / scaledRes.getScaleFactor();
-
-                        double diffX = Math.abs(centerX - translateX);
-                        double diffY = Math.abs(centerY - translateY);
-
-                        double mouseDist = Math.hypot(diffX, diffY);
-
-                        if (mouseDist < 20) {
-                            double percentage = (20 - mouseDist) / 15D;
-                            percentage = Math.max(Math.min(percentage, 1), 0);
-                            GlStateManager.scale(1 + (0.1 * percentage), 1 + (0.1 * percentage), 1 + (0.1 * percentage));
-                        }
-                    }
-
-                    GlStateManager.translate(0.0D, -2.5D, 0.0D);
-                    int mouseY = (er.getResolution().getScaledHeight() / 2);
-                    int mouseX = (er.getResolution().getScaledWidth() / 2);
                     double translateX = renderPositions[0] / scaledRes.getScaleFactor();
                     double translateY = renderPositions[1] / scaledRes.getScaleFactor();
-                    float percentage = (float) (1F - (((float) Math.abs(mouseX - translateX) + Math.abs(mouseY - translateY)) / (mouseX + mouseY)) * 3F);
-                    if (percentage < 0.2) {
-                        percentage = 0.2F;
+
+                    double diffX = Math.abs(centerX - translateX);
+                    double diffY = Math.abs(centerY - translateY);
+
+                    double mouseDist = Math.hypot(diffX, diffY);
+
+                    if (mouseDist < 20) {
+                        double percentage = (20 - mouseDist) / 15D;
+                        percentage = Math.max(Math.min(percentage, 1), 0);
+                        GlStateManager.scale(1 + (0.1 * percentage), 1 + (0.1 * percentage), 1 + (0.1 * percentage));
                     }
-                    if (!(boolean) settings.get(OPACITY).getValue() || isPriority || AntiBot.isBot(ent)) {
-                        percentage = 1;
-                    }
-                    int backgroundColor = FriendManager.isFriend(ent.getName()) ? Colors.getColor(52, 229, 235, 200) :
-                            prioritized ? Colors.getColor(255, 0, 0, 200) :
-                                    Colors.getColor(35, (int) (200 * percentage));
-                    int borderColor = FriendManager.isFriend(ent.getName()) ? Colors.getColor(52, 98, 235) :
-                            prioritized ? Colors.getColor(255) :
-                                    isPriority ? Colors.getColor(255, 178, 0, 200) :
-                                            Colors.getColor(28, (int) (200 * percentage));
-
-                    if (invalid) {
-                        backgroundColor = Colors.getColor(55, 55, 0, (int) (200 * percentage));
-                        borderColor = Colors.getColor(255, 255, 0, (int) (200 * percentage));
-                    }
-
-                    float strWidth = font.getWidth(str);
-
-                    RenderingUtil.rectangleBordered(-strWidth / 2 - 2, -11, strWidth / 2 + 2, 0, 0.5, backgroundColor, borderColor);
-                    int x3 = ((int) (renderPositions[0] + -strWidth / 2 - 3) / 2) - 26;
-                    int x4 = ((int) (renderPositions[0] + strWidth / 2 + 3) / 2) + 20;
-                    int y1 = ((int) (renderPositions[1] + -30) / 2);
-                    int y2 = ((int) (renderPositions[1] + 11) / 2);
-
-                    int color = Colors.getColor(255, (int) (255 * percentage));
-
-                    font.drawBorderedString(str, -strWidth / 2, -8.5F, color, Colors.getColorOpacity(-1, (int) (190 * percentage)));
-
-                    if (!AntiBot.isBot(ent)) {
-                        double y = -strWidth / 2 - 2;
-
-                        float progress = 0;
-                        float health = ent.getHealth();
-                        float absorption = ent.getAbsorptionAmount();
-
-                        progress = health / (ent.getMaxHealth() + absorption);
-
-                        float realHealthProgress = (health / ent.getMaxHealth());
-
-                        float[] fractions = new float[]{0f, 0.5f, 1f};
-                        Color[] colors = new Color[]{Color.RED, Color.YELLOW, Color.GREEN};
-                        Color customColor = health >= 0 ? ESP2D.blendColors(fractions, colors, realHealthProgress).brighter() : Color.RED;
-                        double difference = strWidth + 4;
-                        double healthLocation = y + (strWidth + 4) * progress;
-
-                        RenderingUtil.rectangle(y, 0, healthLocation, 1, Colors.getColorOpacity(customColor.getRGB(), (int) (percentage * 255)));
-                        RenderingUtil.rectangle(healthLocation, 0, y + difference, 1, Colors.getColorOpacity(customColor.darker().darker().getRGB(), (int) (percentage * 255)));
-
-
-                        if (absorption > 0) {
-                            double absorptionDifferent = difference * (absorption / (ent.getMaxHealth() + absorption));
-
-                            RenderingUtil.rectangle(healthLocation, 0, absorptionDifferent + healthLocation, 1, Colors.getColorOpacity(0xFFFFAA00, (int) (percentage * 255)));
-                        }
-
-                        RenderingUtil.rectangle(y, 0.5, y + difference, 1, Colors.getColor(0, (int) (percentage * 110)));
-                    }
-
-                    String selectHealth = this.health.getSelected();
-                    String selectArmor = this.armor.getSelected();
-
-                    boolean healthOption = selectHealth.equals("Always") || (isPriority && selectHealth.equals("Priority Only"));
-                    boolean armor = selectArmor.equals("Always") || (isPriority && selectArmor.equals("Priority Only"));
-
-                    boolean hovered = x3 < mouseX && mouseX < x4 && y1 < mouseY && mouseY < y2;
-
-                    if (healthOption || hovered && selectHealth.equals("Hover")) {
-                        float health = Float.isNaN(ent.getHealth()) ? 0 : ent.getHealth();
-                        String healthInfo = String.valueOf(MathUtils.roundToPlace(health, 1)).replaceFirst("\\.0", "") + (ent.getAbsorptionAmount() > 0 ? " \2476" + (int) ent.getAbsorptionAmount() : "");
-
-                        float strWidth2 = font.getWidth(healthInfo);
-
-                        float[] fractions = new float[]{0f, 0.5f, 1f};
-                        Color[] colors = new Color[]{Color.RED, Color.YELLOW, Color.GREEN};
-
-                        float progress = health / ent.getMaxHealth();
-                        Color customColor = health >= 0 ? ESP2D.blendColors(fractions, colors, progress).brighter() : Color.RED;
-
-                        double fullWidth = Math.max(strWidth2 + 2, 11);
-
-                        try {
-                            RenderingUtil.rectangleBordered(strWidth / 2 + 3, -11, strWidth / 2 + 3 + fullWidth, 0, 0.5, backgroundColor, borderColor);
-                            font.drawBorderedString(healthInfo, strWidth / 2 + 3.5 + fullWidth / 2 - strWidth2 / 2, -8.5, Colors.getColor(customColor.getRed(), customColor.getGreen(), customColor.getBlue(), (int) (255 * percentage)), Colors.getColor(customColor.getRed(), customColor.getGreen(), customColor.getBlue(), (int) (190 * percentage)));
-                        } catch (Exception ignored) {
-
-                        }
-                    }
-
-                    if (armor || hovered && selectArmor.equals("Hover") || isPriority) {
-                        List<ItemStack> itemsToRender = new ArrayList<>();
-                        for (int i = 0; i < 5; i++) {
-                            ItemStack stack = ent.getEquipmentInSlot(i);
-                            if (stack != null) {
-                                itemsToRender.add(stack);
-                            }
-                        }
-                        int x = -5 - (itemsToRender.size() * 5);
-                        for (ItemStack stack : itemsToRender) {
-
-                            boolean stackDamaged = stack.getItemDamage() > 0 && stack.getMaxDamage() - stack.getItemDamage() > 0;
-                            int bruh = stackDamaged ? -27 : -24;
-
-                            RenderingUtil.rectangleBordered(x, bruh, x + 11, bruh + 11, 0.5, backgroundColor, borderColor);
-
-                            RenderHelper.enableGUIStandardItemLighting();
-                            GlStateManager.translate(x - 0.5, bruh, 0);
-                            GlStateManager.scale(0.75, 0.75, 0.75);
-                            mc.getRenderItem().renderItemIntoGUI(stack, 0, -1);
-                            mc.getRenderItem().renderItemOverlays(mc.fontRendererObj, stack, 0, -1);
-                            GlStateManager.scale(1 / 0.75, 1 / 0.75, 1 / 0.75);
-                            GlStateManager.translate(-x + 0.5, -bruh, 0);
-                            RenderHelper.disableStandardItemLighting();
-                            x += 3;
-                            int y = 21;
-
-                            if (stack.getItem() instanceof ItemSword) {
-                                int sLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.sharpness.effectId, stack);
-                                int fLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.fireAspect.effectId, stack);
-                                int kLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.knockback.effectId, stack);
-                                if (sLevel > 0) {
-                                    drawEnchantTag("Sh" + getColor(sLevel) + sLevel, x, y);
-                                    y -= 9;
-                                }
-                                if (fLevel > 0) {
-                                    drawEnchantTag("Fir" + getColor(fLevel) + fLevel, x, y);
-                                    y -= 9;
-                                }
-                                if (kLevel > 0) {
-                                    drawEnchantTag("Kb" + getColor(kLevel) + kLevel, x, y);
-                                }
-                            } else if ((stack.getItem() instanceof ItemArmor)) {
-                                int pLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.protection.effectId, stack);
-                                int tLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.thorns.effectId, stack);
-                                int uLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.unbreaking.effectId, stack);
-                                if (pLevel > 0) {
-                                    drawEnchantTag("P" + getColor(pLevel) + pLevel, x, y);
-                                    y -= 9;
-                                }
-                                if (tLevel > 0) {
-                                    drawEnchantTag("Th" + getColor(tLevel) + tLevel, x, y);
-                                    y -= 9;
-                                }
-                                if (uLevel > 0) {
-                                    drawEnchantTag("Unb" + getColor(uLevel) + uLevel, x, y);
-                                }
-                            } else if ((stack.getItem() instanceof ItemBow)) {
-                                int powLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.power.effectId,
-                                        stack);
-                                int punLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.punch.effectId,
-                                        stack);
-                                int fireLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.flame.effectId, stack);
-                                if (powLevel > 0) {
-                                    drawEnchantTag("Pow" + getColor(powLevel) + powLevel, x, y);
-                                    y -= 9;
-                                }
-                                if (punLevel > 0) {
-                                    drawEnchantTag("Pun" + getColor(punLevel) + punLevel, x, y);
-                                    y -= 9;
-                                }
-                                if (fireLevel > 0) {
-                                    drawEnchantTag("Fir" + getColor(fireLevel) + fireLevel, x, y);
-                                }
-                            } else if (stack.getRarity() == EnumRarity.EPIC) {
-                                drawEnchantTag("\2476\247lGod", x, y);
-                            }
-
-                            int potionEffect = (int) Math.round(255.0D - (double) stack.getItemDamage() * 255.0D / (double) stack.getMaxDamage());
-                            int var10 = 255 - potionEffect << 16 | potionEffect << 8;
-                            Color customColor = new Color(var10).brighter();
-
-                            int x2 = (x * 2);
-                            if (stackDamaged) {
-                                String aa = "" + (stack.getMaxDamage() - stack.getItemDamage());
-                                double width = mc.fontRendererObj.getStringWidth(aa);
-                                GlStateManager.pushMatrix();
-                                GlStateManager.disableDepth();
-                                GL11.glScalef(0.5F, 0.5F, 0.5F);
-                                mc.fontRendererObj.drawStringWithShadow(aa, x2 - width / 4D, -9 - y, customColor.getRGB());
-                                GlStateManager.enableDepth();
-                                GlStateManager.popMatrix();
-                            }
-                            x += 10;
-                        }
-                    }
-
-                    GlStateManager.popMatrix();
-
                 }
+
+                GlStateManager.translate(0.0D, -2.5D, 0.0D);
+                int mouseY = (er.getResolution().getScaledHeight() / 2);
+                int mouseX = (er.getResolution().getScaledWidth() / 2);
+                double translateX = renderPositions[0] / scaledRes.getScaleFactor();
+                double translateY = renderPositions[1] / scaledRes.getScaleFactor();
+                float percentage = (float) (1F - (((float) Math.abs(mouseX - translateX) + Math.abs(mouseY - translateY)) / (mouseX + mouseY)) * 3F);
+                if (percentage < 0.2) {
+                    percentage = 0.2F;
+                }
+                if (!(boolean) settings.get(OPACITY).getValue() || isPriority || AntiBot.isBot(ent)) {
+                    percentage = 1;
+                }
+                int backgroundColor = FriendManager.isFriend(ent.getName()) ? Colors.getColor(52, 229, 235, 200) :
+                        prioritized ? Colors.getColor(255, 0, 0, 200) :
+                                Colors.getColor(35, (int) (200 * percentage));
+                int borderColor = FriendManager.isFriend(ent.getName()) ? Colors.getColor(52, 98, 235) :
+                        prioritized ? Colors.getColor(255) :
+                                isPriority ? Colors.getColor(255, 178, 0, 200) :
+                                        Colors.getColor(28, (int) (200 * percentage));
+
+                if (invalid) {
+                    backgroundColor = Colors.getColor(55, 55, 0, (int) (200 * percentage));
+                    borderColor = Colors.getColor(255, 255, 0, (int) (200 * percentage));
+                }
+
+                float strWidth = font.getWidth(str);
+
+                RenderingUtil.rectangleBordered(-strWidth / 2 - 2, -11, strWidth / 2 + 2, 0, 0.5, backgroundColor, borderColor);
+                int x3 = ((int) (renderPositions[0] + -strWidth / 2 - 3) / 2) - 26;
+                int x4 = ((int) (renderPositions[0] + strWidth / 2 + 3) / 2) + 20;
+                int y1 = ((int) (renderPositions[1] + -30) / 2);
+                int y2 = ((int) (renderPositions[1] + 11) / 2);
+
+                int color = Colors.getColor(255, (int) (255 * percentage));
+
+                font.drawBorderedString(str, -strWidth / 2, -8.5F, color, Colors.getColorOpacity(-1, (int) (190 * percentage)));
+
+                if (!AntiBot.isBot(ent)) {
+                    double left = -strWidth / 2 - 2;
+
+                    float progress;
+                    float health = ent.getHealth();
+                    float absorption = ent.getAbsorptionAmount();
+
+                    progress = health / (ent.getMaxHealth() + absorption);
+
+                    float realHealthProgress = (health / ent.getMaxHealth());
+
+                    float[] fractions = new float[]{0f, 0.5f, 1f};
+                    Color[] colors = new Color[]{Color.RED, Color.YELLOW, Color.GREEN};
+                    Color customColor = health >= 0 ? ESP2D.blendColors(fractions, colors, realHealthProgress).brighter() : Color.RED;
+                    double difference = strWidth + 4;
+                    double healthLocation = left + (strWidth + 4) * progress;
+
+                    RenderingUtil.rectangle(left, 0, healthLocation, 1, Colors.getColorOpacity(customColor.getRGB(), (int) (percentage * 255)));
+                    RenderingUtil.rectangle(healthLocation, 0, left + difference, 1, Colors.getColorOpacity(customColor.darker().darker().getRGB(), (int) (percentage * 255)));
+
+
+                    if (absorption > 0) {
+                        double absorptionDifferent = difference * (absorption / (ent.getMaxHealth() + absorption));
+
+                        RenderingUtil.rectangle(healthLocation, 0, absorptionDifferent + healthLocation, 1, Colors.getColorOpacity(0xFFFFAA00, (int) (percentage * 255)));
+                    }
+
+                    RenderingUtil.rectangle(left, 0.5, left + difference, 1, Colors.getColor(0, (int) (percentage * 110)));
+                }
+
+                String selectHealth = this.health.getSelected();
+                String selectArmor = this.armor.getSelected();
+
+                boolean healthOption = selectHealth.equals("Always") || (isPriority && selectHealth.equals("Priority Only"));
+                boolean armor = selectArmor.equals("Always") || (isPriority && selectArmor.equals("Priority Only"));
+
+                boolean hovered = x3 < mouseX && mouseX < x4 && y1 < mouseY && mouseY < y2;
+
+                if (healthOption || hovered && selectHealth.equals("Hover")) {
+                    float health = Float.isNaN(ent.getHealth()) ? 0 : ent.getHealth();
+                    String healthInfo = String.valueOf(MathUtils.roundToPlace(health, 1)).replaceFirst("\\.0", "") + (ent.getAbsorptionAmount() > 0 ? " \2476" + (int) ent.getAbsorptionAmount() : "");
+
+                    float strWidth2 = font.getWidth(healthInfo);
+
+                    float[] fractions = new float[]{0f, 0.5f, 1f};
+                    Color[] colors = new Color[]{Color.RED, Color.YELLOW, Color.GREEN};
+
+                    float progress = health / ent.getMaxHealth();
+                    Color customColor = health >= 0 ? ESP2D.blendColors(fractions, colors, progress).brighter() : Color.RED;
+
+                    double fullWidth = Math.max(strWidth2 + 2, 11);
+
+                    try {
+                        RenderingUtil.rectangleBordered(strWidth / 2 + 3, -11, strWidth / 2 + 3 + fullWidth, 0, 0.5, backgroundColor, borderColor);
+                        font.drawBorderedString(healthInfo, strWidth / 2 + 3.5 + fullWidth / 2 - strWidth2 / 2, -8.5, Colors.getColor(customColor.getRed(), customColor.getGreen(), customColor.getBlue(), (int) (255 * percentage)), Colors.getColor(customColor.getRed(), customColor.getGreen(), customColor.getBlue(), (int) (190 * percentage)));
+                    } catch (Exception ignored) {
+
+                    }
+                }
+
+                if (armor || hovered && selectArmor.equals("Hover") || isPriority) {
+
+                    boolean showPitEnchants = HypixelUtil.isInGame("THE HYPIXEL PIT");
+
+                    List<ItemStack> itemsToRender = new ArrayList<>();
+                    for (int i = 0; i < 5; i++) {
+                        ItemStack stack = ent.getEquipmentInSlot(i);
+                        if (stack != null) {
+                            itemsToRender.add(stack);
+                        }
+                    }
+                    int x = -5 - (itemsToRender.size() * 5);
+                    for (ItemStack stack : itemsToRender) {
+
+                        boolean stackDamaged = stack.getItemDamage() > 0 && stack.getMaxDamage() - stack.getItemDamage() > 0;
+                        int bruh = stackDamaged ? -27 : -24;
+
+                        RenderingUtil.rectangleBordered(x, bruh, x + 11, bruh + 11, 0.5, backgroundColor, borderColor);
+
+                        RenderHelper.enableGUIStandardItemLighting();
+                        GlStateManager.translate(x - 0.5, bruh, 0);
+                        GlStateManager.scale(0.75, 0.75, 0.75);
+                        mc.getRenderItem().renderItemIntoGUI(stack, 0, -1);
+                        mc.getRenderItem().renderItemOverlays(mc.fontRendererObj, stack, 0, -1);
+                        GlStateManager.scale(1 / 0.75, 1 / 0.75, 1 / 0.75);
+                        GlStateManager.translate(-x + 0.5, -bruh, 0);
+                        RenderHelper.disableStandardItemLighting();
+                        x += 3;
+                        int y = 21;
+
+                        if (showPitEnchants && stack.hasTagCompound()) {
+                            List<String> enchants = HypixelUtil.getPitEnchants(stack);
+
+                            int enchantOffsetY = 0;
+
+                            for (String enchant : enchants) {
+                                boolean strongEnchant = enchant.contains("Retro") || enchant.contains("Stun") || enchant.contains("Funky") ||
+                                        enchant.contains("Wrath I") || enchant.contains("Duelist I") || enchant.contains("David") ||
+                                        enchant.contains("Billionaire I") || enchant.contains("Hemorrhage");
+
+                                int level = 1;
+
+                                if(enchant.length() > 1 && enchant.contains(" ")) {
+                                    String temp = "";
+                                    for (String s : StringUtils.stripHypixelControlCodes(enchant).replace("\247f\2477\2479","").replace("“","").replace("(","").split(" ")) {
+                                        if(s.contains("RARE")) {
+                                            continue;
+                                        }
+
+                                        if(!s.startsWith("II")) {
+                                            temp += s.substring(0, 1);
+                                        } else {
+                                            level += s.equals("II") ? 1 : 2;
+                                        }
+                                    }
+                                    drawEnchantTag((strongEnchant ? "\247c\247l" : "\247e\247l") + temp + getColor(level) + "\247l" + level, x - 3, y + 7 + enchantOffsetY);
+                                    enchantOffsetY += 10;
+                                }
+                            }
+
+                        }
+
+                        if (stack.getItem() instanceof ItemSword) {
+                            int sLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.sharpness.effectId, stack);
+                            int fLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.fireAspect.effectId, stack);
+                            int kLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.knockback.effectId, stack);
+                            if (sLevel > 0) {
+                                drawEnchantTag("Sh" + getColor(sLevel) + sLevel, x, y);
+                                y -= 9;
+                            }
+                            if (fLevel > 0) {
+                                drawEnchantTag("Fir" + getColor(fLevel) + fLevel, x, y);
+                                y -= 9;
+                            }
+                            if (kLevel > 0) {
+                                drawEnchantTag("Kb" + getColor(kLevel) + kLevel, x, y);
+                            }
+                        } else if ((stack.getItem() instanceof ItemArmor)) {
+                            int pLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.protection.effectId, stack);
+                            int tLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.thorns.effectId, stack);
+                            int uLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.unbreaking.effectId, stack);
+                            if (pLevel > 0) {
+                                drawEnchantTag("P" + getColor(pLevel) + pLevel, x, y);
+                                y -= 9;
+                            }
+                            if (tLevel > 0) {
+                                drawEnchantTag("Th" + getColor(tLevel) + tLevel, x, y);
+                                y -= 9;
+                            }
+                            if (uLevel > 0) {
+                                drawEnchantTag("Unb" + getColor(uLevel) + uLevel, x, y);
+                            }
+                        } else if ((stack.getItem() instanceof ItemBow)) {
+                            int powLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.power.effectId,
+                                    stack);
+                            int punLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.punch.effectId,
+                                    stack);
+                            int fireLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.flame.effectId, stack);
+                            if (powLevel > 0) {
+                                drawEnchantTag("Pow" + getColor(powLevel) + powLevel, x, y);
+                                y -= 9;
+                            }
+                            if (punLevel > 0) {
+                                drawEnchantTag("Pun" + getColor(punLevel) + punLevel, x, y);
+                                y -= 9;
+                            }
+                            if (fireLevel > 0) {
+                                drawEnchantTag("Fir" + getColor(fireLevel) + fireLevel, x, y);
+                            }
+                        } else if (stack.getRarity() == EnumRarity.EPIC) {
+                            drawEnchantTag("\2476\247lGod", x, y);
+                        }
+
+                        int potionEffect = (int) Math.round(255.0D - (double) stack.getItemDamage() * 255.0D / (double) stack.getMaxDamage());
+                        int var10 = 255 - potionEffect << 16 | potionEffect << 8;
+                        Color customColor = new Color(var10).brighter();
+
+                        int x2 = (x * 2);
+                        if (stackDamaged) {
+                            String aa = "" + (stack.getMaxDamage() - stack.getItemDamage());
+                            double width = mc.fontRendererObj.getStringWidth(aa);
+                            GlStateManager.pushMatrix();
+                            GlStateManager.disableDepth();
+                            GL11.glScalef(0.5F, 0.5F, 0.5F);
+                            mc.fontRendererObj.drawStringWithShadow(aa, x2 - width / 4D, -9 - y, customColor.getRGB());
+                            GlStateManager.enableDepth();
+                            GlStateManager.popMatrix();
+                        }
+                        x += 10;
+                    }
+                }
+
+                GlStateManager.popMatrix();
+
+
             }
 
             entityPositions.clear();
@@ -440,8 +476,8 @@ public class Nametags extends Module {
 
                 boolean isPriority = prioritized || TargetESP.isPriority(ent) || FriendManager.isFriend(ent.getName());
 
-                if(!isPriority) {
-                    if(UUIDResolver.instance.isInvalidName(ent.getName())) {
+                if (!isPriority) {
+                    if (UUIDResolver.instance.isInvalidName(ent.getName())) {
                         isPriority = true;
                     }
                 }
@@ -490,8 +526,6 @@ public class Nametags extends Module {
         public FloatBuffer projection = BufferUtils.createFloatBuffer(16);
 
         public double[] array = new double[3];
-
-        double opacity = -1;
 
         public Bruh(double[] array) {
             this.array[0] = array[0];

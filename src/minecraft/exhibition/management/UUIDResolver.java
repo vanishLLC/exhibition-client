@@ -96,7 +96,7 @@ public class UUIDResolver {
             for (String name : names) {
                 checkedUsernames.add(name);
                 if (!validMap.containsKey(name)) {
-                    Notifications.getManager().post("Nick Detector", name + " is not a real player name!", 2500, Notifications.Type.WARNING);
+                    Notifications.getManager().post("Nick Detector", name + " is not a real player name!", 2500, Notifications.Type.NOTIFY);
                 }
             }
         } catch (Exception ignored) {
@@ -150,7 +150,7 @@ public class UUIDResolver {
 
                                 if (success) {
                                     if (playerNull) {
-                                        Notifications.getManager().post("Nick Detector", username + " is in /nick! (Valid Name)", 2500, Notifications.Type.WARNING);
+                                        Notifications.getManager().post("Nick Detector", username + " is in /nick! (Valid Name)", 2500, Notifications.Type.NOTIFY);
                                         validMap.remove(username);
                                     }
                                 }

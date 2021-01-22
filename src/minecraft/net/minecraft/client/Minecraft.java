@@ -1621,6 +1621,7 @@ public class Minecraft implements IThreadListener, IPlayerUsage {
         }
 
         if (this.currentScreen == null || this.currentScreen.allowUserInput) {
+
             this.mcProfiler.endStartSection("mouse");
 
             while (Mouse.next()) {

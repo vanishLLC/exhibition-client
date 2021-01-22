@@ -195,6 +195,9 @@ public class Bypass extends Module {
                         if (bruh > 10) {
                             event.setCancelled(true);
 
+                            if (isFlying && bruh > 10)
+                                bruh--;
+
                             if (Math.abs(packet.getUid() - lastUid) > 5 && packet.getUid() != -1) {
                                 chokePackets.add(packet);
                                 sendPackets();
@@ -207,7 +210,7 @@ public class Bypass extends Module {
 
                             boolean canSend = mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically;
 
-                            if ((bruh - 10) >= (45 + randomDelay) && canSend) {
+                            if ((bruh - 10) >= (60 + randomDelay) && canSend) {
                                 short lastbruh = (short) lastSentUid;
                                 chokePackets.add(packet);
                                 sendPackets();
@@ -215,7 +218,7 @@ public class Bypass extends Module {
                                 lastSentUid = packet.getUid();
                                 if (debug)
                                     DevNotifications.getManager().post("\247eSent from \247c" + (lastbruh - 1) + "\247e to \247a" + lastSentUid + " " + mc.thePlayer.ticksExisted);
-                                randomDelay = random.nextInt(30);
+                                randomDelay = random.nextInt(60);
                                 bruh = 10;
                             } else {
                                 chokePackets.add(packet);
@@ -245,7 +248,7 @@ public class Bypass extends Module {
 
                 if (p instanceof C0FPacketConfirmTransaction) {
                     C0FPacketConfirmTransaction packet = (C0FPacketConfirmTransaction) p;
-                    if (packet.getUid() < 0 && HypixelUtil.isVerifiedHypixel() && allowBypassing()) {
+                    if (packet.getUid() < 0 && HypixelUtil.isVerifiedHypixel()) {
 
                         if (c13Timer.delay(1000) && bruh == -1) {
                             if (debug)

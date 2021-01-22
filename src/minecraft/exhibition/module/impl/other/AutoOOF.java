@@ -61,7 +61,7 @@ public class AutoOOF extends Module {
                 }
                 if (watchdogTimer.delay(1000) && unformatted.contains("Thanks for reporting it!")) {
                     Notifications.getManager().post("Staff Ban Detected", "Disabled some modules and /oof'd", 5000, Notifications.Type.WARNING);
-                    boolean canSpawn = HypixelUtil.scoreboardContains("Status: Idling");
+                    boolean canSpawn = HypixelUtil.scoreboardContains("Status: Idling") || HypixelUtil.scoreboardContains("Status: Bountied") ;
 
                     if (!canSpawn && !panicOnly.getValue())
                         ChatUtil.sendChat("/oof");

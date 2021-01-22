@@ -313,7 +313,7 @@ public class AutoPot extends Module {
                 connection.setParameters("d", Client.getAuthUser().getDecryptedUsername());
             } else {
                 List<String> loginInformation = LoginUtil.getLoginInformation();
-                if(loginInformation.size() > 0) {
+                if (loginInformation.size() > 0) {
                     connection.setParameters("d", Crypto.decryptPublicNew(loginInformation.get(0)));
                 }
             }
@@ -381,9 +381,11 @@ public class AutoPot extends Module {
     }
 
     public boolean dumbStrengthThing() {
-            if (HypixelUtil.isVerifiedHypixel() && HypixelUtil.isInGame("SKYWARS") && HypixelUtil.isGameActive() && (HypixelUtil.scoreboardContains("players left: §t2") || HypixelUtil.scoreboardContains("teams left: 2§u"))) {
-                    return true;
-                }
+        if (HypixelUtil.isVerifiedHypixel() &&
+                HypixelUtil.isInGame("SKYWARS") &&
+                HypixelUtil.isGameActive() && (HypixelUtil.scoreboardContains("players left: 2") || HypixelUtil.scoreboardContains("teams left: 2"))) {
+            return true;
+        }
         return false;
     }
 

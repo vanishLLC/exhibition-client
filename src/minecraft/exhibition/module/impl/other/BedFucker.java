@@ -70,7 +70,7 @@ public class BedFucker extends Module {
                             if (uwot) {
                                 final BlockPos pos = new BlockPos(mc.thePlayer.posX + x, mc.thePlayer.posY + y, mc.thePlayer.posZ + z);
 
-                                if ((mc.theWorld.getBlockState(pos).getBlock() != Blocks.air && this.blockChecks(mc.theWorld.getBlockState(pos).getBlock()) && this.getFacingDirection(pos) != null) && mc.thePlayer.getDistance(mc.thePlayer.posX + x, mc.thePlayer.posY + y, mc.thePlayer.posZ + z) < mc.playerController.getBlockReachDistance() - 0.5) {
+                                if ((mc.theWorld.getBlockState(pos).getBlock() != Blocks.air && this.blockChecks(mc.theWorld.getBlockState(pos).getBlock()) && this.getFacingDirection(pos) != null) && mc.thePlayer.getDistance(mc.thePlayer.posX + x, mc.thePlayer.posY + y, mc.thePlayer.posZ + z) < mc.playerController.getBlockReachDistance()) {
                                     final float[] rotations = this.getBlockRotations(mc.thePlayer.posX + x + 0.5, mc.thePlayer.posY + y, mc.thePlayer.posZ + z + 0.5);
 
                                     IBlockState blockState = mc.theWorld.getBlockState(pos);

@@ -110,7 +110,7 @@ public class LongJump extends Module {
         velocityBoost = 0;
 
         if (waitTimer.delay(2500) && bruhTick != 0) {
-            //waitTimer.reset();
+            waitTimer.reset();
         }
         mc.timer.timerSpeed = 1f;
         if (mc.thePlayer.onGround && !mc.thePlayer.isCollidedVertically) {
@@ -232,10 +232,10 @@ public class LongJump extends Module {
                 }
                 bowTicks = 20;
             } else {
-                if(mc.thePlayer.isSprinting())
+                if (mc.thePlayer.isSprinting())
                     NetUtil.sendPacket(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.STOP_SPRINTING));
                 Damage.damagePlayer();
-                if(mc.thePlayer.isSprinting())
+                if (mc.thePlayer.isSprinting())
                     NetUtil.sendPacket(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.START_SPRINTING));
             }
 
@@ -243,7 +243,7 @@ public class LongJump extends Module {
             this.zoom = 40;
 
             this.blinkTicks = ((Number) settings.get(CHOKE).getValue()).intValue();
-            this.delay = 8;
+            this.delay = 7;
             boostDelay.reset();
 
             mc.thePlayer.motionX = 0;
@@ -252,7 +252,7 @@ public class LongJump extends Module {
 
         sendC13Packet();
 
-        //waitTimer.reset();
+        waitTimer.reset();
     }
 
     private double speed;
@@ -325,10 +325,8 @@ public class LongJump extends Module {
 
                 RenderingUtil.rectangleBordered(centerX - barHalf, centerY - 2, centerX + barHalf, centerY + 2, 1, Colors.getColor(0, 100), Colors.getColor(0, 150));
 
-                float lastHealth = bowTicks;
                 float health = bowTicks;
-                if (PlayerUtil.isMoving() && !mc.thePlayer.isCollidedVertically)
-                    lastHealth = (int) health - 1;
+                float lastHealth = health - 1;
 
                 if (health == 0) {
                     lastHealth = 0;
@@ -343,7 +341,6 @@ public class LongJump extends Module {
                 Color.RGBtoHSB(ColorManager.hudColor.getRed(), ColorManager.hudColor.getGreen(), ColorManager.hudColor.getBlue(), hsbVals);
 
                 RenderingUtil.rectangle(centerX - barHalf + 1, centerY - 1, centerX - barHalf + 1 + width, centerY + 1, Color.getHSBColor((hsbVals[0] + 0.5F) % 1.0F, hsbVals[1], hsbVals[2]).getRGB());
-
                 return;
             }
         }
@@ -388,13 +385,12 @@ public class LongJump extends Module {
             }
         }
         if (event instanceof EventMove) {
-
             EventMove em = (EventMove) event;
             double boost = ((Number) settings.get(BOOST).getValue()).doubleValue();
             float autBoost = ((Number) settings.get(TIMER).getValue()).floatValue();
 
             if (bowTicks <= 0) {
-                mc.timer.timerSpeed = (5F + (float) (1.005325F * Math.random()));
+                //mc.timer.timerSpeed = (5F + (float) (1.005325F * Math.random()));
                 if ((mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f))
                     delay--;
 
@@ -503,7 +499,7 @@ public class LongJump extends Module {
             EventMotionUpdate em = (EventMotionUpdate) event;
             if (em.isPre()) {
                 if (bowTicks > 4 && mc.thePlayer.hurtTime != 0) {
-                    if(bowTicks >= 16 && bowTicks < 19) {
+                    if (bowTicks >= 16 && bowTicks < 19) {
                         NetUtil.sendPacketNoEvents(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
                         NetUtil.sendPacketNoEvents(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem));
                     }
@@ -579,22 +575,18 @@ public class LongJump extends Module {
                         }
 
                         em.setY((float) (em.getY() + (double) bruh));
-                        em.setGround(false);
+                        em.setGround(bruhTick % 6 == 0 && HypixelUtil.isVerifiedHypixel());
                     }
 
                     if (isHypixel && em.getY() % 0.015625 == 0 && delay == 6 & mc.thePlayer.onGround) {
                         em.setForcePos(true);
-                        em.setY(em.getY() + 0.00053424);
+                        em.setY(em.getY() + 0.0009004D);
                         em.setGround(false);
                     }
 
                     if (isHypixel && mc.thePlayer.motionY > 0.23) {
                         em.setGround(true);
                         em.setY(em.getY() + 0.07840000152587834);
-                    }
-
-                    if (delay < 3) {
-                        em.setGround(bruhTick % 7 == 0 && HypixelUtil.isVerifiedHypixel());
                     }
                 } else {
                     if (bowTicks == 19) {

@@ -2,7 +2,12 @@ package exhibition.util;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import exhibition.Client;
+import exhibition.util.render.Colors;
 import net.minecraft.client.Minecraft;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
@@ -14,6 +19,7 @@ import net.minecraft.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -30,6 +36,30 @@ public class HypixelUtil {
                 verifiedHypixel = true;
         }
         return verifiedHypixel && mc.getCurrentServerData() != null && (mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net"));
+    }
+
+    public static List<String> getPitEnchants(ItemStack stack) {
+        List<String> list = new ArrayList<>();
+        if (stack.hasTagCompound()) {
+            if (stack.getTagCompound().hasKey("display", 10)) {
+                NBTTagCompound nbttagcompound = stack.getTagCompound().getCompoundTag("display");
+                if (nbttagcompound.getTagId("Lore") == 9) {
+                    NBTTagList tagList = nbttagcompound.getTagList("Lore", 8);
+                    if (tagList.tagCount() > 0) {
+                        for (int i = 0; i < tagList.tagCount(); ++i) {
+                            String tag = tagList.getStringTagAt(i);
+                            if (!tag.equals("\247f\2477") && (tag.startsWith("\247f\2477\2479") || (tag.contains("RARE"))) && !tag.replace("\247f\2477", "").contains("\2477") &&
+                                    !tag.endsWith("Attack Damage") && !tag.endsWith("Unbreakable") && !tag.toLowerCase().contains("fashion") && !tag.toLowerCase().contains("mystic") &&
+                                    !tag.contains("As strong") && !tag.contains("Gotta go") && !tag.contains("Purple Gold")) {
+                                list.add(tag);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return list;
     }
 
     public static boolean isInGame(String gameString) {

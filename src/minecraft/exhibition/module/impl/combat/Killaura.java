@@ -411,7 +411,7 @@ public class Killaura extends Module {
         Scaffold scaffold = (Scaffold) Client.getModuleManager().get(Scaffold.class);
         LongJump longjump = (LongJump) Client.getModuleManager().get(LongJump.class);
         boolean disable = false;
-        if ((AutoPot.potting || AutoPot.haltTicks > 0 || AutoSoup.isHealing) || scaffold.isEnabled() || scaffold.isPlacing() || longjump.allowAttack() || longjump.isBruhing()) {
+        if ((AutoPot.potting || AutoPot.haltTicks > 0) || scaffold.isEnabled() || scaffold.isPlacing() || longjump.allowAttack() || longjump.isBruhing()) {
             disable = true;
         }
 
@@ -532,7 +532,7 @@ public class Killaura extends Module {
                             else if (targetYaw < -maxAngleStep) targetYaw = -maxAngleStep;
 
                             Bypass bypass = Client.getModuleManager().getCast(Bypass.class);
-                            boolean allowInvalidAngles = bypass.allowBypassing() && (bypass.bruh > 15) && HypixelUtil.isVerifiedHypixel();
+                            boolean allowInvalidAngles = bypass.allowBypassing() && (!bypass.option.getSelected().equals("Dong") || bypass.bruh > 10) && HypixelUtil.isVerifiedHypixel();
 
                             if (shouldReduce) {
                                 float pitch = (float) -(Math.atan2(yDiff - (distance > 2.1 ? 0.75 : 1), dist) * 180.0D / 3.141592653589793D);
@@ -565,9 +565,15 @@ public class Killaura extends Module {
                                                         target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
 
                                         if (isAttacking && canAttackRightNow) {
+                                            if(bypass.option.getSelected().equals("Dong") && bypass.bruh >= 20) {
+                                                bypass.bruh -= 2;
+                                            }
                                             em.setPitch(MathHelper.wrapAngleTo180_float(180 - em.getPitch()));
                                         } else {
                                             em.setPitch(em.getPitch() + 360);
+                                            if(bypass.option.getSelected().equals("Dong") && bypass.bruh >= 20) {
+                                                bypass.bruh -= 2;
+                                            }
                                         }
                                     } else {
 
