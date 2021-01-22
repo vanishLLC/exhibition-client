@@ -391,6 +391,8 @@ public class LongJump extends Module {
             double boost = ((Number) settings.get(BOOST).getValue()).doubleValue();
             float autBoost = ((Number) settings.get(TIMER).getValue()).floatValue();
 
+            mc.timer.timerSpeed = (5F + (float) (0.005325F * Math.random()));
+
             if (bowTicks <= 0) {
                 if ((mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f))
                     delay--;
