@@ -41,11 +41,11 @@ public class VRInjector implements ViaInjector {
     }
 
     @Override
-    public int getServerProtocolVersion() {
+    public int getServerProtocolVersion() throws NoSuchFieldException, IllegalAccessException {
         return getClientProtocol();
     }
 
-    private int getClientProtocol() {
+    private int getClientProtocol() throws NoSuchFieldException, IllegalAccessException {
         return 47;
     }
 

@@ -462,7 +462,7 @@ public class Client extends Castable implements EventListener {
                 }
             }
 
-            if (Minecraft.getMinecraft().thePlayer != null) {
+            if (Minecraft.getMinecraft().thePlayer != null && Minecraft.getMinecraft().theWorld != null) {
                 if (packet instanceof C03PacketPlayer && HypixelUtil.isVerifiedHypixel() && hypixelApiKey == null && Minecraft.getMinecraft().thePlayer.ticksExisted > 2) {
                     ChatUtil.sendChat("/api new");
                     hypixelApiKey = "";

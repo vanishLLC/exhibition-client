@@ -321,33 +321,48 @@ public class Nametags extends Module {
                         if (showPitEnchants && stack.hasTagCompound()) {
                             List<String> enchants = HypixelUtil.getPitEnchants(stack);
 
+                            List<String> render = new ArrayList<>();
+
                             int enchantOffsetY = 0;
 
                             for (String enchant : enchants) {
                                 boolean strongEnchant = enchant.contains("Retro") || enchant.contains("Stun") || enchant.contains("Funky") ||
                                         enchant.contains("Wrath I") || enchant.contains("Duelist I") || enchant.contains("David") ||
-                                        enchant.contains("Billionaire I") || enchant.contains("Hemorrhage");
+                                        enchant.contains("Billionaire I") || enchant.contains("Hemorrhage") || enchant.contains("Mirror");
 
                                 int level = 1;
 
-                                if(enchant.length() > 1 && enchant.contains(" ")) {
-                                    String temp = "";
-                                    for (String s : StringUtils.stripHypixelControlCodes(enchant).replace("\247f\2477\2479","").replace("“","").replace("(","").split(" ")) {
-                                        if(s.contains("RARE")) {
+                                if (enchant.length() > 1) {
+                                    StringBuilder temp = new StringBuilder();
+                                    for (String s : StringUtils.stripHypixelControlCodes(enchant)
+                                            .replace("\247f\2477\2479", "")
+                                            .replace("“", "")
+                                            .replace("”","")
+                                            .replace("\"","")
+                                            .replace("(", "").split(" ")) {
+                                        if (s.contains("RARE")) {
                                             continue;
                                         }
 
-                                        if(!s.startsWith("II")) {
-                                            temp += s.substring(0, 1);
+                                        if (!s.startsWith("II")) {
+                                            temp.append(s.charAt(0));
                                         } else {
                                             level += s.equals("II") ? 1 : 2;
                                         }
                                     }
-                                    drawEnchantTag((strongEnchant ? "\247c\247l" : "\247e\247l") + temp + getColor(level) + "\247l" + level, x - 3, y + 7 + enchantOffsetY);
-                                    enchantOffsetY += 10;
+                                    if(!temp.toString().equals("")) {
+                                        render.add((strongEnchant ? "\247c\247l" : "\247e\247l") + temp + getColor(level) + "\247l" + level);
+
+                                    }
                                 }
                             }
 
+                            render.sort(Comparator.comparingInt(String::length));
+
+                            for (String string : render) {
+                                drawEnchantTag(string, x - 3, y + 7 + enchantOffsetY);
+                                enchantOffsetY += 10;
+                            }
                         }
 
                         if (stack.getItem() instanceof ItemSword) {
