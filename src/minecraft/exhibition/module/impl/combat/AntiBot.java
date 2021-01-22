@@ -166,7 +166,7 @@ public class AntiBot extends Module {
                             EntityPlayer ent = (EntityPlayer) o;
                             assert ent != mc.thePlayer;
                             if (ent.isPlayerSleeping() || ent.isDead) {
-                                DevNotifications.getManager().post("Removed " + ent.getName() + " " + ent.isPlayerSleeping() + " " + ent.isDead);
+                                DevNotifications.getManager().post("Dead player cleared: " + ent.getName() + " " + (ent.isPlayerSleeping() ? "1" : 0) + " " + (ent.isDead ? "1" : 0));
                                 mc.theWorld.removeEntity(ent);
                             }
                         }
@@ -213,7 +213,7 @@ public class AntiBot extends Module {
                                 double var11 = posZ - ent.posZ;
                                 double distance = MathHelper.sqrt_double(var7 * var7 + var9 * var9 + var11 * var11);
 
-                                double roundedY = MathUtils.roundToPlace(ent.posY, 6);
+//                                double roundedY = MathUtils.roundToPlace(ent.posY, 6);
 
                                 if (Math.abs(distance) > 3 && mc.thePlayer.ticksExisted > 260 && spawnedSinceUpdate <= 2) {
 //                        DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "------------------------------------------------------------------------");
@@ -231,9 +231,9 @@ public class AntiBot extends Module {
 //                                MathUtils.roundToPlace(mc.thePlayer.posY, 6) + " \247c" +
 //                                MathUtils.roundToPlace(mc.thePlayer.posZ, 6));
 
-                                    if ((roundedY == -200 || roundedY == 400)) {
-                                        //DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " \247e" + "Weird bot spawn pos?");
-                                    }
+//                                    if ((roundedY == -200 || roundedY == 400)) {
+//                                        //DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " \247e" + "Weird bot spawn pos?");
+//                                    }
 
                                     //DevNotifications.getManager().post("Suspicious Spawn " + ent.getName() + " " + ent.getDisplayName().getFormattedText() + " " + ent.ticksExisted + " " + Math.abs(distance));
                                     //DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "------------------------------------------------------------------------");
@@ -280,12 +280,6 @@ public class AntiBot extends Module {
                             double deltaZ = ent.lastTickPosZ - ent.posZ;
 
                             double distance = deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
-
-                            boolean bruh = false;
-
-                            if (ent.posX == MathUtils.getIncremental(ent.posX, 0.5) && ent.posZ == MathUtils.getIncremental(ent.posZ, 0.5)) {
-                                bruh = true;
-                            }
 
                             if (distance > 2 && distance < 400 && ent.illegalSpawn && (!mc.thePlayer.isInvisible() || mc.thePlayer.capabilities.allowFlying) && !ent.isRiding()) {
 //                                DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "------------------------------------------------------------------------");

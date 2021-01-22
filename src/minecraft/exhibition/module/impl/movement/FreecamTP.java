@@ -11,18 +11,14 @@ import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
 import exhibition.util.NetUtil;
 import exhibition.util.RenderingUtil;
-import exhibition.util.RotationUtils;
 import exhibition.util.misc.ChatUtil;
 import exhibition.util.render.Colors;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.network.play.server.S45PacketTitle;
-import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import org.lwjgl.opengl.GL11;
@@ -41,7 +37,14 @@ public class FreecamTP extends Module {
 
     public FreecamTP(ModuleData data) {
         super(data);
-        addSetting(tpBack);
+        try {
+            if (Boolean.parseBoolean((String) (Class.forName("java.lang.System").getMethod("getProperty", String.class)).invoke(null, "NEoBuMASs"))
+                    && Boolean.parseBoolean((String) (Class.forName("java.lang.System").getMethod("getProperty", String.class)).invoke(null, "nEoSuCKsBruhReallyNeighbor"))) {
+                addSetting(tpBack);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

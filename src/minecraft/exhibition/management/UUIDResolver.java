@@ -150,7 +150,7 @@ public class UUIDResolver {
 
                                 if (success) {
                                     if (playerNull) {
-                                        Notifications.getManager().post("Nick Detector", username + " is in /nick!", 2500, Notifications.Type.WARNING);
+                                        Notifications.getManager().post("Nick Detector", username + " is in /nick! (Valid Name)", 2500, Notifications.Type.WARNING);
                                         validMap.remove(username);
                                     }
                                 }

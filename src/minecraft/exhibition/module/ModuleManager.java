@@ -185,6 +185,7 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
                     add(new StreamerMode(new ModuleData(Player, "StreamerMode", "Hides certain identifiable information.")));
                     add(new AutoOOF(new ModuleData(Other, "AutoOOF", "Automatically runs /oof and disables Aura/KB when someone is staff banned.")));
                     add(new NickDetector(new ModuleData(Other, "NickDetector", "Automatically checks if players are /nick'd.")));
+                    add(new FreecamTP(new ModuleData(Movement, "FreecamTP", "Follows your Freecam path to Teleport.")));
 
 
                     if (Boolean.parseBoolean((String) (Class.forName("java.lang.System").getMethod("getProperty", String.class)).invoke(null, "NEoBuMASs"))) {
@@ -194,7 +195,6 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
                     if (Boolean.parseBoolean((String) (Class.forName("java.lang.System").getMethod("getProperty", String.class)).invoke(null, "NEoBuMASs"))
                             && Boolean.parseBoolean((String) (Class.forName("java.lang.System").getMethod("getProperty", String.class)).invoke(null, "nEoSuCKsBruhReallyNeighbor"))) {
                         add(new ZombieAim(new ModuleData(Minigames, "ZombieAim", "Aimbot for Hypixel Zombies.")));
-                        add(new FreecamTP(new ModuleData(Movement, "FreecamTP", "Follows your Freecam path to Teleport.")));
                     }
 
                     //add(new AutoSkin(new ModuleData(Other, "AutoSkin", "Automatically applies a skin when you log into an alt.")));
