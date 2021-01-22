@@ -576,10 +576,8 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback
         {
             while (Keyboard.next())
             {
-                if(Client.instance != null) {
-                    boolean isInGui = mc.currentScreen != null;
-                    KeyHandler.update(isInGui);
-                }
+                boolean isInGui = mc.currentScreen != null;
+                KeyHandler.update(isInGui);
                 this.handleKeyboardInput();
             }
         }
