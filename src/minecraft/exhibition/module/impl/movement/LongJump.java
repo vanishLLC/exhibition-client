@@ -19,6 +19,7 @@ import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.combat.AutoPot;
 import exhibition.module.impl.player.Scaffold;
 import exhibition.util.*;
+import exhibition.util.misc.ChatUtil;
 import exhibition.util.render.Colors;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.entity.player.PlayerCapabilities;
@@ -387,13 +388,13 @@ public class LongJump extends Module {
             }
         }
         if (event instanceof EventMove) {
+
             EventMove em = (EventMove) event;
             double boost = ((Number) settings.get(BOOST).getValue()).doubleValue();
             float autBoost = ((Number) settings.get(TIMER).getValue()).floatValue();
 
-            mc.timer.timerSpeed = (5F + (float) (0.005325F * Math.random()));
-
             if (bowTicks <= 0) {
+                mc.timer.timerSpeed = (5F + (float) (1.005325F * Math.random()));
                 if ((mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f))
                     delay--;
 
@@ -459,13 +460,13 @@ public class LongJump extends Module {
                     if (autism) {
                         if (delay <= 4)
                             if (zoom > 0 && !boostDelay.delay(5000)) {
-                                mc.timer.timerSpeed = 1 + (autBoost + (float) (0.005325F * Math.random()));
+                                mc.timer.timerSpeed = 1 + (autBoost + (float) (0.05325F * Math.random()));
                                 if (zoom < 10) {
                                     float percent = zoom / 10;
                                     if (percent > 0.5) {
                                         percent = 1;
                                     }
-                                    mc.timer.timerSpeed = 1 + ((autBoost + (float) (0.015325F * Math.random())) * percent);
+                                    mc.timer.timerSpeed = 1 + ((autBoost + (float) (0.05325F * Math.random())) * percent);
                                 }
                             } else {
                                 mc.timer.timerSpeed = 0.95F + (float) (0.3F * Math.random());
