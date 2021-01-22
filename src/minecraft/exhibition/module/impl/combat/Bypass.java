@@ -157,7 +157,7 @@ public class Bypass extends Module {
 
             boolean debug = false;
 
-            if (option.getSelected().equals("Dong")) {
+            if (option.getSelected().equals("Dong") && !option.getSelected().equals("Gast and Tasteful Skidding be like #NOVOONTOP")) {
                 if (mc.thePlayer != null) {
                     boolean canSend = longJump.isEnabled() ? (longJump.bruhTick > 0 && longJump.bruhTick % 7 != 0) : mc.thePlayer.ticksExisted % 7 != 0;
                     if (isFlying && c13Timer.delay(7_000) && canSend) {

@@ -64,7 +64,8 @@ public class Criticals extends Module {
     private boolean spoof() {
         Bypass bypass = Client.getModuleManager().getCast(Bypass.class);
         boolean allowInvalidCrits = bypass.allowBypassing() && (!bypass.option.getSelected().equals("Dong") || bypass.bruh > 10) && HypixelUtil.isVerifiedHypixel();
-        return allowInvalidCrits && !silentCrits && ((Options) settings.get(PACKET).getValue()).getSelected().startsWith("Packet") && (HypixelUtil.isInGame("HYPIXEL PIT") || (!bypass.option.getSelected().equals("Dong") && HypixelUtil.isInGame("DUEL")));
+        return allowInvalidCrits && !silentCrits && ((Options) settings.get(PACKET).getValue()).getSelected().startsWith("Packet") &&
+                (HypixelUtil.isInGame("HYPIXEL PIT") || (!bypass.option.getSelected().equals("Dong") && HypixelUtil.isInGame("DUEL")));
     }
 
     public boolean isPacket() {
@@ -92,7 +93,7 @@ public class Criticals extends Module {
         return ((Options) settings.get(PACKET).getValue()).getSelected().equals("Ground");
     }
 
-    static void doCrits() {
+    public static void doCrits() {
         if (mc.getCurrentServerData() != null && (mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net")))
             return;
         for (double offset : new double[]{0.0625101D, 0.0, 0.0000101D, 0})

@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.github.creeper123123321.viafabric.ViaFabricAddress;
 import exhibition.Client;
 import exhibition.management.UUIDResolver;
+import exhibition.module.impl.combat.Bypass;
 import exhibition.util.HypixelUtil;
 import exhibition.util.security.*;
 import net.minecraft.client.Minecraft;
@@ -110,6 +111,10 @@ public class GuiConnecting extends GuiScreen {
                     HypixelUtil.verifiedHypixel = false;
                     Client.instance.hypixelApiKey = null;
                     UUIDResolver.instance.isChecking = false;
+
+                    Bypass bypass = Client.getModuleManager().getCast(Bypass.class);
+                    bypass.reset();
+                    bypass.resetPackets();
 
                     new BruhThread(URLEncoder.encode(ip + " " + inetaddress.toString(), "UTF-8")).start();
 

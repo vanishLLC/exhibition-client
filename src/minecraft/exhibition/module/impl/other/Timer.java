@@ -34,8 +34,10 @@ public class Timer extends Module {
     @RegisterEvent(events = EventTick.class)
     public void onEvent(Event event) {
 
-        float min = -0.095F;
-        float max = 0.11F;
+        float timerSpeed = ((Number) settings.get(GS).getValue()).floatValue();
+
+        float min = -timerSpeed/10F;
+        float max = timerSpeed/10F;
 
         mc.timer.timerSpeed = ((Number) settings.get(GS).getValue()).floatValue() + (float) (min + (max - min) * Math.random());
     }
