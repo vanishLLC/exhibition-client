@@ -93,6 +93,60 @@ public class HypixelUtil {
         return scoreboardContains("starting in") || scoreboardContains("waiting..");
     }
 
+    /*
+     * Use this method to parse information such as
+     * split("Event:", ": ") in order to read stuff like "TDM" in "Event: TDM"
+     */
+    public static String[] scoreboardSplit(String contains, String regex) {
+        Scoreboard scoreboard = Minecraft.getMinecraft().theWorld.getScoreboard();
+        ScoreObjective scoreobjective = null;
+        ScorePlayerTeam scoreboardPlayersTeam = scoreboard.getPlayersTeam(Minecraft.getMinecraft().thePlayer.getName());
+
+        if (scoreboardPlayersTeam != null) {
+            int j1 = scoreboardPlayersTeam.getChatFormat().getColorIndex();
+
+            if (j1 >= 0) {
+                scoreobjective = scoreboard.getObjectiveInDisplaySlot(3 + j1);
+            }
+        }
+
+        ScoreObjective scoreobjective1 = scoreobjective != null ? scoreobjective : scoreboard.getObjectiveInDisplaySlot(1);
+
+        if (scoreobjective1 != null) {
+            try {
+                Scoreboard scoreboardBruh = scoreobjective1.getScoreboard();
+                Collection<Score> collection = scoreboardBruh.getSortedScores(scoreobjective1);
+                ArrayList<Score> arraylist = collection.stream().filter(new Predicate<Score>() {
+                    @Override
+                    public boolean test(Score score) {
+                        return score.getPlayerName() != null && !score.getPlayerName().startsWith("#");
+                    }
+                }).collect(Collectors.toCollection(Lists::newArrayList));
+                ArrayList<Score> arraylist1;
+
+                if (arraylist.size() > 15) {
+                    arraylist1 = Lists.newArrayList(Iterables.skip(arraylist, collection.size() - 15));
+                } else {
+                    arraylist1 = arraylist;
+                }
+
+                for (Score score : arraylist1) {
+                    ScorePlayerTeam scoreplayerteam1 = scoreboard.getPlayersTeam(score.getPlayerName());
+                    String s1 = ScorePlayerTeam.formatPlayerName(scoreplayerteam1, score.getPlayerName()).replace("\uD83D\uDC7D", "").replace("\uD83C\uDF82", "");
+
+                    String cleaned = StringUtils.stripHypixelControlCodes(s1);
+                    if (cleaned.toLowerCase().contains(contains.toLowerCase())) {
+                        return cleaned.split(regex);
+                    }
+                }
+            } catch (Exception e) {
+
+            }
+        }
+
+        return null;
+    }
+
     public static boolean scoreboardContains(String str) {
         Scoreboard scoreboard = Minecraft.getMinecraft().theWorld.getScoreboard();
         ScoreObjective scoreobjective = null;
@@ -128,7 +182,7 @@ public class HypixelUtil {
 
                 for (Score score : arraylist1) {
                     ScorePlayerTeam scoreplayerteam1 = scoreboard.getPlayersTeam(score.getPlayerName());
-                    String s1 = ScorePlayerTeam.formatPlayerName(scoreplayerteam1, score.getPlayerName()).replace("\uD83D\uDC7D", "").replace("\uD83C\uDF82", "").replace("\247g", "");
+                    String s1 = ScorePlayerTeam.formatPlayerName(scoreplayerteam1, score.getPlayerName()).replace("\uD83D\uDC7D", "").replace("\uD83C\uDF82", "");
 
                     if (StringUtils.stripHypixelControlCodes(s1).toLowerCase().contains(str.toLowerCase())) {
                         return true;

@@ -6,6 +6,7 @@ public class StringUtils
 {
     private static final Pattern patternControlCode = Pattern.compile("(?i)\\u00A7[0-9A-FK-OR]");
     private static final Pattern hypixelControlCode = Pattern.compile("(?i)\\u00A7[0-9A-Za-z]");
+    private static final Pattern invalidControlCode = Pattern.compile("(?i)\\u00A7[G-JP-QS-Zg-jp-qs-z]");
 
 
     /**
@@ -27,6 +28,11 @@ public class StringUtils
     public static String stripHypixelControlCodes(String p_76338_0_)
     {
         return hypixelControlCode.matcher(p_76338_0_).replaceAll("");
+    }
+
+    public static String stripInvalidControlCodes(String p_76338_0_)
+    {
+        return invalidControlCode.matcher(p_76338_0_).replaceAll("");
     }
 
     /**

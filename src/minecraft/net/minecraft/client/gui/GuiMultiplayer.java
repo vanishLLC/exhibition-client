@@ -210,6 +210,8 @@ public class GuiMultiplayer extends GuiScreen implements GuiYesNoCallback
                 mc.displayGuiScreen(new GuiAltManager(this));
             } else if(button.id == 44444) {
                 if (ViaFabric.config.getClientSideVersion() == ProtocolVersion.v1_8.getVersion()){
+                    ViaFabric.config.setClientSideVersion(ProtocolVersion.v1_9_3.getVersion());
+                } else if (ViaFabric.config.getClientSideVersion() == ProtocolVersion.v1_9_3.getVersion()){
                     ViaFabric.config.setClientSideVersion(ProtocolVersion.v1_12_2.getVersion());
                 } else if (ViaFabric.config.getClientSideVersion() == ProtocolVersion.v1_12_2.getVersion()){
                     ViaFabric.config.setClientSideVersion(ProtocolVersion.v1_13_2.getVersion());

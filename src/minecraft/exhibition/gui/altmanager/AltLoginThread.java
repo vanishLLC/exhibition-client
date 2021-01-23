@@ -102,7 +102,7 @@ public final class AltLoginThread extends Thread {
             this.status = EnumChatFormatting.GREEN + "Logged in. (" + auth.getUsername() + ")";
             alt.setMask(auth.getUsername());
             this.mc.session = auth;
-            if (alt.getStatus().equals(Alt.Status.Unchecked)) {
+            if (alt.getStatus().equals(Alt.Status.Unchecked) || alt.getStatus().equals(Alt.Status.NotWorking)) {
                 alt.setStatus(Alt.Status.Working);
             }
             Notifications.getManager().post("Logged in!", "Logged in as " + alt.getMask(), 2000, Notifications.Type.OKAY);

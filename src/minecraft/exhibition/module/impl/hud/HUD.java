@@ -16,6 +16,7 @@ import exhibition.module.data.ModuleData;
 import exhibition.module.data.MultiBool;
 import exhibition.module.data.Options;
 import exhibition.module.data.settings.Setting;
+import exhibition.module.impl.combat.Bypass;
 import exhibition.module.impl.other.AutoSkin;
 import exhibition.module.impl.other.ChatCommands;
 import exhibition.util.MathUtils;
@@ -241,7 +242,14 @@ public class HUD extends Module {
 
             String s = stringBuilder.toString();
 
-            mc.fontRendererObj.drawString(stringBuilder.toString(), (int) (e.getResolution().getScaledWidth_double() / 2 - mc.fontRendererObj.getStringWidth(s) / 2), 30, -1);
+            mc.fontRendererObj.drawString(s, (int) (e.getResolution().getScaledWidth_double() / 2 - mc.fontRendererObj.getStringWidth(s) / 2), 30, -1);
+
+            Bypass bypass = Client.getModuleManager().getCast(Bypass.class);
+            int current = (bypass.bruh - 10);
+            int max = (40 + bypass.randomDelay);
+
+            String bruh = bypass.bruh == 0 ? "Dong Waits..." : current < 0 ? "Dong Inactive" : (current + "/" + max);
+            mc.fontRendererObj.drawString(bruh, (int) (e.getResolution().getScaledWidth_double() / 2 - mc.fontRendererObj.getStringWidth(bruh) / 2), 20, -1);
         }
 
 //        String okbruh = Angle.INSTANCE.angleVL + " Angle VL | Size: " + Angle.INSTANCE.angleHits.size();

@@ -52,6 +52,7 @@ import exhibition.gui.screen.impl.mainmenu.GuiLoginMenu;
 import exhibition.management.GlobalValues;
 import exhibition.management.command.Command;
 import exhibition.management.keybinding.KeyHandler;
+import exhibition.module.impl.combat.Bypass;
 import exhibition.module.impl.hud.HUD;
 import exhibition.module.impl.other.Spotify;
 import exhibition.util.misc.ChatUtil;
@@ -1389,8 +1390,7 @@ public class Minecraft implements IThreadListener, IPlayerUsage {
             } else {
                 switch (this.objectMouseOver.typeOfHit) {
                     case ENTITY:
-
-                            this.playerController.attackEntity(this.thePlayer, this.objectMouseOver.entityHit);
+                        this.playerController.attackEntity(this.thePlayer, this.objectMouseOver.entityHit);
                         break;
 
                     case BLOCK:
@@ -1408,7 +1408,7 @@ public class Minecraft implements IThreadListener, IPlayerUsage {
                         }
                 }
 
-                if (Client.instance.is1_9orGreater())
+                if (block)
                     this.thePlayer.swingItem();
             }
         }

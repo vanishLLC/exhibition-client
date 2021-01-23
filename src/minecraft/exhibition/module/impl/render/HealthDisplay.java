@@ -37,7 +37,7 @@ public class HealthDisplay extends Module {
 
         if (event instanceof EventRenderGuiLast) {
 
-            int guiOffset = mc.currentScreen instanceof GuiContainer ? mc.currentScreen instanceof GuiInventory ? 75 : 100 : 0;
+            int guiOffset = mc.currentScreen instanceof GuiInventory ? 75 : mc.thePlayer.openContainer != mc.thePlayer.inventoryContainer ? 100 : 0;
             EventRenderGuiLast er = (EventRenderGuiLast) event;
 
             boolean isLighting = GL11.glIsEnabled(GL11.GL_LIGHTING);

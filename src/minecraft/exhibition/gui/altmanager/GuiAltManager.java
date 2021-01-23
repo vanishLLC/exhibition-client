@@ -242,6 +242,18 @@ public class GuiAltManager extends PanoramaScreen {
                 }
                 break;
             }
+            case 4206969: {
+                if (this.selectedAlt != null) {
+                    this.selectedAlt.setFavorite(!this.selectedAlt.isFavorite());
+                    this.status = this.selectedAlt.isFavorite() ? "\2476Favorited Alt." : "\247cUnfavorited Alt.";
+                    try {
+                        Client.getFileManager().getFile(Alts.class).saveFile();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                break;
+            }
         }
     }
 
@@ -365,7 +377,7 @@ public class GuiAltManager extends PanoramaScreen {
                         boolean hovering = par1 >= 52 && par1 <= 52 + 25 && par2 >= y - this.offset - 4 && par2 <= y - this.offset + 20;
                         RenderingUtil.rectangleBordered(52, y - this.offset - 4, 52 + 25, y - this.offset + 20, 1, Colors.getColor(50, 60), hovering ? -2142088622 : -2144259791);
                         GlStateManager.pushMatrix();
-                        GlStateManager.translate(52 + 25/2D, y - this.offset, 0);
+                        GlStateManager.translate(52 + 25 / 2D, y - this.offset, 0);
                         GlStateManager.scale(0.5, 0.5, 0.5);
                         mc.fontRendererObj.drawStringWithShadow("Favorite", -fontRendererObj.getStringWidth("Favorite") / 2D, 6, Colors.getColor(230, 255));
                         mc.fontRendererObj.drawStringWithShadow("Account", 0 - fontRendererObj.getStringWidth("Account") / 2D, 18, Colors.getColor(230, 255));
@@ -500,11 +512,13 @@ public class GuiAltManager extends PanoramaScreen {
             e.printStackTrace();
         }
         seatchField = new GuiTextField(this.eventButton, this.mc.fontRendererObj, this.width / 2 + 116, this.height - 22, 72, 16);
-        this.buttonList.add(new GuiMenuButton(12, this.width - 45, 30, 40, 20, "Altening-Gen"));
-        this.buttonList.add(new GuiMenuButton(13, this.width - 45, 55, 40, 20, Client.altService.getCurrentService().getServiceName()));
-        this.buttonList.add(new GuiMenuButton(14, this.width - 45, 80, 40, 20, "Remove NW"));
-        this.buttonList.add(new GuiMenuButton(15, this.width - 45, 105, 40, 20, "Remove Ban'd"));
-        this.buttonList.add(new GuiMenuButton(16, this.width - 45, 130, 40, 20, "Export Alts"));
+        this.buttonList.add(new GuiMenuButton(4206969, 2, 30, 47, 20, "Favorite Current"));
+
+        this.buttonList.add(new GuiMenuButton(12, this.width - 43, 30, 40, 20, "Altening-Gen"));
+        this.buttonList.add(new GuiMenuButton(13, this.width - 43, 55, 40, 20, Client.altService.getCurrentService().getServiceName()));
+        this.buttonList.add(new GuiMenuButton(14, this.width - 43, 80, 40, 20, "Remove NW"));
+        this.buttonList.add(new GuiMenuButton(15, this.width - 43, 105, 40, 20, "Remove Ban'd"));
+        this.buttonList.add(new GuiMenuButton(16, this.width - 43, 130, 40, 20, "Export Alts"));
 
 
         this.buttonList.add(this.sortButton = new GuiMenuButton(10, this.width - 125, 5, 75, 20, sorting.toString()));

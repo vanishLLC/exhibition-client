@@ -186,7 +186,7 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
                     add(new AutoOOF(new ModuleData(Other, "AutoOOF", "Automatically runs /oof and disables Aura/KB when someone is staff banned.")));
                     add(new NickDetector(new ModuleData(Other, "NickDetector", "Automatically checks if players are /nick'd.")));
                     add(new FreecamTP(new ModuleData(Movement, "FreecamTP", "Follows your Freecam path to Teleport.")));
-
+                    add(new BanStats(new ModuleData(Other, "BanStats", "Shows hypixel ban stats for the last few seconds.")));
 
                     if (Boolean.parseBoolean((String) (Class.forName("java.lang.System").getMethod("getProperty", String.class)).invoke(null, "NEoBuMASs"))) {
                         add(new Aimbot(new ModuleData(Minigames, "Aimbot", "Cops n Crims aimbot.")));

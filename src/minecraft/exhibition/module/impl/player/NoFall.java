@@ -54,10 +54,11 @@ public class NoFall extends Module {
                 double fallen = mc.thePlayer.fallDistance - dist;
                 double predictedFallen = fallen + -((fallY - 0.08D) * 0.9800000190734863D);
                 if (predictedFallen >= 3.0) {
-                    if (vanilla.getValue()) {
+                    Bypass bypass = Client.getModuleManager().getCast(Bypass.class);
+                    boolean allowVanilla = bypass.option.getSelected().equals("Dong") && (bypass.bruh == 0 || bypass.bruh >= 10);
+                    if (vanilla.getValue() && allowVanilla) {
                         if (em.isPre()) {
-                            Bypass bypass = Client.getModuleManager().getCast(Bypass.class);
-                            if(bypass.option.getSelected().equals("Dong") && bypass.bruh >= 20) {
+                            if(bypass.bruh >= 22) {
                                 bypass.bruh -= 2;
                             }
                             em.setGround(true);

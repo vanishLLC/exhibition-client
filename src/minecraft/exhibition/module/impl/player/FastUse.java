@@ -88,7 +88,7 @@ public class FastUse extends Module {
     }
 
     private boolean canUseItem(Item item) {
-        return !(item instanceof ItemSword) && ((Boolean) settings.get(BOW).getValue() || !(item instanceof ItemBow));
+        return !(item instanceof ItemSword) && !(item instanceof ItemBow) || ((boolean) settings.get(BOW).getValue() && Client.instance.is1_9orGreater());
     }
 
 }

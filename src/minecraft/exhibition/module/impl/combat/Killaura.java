@@ -77,6 +77,7 @@ public class Killaura extends Module {
     private Setting<Boolean> pitSpawn = new Setting<>("PIT-SPAWN", true, "Disables Killaura when in PIT spawn.");
     private Setting<Boolean> antiLag = new Setting<>("ANTI-LAG", true, "Prevents the Killaura from flagging you when lagging.");
     private Setting<Boolean> reduce = new Setting<>("REDUCE", false, "Reduces your rotations to prevent flags.");
+    private Setting<Boolean> antiCritFunky = new Setting<>("ANTI-CF", false, "Attacks players without proccing Critically Funky.");
     private Setting<Boolean> prediction = new Setting<>("PREDICTION", true, "Predicts where the player will be on server side.");
     private Setting<Number> predictionTicks = new Setting<>("PTICKS", 1, "The amount of ticks to predict. 1 tick = 50ms", 1, 1, 10);
     private Setting<Number> predictionScale = new Setting<>("PSCALE", 1.0, "The scale of how much prediction is applied.", 0.05, 0, 2);
@@ -532,7 +533,10 @@ public class Killaura extends Module {
                             else if (targetYaw < -maxAngleStep) targetYaw = -maxAngleStep;
 
                             Bypass bypass = Client.getModuleManager().getCast(Bypass.class);
-                            boolean allowInvalidAngles = bypass.allowBypassing() && (!bypass.option.getSelected().equals("Dong") || bypass.bruh > 10) && HypixelUtil.isVerifiedHypixel();
+
+                            int bypassTicks = bypass.bruh - 10;
+
+                            boolean allowInvalidAngles = bypass.allowBypassing() && (!bypass.option.getSelected().equals("Dong") || bypassTicks > 3 && bypassTicks < (38 + bypass.randomDelay)) && HypixelUtil.isVerifiedHypixel();
 
                             if (shouldReduce) {
                                 float pitch = (float) -(Math.atan2(yDiff - (distance > 2.1 ? 0.75 : 1), dist) * 180.0D / 3.141592653589793D);
@@ -565,13 +569,13 @@ public class Killaura extends Module {
                                                         target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
 
                                         if (isAttacking && canAttackRightNow) {
-                                            if(bypass.option.getSelected().equals("Dong") && bypass.bruh >= 20) {
+                                            if (bypass.option.getSelected().equals("Dong") && bypassTicks > 7) {
                                                 bypass.bruh -= 2;
                                             }
                                             em.setPitch(MathHelper.wrapAngleTo180_float(180 - em.getPitch()));
                                         } else {
                                             em.setPitch(em.getPitch() + 360);
-                                            if(bypass.option.getSelected().equals("Dong") && bypass.bruh >= 20) {
+                                            if (bypass.option.getSelected().equals("Dong") && bypassTicks > 7) {
                                                 bypass.bruh -= 2;
                                             }
                                         }
@@ -646,91 +650,106 @@ public class Killaura extends Module {
 
                             boolean setupCrits = critModule.isOldCrits() || target.hurtTime <= 1 || (target.waitTicks <= 1);
 
-                            if (crits) {
-                                if (critModule.isNewCrits()) {
-                                    if (mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically && isNextTickGround()) {
-                                        if (setupTick == 0 && setupCrits) {
-                                            stepDelay = 1;
-                                            blockJump = true;
-                                            isCritSetup = false;
-                                            em.setY(em.getY() + 0.123259982345);
-                                            em.setGround(true);
-                                            em.setForcePos(true);
-                                            setupTick = 1;
-                                            //ChatUtil.printChat(target.waitTicks + " stage 1");
-                                        } else if (setupTick == 1 || setupTick == 4 || setupTick == 8) {
-                                            if ((em.getY() == mc.thePlayer.posY && em.isOnground())) {
+                            if (!antiCritFunky.getValue() || !isCritFunky(target))
+                                if (crits) {
+                                    if (critModule.isNewCrits()) {
+                                        if (mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically && isNextTickGround()) {
+                                            if (setupTick == 0 && setupCrits) {
+                                                stepDelay = 1;
                                                 blockJump = true;
-                                                isCritSetup = true;
-                                                em.setY(em.getY() + 0x1.cb5c6eba0ceabp-8);
-                                                em.setGround(false);
-                                                em.setForcePos(true);
-                                                setupTick = 2;
-
-                                                //ChatUtil.printChat(target.waitTicks + " stage 2");
-                                            }
-                                        } else if (setupTick == 2 || setupTick == 5 || setupTick == 9) {
-                                            if ((em.getY() == mc.thePlayer.posY && em.isOnground())) {
                                                 isCritSetup = false;
+                                                em.setY(em.getY() + 0.123259982345);
+                                                em.setGround(true);
                                                 em.setForcePos(true);
-                                                //ChatUtil.printChat("2");
-                                                setupTick = 0;
-                                            }
-                                        }
-                                        if (setupTick == 6)
-                                            setupTick++;
-                                        if (setupTick == 10)
-                                            setupTick = 0;
-                                    } else {
-                                        setupTick = 0;
-                                    }
-                                } else if (critModule.isOldCrits()) {
-                                    boolean canAttackRightNow = (attack.equals("Always")) ||
-                                            (attack.equals("Precise") ? target.waitTicks <= 1 :
-                                                    target.waitTicks <= 1 || (target.hurtResistantTime <= 11 && target.hurtResistantTime >= 6) || target.hurtTime > 6);
-
-                                    if (canAttackRightNow && isNextTickGround() && !Client.instance.isLagging()) {
-                                        if (setupCrits && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {
-                                            if (setupTick == 0) {
-                                                stepDelay = 2;
-                                                blockJump = true;
-                                                em.setY(em.getY() + 0.07234F + (0.0000023F) * Math.random());
-                                                em.setGround(false);
-                                                em.setForcePos(true);
-                                                isCritSetup = false;
                                                 setupTick = 1;
-                                            } else if (setupTick == 1) {
-                                                isCritSetup = true;
-                                                if (HypixelUtil.isInGame("HYPIXEL PIT"))
-                                                    em.setY(em.getY() + 0.0076092939542 - (0.0000000002475776F) * Math.random());
-                                                em.setGround(false);
-                                                em.setForcePos(true);
+                                                //ChatUtil.printChat(target.waitTicks + " stage 1");
+                                            } else if (setupTick == 1 || setupTick == 4 || setupTick == 8) {
+                                                if ((em.getY() == mc.thePlayer.posY && em.isOnground())) {
+                                                    blockJump = true;
+                                                    isCritSetup = true;
+                                                    em.setY(em.getY() + 0x1.cb5c6eba0ceabp-8);
+                                                    em.setGround(false);
+                                                    em.setForcePos(true);
+                                                    setupTick = 2;
+
+                                                    //ChatUtil.printChat(target.waitTicks + " stage 2");
+                                                }
+                                            } else if (setupTick == 2 || setupTick == 5 || setupTick == 9) {
+                                                if ((em.getY() == mc.thePlayer.posY && em.isOnground())) {
+                                                    isCritSetup = false;
+                                                    em.setForcePos(true);
+                                                    //ChatUtil.printChat("2");
+                                                    setupTick = 0;
+                                                }
+                                            }
+                                            if (setupTick == 6)
+                                                setupTick++;
+                                            if (setupTick == 10)
                                                 setupTick = 0;
+                                        } else {
+                                            setupTick = 0;
+                                        }
+                                    } else if (critModule.isOldCrits()) {
+                                        boolean canAttackRightNow = (attack.equals("Always")) ||
+                                                (attack.equals("Precise") ? target.waitTicks <= 1 :
+                                                        target.waitTicks <= 1 || (target.hurtResistantTime <= 11 && target.hurtResistantTime >= 6) || target.hurtTime > 6);
+
+                                        if (canAttackRightNow && isNextTickGround() && !Client.instance.isLagging()) {
+                                            if (setupCrits && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {
+                                                if (setupTick == 0) {
+                                                    stepDelay = 2;
+                                                    blockJump = true;
+                                                    em.setY(em.getY() + 0.07234F + (0.0000023F) * Math.random());
+                                                    em.setGround(false);
+                                                    em.setForcePos(true);
+                                                    isCritSetup = false;
+                                                    setupTick = 1;
+                                                } else if (setupTick == 1) {
+                                                    isCritSetup = true;
+                                                    if (HypixelUtil.isInGame("HYPIXEL PIT"))
+                                                        em.setY(em.getY() + 0.0076092939542 - (0.0000000002475776F) * Math.random());
+                                                    em.setGround(false);
+                                                    em.setForcePos(true);
+                                                    setupTick = 0;
+                                                } else {
+                                                    setupTick = 0;
+                                                }
                                             } else {
                                                 setupTick = 0;
                                             }
                                         } else {
                                             setupTick = 0;
                                         }
-                                    } else {
-                                        setupTick = 0;
-                                    }
-                                } else if (critModule.isPacket() && HypixelUtil.isVerifiedHypixel() && mc.getCurrentServerData() != null && (mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net"))) {
-                                    boolean isAttacking = mc.thePlayer.getDistanceToEntity(target) <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && delay.roundDelay(50 * nextRandom);
-                                    boolean canAttackRightNow = attack.equals("Always") || (attack.equals("Precise") ? target.waitTicks <= 0 : target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
+                                    } else if (critModule.isPacket() && HypixelUtil.isVerifiedHypixel() && mc.getCurrentServerData() != null && (mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net"))) {
+                                        boolean isAttacking = mc.thePlayer.getDistanceToEntity(target) <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && delay.roundDelay(50 * nextRandom);
+                                        boolean canAttackRightNow = attack.equals("Always") || (attack.equals("Precise") ? target.waitTicks <= 0 : target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
 
-                                    if (isAttacking && canAttackRightNow && isNextTickGround())
-                                        if (mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {
-                                            stepDelay = 2;
-                                            blockJump = true;
-                                            em.setY(em.getY() + 0.07840000152587834 + (0.0000023423F) * Math.random());
-                                            em.setGround(false);
-                                            em.setForcePos(true);
-                                            isCritSetup = true;
-                                        }
+                                        if (isAttacking && canAttackRightNow && isNextTickGround())
+                                            if (mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {
+                                                stepDelay = 2;
+                                                blockJump = true;
+                                                em.setY(em.getY() + 0.07840000152587834 + (0.0000023423F) * Math.random());
+                                                em.setGround(false);
+                                                em.setForcePos(true);
+                                                isCritSetup = true;
+                                            }
+                                    }
+                                } else {
+                                    setupTick = 0;
                                 }
-                            } else {
-                                setupTick = 0;
+
+                            if (antiCritFunky.getValue() && isCritFunky(target) && HypixelUtil.isVerifiedHypixel() && !em.isOnground() && !mc.thePlayer.onGround && allowInvalidAngles) {
+                                boolean isAttacking = mc.thePlayer.getDistanceToEntity(target) <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && delay.roundDelay(50 * nextRandom);
+                                boolean canAttackRightNow = attack.equals("Always") || (attack.equals("Precise") ? target.waitTicks <= 0 : target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
+
+                                if (isAttacking && canAttackRightNow) {
+                                    if (bypass.option.getSelected().equals("Dong") && bypass.bruh > 15) {
+                                        bypass.bruh -= 2;
+                                    }
+
+                                    ChatUtil.printChat("Spoof");
+                                    em.setGround(true);
+                                }
                             }
 
                             if ((block) && (mc.thePlayer.inventory.getCurrentItem() != null) && ((mc.thePlayer.inventory.getCurrentItem().getItem() instanceof ItemSword))) {
@@ -955,6 +974,19 @@ public class Killaura extends Module {
                 }
             }
         }
+    }
+
+    private boolean isCritFunky(EntityLivingBase target) {
+        if(target instanceof EntityPlayer) {
+            if(target.getEquipmentInSlot(2) != null) {
+                for (String pitEnchant : HypixelUtil.getPitEnchants(target.getEquipmentInSlot(2))) {
+                    if(pitEnchant.contains("Crit") && pitEnchant.contains("Funk")) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     public float getLastYaw() {
@@ -1219,7 +1251,7 @@ public class Killaura extends Module {
     private double getTargetWeighted(EntityLivingBase entityLivingBase) {
         double weight = entityLivingBase.getHealth();
 
-        if(mc.thePlayer.getHealth() <= 19.5) {
+        if (mc.thePlayer.getHealth() <= 19.5) {
             weight += Math.max(entityLivingBase.waitTicks, 0);
             // If the player is hurt, we don't get any benefit?
             if (entityLivingBase.hurtTime >= 6) {

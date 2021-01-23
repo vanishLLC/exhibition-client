@@ -13,7 +13,7 @@ public class KeyHandler {
     private static final List<KeyMask> activeMasks = new ArrayList<>();
 
     public static void update(boolean isInGui) {
-        if (Client.isHidden()) {
+        if (Client.instance == null || Client.isHidden()) {
             return;
         }
         boolean pressed = Keyboard.getEventKeyState();

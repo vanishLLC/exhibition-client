@@ -182,14 +182,13 @@ public class GuiPlayerTabOverlay extends Gui {
                 GameProfile gameprofile = networkplayerinfo1.getGameProfile();
 
                 String name = gameprofile.getName();
-                if(PriorityManager.isPriority(name)) {
-                    drawRect(j2, k2, j2 + i1, k2 + 8, Colors.getColor(255, 0, 0, 160));
-                    GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-                } else if(FriendManager.isFriend(name)) {
+                if (FriendManager.isFriend(name)) {
                     drawRect(j2, k2, j2 + i1, k2 + 8, Colors.getColor(0, 255, 255, 160));
                     GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-                }
-                if (UUIDResolver.instance.isInvalidName(name)) {
+                } else if (PriorityManager.isPriority(name)) {
+                    drawRect(j2, k2, j2 + i1, k2 + 8, Colors.getColor(255, 0, 0, 160));
+                    GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+                } else if (UUIDResolver.instance.isInvalidName(name)) {
                     drawRect(j2, k2, j2 + i1, k2 + 8, Colors.getColor(255, 255, 0, 160));
                     GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
                 }

@@ -14,8 +14,11 @@ import exhibition.event.impl.EventRenderGui;
 import exhibition.management.font.DynamicTTFFont;
 import exhibition.management.notifications.dev.DevNotifications;
 import exhibition.module.impl.hud.HUD;
+import exhibition.module.impl.other.BanStats;
 import exhibition.module.impl.other.StreamerMode;
 import exhibition.module.impl.render.Crosshair;
+import exhibition.util.HypixelUtil;
+import exhibition.util.MathUtils;
 import exhibition.util.render.Colors;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
@@ -573,20 +576,29 @@ public class GuiIngame extends Gui {
             i = Math.max(i, this.getFontRenderer().getStringWidth(s));
         }
 
+        BanStats banStats = Client.getModuleManager().getCast(BanStats.class);
+
+        boolean renderBanStats = banStats.isEnabled() && HypixelUtil.isVerifiedHypixel();
+
         int j1 = arraylist1.size() * this.getFontRenderer().FONT_HEIGHT;
+
+        if (renderBanStats) {
+            j1 += this.getFontRenderer().FONT_HEIGHT * 3;
+        }
+
         int k1 = p_180475_2_.getScaledHeight() / 2 + j1 / 3;
         byte b0 = 3;
         int j = p_180475_2_.getScaledWidth() - i - b0;
         int k = 0;
 
         for (Object score1 : arraylist1) {
-            ++k;
-            ScorePlayerTeam scoreplayerteam1 = scoreboard.getPlayersTeam(((Score) score1).getPlayerName());
-            String s1 = ScorePlayerTeam.formatPlayerName(scoreplayerteam1, ((Score) score1).getPlayerName());
-            String s2 = EnumChatFormatting.RED + "" + ((Score) score1).getScorePoints();
-            int l = k1 - k * this.getFontRenderer().FONT_HEIGHT;
-            int i1 = p_180475_2_.getScaledWidth() - b0 + 2;
-            drawRect(j - 2, l, i1, l + this.getFontRenderer().FONT_HEIGHT, 1342177280);
+            {
+                ++k;
+                ScorePlayerTeam scoreplayerteam1 = scoreboard.getPlayersTeam(((Score) score1).getPlayerName());
+                String s1 = ScorePlayerTeam.formatPlayerName(scoreplayerteam1, ((Score) score1).getPlayerName());
+                int l = k1 - k * this.getFontRenderer().FONT_HEIGHT;
+                int i1 = p_180475_2_.getScaledWidth() - b0 + 2;
+                drawRect(j - 2, l, i1, l + this.getFontRenderer().FONT_HEIGHT, 1342177280);
 
 //            if (s1.contains("/") && s1.contains("\2478") && s1.contains(" ") && s1.toLowerCase().contains("m")) {
 //                try {
@@ -604,15 +616,52 @@ public class GuiIngame extends Gui {
 //                }
 //            }
 
-            this.getFontRenderer().drawString(s1, j, l, 553648127);
-            //this.getFontRenderer().drawString(s2, i1 - this.getFontRenderer().getStringWidth(s2), l, 553648127);
+                this.getFontRenderer().drawString(s1, j, l, 553648127);
+                //this.getFontRenderer().drawString(s2, i1 - this.getFontRenderer().getStringWidth(s2), l, 553648127);
 
 
-            if (k == arraylist1.size()) {
-                String s3 = p_180475_1_.getDisplayName();
-                drawRect(j - 2, l - this.getFontRenderer().FONT_HEIGHT - 1, i1, l - 1, 1610612736);
-                drawRect(j - 2, l - 1, i1, l, 1342177280);
-                this.getFontRenderer().drawString(s3, j + i / 2 - this.getFontRenderer().getStringWidth(s3) / 2, l - this.getFontRenderer().FONT_HEIGHT, 553648127);
+                if (k == arraylist.size()) {
+                    if (renderBanStats) {
+                        l -= 3 * this.getFontRenderer().FONT_HEIGHT;
+                    }
+                    String s3 = p_180475_1_.getDisplayName();
+                    drawRect(j - 2, l - this.getFontRenderer().FONT_HEIGHT - 1, i1, l - 1, 1610612736);
+                    drawRect(j - 2, l - 1, i1, l, 1342177280);
+                    this.getFontRenderer().drawString(s3, j + i / 2 - this.getFontRenderer().getStringWidth(s3) / 2, l - this.getFontRenderer().FONT_HEIGHT, 553648127);
+                }
+            }
+
+            if (k == 1 && renderBanStats) {
+                {
+                    ++k;
+                    int l = k1 - k * this.getFontRenderer().FONT_HEIGHT;
+                    int i1 = p_180475_2_.getScaledWidth() - b0 + 2;
+                    drawRect(j - 2, l, i1, l + this.getFontRenderer().FONT_HEIGHT, 1342177280);
+                }
+                {
+                    long lastMinuteBans = banStats.bansLastMinute;
+                    ++k;
+                    int l = k1 - k * this.getFontRenderer().FONT_HEIGHT;
+                    int i1 = p_180475_2_.getScaledWidth() - b0 + 2;
+                    drawRect(j - 2, l, i1, l + this.getFontRenderer().FONT_HEIGHT, 1342177280);
+
+                    this.getFontRenderer().drawString("Last 5m: " + (lastMinuteBans >= 10 ? "\247c\247l" : lastMinuteBans == 0 ? "\247a" : lastMinuteBans > 5 ? "\2476" : "\247e") + lastMinuteBans, j, l, 553648127);
+                }
+                {
+                    long banDiff = banStats.banDifference;
+                    ++k;
+                    int l = k1 - k * this.getFontRenderer().FONT_HEIGHT;
+                    int i1 = p_180475_2_.getScaledWidth() - b0 + 2;
+                    drawRect(j - 2, l, i1, l + this.getFontRenderer().FONT_HEIGHT, 1342177280);
+
+                    String time = "";
+                    long roundedTime = (long) MathUtils.getIncremental(banStats.banTimer.getDifference(), 50);
+                    if (banStats.banTimer.getDifference() > 60_000) {
+                        time = " \247a(" + StringUtils.ticksToElapsedTime((int) roundedTime / 50) + ")";
+                    }
+
+                    this.getFontRenderer().drawString("Bans: " + (banDiff == 0 ? "\247a" : banDiff == 1 ? "\247e\247l+" : banDiff <= 3 ? "\2476\247l+" : "\247c\247l+") + banDiff + time, j, l, 553648127);
+                }
             }
         }
     }

@@ -6,6 +6,7 @@ import exhibition.event.EventListener;
 import exhibition.event.EventSystem;
 import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventPacket;
+import exhibition.event.impl.EventTick;
 import exhibition.gui.altmanager.FileManager;
 import exhibition.gui.click.ClickGui;
 import exhibition.gui.console.SourceConsoleGUI;
@@ -32,9 +33,13 @@ import exhibition.util.Timer;
 import exhibition.util.misc.ChatUtil;
 import exhibition.util.security.*;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityArmorStand;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C00PacketKeepAlive;
 import net.minecraft.network.play.client.C03PacketPlayer;
@@ -437,7 +442,7 @@ public class Client extends Castable implements EventListener {
 
     public double spawnY = 86;
 
-    @RegisterEvent(events = {EventPacket.class})
+    @RegisterEvent(events = {EventPacket.class, EventTick.class})
     public void onEvent(Event event) {
         if (event instanceof EventPacket) {
             EventPacket eventPacket = event.cast();
@@ -445,7 +450,6 @@ public class Client extends Castable implements EventListener {
             if (eventPacket.isIncoming() && !(packet instanceof C00PacketKeepAlive)) {
                 packetTimer.reset();
             }
-
             if (packet instanceof S08PacketPlayerPosLook) {
                 S08PacketPlayerPosLook spawnPosition = (S08PacketPlayerPosLook) packet;
 
@@ -463,7 +467,7 @@ public class Client extends Castable implements EventListener {
             }
 
             if (Minecraft.getMinecraft().thePlayer != null && Minecraft.getMinecraft().theWorld != null) {
-                if (packet instanceof C03PacketPlayer && HypixelUtil.isVerifiedHypixel() && hypixelApiKey == null && Minecraft.getMinecraft().thePlayer.ticksExisted > 2) {
+                if (packet instanceof C03PacketPlayer && HypixelUtil.isVerifiedHypixel() && hypixelApiKey == null && Minecraft.getMinecraft().thePlayer.ticksExisted > 10) {
                     ChatUtil.sendChat("/api new");
                     hypixelApiKey = "";
                     return;
@@ -475,6 +479,30 @@ public class Client extends Castable implements EventListener {
                         hypixelApiKey = unformatted.split("Your new API key is ")[1].trim();
                         event.setCancelled(true);
                         DevNotifications.getManager().post("Key " + hypixelApiKey);
+                    }
+                }
+            }
+        }
+        if (event instanceof EventTick) {
+            if (HypixelUtil.isInGame("PIT")) {
+                Minecraft mc = Minecraft.getMinecraft();
+                for (Entity entity : mc.theWorld.getLoadedEntityList()) {
+                    if (entity instanceof EntityPlayer && !(entity instanceof EntityPlayerSP)) {
+                        EntityPlayer player = (EntityPlayer)entity;
+                        if (player.isRiding()) {
+                            if (player.ridingEntity instanceof EntityArmorStand) {
+                                EntityArmorStand armorStand = (EntityArmorStand) player.ridingEntity;
+                                if ((player.posX == player.lastTickPosX && player.posY == player.lastTickPosY && player.posZ == player.lastTickPosZ) ||
+                                        (armorStand.posX == armorStand.lastTickPosX && armorStand.posY == armorStand.lastTickPosY && armorStand.posZ == armorStand.lastTickPosZ)) {
+                                    player.flags++;
+                                    if(player.flags > 10) {
+                                        player.ridingEntity = null;
+                                    }
+                                } else {
+                                    player.flags--;
+                                }
+                            }
+                        }
                     }
                 }
             }

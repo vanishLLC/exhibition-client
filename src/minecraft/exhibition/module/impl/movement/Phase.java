@@ -60,15 +60,16 @@ public class Phase extends Module {
         if (mc.thePlayer == null || mc.theWorld == null) {
             return;
         }
+        if (event instanceof EventMotionUpdate) {
+            if (toggle.getValue() && !isInsideBlock() && mc.thePlayer.getDistance(enablePos.xCoord, enablePos.yCoord, enablePos.zCoord) > 5) {
+                toggle();
+                return;
+            }
+        }
         String currentPhase = ((Options) settings.get(PM).getValue()).getSelected();
         this.setSuffix(currentPhase);
         if (currentPhase.equalsIgnoreCase("Hypixel") && mc.getIntegratedServer() == null) {
             if (event instanceof EventMotionUpdate) {
-                if (toggle.getValue() && !isInsideBlock() && mc.thePlayer.getDistance(enablePos.xCoord, enablePos.yCoord, enablePos.zCoord) > 5) {
-                    toggle();
-                    return;
-                }
-
                 double multiplier = 0.162905382 + (0.00000000000094385093485943 * Math.random());
                 double mx = Math.cos(Math.toRadians(mc.thePlayer.rotationYaw + 90.0F));
                 double mz = Math.sin(Math.toRadians(mc.thePlayer.rotationYaw + 90.0F));
