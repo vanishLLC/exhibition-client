@@ -747,8 +747,6 @@ public class Killaura extends Module {
                                     if (bypass.option.getSelected().equals("Dong") && bypass.bruh > 15) {
                                         bypass.bruh -= 2;
                                     }
-
-                                    ChatUtil.printChat("Spoof");
                                     em.setGround(true);
                                 }
                             }
