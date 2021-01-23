@@ -9,6 +9,7 @@ import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventRenderGui;
 import exhibition.event.impl.EventTick;
 import exhibition.management.ColorManager;
+import exhibition.management.GlobalValues;
 import exhibition.management.animate.Opacity;
 import exhibition.management.font.DynamicTTFFont;
 import exhibition.module.Module;
@@ -243,8 +244,10 @@ public class HUD extends Module {
             String s = stringBuilder.toString();
 
             mc.fontRendererObj.drawString(s, (int) (e.getResolution().getScaledWidth_double() / 2 - mc.fontRendererObj.getStringWidth(s) / 2), 30, -1);
+        }
 
-            Bypass bypass = Client.getModuleManager().getCast(Bypass.class);
+        Bypass bypass = Client.getModuleManager().getCast(Bypass.class);
+        if (bypass.option.getSelected().equals("Dong") && GlobalValues.allowDebug.getValue()) {
             int current = (bypass.bruh - 10);
             int max = (40 + bypass.randomDelay);
 
@@ -661,7 +664,7 @@ public class HUD extends Module {
     private String getServerProtocol() {
         String serverProtocol = "1.8.x";
 
-        if(mc.getNetHandler() != null && mc.getNetHandler().getNetworkManager() != null) {
+        if (mc.getNetHandler() != null && mc.getNetHandler().getNetworkManager() != null) {
             ChannelHandler viaDecoder = mc.getNetHandler().getNetworkManager().channel.pipeline().get(CommonTransformer.HANDLER_DECODER_NAME);
             if (viaDecoder instanceof VRDecodeHandler) {
                 ProtocolInfo protocol = ((VRDecodeHandler) viaDecoder).getInfo().getProtocolInfo();
