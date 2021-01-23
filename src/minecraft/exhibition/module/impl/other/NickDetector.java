@@ -8,6 +8,7 @@ import exhibition.management.UUIDResolver;
 import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
+import exhibition.module.data.settings.Setting;
 import exhibition.util.Timer;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.network.NetworkPlayerInfo;
@@ -24,23 +25,26 @@ import java.util.UUID;
 
 public class NickDetector extends Module {
 
+    private final Setting<Boolean> disconnect = new Setting<>("DISCONNECT", false, "Notifies you if a nicked player disconnects. \247e(May help identify Staff)");
+
     public NickDetector(ModuleData data) {
         super(data);
+        addSetting(disconnect);
     }
 
     private Timer timer = new Timer();
 
     @RegisterEvent(events = {EventTick.class, EventPacket.class})
     public void onEvent(Event event) {
-        if (event instanceof EventPacket) {
+        if (event instanceof EventPacket && disconnect.getValue()) {
             EventPacket ep = event.cast();
             Packet packet = ep.getPacket();
             if (packet instanceof S38PacketPlayerListItem) {
                 S38PacketPlayerListItem packetPlayerListItem = (S38PacketPlayerListItem) packet;
                 for (S38PacketPlayerListItem.AddPlayerData addPlayerData : packetPlayerListItem.getPlayerList()) {
                     if (packetPlayerListItem.getAction() == S38PacketPlayerListItem.Action.REMOVE_PLAYER) {
-                        if(UUIDResolver.instance.isInvalidName(addPlayerData.getProfile().getName())) {
-                            Notifications.getManager().post("Nick Detector", addPlayerData.getProfile().getName() + " has left your game.", Notifications.Type.INFO);
+                        if (UUIDResolver.instance.isInvalidUUID(addPlayerData.getProfile().getId())) {
+                            Notifications.getManager().post("Nick Detector", mc.getNetHandler().getPlayerInfo(addPlayerData.getProfile().getId()).getGameProfile().getName() + " has left your game.", Notifications.Type.INFO);
                         }
                     }
                 }
@@ -70,7 +74,7 @@ public class NickDetector extends Module {
                 if (UUIDResolver.instance.isInvalidName(name)) {
                     continue;
                 }
-                if (UUIDResolver.instance.checkedUsernames.contains(name)) {
+                if (UUIDResolver.instance.checkedUsernames.containsKey(name)) {
                     continue;
                 }
                 usernameList.put(name, playerInfo.getGameProfile().getId());

@@ -151,6 +151,7 @@ public class Killaura extends Module {
         addSetting(maxTargets);
         addSetting(antiLag);
         addSetting(pitSpawn);
+        addSetting(antiCritFunky);
         addSetting(new Setting<>("ATTACK-MODE", attackMode, "Customizes the Killaura attack mode."));
     }
 
