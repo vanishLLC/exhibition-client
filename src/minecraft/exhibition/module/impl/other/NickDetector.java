@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+import static net.minecraft.client.gui.GuiPlayerTabOverlay.playerInfoMap;
+
 public class NickDetector extends Module {
 
     private final Setting<Boolean> disconnect = new Setting<>("DISCONNECT", false, "Notifies you if a nicked player disconnects. \247e(May help identify Staff)");
@@ -62,10 +64,7 @@ public class NickDetector extends Module {
         HashMap<String, UUID> usernameList = new HashMap<>();
 
         final NetHandlerPlayClient netHandler = mc.thePlayer.sendQueue;
-        List<NetworkPlayerInfo> list = new ArrayList<>();
-        for (NetworkPlayerInfo networkPlayerInfo : netHandler.getPlayerInfoMap()) {
-            list.add(networkPlayerInfo);
-        }
+        List<NetworkPlayerInfo> list = playerInfoMap.sortedCopy(netHandler.getPlayerInfoMap());
         for (NetworkPlayerInfo playerInfo : list) {
             if (playerInfo.getGameProfile() != null && !playerInfo.getGameProfile().equals(mc.thePlayer.getGameProfile())) {
                 IChatComponent e = new ChatComponentText(ScorePlayerTeam.formatPlayerName(playerInfo.getPlayerTeam(), playerInfo.getGameProfile().getName()));
