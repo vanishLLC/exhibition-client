@@ -744,10 +744,10 @@ public class Killaura extends Module {
                                 boolean canAttackRightNow = attack.equals("Always") || (attack.equals("Precise") ? target.waitTicks <= 0 : target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
 
                                 if (isAttacking && canAttackRightNow) {
-                                    if (bypass.option.getSelected().equals("Dong") && bypass.bruh > 15) {
-                                        bypass.bruh -= 2;
+                                    if (bypass.option.getSelected().equals("Dong") && bypass.bruh > 15 && (bypass.bruh - 10) <= 38 + bypass.randomDelay) {
+                                        bypass.bruh -= 1;
+                                        em.setGround(true);
                                     }
-                                    em.setGround(true);
                                 }
                             }
 
@@ -962,6 +962,9 @@ public class Killaura extends Module {
     }
 
     private boolean isCritFunky(EntityLivingBase target) {
+        if(!HypixelUtil.isInGame("PIT"))
+            return false;
+
         if (target instanceof EntityPlayer) {
             if (target.getEquipmentInSlot(2) != null) {
                 for (String pitEnchant : HypixelUtil.getPitEnchants(target.getEquipmentInSlot(2))) {

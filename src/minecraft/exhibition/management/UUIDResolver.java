@@ -65,8 +65,24 @@ public class UUIDResolver {
             }
         }
 
-        responseMap.entrySet().removeIf(map -> (map.getValue() + 600_000) < System.currentTimeMillis());
-        hypixelResponseMap.entrySet().removeIf(map -> (map.getValue() + 60_000) < System.currentTimeMillis());
+        try {
+            Iterator<Map.Entry<String, Long>> responses = responseMap.entrySet().iterator();
+            while (responses.hasNext()) {
+                Map.Entry<String, Long> map = responses.next();
+                if (map.getValue() + 600_000 < System.currentTimeMillis()) {
+                    responses.remove();
+                }
+            }
+            Iterator<Map.Entry<String, Long>> hypixelRespones = hypixelResponseMap.entrySet().iterator();
+            while (hypixelRespones.hasNext()) {
+                Map.Entry<String, Long> map = hypixelRespones.next();
+                if (map.getValue() + 60_000 < System.currentTimeMillis()) {
+                    hypixelRespones.remove();
+                }
+            }
+        } catch (Exception e) {
+
+        }
 
         if (responseMap.size() < 600) {
             if (isRateLimited && responseMap.size() < 550) {
