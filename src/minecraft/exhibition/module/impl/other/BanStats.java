@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class BanStats extends Module {
 
-    private final BanStatsThread banStatsThread = new BanStatsThread(this);
+    private BanStatsThread banStatsThread;
 
     public long banDifference;
     public long bansLastMinute;
@@ -40,6 +40,7 @@ public class BanStats extends Module {
 
     @Override
     public void onEnable() {
+        banStatsThread = new BanStatsThread(this);
     }
 
     @Override
