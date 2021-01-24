@@ -235,7 +235,7 @@ public class Bypass extends Module {
                                     lastSentUid = packet.getUid();
                                     if (debug)
                                         DevNotifications.getManager().post("\247eSent from \247c" + (lastbruh - 1) + "\247e to \247a" + lastSentUid + " " + mc.thePlayer.ticksExisted);
-                                    randomDelay = random.nextInt(5);
+                                    randomDelay = random.nextInt(10);
                                     bruh = 10;
                                 } else {
 
@@ -299,7 +299,7 @@ public class Bypass extends Module {
                     if (packet.getUid() < 0 && HypixelUtil.isVerifiedHypixel()) {
                         if (bruh == -2) {
                             if (debug)
-                                ChatUtil.debug("\247aSent last bruh \247e" + mc.thePlayer.ticksExisted);
+                                DevNotifications.getManager().post("\247aSent last bruh \247e" + mc.thePlayer.ticksExisted);
                             sendPackets();
                             bruh = -3;
                         }
@@ -307,18 +307,22 @@ public class Bypass extends Module {
                         if (bruh >= 0) {
                             if (bruh == 0) {
                                 if (debug)
-                                    ChatUtil.debug("\247aSent last bruh \247e" + mc.thePlayer.ticksExisted);
+                                    DevNotifications.getManager().post("\247aSent last bruh \247e" + mc.thePlayer.ticksExisted);
                                 sendPackets();
                             }
                             event.setCancelled(true);
                             chokePackets.add(packet);
                             if (debug)
-                                ChatUtil.debug("\247eChoking \247c" + packet.getUid() + " \247e" + mc.thePlayer.ticksExisted);
+                                DevNotifications.getManager().post("\247eChoking \247c" + packet.getUid() + " \247e" + mc.thePlayer.ticksExisted);
                             if (bruh == 0 || !c13Timer.delay(5)) { // You get sent them in an instant
                                 bruh++;
                             }
                         } else {
                             event.setCancelled(true);
+                            if(c13Timer.delay(1000)) {
+                                Notifications.getManager().post("Bypass Error", "Possible WD/Staff Alert. Please rejoin or finish your match quickly.", 7500, Notifications.Type.WARNING);
+                                c13Timer.reset();
+                            }
                             if (debug)
                                 ChatUtil.debug("\2476Canceled \247c" + packet.getUid() + " \2476" + mc.thePlayer.ticksExisted);
                         }

@@ -177,7 +177,7 @@ public class ChestStealer extends Module {
                             if (stack != null) {
                                 this.slotList.add(i);
                                 canMissAgain = random.nextBoolean();
-                            } else if (randomMiss.getValue() && canMissAgain && Math.random() > 0.95) {
+                            } else if (!pitMode.getValue() && randomMiss.getValue() && canMissAgain && Math.random() > 0.95) {
                                 canMissAgain = false;
                                 this.slotList.add(i);
                             }

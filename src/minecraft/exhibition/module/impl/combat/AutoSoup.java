@@ -71,7 +71,7 @@ public class AutoSoup extends Module {
                 boolean shouldEat = soupSlot != -1 && mc.thePlayer.inventoryContainer.getSlot(soupSlot).getHasStack() && mc.thePlayer.inventoryContainer.getSlot(soupSlot).getStack().getItem() == Items.cooked_beef;
 
                 boolean shouldResistance = soupSlot != -1 && mc.thePlayer.inventoryContainer.getSlot(soupSlot).getHasStack() && mc.thePlayer.inventoryContainer.getSlot(soupSlot).getStack().getItem() == Items.mutton
-                        && mc.thePlayer.getMaxHealth() == 20 ? mc.thePlayer.getHealth()/2F <= resHealth.getValue().floatValue() : (mc.thePlayer.getHealth() / mc.thePlayer.getMaxHealth()) <= resHealth.getValue().floatValue() / 10F;
+                        && mc.thePlayer.getMaxHealth() == 20 ? mc.thePlayer.getHealth() / 2F <= resHealth.getValue().floatValue() : (mc.thePlayer.getHealth() / mc.thePlayer.getMaxHealth()) <= resHealth.getValue().floatValue() / 10F;
 
                 boolean shouldHeal = (mc.thePlayer.getMaxHealth() == 20 ? mc.thePlayer.getHealth() <= minHealth : (mc.thePlayer.getHealth() / mc.thePlayer.getMaxHealth()) <= minHealth / 20F) ||
                         (shouldEat && mc.thePlayer.getFoodStats().needFood()) || shouldResistance;
@@ -180,7 +180,7 @@ public class AutoSoup extends Module {
         boolean needsRegenOrAbsorption = (!mc.thePlayer.isPotionActive(Potion.regeneration) || (mc.thePlayer.getAbsorptionAmount() <= 0) ||
                 (mc.thePlayer.isPotionActive(Potion.regeneration) && mc.thePlayer.getActivePotionEffect(Potion.regeneration).getDuration() < 5));
 
-        boolean shouldResistance = mc.thePlayer.getMaxHealth() == 20 ? mc.thePlayer.getHealth()/2F <= resHealth.getValue().floatValue() : (mc.thePlayer.getHealth() / mc.thePlayer.getMaxHealth()) <= resHealth.getValue().floatValue() / 10F;
+        boolean shouldResistance = mc.thePlayer.getMaxHealth() == 20 ? mc.thePlayer.getHealth() / 2F <= resHealth.getValue().floatValue() : (mc.thePlayer.getHealth() / mc.thePlayer.getMaxHealth()) <= resHealth.getValue().floatValue() / 10F;
 
         for (int i = 9; i < 45; i++) {
             if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
@@ -210,9 +210,11 @@ public class AutoSoup extends Module {
                             continue;
                         }
                         if (priority < 2 && item == Items.bread) {
-                            slot = i;
-                            priority = 2;
-                            continue;
+                            if (!mc.thePlayer.isPotionActive(Potion.regeneration) || (mc.thePlayer.isPotionActive(Potion.regeneration) && mc.thePlayer.getActivePotionEffect(Potion.regeneration).getAmplifier() < 2)) {
+                                slot = i;
+                                priority = 2;
+                                continue;
+                            }
                         }
                         if (priority < 2 && needsRegenOrAbsorption) {
                             slot = i;

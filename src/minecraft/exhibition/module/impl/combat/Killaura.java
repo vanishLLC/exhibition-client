@@ -537,7 +537,7 @@ public class Killaura extends Module {
 
                             int bypassTicks = bypass.bruh - 10;
 
-                            boolean allowInvalidAngles = bypass.allowBypassing() && (!bypass.option.getSelected().equals("Dong") || bypassTicks > 3 && bypassTicks < (37 + bypass.randomDelay)) && HypixelUtil.isVerifiedHypixel();
+                            boolean allowInvalidAngles = bypass.allowBypassing() && (!bypass.option.getSelected().equals("Dong") || bypassTicks > 4 && bypassTicks <= (35 + bypass.randomDelay)) && HypixelUtil.isVerifiedHypixel();
 
                             if (shouldReduce) {
                                 float pitch = (float) -(Math.atan2(yDiff - (distance > 2.1 ? 0.75 : 1), dist) * 180.0D / 3.141592653589793D);
@@ -645,7 +645,9 @@ public class Killaura extends Module {
 
                             boolean setupCrits = critModule.isOldCrits() || target.hurtTime <= 1 || (target.waitTicks <= 1);
 
-                            if (!antiCritFunky.getValue() || !isCritFunky(target))
+                            boolean badCrits = allowInvalidAngles && antiCritFunky.getValue() && shouldntCrit(target);
+
+                            if (!badCrits) {
                                 if (crits) {
                                     if (critModule.isNewCrits()) {
                                         if (mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically && isNextTickGround()) {
@@ -732,16 +734,18 @@ public class Killaura extends Module {
                                 } else {
                                     setupTick = 0;
                                 }
+                            } else {
+                                isCritSetup = true;
+                            }
 
-                            if (antiCritFunky.getValue() && isCritFunky(target) && HypixelUtil.isVerifiedHypixel() && !em.isOnground() && !mc.thePlayer.onGround && allowInvalidAngles) {
+                            if (antiCritFunky.getValue() && isCritFunky(target) && !em.isOnground() && !mc.thePlayer.onGround && allowInvalidAngles) {
                                 boolean isAttacking = mc.thePlayer.getDistanceToEntity(target) <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && delay.roundDelay(50 * nextRandom);
                                 boolean canAttackRightNow = attack.equals("Always") || (attack.equals("Precise") ? target.waitTicks <= 0 : target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
 
                                 if (isAttacking && canAttackRightNow) {
-                                    if (bypass.option.getSelected().equals("Dong") && bypass.bruh > 15 && (bypass.bruh - 10) <= 38 + bypass.randomDelay) {
-                                        bypass.bruh -= 1;
-                                        em.setGround(true);
-                                    }
+                                    isCritSetup = true;
+                                    bypass.bruh -= 1;
+                                    em.setGround(true);
                                 }
                             }
 
@@ -955,9 +959,27 @@ public class Killaura extends Module {
         }
     }
 
-    private boolean isCritFunky(EntityLivingBase target) {
-        if(!HypixelUtil.isInGame("PIT"))
+    private boolean shouldntCrit(EntityLivingBase target) {
+        if (!HypixelUtil.isInGame("PIT")) {
             return false;
+        }
+
+        if (target instanceof EntityPlayer) {
+            if (target.getEquipmentInSlot(2) != null) {
+                for (String pitEnchant : HypixelUtil.getPitEnchants(target.getEquipmentInSlot(2))) {
+                    if ((pitEnchant.contains("Crit") && pitEnchant.contains("Funk")) || pitEnchant.contains("Retro")) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean isCritFunky(EntityLivingBase target) {
+        if (!HypixelUtil.isInGame("PIT")) {
+            return false;
+        }
 
         if (target instanceof EntityPlayer) {
             if (target.getEquipmentInSlot(2) != null) {

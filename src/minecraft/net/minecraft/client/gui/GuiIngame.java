@@ -637,6 +637,9 @@ public class GuiIngame extends Gui {
                     int l = k1 - k * this.getFontRenderer().FONT_HEIGHT;
                     int i1 = p_180475_2_.getScaledWidth() - b0 + 2;
                     drawRect(j - 2, l, i1, l + this.getFontRenderer().FONT_HEIGHT, 1342177280);
+
+                    if ((Client.instance.hypixelApiKey == null || Client.instance.hypixelApiKey.equals("")))
+                        this.getFontRenderer().drawString("\247cType /api new", j, l, 553648127);
                 }
                 {
                     long lastMinuteBans = banStats.bansLastMinute;
@@ -656,7 +659,7 @@ public class GuiIngame extends Gui {
 
                     String time = "";
                     long roundedTime = (long) MathUtils.getIncremental(banStats.banTimer.getDifference(), 50);
-                    if (banStats.banTimer.getDifference() > 60_000) {
+                    if (banStats.banTimer.getDifference() > 60_000 && banDiff == 0) {
                         time = " \247a(" + StringUtils.ticksToElapsedTime((int) roundedTime / 50) + ")";
                     }
 

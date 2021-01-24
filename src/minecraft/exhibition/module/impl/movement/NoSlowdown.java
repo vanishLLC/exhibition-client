@@ -9,6 +9,7 @@ import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.combat.AutoSoup;
+import exhibition.module.impl.combat.Bypass;
 import exhibition.module.impl.combat.Killaura;
 import exhibition.util.MathUtils;
 import exhibition.util.NetUtil;
@@ -48,7 +49,9 @@ public class NoSlowdown extends Module {
             }
             EventMotionUpdate em = (EventMotionUpdate) event;
             Killaura killaura = ((Killaura) Client.getModuleManager().get(Killaura.class));
-            if (shouldUnblock) {
+            Bypass bypass = Client.getModuleManager().getCast(Bypass.class);
+            boolean allowVanilla = bypass.allowBypassing() && (!bypass.option.getSelected().equals("Dong") || (bypass.bruh == 0 || bypass.bruh >= 10));
+            if (shouldUnblock && allowVanilla) {
                 if (em.isPre() && (mc.thePlayer.isBlocking() && killaura.isBlocking)) {
                     if (mc.thePlayer.isCollidedVertically && mc.thePlayer.onGround) {
                         killaura.isBlocking = false;
