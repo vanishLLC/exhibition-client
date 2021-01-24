@@ -166,7 +166,7 @@ public class Bypass extends Module {
                 }
             }
 
-            boolean debug = false;
+            boolean debug = true;
 
             if (option.getSelected().equals("Dong") && !option.getSelected().equals("Gast and Tasteful Skidding be like #NOVOONTOP")) {
                 if (mc.thePlayer != null) {
@@ -181,7 +181,7 @@ public class Bypass extends Module {
                                 NetUtil.sendPacketNoEvents(packet);
                             }
                         }
-                        if(debug && sent > 0)
+                        if (debug && sent > 0)
                             ChatUtil.debug("\2479Fly Test sent " + sent);
                         c13Timer.reset();
                     }
@@ -212,10 +212,23 @@ public class Bypass extends Module {
 
                             boolean canSend = mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically;
 
-                            if ((bruh - 10) >= (45 + randomDelay) && canSend) {
+                            if ((bruh - 10) >= (40 + randomDelay) && canSend) {
                                 short lastbruh = (short) lastSentUid;
                                 chokePackets.add(packet);
-                                sendPackets();
+
+                                int sent = 0;
+                                int size = chokePackets.size();
+                                while (chokePackets.peek() != null && sent < size - 4) {
+                                    Packet chokedPacket = chokePackets.poll();
+                                    if (chokedPacket != null) {
+                                        sent++;
+                                        NetUtil.sendPacketNoEvents(chokedPacket);
+                                    }
+                                }
+
+                                if (sent > 0 && debug) {
+                                    DevNotifications.getManager().post("\247b\247lSent " + sent + " out of " + size);
+                                }
 
                                 lastSentUid = packet.getUid();
                                 if (debug)
@@ -242,47 +255,58 @@ public class Bypass extends Module {
                     }
                 }
             } else {
-                if (c13Timer.delay(150) && bruh > 0) {
+                if (c13Timer.delay(75) && bruh > 0) {
                     if (debug)
                         ChatUtil.debug("\247bBypass is ready.");
                     bruh = -1;
+
+                    if (debug)
+                        ChatUtil.debug("\247eSending burst");
+
+                    int sent = 0;
+                    int max = chokePackets.size();
+                    while (chokePackets.peek() != null && sent < max - 1) {
+                        Packet chokedPacket = chokePackets.poll();
+                        if (chokedPacket != null) {
+                            sent++;
+                            NetUtil.sendPacketNoEvents(chokedPacket);
+                        }
+                    }
+
+                    if (debug && sent > 0) {
+                        ChatUtil.debug("\247b\247lSent " + sent);
+                    }
                 }
 
                 if (p instanceof C0FPacketConfirmTransaction) {
                     C0FPacketConfirmTransaction packet = (C0FPacketConfirmTransaction) p;
                     if (packet.getUid() < 0 && HypixelUtil.isVerifiedHypixel()) {
-
-                        if (c13Timer.delay(1000) && bruh == -1) {
-                            if (debug)
-                                ChatUtil.debug("\247eSending burst");
-                            sendPackets();
-                            bruh = 0;
-                        }
-
-                        if (bruh < 20) {
+                        if (bruh >= 0 && bruh < 2) {
                             if (bruh == 0)
                                 sendPackets();
-                            if (bruh != 0) {
-                                event.setCancelled(true);
-                                chokePackets.add(packet);
-                            }
+                            event.setCancelled(true);
+                            chokePackets.add(packet);
                             if (debug)
                                 ChatUtil.debug("\247eChoking \247c" + packet.getUid() + " \247e" + mc.thePlayer.ticksExisted);
-                            if (!c13Timer.delay(50) || bruh == 0)
+                            if (bruh == 0) {
                                 bruh++;
+                            }
                             c13Timer.reset();
-                        }
-
-                        if (!event.isCancelled()) {
+                        } else {
                             if (debug)
-                                ChatUtil.debug("\247dSent " + packet.getUid());
+                                ChatUtil.debug("\2476Received \247c" + packet.getUid() + " \247e" + mc.thePlayer.ticksExisted);
                         }
-
                     }
                 }
             }
 
             if (p instanceof C00PacketKeepAlive) {
+                if (option.getSelected().equals("Dong") && allowBypassing()) {
+                    chokePackets.add(p);
+                    event.setCancelled(true);
+                    return;
+                }
+
                 if (DELAY.getValue().longValue() != 0) {
                     packetList.add(new BruhPacket(p, DELAY.getValue().longValue()));
                     event.setCancelled(true);

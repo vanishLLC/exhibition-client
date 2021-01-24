@@ -537,7 +537,7 @@ public class Killaura extends Module {
 
                             int bypassTicks = bypass.bruh - 10;
 
-                            boolean allowInvalidAngles = bypass.allowBypassing() && (!bypass.option.getSelected().equals("Dong") || bypassTicks > 3 && bypassTicks < (38 + bypass.randomDelay)) && HypixelUtil.isVerifiedHypixel();
+                            boolean allowInvalidAngles = bypass.allowBypassing() && (!bypass.option.getSelected().equals("Dong") || bypassTicks > 3 && bypassTicks < (37 + bypass.randomDelay)) && HypixelUtil.isVerifiedHypixel();
 
                             if (shouldReduce) {
                                 float pitch = (float) -(Math.atan2(yDiff - (distance > 2.1 ? 0.75 : 1), dist) * 180.0D / 3.141592653589793D);
@@ -613,7 +613,7 @@ public class Killaura extends Module {
                                 }
                             } else {
                                 // Allow reduced to still have your heads backwards
-                                if (reduce.getValue() && bypass.allowBypassing() && HypixelUtil.isVerifiedHypixel()) {
+                                if (reduce.getValue() && allowInvalidAngles) {
                                     float pitch = (float) -(Math.atan2(yDiff, dist) * 180.0D / 3.141592653589793D);
                                     em.setPitch(MathHelper.clamp_float(pitch / 1.1F, -90, 90));
 
@@ -834,37 +834,23 @@ public class Killaura extends Module {
                         }
 
                         if (canAttackRightNow && shouldAttack) {
-                            if (!Client.instance.is1_9orGreater())
+                            if (!Client.instance.is1_9orGreater()) {
                                 if (!(boolean) noswing.getValue()) {
                                     mc.thePlayer.swingItem();
                                 } else {
                                     mc.thePlayer.swingItemFake();
                                 }
-                            //ChatUtil.printChat("Attacked " + target.hurtTime + " " + target.waitTicks);
-
-//                            if(isCriticalAttack) {
-//                                ChatUtil.printChat("\2476+Crit " + mc.thePlayer.ticksExisted + " " + mc.thePlayer.fallDistance + " " + isCritSetup + " " + target.waitTicks);
-//                            } else {
-//                                ChatUtil.printChat("\247a+Normal " + mc.thePlayer.ticksExisted + " " + mc.thePlayer.fallDistance + " " + isCritSetup + " " + target.waitTicks);
-//                            }
-
-//                            if (mc.thePlayer.isSprinting() && lessKB.getValue())
-//                                NetUtil.sendPacketNoEvents(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.STOP_SPRINTING));
+                            }
 
                             NetUtil.sendPacketNoEvents(new C02PacketUseEntity(target, C02PacketUseEntity.Action.ATTACK));
 
-//                            if (mc.thePlayer.isSprinting() && lessKB.getValue())
-//                                NetUtil.sendPacketNoEvents(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.START_SPRINTING));
-
-                            if (Client.instance.is1_9orGreater())
+                            if (Client.instance.is1_9orGreater()) {
                                 if (!(boolean) noswing.getValue()) {
                                     mc.thePlayer.swingItem();
                                 } else {
                                     mc.thePlayer.swingItemFake();
                                 }
-
-
-                            //ChatUtil.printChat(-(mc.thePlayer.posY - mc.thePlayer.lastTickPosY) + "");
+                            }
 
                             if (target.waitTicks <= 0) {
                                 boolean b = Angle.INSTANCE.check(new Location(mc.thePlayer.posX, em.getY(), mc.thePlayer.posZ, em.getYaw(), 0), target);
@@ -976,10 +962,10 @@ public class Killaura extends Module {
     }
 
     private boolean isCritFunky(EntityLivingBase target) {
-        if(target instanceof EntityPlayer) {
-            if(target.getEquipmentInSlot(2) != null) {
+        if (target instanceof EntityPlayer) {
+            if (target.getEquipmentInSlot(2) != null) {
                 for (String pitEnchant : HypixelUtil.getPitEnchants(target.getEquipmentInSlot(2))) {
-                    if(pitEnchant.contains("Crit") && pitEnchant.contains("Funk")) {
+                    if (pitEnchant.contains("Crit") && pitEnchant.contains("Funk")) {
                         return true;
                     }
                 }

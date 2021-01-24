@@ -62,7 +62,10 @@ public class NickDetector extends Module {
         HashMap<String, UUID> usernameList = new HashMap<>();
 
         final NetHandlerPlayClient netHandler = mc.thePlayer.sendQueue;
-        List<NetworkPlayerInfo> list = new ArrayList<>(netHandler.getPlayerInfoMap());
+        List<NetworkPlayerInfo> list = new ArrayList<>();
+        for (NetworkPlayerInfo networkPlayerInfo : netHandler.getPlayerInfoMap()) {
+            list.add(networkPlayerInfo);
+        }
         for (NetworkPlayerInfo playerInfo : list) {
             if (playerInfo.getGameProfile() != null && !playerInfo.getGameProfile().equals(mc.thePlayer.getGameProfile())) {
                 IChatComponent e = new ChatComponentText(ScorePlayerTeam.formatPlayerName(playerInfo.getPlayerTeam(), playerInfo.getGameProfile().getName()));

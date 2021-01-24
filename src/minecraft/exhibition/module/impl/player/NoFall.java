@@ -11,6 +11,7 @@ import exhibition.module.impl.combat.Bypass;
 import exhibition.util.HypixelUtil;
 import exhibition.util.NetUtil;
 import exhibition.util.PlayerUtil;
+import exhibition.util.misc.ChatUtil;
 import net.minecraft.block.BlockAir;
 import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.util.BlockPos;
@@ -46,17 +47,13 @@ public class NoFall extends Module {
             if (dist > mc.thePlayer.fallDistance) dist = 0;
 
             if (mc.thePlayer.motionY < 0 && mc.thePlayer.fallDistance > 2.124) {
-                if(!HypixelUtil.isVerifiedHypixel()) {
-                    em.setGround(true);
-                }
-
                 double fallY = mc.thePlayer.motionY;
                 double fallen = mc.thePlayer.fallDistance - dist;
                 double predictedFallen = fallen + -((fallY - 0.08D) * 0.9800000190734863D);
                 if (predictedFallen >= 3.0) {
                     Bypass bypass = Client.getModuleManager().getCast(Bypass.class);
-                    boolean allowVanilla = bypass.option.getSelected().equals("Dong") && (bypass.bruh == 0 || bypass.bruh >= 10);
-                    if (vanilla.getValue() && allowVanilla) {
+                    boolean allowVanilla = bypass.allowBypassing() && (!bypass.option.getSelected().equals("Dong") || (bypass.bruh == 0 || bypass.bruh >= 10));
+                    if (vanilla.getValue() && allowVanilla && HypixelUtil.isVerifiedHypixel()) {
                         if (em.isPre()) {
                             if(bypass.bruh >= 22) {
                                 bypass.bruh -= 2;
@@ -65,7 +62,7 @@ public class NoFall extends Module {
                             dist = mc.thePlayer.fallDistance;
                         }
                     } else {
-                        if (em.isPost()) {
+                        if (em.isPre()) {
                             NetUtil.sendPacketNoEvents(new C03PacketPlayer(true));
                             dist = mc.thePlayer.fallDistance;
                         }

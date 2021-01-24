@@ -12,6 +12,7 @@ import exhibition.gui.altmanager.*;
 import exhibition.gui.generators.handlers.altening.AlteningGenHandler;
 import exhibition.gui.generators.handlers.altening.stupidaltserviceshit.AltService;
 import exhibition.management.notifications.usernotification.Notifications;
+import exhibition.module.impl.other.BanStats;
 import exhibition.module.impl.other.StreamerMode;
 import exhibition.util.IPUtil;
 import exhibition.util.security.SilentSnitch;
@@ -294,6 +295,14 @@ public class GuiDisconnected extends GuiScreen {
             String timeDiff = "Account lasted " + getTimeLength(timeDifference);
             fontRendererObj.drawStringWithShadow(timeDiff, width / 2D - fontRendererObj.getStringWidth(timeDiff) / 2D, 12, -1);
         }
+
+        BanStats banStats = Client.getModuleManager().getCast(BanStats.class);
+
+        if(banStats.isEnabled()) {
+            String s = "Bans since connect: " + banStats.bansSinceConnect;
+            fontRendererObj.drawStringWithShadow(s, width / 2D - fontRendererObj.getStringWidth(s) / 2D, 22, -1);
+        }
+
 
         super.drawScreen(mouseX, mouseY, partialTicks);
     }

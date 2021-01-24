@@ -8,8 +8,12 @@ import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
+import exhibition.module.impl.combat.AntiBot;
 import exhibition.module.impl.combat.AntiVelocity;
+import exhibition.module.impl.combat.Bypass;
 import exhibition.module.impl.combat.Killaura;
+import exhibition.module.impl.hud.HUD;
+import exhibition.module.impl.movement.BorderHop;
 import exhibition.module.impl.movement.Fly;
 import exhibition.module.impl.movement.LongJump;
 import exhibition.module.impl.movement.Speed;
@@ -61,7 +65,7 @@ public class AutoOOF extends Module {
                 }
                 if (watchdogTimer.delay(1000) && unformatted.contains("Thanks for reporting it!")) {
                     Notifications.getManager().post("Staff Ban Detected", "Disabled some modules and /oof'd", 5000, Notifications.Type.WARNING);
-                    boolean canSpawn = HypixelUtil.scoreboardContains("Status: Idling") || HypixelUtil.scoreboardContains("Status: Bountied") ;
+                    boolean canSpawn = HypixelUtil.scoreboardContains("Status: Idling") || HypixelUtil.scoreboardContains("Status: Bountied");
 
                     if (!canSpawn && !panicOnly.getValue())
                         ChatUtil.sendChat("/oof");
@@ -70,11 +74,10 @@ public class AutoOOF extends Module {
                         ChatUtil.sendChat("/spawn");
                     }
 
-                    Module[] modules = new Module[]{Client.getModuleManager().get(Killaura.class), Client.getModuleManager().get(AntiVelocity.class),
-                            Client.getModuleManager().get(Speed.class), Client.getModuleManager().get(Fly.class), Client.getModuleManager().get(LongJump.class)};
-                    for (Module module : modules) {
-                        if (module.isEnabled()) {
-                            module.toggle();
+                    Class<? extends Module>[] classes = new Class[]{Killaura.class, AntiVelocity.class, Speed.class, Fly.class, LongJump.class, BedFucker.class, BorderHop.class};
+                    for (Class<? extends Module> module : classes) {
+                        if (Client.getModuleManager().isEnabled(module)) {
+                            Client.getModuleManager().get(module).toggle();
                         }
                     }
                 }

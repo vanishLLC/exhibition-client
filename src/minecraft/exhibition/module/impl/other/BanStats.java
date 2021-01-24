@@ -24,6 +24,8 @@ public class BanStats extends Module {
 
     public long banDifference;
     public long bansLastMinute;
+    public long bansSinceConnect;
+
 
     public final Timer banTimer = new Timer();
 
@@ -110,16 +112,26 @@ public class BanStats extends Module {
                         long staff_total = jsonObject.get("staff_total").getAsLong();
 
                         if (success) {
+                            if(staffTotalBans != 0 && banStats.bansSinceConnect == 0 && banStats.banTimer.getDifference() >= 120_000) {
+                                staffTotalBans = 0;
+                                banStats.banTimer.reset();
+                            }
+
                             long diff = staff_total - staffTotalBans;
                             if (staffTotalBans != 0)
                                 banStats.banDifference = diff;
                             if (staffTotalBans != 0 && diff != 0) {
                                 banStats.banTimer.reset();
                                 banStats.banDifferenceMap.put(System.currentTimeMillis() + 300_000, diff);
+                                banStats.bansSinceConnect += diff;
                             }
 
                             if (diff >= 4 && banStats.alertBans.getValue()) {
-                                Notifications.getManager().post("Staff Activity", "Staff seem to be banning a lot.", 2000, Notifications.Type.NOTIFY);
+                                Notifications.getManager().post("Staff Activity", "Staff seem to be banning a lot.", 3000, Notifications.Type.WARNING);
+                            }
+
+                            if (diff > 0 && banStats.alertBans.getValue() && banStats.banTimer.getDifference() >= 120_000) {
+                                Notifications.getManager().post("Staff Activity", "Staff are no longer inactive.", 3000, Notifications.Type.WARNING);
                             }
 
                             staffTotalBans = staff_total;

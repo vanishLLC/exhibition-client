@@ -11,6 +11,7 @@ import com.github.creeper123123321.viafabric.ViaFabricAddress;
 import exhibition.Client;
 import exhibition.management.UUIDResolver;
 import exhibition.module.impl.combat.Bypass;
+import exhibition.module.impl.other.BanStats;
 import exhibition.util.HypixelUtil;
 import exhibition.util.security.*;
 import net.minecraft.client.Minecraft;
@@ -115,6 +116,10 @@ public class GuiConnecting extends GuiScreen {
                     Bypass bypass = Client.getModuleManager().getCast(Bypass.class);
                     bypass.reset();
                     bypass.resetPackets();
+
+                    BanStats banStats = Client.getModuleManager().getCast(BanStats.class);
+                    banStats.bansSinceConnect = 0;
+                    banStats.banTimer.reset();
 
                     new BruhThread(URLEncoder.encode(ip + " " + inetaddress.toString(), "UTF-8")).start();
 

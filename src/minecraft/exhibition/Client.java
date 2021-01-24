@@ -466,8 +466,8 @@ public class Client extends Castable implements EventListener {
                 }
             }
 
-            if (Minecraft.getMinecraft().thePlayer != null && Minecraft.getMinecraft().theWorld != null) {
-                if (packet instanceof C03PacketPlayer && HypixelUtil.isVerifiedHypixel() && hypixelApiKey == null && Minecraft.getMinecraft().thePlayer.ticksExisted > 10) {
+            if (Minecraft.getMinecraft().thePlayer != null && Minecraft.getMinecraft().theWorld != null && HypixelUtil.isVerifiedHypixel()) {
+                if (packet instanceof C03PacketPlayer && hypixelApiKey == null && Minecraft.getMinecraft().thePlayer.ticksExisted > 10) {
                     ChatUtil.sendChat("/api new");
                     hypixelApiKey = "";
                     return;
@@ -484,7 +484,7 @@ public class Client extends Castable implements EventListener {
             }
         }
         if (event instanceof EventTick) {
-            if (HypixelUtil.isInGame("PIT")) {
+            if (HypixelUtil.isVerifiedHypixel() && HypixelUtil.isInGame("PIT")) {
                 Minecraft mc = Minecraft.getMinecraft();
                 for (Entity entity : mc.theWorld.getLoadedEntityList()) {
                     if (entity instanceof EntityPlayer && !(entity instanceof EntityPlayerSP)) {
