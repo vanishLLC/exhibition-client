@@ -126,11 +126,11 @@ public class BanStats extends Module {
                                 banStats.bansSinceConnect += diff;
                             }
 
-                            if (diff >= 4 && banStats.alertBans.getValue()) {
+                            if (staffTotalBans != 0 && diff >= 4 && banStats.alertBans.getValue()) {
                                 Notifications.getManager().post("Staff Activity", "Staff seem to be banning a lot.", 3000, Notifications.Type.WARNING);
                             }
 
-                            if (diff > 0 && banStats.alertBans.getValue() && banStats.banTimer.getDifference() >= 120_000) {
+                            if (staffTotalBans != 0 && diff > 0 && banStats.alertBans.getValue() && banStats.banTimer.getDifference() >= 120_000) {
                                 Notifications.getManager().post("Staff Activity", "Staff are no longer inactive.", 3000, Notifications.Type.WARNING);
                             }
 
