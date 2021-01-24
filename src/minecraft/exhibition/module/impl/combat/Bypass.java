@@ -328,12 +328,6 @@ public class Bypass extends Module {
             }
 
             if (p instanceof C00PacketKeepAlive) {
-                if (option.getSelected().equals("Dong") && allowBypassing() && bruh > 5) {
-                    chokePackets.add(p);
-                    event.setCancelled(true);
-                    return;
-                }
-
                 if (DELAY.getValue().longValue() != 0) {
                     packetList.add(new BruhPacket(p, DELAY.getValue().longValue()));
                     event.setCancelled(true);

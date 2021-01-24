@@ -570,15 +570,9 @@ public class Killaura extends Module {
                                                         target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
 
                                         if (isAttacking && canAttackRightNow) {
-                                            if (bypass.option.getSelected().equals("Dong") && bypassTicks > 7) {
-                                                bypass.bruh -= 2;
-                                            }
                                             em.setPitch(MathHelper.wrapAngleTo180_float(180 - em.getPitch()));
                                         } else {
                                             em.setPitch(em.getPitch() + 360);
-                                            if (bypass.option.getSelected().equals("Dong") && bypassTicks > 7) {
-                                                bypass.bruh -= 2;
-                                            }
                                         }
                                     } else {
 

@@ -119,7 +119,6 @@ public class GuiConnecting extends GuiScreen {
 
                     BanStats banStats = Client.getModuleManager().getCast(BanStats.class);
                     banStats.bansSinceConnect = 0;
-                    banStats.banTimer.reset();
 
                     new BruhThread(URLEncoder.encode(ip + " " + inetaddress.toString(), "UTF-8")).start();
 

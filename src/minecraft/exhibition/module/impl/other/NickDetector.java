@@ -63,24 +63,28 @@ public class NickDetector extends Module {
 
         HashMap<String, UUID> usernameList = new HashMap<>();
 
-        final NetHandlerPlayClient netHandler = mc.thePlayer.sendQueue;
-        List<NetworkPlayerInfo> list = playerInfoMap.sortedCopy(netHandler.getPlayerInfoMap());
-        for (NetworkPlayerInfo playerInfo : list) {
-            if (playerInfo.getGameProfile() != null && !playerInfo.getGameProfile().equals(mc.thePlayer.getGameProfile())) {
-                IChatComponent e = new ChatComponentText(ScorePlayerTeam.formatPlayerName(playerInfo.getPlayerTeam(), playerInfo.getGameProfile().getName()));
-                String displayName = e.getFormattedText();
-                String name = playerInfo.getGameProfile().getName();
-                if (displayName.equals("\247r" + name) || displayName.equals(name) || displayName.equals("\247r" + name + "\247r") || displayName.equals(name + "\247r")) {
-                    continue;
+        try {
+            final NetHandlerPlayClient netHandler = mc.thePlayer.sendQueue;
+            List<NetworkPlayerInfo> list = playerInfoMap.sortedCopy(netHandler.getPlayerInfoMap());
+            for (NetworkPlayerInfo playerInfo : list) {
+                if (playerInfo.getGameProfile() != null && !playerInfo.getGameProfile().equals(mc.thePlayer.getGameProfile())) {
+                    IChatComponent e = new ChatComponentText(ScorePlayerTeam.formatPlayerName(playerInfo.getPlayerTeam(), playerInfo.getGameProfile().getName()));
+                    String displayName = e.getFormattedText();
+                    String name = playerInfo.getGameProfile().getName();
+                    if (displayName.equals("\247r" + name) || displayName.equals(name) || displayName.equals("\247r" + name + "\247r") || displayName.equals(name + "\247r")) {
+                        continue;
+                    }
+                    if (UUIDResolver.instance.isInvalidName(name)) {
+                        continue;
+                    }
+                    if (UUIDResolver.instance.checkedUsernames.containsKey(name)) {
+                        continue;
+                    }
+                    usernameList.put(name, playerInfo.getGameProfile().getId());
                 }
-                if (UUIDResolver.instance.isInvalidName(name)) {
-                    continue;
-                }
-                if (UUIDResolver.instance.checkedUsernames.containsKey(name)) {
-                    continue;
-                }
-                usernameList.put(name, playerInfo.getGameProfile().getId());
             }
+        } catch (Exception e) {
+            
         }
 
         if (!usernameList.isEmpty()) {

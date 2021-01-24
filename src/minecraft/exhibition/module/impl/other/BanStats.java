@@ -112,7 +112,7 @@ public class BanStats extends Module {
                         long staff_total = jsonObject.get("staff_total").getAsLong();
 
                         if (success) {
-                            if(staffTotalBans != 0 && banStats.bansSinceConnect == 0 && banStats.banTimer.getDifference() >= 120_000) {
+                            if(staffTotalBans != 0 && banStats.bansSinceConnect == 0 && banStats.banTimer.getDifference() >= 40_000) {
                                 staffTotalBans = 0;
                                 banStats.banTimer.reset();
                             }
