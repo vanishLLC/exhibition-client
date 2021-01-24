@@ -114,16 +114,17 @@ public class Scaffold extends Module {
     }
 
     public void onDisable() {
-        if (mc.thePlayer.isSwingInProgress) {
-            mc.thePlayer.swingProgress = 0;
-            mc.thePlayer.swingProgressInt = 0;
-            mc.thePlayer.isSwingInProgress = false;
+        if (!(mc.thePlayer == null)){
+            if (mc.thePlayer.isSwingInProgress) {
+                mc.thePlayer.swingProgress = 0;
+                mc.thePlayer.swingProgressInt = 0;
+                mc.thePlayer.isSwingInProgress = false;
+            }
+            NetUtil.sendPacket(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.STOP_SNEAKING));
         }
-        NetUtil.sendPacket(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.STOP_SNEAKING));
-
-        if (fastTower.getValue()) {
-            mc.timer.timerSpeed = 1F;
-        }
+            if (fastTower.getValue()) {
+                mc.timer.timerSpeed = 1F;
+            }
     }
 
 
