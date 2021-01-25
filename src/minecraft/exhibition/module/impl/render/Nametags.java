@@ -15,6 +15,7 @@ import exhibition.module.data.ModuleData;
 import exhibition.module.data.Options;
 import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.combat.AntiBot;
+import exhibition.module.impl.combat.Killaura;
 import exhibition.util.HypixelUtil;
 import exhibition.util.MathUtils;
 import exhibition.util.RenderingUtil;
@@ -117,7 +118,7 @@ public class Nametags extends Module {
             for (EntityPlayer ent : entList) {
                 int dist = (int) mc.thePlayer.getDistanceToEntity(ent);
 
-                boolean prioritized = PriorityManager.isPriority(ent);
+                boolean prioritized = PriorityManager.isPriority(ent) || ent == (((Killaura)Client.getModuleManager().get(Killaura.class)).vip);
 
                 boolean isPriority = prioritized || TargetESP.isPriority(ent) || FriendManager.isFriend(ent.getName());
 

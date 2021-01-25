@@ -1343,9 +1343,9 @@ public class Killaura extends Module {
                             priorityOnly = true;
                             targets.add(entity);
                         }
-                        if (!priorityOnly)
-                            targets.add(entity);
                     }
+                    if (!priorityOnly)
+                        targets.add(entity);
                 }
             }
         }
