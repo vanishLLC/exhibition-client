@@ -462,7 +462,7 @@ public class Client extends Castable implements EventListener {
                 double yOffset = MathUtils.roundToPlace((y - (int) y), 10);
 
                 if (distance < 20 && yOffset == 0.6) {
-                    spawnY = y - 15;
+                    spawnY = y - 4;
                 }
             }
 

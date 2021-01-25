@@ -14,6 +14,7 @@ import exhibition.module.data.ModuleData;
 import exhibition.module.data.MultiBool;
 import exhibition.module.data.settings.Setting;
 import exhibition.util.HypixelUtil;
+import exhibition.util.NetUtil;
 import exhibition.util.Timer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Items;
@@ -79,11 +80,11 @@ public class AutoSoup extends Module {
                 Killaura killaura = Client.getModuleManager().getCast(Killaura.class);
 
                 if (lastItem != -1 && isHealing) {
-                    mc.thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer(em.isOnground()));
-                    mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange((lastItem + 1) % 9));
-                    mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(lastItem));
-                    mc.thePlayer.sendQueue.addToSendQueue(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
-                    mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem));
+                    NetUtil.sendPacketNoEvents(new C03PacketPlayer(em.isOnground()));
+                    NetUtil.sendPacketNoEvents(new C09PacketHeldItemChange((lastItem + 1) % 9));
+                    NetUtil.sendPacketNoEvents(new C09PacketHeldItemChange(lastItem));
+                    NetUtil.sendPacketNoEvents(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
+                    NetUtil.sendPacketNoEvents(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem));
                     if (killaura.isEnabled() && killaura.isBlocking && Killaura.getTarget() != null) {
                         killaura.isBlocking = false;
                     }
@@ -106,18 +107,18 @@ public class AutoSoup extends Module {
                         lastItem = swapTo;
                         lastCurrentItem = mc.thePlayer.inventory.currentItem;
                         if ((killaura.isEnabled() && killaura.isBlocking) || mc.thePlayer.isBlocking()) {
-                            mc.thePlayer.sendQueue.addToSendQueue(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
+                            NetUtil.sendPacketNoEvents(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
                         }
 
-                        mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(lastItem));
-                        mc.thePlayer.sendQueue.addToSendQueue(new C08PacketPlayerBlockPlacement(stack));
-                        mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange((lastItem + 1) % 9));
-                        mc.thePlayer.sendQueue.addToSendQueue(new C09PacketHeldItemChange(lastItem));
+                        NetUtil.sendPacketNoEvents(new C09PacketHeldItemChange(lastItem));
+                        NetUtil.sendPacketNoEvents(new C08PacketPlayerBlockPlacement(stack));
+                        NetUtil.sendPacketNoEvents(new C09PacketHeldItemChange((lastItem + 1) % 9));
+                        NetUtil.sendPacketNoEvents(new C09PacketHeldItemChange(lastItem));
                     } else {
                         int currentItem = mc.thePlayer.inventory.currentItem;
-                        mc.getNetHandler().addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem = swapTo));
-                        mc.getNetHandler().addToSendQueue(new C08PacketPlayerBlockPlacement(mc.thePlayer.inventory.getCurrentItem()));
-                        mc.getNetHandler().addToSendQueue(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem = currentItem));
+                        NetUtil.sendPacketNoEvents(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem = swapTo));
+                        NetUtil.sendPacketNoEvents(new C08PacketPlayerBlockPlacement(mc.thePlayer.inventory.getCurrentItem()));
+                        NetUtil.sendPacketNoEvents(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem = currentItem));
                     }
                     isHealing = true;
                     timer.reset();
