@@ -63,7 +63,8 @@ public class Criticals extends Module {
 
     private boolean spoof() {
         Bypass bypass = Client.getModuleManager().getCast(Bypass.class);
-        boolean allowInvalidCrits = bypass.allowBypassing() && (!bypass.option.getSelected().equals("Dong") || bypass.bruh > 10) && HypixelUtil.isVerifiedHypixel();
+        int bypassTicks = bypass.bruh - 10;
+        boolean allowInvalidCrits = bypass.allowBypassing() && (!bypass.option.getSelected().equals("Dong") || bypassTicks > 5 && bypassTicks <= (40 + bypass.randomDelay)) && HypixelUtil.isVerifiedHypixel();
         return allowInvalidCrits && !silentCrits && ((Options) settings.get(PACKET).getValue()).getSelected().startsWith("Packet") &&
                 (HypixelUtil.isInGame("HYPIXEL PIT") || (!bypass.option.getSelected().equals("Dong") && HypixelUtil.isInGame("DUEL")));
     }

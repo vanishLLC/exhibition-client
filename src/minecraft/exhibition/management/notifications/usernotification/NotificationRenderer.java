@@ -32,14 +32,13 @@ public class NotificationRenderer implements INotificationRenderer {
         ScaledResolution scaledRes = new ScaledResolution(mc);
         float y = (float) (scaledRes.getScaledHeight()) - (notifications.size() * (24) + (mc.currentScreen instanceof GuiChat ? 14 : 0));
         int count = 0;
-        if((GlobalValues.centerNotifs.getValue() && (mc.currentScreen == null || mc.currentScreen instanceof GuiChat))) {
-            y = scaledRes.getScaledHeight()/2F + 50;
+        if ((GlobalValues.centerNotifs.getValue() && (mc.currentScreen == null || mc.currentScreen instanceof GuiChat))) {
+            y = scaledRes.getScaledHeight() / 2F + 50;
         }
 
         boolean isTargetHudActive = false;
-        if(Client.instance != null && Client.getModuleManager().isEnabled(TargetHUD.class)) {
-            Killaura killaura = (Killaura) Client.getModuleManager().get(Killaura.class);
-            if (killaura.isEnabled() && killaura.getCurrentTarget() != null) {
+        if (Client.instance != null && Client.getModuleManager().isEnabled(TargetHUD.class)) {
+            if (Killaura.getTarget() != null) {
                 isTargetHudActive = true;
             }
         }
@@ -49,30 +48,26 @@ public class NotificationRenderer implements INotificationRenderer {
 
             String headerString = not.getHeader();
 
-            if(headerString.contains("{s}")) {
-                long timeLeft = (not.getDisplayTime() + not.getStart()) - not.checkTime();
-                if(timeLeft < 0)
-                    timeLeft = 0;
+            if (headerString.contains("{s}")) {
+                long timeLeft = Math.max((not.getDisplayTime() + not.getStart()) - not.checkTime(), 0);
 
-                headerString = headerString.replace("{s}", String.valueOf(MathUtils.roundToPlace((timeLeft/1000D), 1)));
+                headerString = headerString.replace("{s}", String.valueOf(MathUtils.roundToPlace((timeLeft / 1000D), 1)));
             }
 
             String footerString = not.getSubtext();
 
-            if(footerString.contains("{s}")) {
-                long timeLeft = (not.getDisplayTime() + not.getStart()) - not.checkTime();
-                if(timeLeft < 0)
-                    timeLeft = 0;
+            if (footerString.contains("{s}")) {
+                long timeLeft = Math.max((not.getDisplayTime() + not.getStart()) - not.checkTime(), 0);
 
-                footerString = footerString.replace("{s}", String.valueOf(MathUtils.roundToPlace((timeLeft/1000D), 1)));
+                footerString = footerString.replace("{s}", String.valueOf(MathUtils.roundToPlace((timeLeft / 1000D), 1)));
             }
 
             float subHeaderWidth = (Client.subHeader.getWidth(not.getSubtext()));
             float headerWidth = (Client.header.getWidth(headerString));
             double tarX = not.getTarX() >= scaledRes.getScaledWidth() ? not.getTarX() : scaledRes.getScaledWidth() - 23 - (Math.max(headerWidth, subHeaderWidth));
 
-            if((GlobalValues.centerNotifs.getValue() && (mc.currentScreen == null || mc.currentScreen instanceof GuiChat))) {
-                tarX = not.getTarX() >= scaledRes.getScaledWidth() ? not.getTarX() : (scaledRes.getScaledWidth()/2D + (-23 - (Math.max(headerWidth, subHeaderWidth)))/(isTargetHudActive && count < 2 ? 1 : 2D));
+            if ((GlobalValues.centerNotifs.getValue() && (mc.currentScreen == null || mc.currentScreen instanceof GuiChat))) {
+                tarX = not.getTarX() >= scaledRes.getScaledWidth() ? not.getTarX() : (scaledRes.getScaledWidth() / 2D + (-23 - (Math.max(headerWidth, subHeaderWidth))) / (isTargetHudActive && count < 2 ? 1 : 2D));
                 tarX = MathUtils.getIncremental(tarX, 0.5);
             }
 
@@ -83,7 +78,7 @@ public class NotificationRenderer implements INotificationRenderer {
             GL11.glPushMatrix();
             Depth.pre();
             Depth.mask();
-            RenderingUtil.rectangle(not.translate.getX(), not.translate.getY(), not.translate.getX() + Math.max(headerWidth, subHeaderWidth) + 23, not.translate.getY() + (23),-1);
+            RenderingUtil.rectangle(not.translate.getX(), not.translate.getY(), not.translate.getX() + Math.max(headerWidth, subHeaderWidth) + 23, not.translate.getY() + (23), -1);
             Depth.render();
 
             RenderingUtil.rectangle(not.translate.getX(), not.translate.getY(), not.translate.getX() + Math.max(headerWidth, subHeaderWidth) + 23, not.translate.getY() + (23), Colors.getColor(0, 200));
@@ -124,15 +119,15 @@ public class NotificationRenderer implements INotificationRenderer {
             Client.header.drawStringWithShadow(headerString, (x + 20), (not.translate.getY() + 1), -1);
             Client.subHeader.drawStringWithShadow(footerString, x + 20, not.translate.getY() + 12, -1);
 
-            double percent = ((float)(System.currentTimeMillis() - not.getStart())/(float)not.getDisplayTime());
-            if(percent > 1)
+            double percent = ((float) (System.currentTimeMillis() - not.getStart()) / (float) not.getDisplayTime());
+            if (percent > 1)
                 percent = 1;
-            if(percent < 0)
+            if (percent < 0)
                 percent = 0;
             double width = (x + Math.max(headerWidth, subHeaderWidth) + 23 - (x - 1)) * percent;
 
             RenderingUtil.rectangle(x - 1, not.translate.getY() + (21.5), x + Math.max(headerWidth, subHeaderWidth) + 23, not.translate.getY() + (23), Colors.getColorOpacity(getColor(not.getType()), 45));
-            RenderingUtil.drawGradientSideways(x - 3 + width, not.translate.getY() + (21.5), x + width + 2, not.translate.getY() + (23), Colors.getColor(0,0), getColor(not.getType()));
+            RenderingUtil.drawGradientSideways(x - 3 + width, not.translate.getY() + (21.5), x + width + 2, not.translate.getY() + (23), Colors.getColor(0, 0), getColor(not.getType()));
             RenderingUtil.rectangle(x + 2 + width, not.translate.getY() + (21.5), x + Math.max(headerWidth, subHeaderWidth) + 23, not.translate.getY() + (23), getColor(not.getType()));
 
             Depth.post();

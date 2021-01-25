@@ -29,7 +29,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C00PacketKeepAlive;
-import net.minecraft.network.play.client.C02PacketUseEntity;
 import net.minecraft.network.play.client.C0DPacketCloseWindow;
 import net.minecraft.network.play.client.C0FPacketConfirmTransaction;
 import net.minecraft.network.play.server.S2DPacketOpenWindow;
@@ -46,7 +45,7 @@ public class Bypass extends Module {
 
     public Setting<Number> DELAY = new Setting<>("DELAY", 300, "Spoof offset. This should be 500 - (your ping).", 5, 0, 1000);
     public Setting<Boolean> AUTOBYPASS = new Setting<>("AUTOBYPASS", false, "Automatically detects optimal delay value.");
-    public Options option = new Options("Mode", "Dong", "Dong", "Watchdog Off");
+    public Options option = new Options("Mode", "Watchdog Off", "Experimental", "Watchdog Off");
 
     private long startMS = -1;
     private int state = 0;
@@ -62,7 +61,7 @@ public class Bypass extends Module {
         super(data);
         addSetting(DELAY);
         addSetting(AUTOBYPASS);
-        addSetting(new Setting<>("MODE", option, "Which bypass method should be used."));
+        addSetting(new Setting<>("MODE", option, "Which bypass method should be used. (Experimental may WD ban)"));
     }
 
     @Override
@@ -171,42 +170,37 @@ public class Bypass extends Module {
             boolean debug = true;
 
             if (option.getSelected().equals("Dong") && !option.getSelected().equals("Gast and Tasteful Skidding be like #NOVOONTOP")) {
-                if (mc.thePlayer != null) {
-                    boolean canSend = (!isFlying && mc.thePlayer.onGround) || (longJump.isEnabled() ? (longJump.bruhTick % 6 == 3) : mc.thePlayer.ticksExisted % 7 != 0);
-                    if (c13Timer.delay(3_000) && canSend) {
+                if (mc.thePlayer == null) {
+                    resetPackets();
+                } else {
+                    boolean canSend = (longJump.isEnabled() ? (longJump.bruhTick % 7 == 3 || longJump.bruhTick % 7 == 4) : mc.thePlayer.ticksExisted % 7 != 0);
+                    if (canSend && isFlying && c13Timer.delay(2500) && bruh > 20) {
+                        c13Timer.reset();
                         int sent = 0;
                         while (chokePackets.peek() != null && sent < 1) {
-                            Packet packet = chokePackets.poll();
-                            if (packet instanceof C0FPacketConfirmTransaction)
+                            Packet chokedPacket = chokePackets.poll();
+                            if (chokedPacket != null) {
                                 sent++;
-                            if (packet != null) {
-                                NetUtil.sendPacketNoEvents(packet);
+                                NetUtil.sendPacketNoEvents(chokedPacket);
                             }
                         }
-                        if (debug && sent > 0)
-                            ChatUtil.debug("\2479Fly Test sent " + sent);
-                        c13Timer.reset();
+                        ChatUtil.debug("\247e\247lRELIEF " + bruh);
                     }
-                } else {
-                    resetPackets();
                 }
 
                 if (p instanceof C0FPacketConfirmTransaction) {
                     C0FPacketConfirmTransaction packet = (C0FPacketConfirmTransaction) p;
                     if (packet.getUid() < 0) {
-                        if(HypixelUtil.isVerifiedHypixel() && allowBypassing()) {
+                        if (HypixelUtil.isVerifiedHypixel() && allowBypassing()) {
                             this.bruh++;
 
                             if (bruh > 5) {
                                 event.setCancelled(true);
-                                if (isFlying && bruh > 15)
-                                    bruh--;
-
                                 if (Math.abs(packet.getUid() - lastUid) > 5 && packet.getUid() != -1) {
                                     chokePackets.add(packet);
                                     sendPackets();
                                     if (debug)
-                                        DevNotifications.getManager().post("\247bRESET BRUH TO " + packet.getUid() + " " + lastUid);
+                                        ChatUtil.debug("\247bRESET BRUH TO " + packet.getUid() + " " + lastUid);
                                     bruh = 0;
                                     lastUid = packet.getUid();
                                     return;
@@ -214,13 +208,16 @@ public class Bypass extends Module {
 
                                 boolean canSend = mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically;
 
-                                if ((bruh - 10) >= (40 + randomDelay) && canSend) {
-                                    short lastbruh = (short) lastSentUid;
-                                    chokePackets.add(packet);
+                                if (isFlying && (bruh - 10) >= (45 + randomDelay)) {
+                                    bruh -= 7;
+                                }
 
+                                if ((bruh - 10) >= (45 + randomDelay) && (!isFlying || canSend)) {
+                                    short lastbruh = (short) lastSentUid;
                                     int sent = 0;
                                     int size = chokePackets.size();
-                                    while (chokePackets.peek() != null && sent < size - 4) {
+                                    chokePackets.add(packet);
+                                    while (chokePackets.peek() != null) {
                                         Packet chokedPacket = chokePackets.poll();
                                         if (chokedPacket != null) {
                                             sent++;
@@ -229,22 +226,20 @@ public class Bypass extends Module {
                                     }
 
                                     if (sent > 0 && debug) {
-                                        DevNotifications.getManager().post("\247b\247lSent " + sent + " out of " + size);
+                                        ChatUtil.debug("\247b\247lSent " + sent + " out of " + size);
                                     }
 
                                     lastSentUid = packet.getUid();
                                     if (debug)
-                                        DevNotifications.getManager().post("\247eSent from \247c" + (lastbruh - 1) + "\247e to \247a" + lastSentUid + " " + mc.thePlayer.ticksExisted);
-                                    randomDelay = random.nextInt(10);
+                                        DevNotifications.getManager().post("\247eSent from \247c" + (lastbruh) + "\247e to \247a" + (lastSentUid + 1) + " " + mc.thePlayer.ticksExisted);
+                                    randomDelay = random.nextInt(30);
                                     bruh = 10;
                                 } else {
-
                                     chokePackets.add(packet);
                                 }
 
-                                if (!isFlying) {
+                                if (!isFlying)
                                     c13Timer.reset();
-                                }
 
                             } else {
                                 event.setCancelled(true);
@@ -254,12 +249,15 @@ public class Bypass extends Module {
                                 int transactions = 0;
 
                                 for (Packet chokePacket : chokePackets) {
-                                    if(chokePacket instanceof C0FPacketConfirmTransaction)
+                                    if (chokePacket instanceof C0FPacketConfirmTransaction)
                                         transactions++;
                                 }
 
                                 if (debug)
                                     DevNotifications.getManager().post("\247eNormal " + confirmTransaction.getUid() + " " + transactions);
+
+                                c13Timer.reset();
+
                                 lastSentUid = packet.getUid();
                             }
                             lastUid = packet.getUid();
@@ -319,7 +317,7 @@ public class Bypass extends Module {
                             }
                         } else {
                             event.setCancelled(true);
-                            if(c13Timer.delay(1000)) {
+                            if (c13Timer.delay(1000)) {
                                 Notifications.getManager().post("Bypass Error", "Possible WD/Staff Alert. Please rejoin or finish your match quickly.", 7500, Notifications.Type.WARNING);
                                 c13Timer.reset();
                             }
@@ -332,6 +330,12 @@ public class Bypass extends Module {
             }
 
             if (p instanceof C00PacketKeepAlive) {
+//                if(option.getSelected().equals("Dong") && isFlying) {
+//                    event.setCancelled(true);
+//                    chokePackets.add(p);
+//                    return;
+//                }
+
                 if (DELAY.getValue().longValue() != 0) {
                     packetList.add(new BruhPacket(p, DELAY.getValue().longValue()));
                     event.setCancelled(true);

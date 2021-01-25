@@ -51,6 +51,7 @@ public class BanStats extends Module {
     @RegisterEvent(events = {EventTick.class})
     public void onEvent(Event event) {
         if (!banStatsThread.isRunning) {
+            banTimer.reset();
             banStatsThread.start();
         }
 

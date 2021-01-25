@@ -353,7 +353,6 @@ public class Nametags extends Module {
                                     }
                                     if(!temp.toString().equals("")) {
                                         render.add((strongEnchant ? "\247c\247l" : "\247e\247l") + temp + getColor(level) + "\247l" + level);
-
                                     }
                                 }
                             }

@@ -11,12 +11,14 @@ import exhibition.event.EventSystem;
 import exhibition.event.RegisterEvent;
 import exhibition.event.impl.*;
 import exhibition.management.ColorManager;
+import exhibition.management.GlobalValues;
 import exhibition.management.command.impl.Damage;
 import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.combat.AutoPot;
+import exhibition.module.impl.combat.Bypass;
 import exhibition.module.impl.player.Scaffold;
 import exhibition.util.*;
 import exhibition.util.misc.ChatUtil;
@@ -174,6 +176,13 @@ public class LongJump extends Module {
         if (AutoPot.haltTicks > 0) {
             toggle();
             Notifications.getManager().post("LongJump Disabled", "Blocked due to jump pot.", 1000, Notifications.Type.NOTIFY);
+            return;
+        }
+
+        Bypass bypass = Client.getModuleManager().getCast(Bypass.class);
+        if (bypass.option.getSelected().equals("Dong") && (bypass.bruh != 0 && bypass.bruh < 15)) {
+            toggle();
+            Notifications.getManager().post("LongJump Disabled", "Dong mode moment. Re-toggle LongJump.", 1000, Notifications.Type.NOTIFY);
             return;
         }
 
@@ -568,6 +577,11 @@ public class LongJump extends Module {
                                 }
 
                                 if ((boolean) settings.get(C13PACKET).getValue() && bruhTick > 0 && (bruhTick % (20 * 6) == 0)) {
+                                    Bypass bypass = Client.getModuleManager().getCast(Bypass.class);
+                                    if (bypass.option.getSelected().equals("Dong") && GlobalValues.allowDebug.getValue()) {
+                                        int current = (bypass.bruh - 10);
+                                        ChatUtil.printChat("AEEA " + current);
+                                    }
                                     sendC13Packet();
                                     distanceTraveled = 0;
                                 }
@@ -575,18 +589,22 @@ public class LongJump extends Module {
                         }
 
                         em.setY((float) (em.getY() + (double) bruh));
-                        em.setGround(bruhTick % 6 == 0 && HypixelUtil.isVerifiedHypixel());
+                        em.setGround(false);
                     }
 
                     if (isHypixel && em.getY() % 0.015625 == 0 && delay == 6 & mc.thePlayer.onGround) {
                         em.setForcePos(true);
-                        em.setY(em.getY() + 0.0009004D);
+                        em.setY(em.getY() + 0.00625101F);
                         em.setGround(false);
                     }
 
                     if (isHypixel && mc.thePlayer.motionY > 0.23) {
                         em.setGround(true);
                         em.setY(em.getY() + 0.07840000152587834);
+                    }
+
+                    if (delay < 3) {
+                        em.setGround(bruhTick % 7 == 0 && HypixelUtil.isVerifiedHypixel());
                     }
                 } else {
                     if (bowTicks == 19) {

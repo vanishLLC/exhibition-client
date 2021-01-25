@@ -249,9 +249,9 @@ public class HUD extends Module {
         Bypass bypass = Client.getModuleManager().getCast(Bypass.class);
         if (bypass.option.getSelected().equals("Dong") && GlobalValues.allowDebug.getValue()) {
             int current = (bypass.bruh - 10);
-            int max = (40 + bypass.randomDelay);
+            int max = (45 + bypass.randomDelay);
 
-            String bruh = bypass.bruh == 0 ? "Dong Waits..." : current < 0 ? "Dong Inactive" : (current + "/" + max);
+            String bruh = bypass.bruh == 0 ? "Watchdog Inactive" : current < 0 ? "Waiting" : current + "/" + max;
             mc.fontRendererObj.drawString(bruh, (int) (e.getResolution().getScaledWidth_double() / 2 - mc.fontRendererObj.getStringWidth(bruh) / 2), 20, -1);
         }
 

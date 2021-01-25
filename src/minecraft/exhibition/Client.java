@@ -468,6 +468,7 @@ public class Client extends Castable implements EventListener {
 
             if (Minecraft.getMinecraft().thePlayer != null && Minecraft.getMinecraft().theWorld != null && HypixelUtil.isVerifiedHypixel()) {
                 if (packet instanceof C03PacketPlayer && hypixelApiKey == null && Minecraft.getMinecraft().thePlayer.ticksExisted > 10) {
+                    DevNotifications.getManager().post("Grabbing key");
                     ChatUtil.sendChat("/api new");
                     hypixelApiKey = "";
                     return;

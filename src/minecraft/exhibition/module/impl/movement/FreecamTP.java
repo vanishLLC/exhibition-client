@@ -97,7 +97,7 @@ public class FreecamTP extends Module {
                 mc.thePlayer.setPositionAndUpdate(mc.thePlayer.posX, mc.thePlayer.posY + 0.42F, mc.thePlayer.posZ);
             } else {
                 stage = 0;
-                ticks = 120;
+                ticks = 107;
             }
         }
     }

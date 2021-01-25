@@ -29,7 +29,7 @@ public class TeamUtils {
         String nameFormated = player.getDisplayName().getFormattedText();
         if (pitMode && HypixelUtil.scoreboardContains("SQUADS")) {
             if (nameFormated.contains("[")) {
-                nameFormated = nameFormated.split("\\[")[1];
+                nameFormated = "§" + nameFormated.split("\\[§(.).*§[0-9a-z]")[1];
             }
         } else if(pitMode && !HypixelUtil.scoreboardContains("PIZZA")) {
             if (nameFormated.contains("] ")) {

@@ -254,11 +254,11 @@ public class Fly extends Module {
                     bruh = 0.000024F + (float) (min + (max - min) * Math.random()); // 0.00079
                 }
                 if (tickPassed == 2) {
-                    bruh = 0.000014F + (float) (min + (max - min) * Math.random()); // -0.00031
+                    bruh = 0.000013F + (float) (min + (max - min) * Math.random()); // -0.00031
                 }
                 if (tickPassed == 3) {
                     up = true;
-                    bruh = 0.000024F + (float) (min + (max - min) * Math.random()); // -0.00069
+                    bruh = 0.000023F + (float) (min + (max - min) * Math.random()); // -0.00069
                 }
                 if (tickPassed == 4) {
                     bruh = 0.000017F + (float) (min + (max - min) * Math.random()); // 0.0012
