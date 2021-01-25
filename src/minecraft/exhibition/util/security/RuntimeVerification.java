@@ -60,6 +60,8 @@ public class RuntimeVerification {
         Object var3 = null;
         Method method = null;
         List<String> list = null;
+        boolean noAgent = true;
+        boolean noClassPath = true;
         try {
             var2 = Class.forName("java.lang.management.ManagementFactory");
             var3 = var2.getDeclaredMethod("getRuntimeMXBean").invoke((Object) null);
@@ -106,8 +108,7 @@ public class RuntimeVerification {
                     List<String> arguments = new ArrayList<>();
                     if (lastVersionId != null && javaArgObject != null) {
                         String javaArgs = javaArgObject.getAsString().trim();
-                        boolean noAgent = true;
-                        boolean noClassPath = true;
+
                         boolean classNameEquals = Arrays.equals(lastVersionId.getAsString().getBytes(), ("Exhibition").getBytes());
                         if (classNameEquals) {
                             for (String s : javaArgs.split(" ")) {
@@ -191,7 +192,7 @@ public class RuntimeVerification {
         if (invalidSystemClassFiles) {
             Snitch.snitch(5, invalid.toArray(new String[0]));
         } else if (!argumentsOkay) {
-            exhibition.module.impl.combat.AutoPot.snitch(7);
+            Snitch.snitch(7, String.valueOf(foundDisableAttach), String.valueOf(noAgent), String.valueOf(noClassPath), String.valueOf(!argumentMismatch));
         } else if (!foundDisableAttach) {
             try {
                 exhibition.util.security.Snitch.snitch(0, getNativeVMArguments().toArray(new String[]{}));
