@@ -125,7 +125,8 @@ public class Killaura extends Module {
                 /*Armor*/decodeByteArray(new byte[]{65, 114, 109, 111, 114}),
                 /*Health*/decodeByteArray(new byte[]{72, 101, 97, 108, 116, 104}),
                 /*Bounty*/decodeByteArray(new byte[]{66, 111, 117, 110, 116, 121}),
-                "Health Vamp"),
+                "Health Vamp",
+                "Bounty Vamp"),
                 /*Target mode priority.*/decodeByteArray(new byte[]{84, 97, 114, 103, 101, 116, 32, 109, 111, 100, 101, 32, 112, 114, 105, 111, 114, 105, 116, 121, 46})));
         settings.put(/*PARTICLES*/decodeByteArray(new byte[]{80, 65, 82, 84, 73, 67, 76, 69, 83}), new Setting<>(/*PARTICLES*/decodeByteArray(new byte[]{80, 65, 82, 84, 73, 67, 76, 69, 83}), false, /*Render enchant particles.*/decodeByteArray(new byte[]{82, 101, 110, 100, 101, 114, 32, 101, 110, 99, 104, 97, 110, 116, 32, 112, 97, 114, 116, 105, 99, 108, 101, 115, 46})));
         settings.put(/*STEPCOMPAT*/decodeByteArray(new byte[]{83, 84, 69, 80, 67, 79, 77, 80, 65, 84}), new Setting<>(/*STEPCOMPAT*/decodeByteArray(new byte[]{83, 84, 69, 80, 67, 79, 77, 80, 65, 84}), true, /*Adds extra compatability when stepping up blocks with Criticals.*/decodeByteArray(new byte[]{65, 100, 100, 115, 32, 101, 120, 116, 114, 97, 32, 99, 111, 109, 112, 97, 116, 97, 98, 105, 108, 105, 116, 121, 32, 119, 104, 101, 110, 32, 115, 116, 101, 112, 112, 105, 110, 103, 32, 117, 112, 32, 98, 108, 111, 99, 107, 115, 32, 119, 105, 116, 104, 32, 67, 114, 105, 116, 105, 99, 97, 108, 115, 46})));
@@ -1244,12 +1245,51 @@ public class Killaura extends Module {
             loaded.sort(Comparator.comparingInt(o -> (o instanceof EntityPlayer ? ((EntityPlayer) o).inventory.getTotalArmorValue() : (int) o.getHealth())));
         } else if (current.equals("Health Vamp")) {
             loaded.sort(Comparator.comparingDouble(this::getTargetWeighted));
+        } else if (current.equals("Bounty Vamp")) {
+            loaded.sort(Comparator.comparingDouble(this::getTargetWeightedBounty));
         }
 
         int maxTargets = this.maxTargets.getValue().intValue();
         loaded = loaded.subList(0, Math.min(maxTargets, loaded.size()));
 
     }
+
+    private double getTargetWeightedBounty(EntityLivingBase entityLivingBase) {
+        double weight = entityLivingBase.getHealth();
+
+        if (entityLivingBase instanceof EntityPlayer) {
+            if (TargetESP.isPriority((EntityPlayer) entityLivingBase) && entityLivingBase.hurtTime < 7) {
+                weight -= 20;
+            }
+        }
+
+        if (mc.thePlayer.getHealth() <= 19.5) {
+            weight += Math.max(entityLivingBase.waitTicks, 0);
+            // If the player is hurt, we don't get any benefit?
+            if (entityLivingBase.hurtTime >= 6) {
+                weight += 10;
+            }
+
+            float estimatedYawChange;
+
+            float forwardYawDiff = Math.abs(MathHelper.clamp_float(RotationUtils.getYawChangeGiven(entityLivingBase.posX, entityLivingBase.posZ, lastAngles.x), -180, 180));
+            if (forwardYawDiff > 90) {
+                estimatedYawChange = Math.abs(MathHelper.clamp_float(RotationUtils.getYawChangeGiven(entityLivingBase.posX, entityLivingBase.posZ, lastAngles.x + 180), -180, 180));
+            } else {
+                estimatedYawChange = forwardYawDiff;
+            }
+
+            estimatedYawChange = (float) MathUtils.getIncremental(estimatedYawChange, 20);
+
+            // The bigger the difference, the less we prefer to swap to them.
+            if (estimatedYawChange >= 60) {
+                weight += estimatedYawChange / 20;
+            }
+        }
+
+        return weight;
+    }
+
 
     // This is for Health Vampire mode
     private double getTargetWeighted(EntityLivingBase entityLivingBase) {
@@ -1286,23 +1326,26 @@ public class Killaura extends Module {
     private List<EntityLivingBase> getTargets() {
         List<EntityLivingBase> targets = new ArrayList<>();
         boolean priorityOnly = false;
+        boolean allowPriorityOnly = !((Options) settings.get(TARGETMODE).getValue()).getSelected().equals("Bounty Vamp");
         for (Object o : mc.theWorld.getLoadedEntityList()) {
             if (o instanceof EntityLivingBase) {
                 EntityLivingBase entity = (EntityLivingBase) o;
                 if (validEntity(entity)) {
-                    if (vip == entity) {
-                        targets.clear();
-                        targets.add(entity);
-                        return targets;
-                    }
-                    if (entity instanceof EntityPlayer && PriorityManager.isPriority((EntityPlayer) entity)) {
-                        if (!priorityOnly)
+                    if (allowPriorityOnly) {
+                        if (vip == entity) {
                             targets.clear();
-                        priorityOnly = true;
-                        targets.add(entity);
+                            targets.add(entity);
+                            return targets;
+                        }
+                        if (entity instanceof EntityPlayer && PriorityManager.isPriority((EntityPlayer) entity)) {
+                            if (!priorityOnly)
+                                targets.clear();
+                            priorityOnly = true;
+                            targets.add(entity);
+                        }
+                        if (!priorityOnly)
+                            targets.add(entity);
                     }
-                    if (!priorityOnly)
-                        targets.add(entity);
                 }
             }
         }
