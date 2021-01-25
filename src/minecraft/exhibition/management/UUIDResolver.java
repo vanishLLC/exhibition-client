@@ -56,16 +56,15 @@ public class UUIDResolver {
 
     public void checkNames(HashMap<String, UUID> usernamesToCheck) {
 
-        Iterator<Map.Entry<String, Long>> validMapIter = validMap.entrySet().iterator();
-        while (validMapIter.hasNext()) {
-            Map.Entry<String, Long> entry = validMapIter.next();
-            if (entry.getValue() + 1_800_000 < System.currentTimeMillis()) { // 30 Minutes
-                checkedUsernames.remove(entry.getKey());
-                validMapIter.remove();
-            }
-        }
-
         try {
+            Iterator<Map.Entry<String, Long>> validMapIter = validMap.entrySet().iterator();
+            while (validMapIter.hasNext()) {
+                Map.Entry<String, Long> entry = validMapIter.next();
+                if (entry.getValue() + 1_800_000 < System.currentTimeMillis()) { // 30 Minutes
+                    checkedUsernames.remove(entry.getKey());
+                    validMapIter.remove();
+                }
+            }
             Iterator<Map.Entry<String, Long>> responses = responseMap.entrySet().iterator();
             while (responses.hasNext()) {
                 Map.Entry<String, Long> map = responses.next();

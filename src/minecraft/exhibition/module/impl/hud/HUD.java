@@ -62,6 +62,7 @@ public class HUD extends Module {
 
     private Setting<Boolean> showSessionTime = new Setting<>("SESSION TIME", false);
     private Setting<Boolean> showProtocol = new Setting<>("PROTOCOL", true);
+    private Setting<Boolean> drawTicksPerSecond = new Setting<>("TPS", true);
 
     private final ResourceLocation etb = new ResourceLocation("textures/shit.png"); // 512 x 512
 
@@ -81,7 +82,8 @@ public class HUD extends Module {
                 new Setting<>("SUFFIX", true),
                 new Setting<>("TIME", false),
                 new Setting<>("PING", false),
-                new Setting<>("FPS", false)};
+                new Setting<>("FPS", false),
+                new Setting<>("TPS", false)};
         settings.put("OPTIONS", new Setting<>("OPTIONS", options = new MultiBool("HUD Options", ents), "Extra options you can enable in the HUD."));
         settings.put("RENDERER", new Setting<>("RENDERER", selectedFont, "Select which fontrenderer to use for the overlay."));
     }
@@ -320,6 +322,7 @@ public class HUD extends Module {
         boolean fpsTime = (options.getValue("FPS"));
         boolean drawPing = (options.getValue("PING"));
         boolean drawProtocol = showProtocol.getValue();
+        boolean drawTPS = drawTicksPerSecond.getValue();
         boolean nostalgia = (options.getValue("NOSTALGIA"));
         boolean suf = (options.getValue("SUFFIX"));
         boolean array = (options.getValue("ARRAYLIST"));
@@ -330,7 +333,7 @@ public class HUD extends Module {
             Client.blockyFont.drawStringWithShadow("Virtue 6", (29 - Client.blockyFont.getStringWidth("Virtue 6") / 2D + 2), 4.0D,
                     -4210753, 0.8F);
 
-            String serverVersion = "Ver " + getServerProtocol();
+            String serverVersion = getServerProtocol() + " | " + Client.getTPS();
 
             Client.blockyFont.drawStringWithShadow("Fps: " + Minecraft.getDebugFPS(), (29 - Client.blockyFont.getStringWidth("Fps: " + Minecraft.getDebugFPS()) / 2D + 2), 14.0D, -6513508, 1.2F);
             Client.blockyFont.drawStringWithShadow(serverVersion, (29 - Client.blockyFont.getStringWidth(serverVersion) / 2D + 2), 24.0D, -6513508, 1.2F);
@@ -468,6 +471,8 @@ public class HUD extends Module {
                 }
                 if (drawPing)
                     Client.virtueFont.drawStringWithShadow("\2477Ping: \247f" + ping, 3, yOffset + 85 + nigga, -1);
+                if (drawTPS)
+                    Client.virtueFont.drawStringWithShadow("\2477TPS: \247f" + Client.getTPS(), 3, yOffset + 85 + nigga, -1);
             } else {
                 RenderingUtil.rectangleBordered(2, yOffset + 12, 62, yOffset + 74, 1, Colors.getColor(0, 150), Colors.getColor(0, 200));
                 RenderingUtil.rectangle(3, yOffset + 13, 61, yOffset + 25, colorInt);
@@ -489,6 +494,8 @@ public class HUD extends Module {
                 }
                 if (drawPing)
                     mc.fontRendererObj.drawStringWithShadow("\2477Ping: \247f" + ping, 2, yOffset + 77 + nigga, -1);
+                if (drawTPS)
+                    mc.fontRendererObj.drawStringWithShadow("\2477TPS: \247f" + Client.getTPS(), 2, yOffset + 77 + nigga, -1);
             }
 
             return;
@@ -517,6 +524,8 @@ public class HUD extends Module {
                 ok += " \2477[\247r" + (font.renderMC ? "" : "\247l") + Minecraft.getDebugFPS() + " FPS\2477]\247f";
             if (drawPing)
                 ok += " \2477[\247r" + (font.renderMC ? "" : "\247l") + ping + "ms\2477]\247f";
+            if (drawTPS)
+                ok += " \2477[\247r" + (font.renderMC ? "" : "\247l") + Client.getTPS() + "ms\2477]\247f";
 
             GlStateManager.pushMatrix();
             GlStateManager.translate(2, 2, 0);
@@ -576,6 +585,9 @@ public class HUD extends Module {
                 ok += " \2477[\247f" + Minecraft.getDebugFPS() + " FPS\2477]\247f";
             if (drawPing)
                 ok += " \2477[\247f" + ping + "ms\2477]\247f";
+            if (drawTPS)
+                ok += " \2477[\247f" + Client.getTPS() + "\2477]\247f";
+
             mc.fontRendererObj.drawStringWithShadow(ok, 2, 2, c2222);
             mc.fontRendererObj.drawStringWithShadow(clientName.substring(0, 1), 2, 2, 0xbcffbc);
 

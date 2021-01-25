@@ -75,6 +75,8 @@ public class GuiDownloadTerrain extends GuiScreen {
 
         ((Bypass) Client.getModuleManager().get(Bypass.class)).worldChange();
 
+        Client.instance.differenceQueue.clear();
+
         if (!GlobalValues.keepPriority.getValue())
             PriorityManager.clearPriorityList();
 //        if(mc.getCurrentServerData() != null && mc.getCurrentServerData().serverName.toLowerCase().contains("hypixel") || mc.getCurrentServerData().serverIP.toLowerCase().contains("hypixel")) {

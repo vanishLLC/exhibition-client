@@ -45,7 +45,7 @@ public class Bypass extends Module {
 
     public Setting<Number> DELAY = new Setting<>("DELAY", 300, "Spoof offset. This should be 500 - (your ping).", 5, 0, 1000);
     public Setting<Boolean> AUTOBYPASS = new Setting<>("AUTOBYPASS", false, "Automatically detects optimal delay value.");
-    public Options option = new Options("Mode", "Watchdog Off", "Experimental", "Watchdog Off");
+    public Options option = new Options("Mode", "Watchdog Off", "Dong", "Watchdog Off");
 
     private long startMS = -1;
     private int state = 0;
@@ -184,7 +184,7 @@ public class Bypass extends Module {
                                 NetUtil.sendPacketNoEvents(chokedPacket);
                             }
                         }
-                        ChatUtil.debug("\247e\247lRELIEF " + bruh);
+                        DevNotifications.getManager().post("\247e\247lRELIEF " + bruh);
                     }
                 }
 
@@ -200,7 +200,7 @@ public class Bypass extends Module {
                                     chokePackets.add(packet);
                                     sendPackets();
                                     if (debug)
-                                        ChatUtil.debug("\247bRESET BRUH TO " + packet.getUid() + " " + lastUid);
+                                        DevNotifications.getManager().post("\247bRESET BRUH TO " + packet.getUid() + " " + lastUid);
                                     bruh = 0;
                                     lastUid = packet.getUid();
                                     return;
@@ -226,7 +226,7 @@ public class Bypass extends Module {
                                     }
 
                                     if (sent > 0 && debug) {
-                                        ChatUtil.debug("\247b\247lSent " + sent + " out of " + size);
+                                        DevNotifications.getManager().post("\247b\247lSent " + sent + " out of " + size);
                                     }
 
                                     lastSentUid = packet.getUid();
@@ -270,7 +270,7 @@ public class Bypass extends Module {
             } else {
                 if (c13Timer.delay(1000) && !Client.instance.isLagging() && bruh > 0) {
                     if (debug)
-                        ChatUtil.debug("\247bBypass is ready.");
+                        DevNotifications.getManager().post("\247bBypass is ready.");
                     int sent = 0;
                     int max = chokePackets.size();
                     while (chokePackets.peek() != null && sent < max - 1) {
@@ -281,14 +281,14 @@ public class Bypass extends Module {
                         }
                     }
                     if (debug && sent > 0) {
-                        ChatUtil.debug("\247b\247lSent " + sent);
+                        DevNotifications.getManager().post("\247b\247lSent " + sent);
                     }
                     bruh = -1;
                 }
 
                 if (c13Timer.delay(1000) && !Client.instance.isLagging() && bruh == -1) {
                     if (debug)
-                        ChatUtil.debug("\247aReady to resend bursts.");
+                        DevNotifications.getManager().post("\247aReady to resend bursts.");
                     bruh = -2;
                 }
 
@@ -322,7 +322,7 @@ public class Bypass extends Module {
                                 c13Timer.reset();
                             }
                             if (debug)
-                                ChatUtil.debug("\2476Canceled \247c" + packet.getUid() + " \2476" + mc.thePlayer.ticksExisted);
+                                DevNotifications.getManager().post("\2476Canceled \247c" + packet.getUid() + " \2476" + mc.thePlayer.ticksExisted);
                         }
                         c13Timer.reset();
                     }

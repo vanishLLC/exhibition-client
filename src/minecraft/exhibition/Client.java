@@ -44,9 +44,11 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C00PacketKeepAlive;
 import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.server.S02PacketChat;
+import net.minecraft.network.play.server.S03PacketTimeUpdate;
 import net.minecraft.network.play.server.S05PacketSpawnPosition;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.util.CryptManager;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StringUtils;
 import us.myles.ViaVersion.api.protocol.ProtocolVersion;
@@ -57,6 +59,7 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import static exhibition.util.security.AuthenticationUtil.getHwid;
 import static exhibition.util.security.Snitch.snitch;
@@ -248,7 +251,7 @@ public class Client extends Castable implements EventListener {
 
         try {
             Client.authUser = ((Castable) args[323]).cast();
-        } catch (Exception e) {
+        } catch (Exception ignore) {
 
         }
         // Client.mojang.connect();
@@ -442,8 +445,31 @@ public class Client extends Castable implements EventListener {
 
     public double spawnY = 86;
 
+    public final ArrayBlockingQueue<Long> differenceQueue = new ArrayBlockingQueue<>(5);
+
+    private long lastTime = -1;
+
+    public static String getTPS() {
+        Client instance = Client.instance;
+
+        if (instance.differenceQueue.size() <= 1) {
+            return "N/A";
+        }
+
+        double totalTPS = 0;
+
+        for (Long diff : instance.differenceQueue) {
+            double seconds = diff / 1000D;
+            double calculatedTPS = MathHelper.clamp_double(20D / seconds, 0, 20);
+            totalTPS += calculatedTPS;
+        }
+
+        return String.format("%.1f", totalTPS / instance.differenceQueue.size());
+    }
+
     @RegisterEvent(events = {EventPacket.class, EventTick.class})
     public void onEvent(Event event) {
+        Minecraft mc = Minecraft.getMinecraft();
         if (event instanceof EventPacket) {
             EventPacket eventPacket = event.cast();
             Packet packet = eventPacket.getPacket();
@@ -466,12 +492,27 @@ public class Client extends Castable implements EventListener {
                 }
             }
 
-            if (Minecraft.getMinecraft().thePlayer != null && Minecraft.getMinecraft().theWorld != null && HypixelUtil.isVerifiedHypixel()) {
-                if (packet instanceof C03PacketPlayer && hypixelApiKey == null && Minecraft.getMinecraft().thePlayer.ticksExisted > 10) {
+            if (mc.thePlayer != null && mc.theWorld != null && HypixelUtil.isVerifiedHypixel()) {
+                if (packet instanceof C03PacketPlayer && hypixelApiKey == null && mc.thePlayer.ticksExisted > 10) {
                     DevNotifications.getManager().post("Grabbing key");
                     ChatUtil.sendChat("/api new");
                     hypixelApiKey = "";
                     return;
+                }
+                if (packet instanceof S03PacketTimeUpdate) {
+                    if (lastTime == -1) {
+                        lastTime = System.currentTimeMillis();
+                        return;
+                    }
+
+                    if (differenceQueue.remainingCapacity() == 0) {
+                        differenceQueue.remove();
+                    }
+
+                    long current = System.currentTimeMillis();
+                    differenceQueue.add(current - lastTime);
+                    lastTime = current;
+
                 }
                 if (packet instanceof S02PacketChat) {
                     S02PacketChat packetChat = (S02PacketChat) packet;
@@ -486,17 +527,16 @@ public class Client extends Castable implements EventListener {
         }
         if (event instanceof EventTick) {
             if (HypixelUtil.isVerifiedHypixel() && HypixelUtil.isInGame("PIT")) {
-                Minecraft mc = Minecraft.getMinecraft();
                 for (Entity entity : mc.theWorld.getLoadedEntityList()) {
                     if (entity instanceof EntityPlayer && !(entity instanceof EntityPlayerSP)) {
-                        EntityPlayer player = (EntityPlayer)entity;
+                        EntityPlayer player = (EntityPlayer) entity;
                         if (player.isRiding()) {
                             if (player.ridingEntity instanceof EntityArmorStand) {
                                 EntityArmorStand armorStand = (EntityArmorStand) player.ridingEntity;
                                 if ((player.posX == player.lastTickPosX && player.posY == player.lastTickPosY && player.posZ == player.lastTickPosZ) ||
                                         (armorStand.posX == armorStand.lastTickPosX && armorStand.posY == armorStand.lastTickPosY && armorStand.posZ == armorStand.lastTickPosZ)) {
                                     player.flags++;
-                                    if(player.flags > 10) {
+                                    if (player.flags > 10) {
                                         player.ridingEntity = null;
                                     }
                                 } else {
