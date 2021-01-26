@@ -525,7 +525,7 @@ public class HUD extends Module {
             if (drawPing)
                 ok += " \2477[\247r" + (font.renderMC ? "" : "\247l") + ping + "ms\2477]\247f";
             if (drawTPS)
-                ok += " \2477[\247r" + (font.renderMC ? "" : "\247l") + Client.getTPS() + "ms\2477]\247f";
+                ok += " \2477[\247r" + (font.renderMC ? "" : "\247l") + Client.getTPS() + "\2477]\247f";
 
             GlStateManager.pushMatrix();
             GlStateManager.translate(2, 2, 0);
