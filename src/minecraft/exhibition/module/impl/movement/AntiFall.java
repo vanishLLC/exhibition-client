@@ -33,7 +33,7 @@ public class AntiFall extends Module {
     }
 
     public boolean shouldSafeWalk() {
-        return isEnabled() && !timer.delay(250);
+        return isEnabled() && !timer.delay(600);
     }
 
     @RegisterEvent(events = {EventMove.class, EventPacket.class})
@@ -49,9 +49,8 @@ public class AntiFall extends Module {
             EventMove em = event.cast();
             if (isBlockUnder() && !saveMe && Client.getModuleManager().get(NoFall.class).isEnabled() || mc.thePlayer.capabilities.isFlying)
                 return;
-            if ((saveMe && timer.delay(250)) || mc.thePlayer.isCollidedVertically) {
+            if (mc.thePlayer.isCollidedVertically) {
                 saveMe = false;
-                timer.reset();
                 return;
             }
 
@@ -60,17 +59,13 @@ public class AntiFall extends Module {
                     && !Client.getModuleManager().isEnabled(FreecamTP.class)
                     && mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.5, mc.thePlayer.posZ)).getBlock() == Blocks.air) {
                 if (!((Boolean) settings.get(VOID).getValue()) || !isBlockUnder()) {
-                    if (!saveMe) {
-                        saveMe = true;
-                        timer.reset();
-                    } else {
-                        em.setX(mc.thePlayer.motionX = 0);
-                        em.setY(mc.thePlayer.motionY = 0);
-                        em.setZ(mc.thePlayer.motionZ = 0);
+                    em.setX(mc.thePlayer.motionX *= -1);
+                    em.setY(mc.thePlayer.motionY = 0);
+                    em.setZ(mc.thePlayer.motionZ *= -1);
 
-                        mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY + (mc.thePlayer.fallDistance * 0.98) + (0.0629280134905892031 * Math.random()), mc.thePlayer.posZ);
-                        mc.thePlayer.fallDistance = 0;
-                    }
+                    mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY + (mc.thePlayer.fallDistance * 0.98) + (0.0629280134905892031 * Math.random()), mc.thePlayer.posZ);
+                    mc.thePlayer.fallDistance = 0;
+                    timer.reset();
                 }
             }
         }
@@ -82,7 +77,6 @@ public class AntiFall extends Module {
                         mc.thePlayer.fallDistance = 0;
                     mc.thePlayer.motionX = mc.thePlayer.motionZ = 0;
                     saveMe = false;
-                    timer.reset();
                 }
             }
         }
@@ -90,9 +84,18 @@ public class AntiFall extends Module {
 
     private boolean isBlockUnder() {
         for (int i = (int) (mc.thePlayer.posY); i >= 0; i--) {
-            BlockPos pos = new BlockPos(mc.thePlayer.posX, i, mc.thePlayer.posZ);
-            if (!(mc.theWorld.getBlockState(pos).getBlock() instanceof BlockAir)) {
-                return true;
+            double[][] offsets = new double[][]{new double[]{0, 0}, new double[]{-0.35, -0.35}, new double[]{-0.35, 0.35}, new double[]{0.35, 0.35}, new double[]{0.35, -0.35}};
+            for (double[] offset : offsets) {
+                double offsetX = offset[0];
+                double offsetZ = offset[1];
+
+                double posX = offsetX + mc.thePlayer.posX;
+                double posY = i;
+                double posZ = offsetZ + mc.thePlayer.posZ;
+                BlockPos pos = new BlockPos(posX, posY, posZ);
+                if (!(mc.theWorld.getBlockState(pos).getBlock() instanceof BlockAir)) {
+                    return true;
+                }
             }
         }
         return false;

@@ -280,7 +280,7 @@ public class Bypass extends Module {
                         DevNotifications.getManager().post("\247bBypass is ready.");
                     int sent = 0;
                     int max = chokePackets.size();
-                    while (chokePackets.peek() != null && sent < max - 1) {
+                    while (chokePackets.peek() != null && sent < 2) {
                         Packet chokedPacket = chokePackets.poll();
                         if (chokedPacket != null) {
                             sent++;
@@ -331,6 +331,7 @@ public class Bypass extends Module {
                             }
                             if (debug)
                                 DevNotifications.getManager().post("\2476Canceled \247c" + packet.getUid() + " \2476" + mc.thePlayer.ticksExisted);
+                            chokePackets.add(packet);
                         }
                         c13Timer.reset();
                     }
@@ -456,8 +457,9 @@ public class Bypass extends Module {
             }
         }
 
-        if (sent > 0) {
-            //DevNotifications.getManager().post("\247b\247lSent " + sent);
+        boolean debug = true;
+        if (sent > 0 && debug) {
+            DevNotifications.getManager().post("\247b\247lSent " + sent);
         }
         this.resetPackets();
     }

@@ -120,13 +120,6 @@ public class BanStats extends Module {
                             }
 
                             long diff = staff_total - staffTotalBans;
-                            if (staffTotalBans != 0)
-                                banStats.banDifference = diff;
-                            if (staffTotalBans != 0 && diff != 0) {
-                                banStats.banTimer.reset();
-                                banStats.banDifferenceMap.put(System.currentTimeMillis() + 300_000, diff);
-                                banStats.bansSinceConnect += diff;
-                            }
 
                             if (staffTotalBans != 0 && diff >= 4 && banStats.alertBans.getValue()) {
                                 Notifications.getManager().post("Staff Activity", "Staff seem to be banning a lot.", 3000, Notifications.Type.WARNING);
@@ -134,6 +127,14 @@ public class BanStats extends Module {
 
                             if (staffTotalBans != 0 && diff > 0 && banStats.alertBans.getValue() && banStats.banTimer.getDifference() >= 120_000) {
                                 Notifications.getManager().post("Staff Activity", "Staff are no longer inactive.", 3000, Notifications.Type.WARNING);
+                            }
+
+                            if (staffTotalBans != 0)
+                                banStats.banDifference = diff;
+                            if (staffTotalBans != 0 && diff != 0) {
+                                banStats.banTimer.reset();
+                                banStats.banDifferenceMap.put(System.currentTimeMillis() + 300_000, diff);
+                                banStats.bansSinceConnect += diff;
                             }
 
                             staffTotalBans = staff_total;

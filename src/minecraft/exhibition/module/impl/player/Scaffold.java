@@ -55,7 +55,7 @@ public class Scaffold extends Module {
     }
 
     private static final List<Block> blacklistedBlocks = Arrays.asList(Blocks.rail, Blocks.activator_rail, Blocks.detector_rail, Blocks.golden_rail,
-            Blocks.air, Blocks.water, Blocks.flowing_water, Blocks.lava, Blocks.flowing_lava, Blocks.enchanting_table, Blocks.carpet,
+            Blocks.air, Blocks.water, Blocks.flowing_water, Blocks.lava, Blocks.flowing_lava, Blocks.enchanting_table, Blocks.carpet, Blocks.mob_spawner,
             Blocks.glass_pane, Blocks.stained_glass_pane, Blocks.iron_bars, Blocks.web, Blocks.snow_layer, Blocks.ice, Blocks.packed_ice,
             Blocks.coal_ore, Blocks.diamond_ore, Blocks.emerald_ore, Blocks.ender_chest, Blocks.chest, Blocks.torch, Blocks.anvil, Blocks.trapped_chest,
             Blocks.noteblock, Blocks.jukebox, Blocks.tnt, Blocks.cobblestone_wall, Blocks.gold_ore, Blocks.iron_ore, Blocks.lapis_ore, Blocks.lit_redstone_ore,

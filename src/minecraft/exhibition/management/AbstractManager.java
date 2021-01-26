@@ -39,7 +39,7 @@ public abstract class AbstractManager<E> {
 	/**
 	 * Returns the first object that matches the given class.
 	 */
-	public <T> T get(Class<T> clazz) {
+	public <T extends E> T get(Class<T> clazz) {
 		for (E e : array) {
 			if (e.getClass().equals(clazz)) {
 				return (T)e;
