@@ -296,7 +296,7 @@ public class GuiDisconnected extends GuiScreen {
             fontRendererObj.drawStringWithShadow(timeDiff, width / 2D - fontRendererObj.getStringWidth(timeDiff) / 2D, 12, -1);
         }
 
-        BanStats banStats = Client.getModuleManager().getCast(BanStats.class);
+        BanStats banStats = Client.getModuleManager().get(BanStats.class);
 
         if(banStats.isEnabled()) {
             String s = "Bans since connect: " + banStats.bansSinceConnect;

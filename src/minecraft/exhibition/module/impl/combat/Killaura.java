@@ -534,7 +534,7 @@ public class Killaura extends Module {
                             if (targetYaw > maxAngleStep) targetYaw = maxAngleStep;
                             else if (targetYaw < -maxAngleStep) targetYaw = -maxAngleStep;
 
-                            Bypass bypass = Client.getModuleManager().getCast(Bypass.class);
+                            Bypass bypass = Client.getModuleManager().get(Bypass.class);
 
                             int bypassTicks = bypass.bruh - 10;
 

@@ -119,7 +119,7 @@ public class Bypass extends Module {
         lastMode = option.getSelected();
 
         Fly fly = Client.getModuleManager().get(Fly.class).cast();
-        LongJump longJump = Client.getModuleManager().getCast(LongJump.class);
+        LongJump longJump = Client.getModuleManager().get(LongJump.class);
         boolean fallFly = fly.isEnabled() && !((boolean) fly.getSetting("BLORP").getValue()) && (boolean) fly.getSetting("CHOKE").getValue();
 
         boolean isFlying = Client.getModuleManager().isEnabled(LongJump.class) || fallFly;
@@ -173,7 +173,7 @@ public class Bypass extends Module {
                 }
             }
 
-            boolean debug = false;
+            boolean debug = true;
 
             if (option.getSelected().equals("Dong") && !option.getSelected().equals("Gast and Tasteful Skidding be like #NOVOONTOP")) {
                 if (mc.thePlayer == null) {
@@ -297,22 +297,23 @@ public class Bypass extends Module {
                     if (debug)
                         DevNotifications.getManager().post("\247aReady to resend bursts.");
                     bruh = -2;
+                    lastSentUid = 1;
                 }
 
                 if (p instanceof C0FPacketConfirmTransaction) {
                     C0FPacketConfirmTransaction packet = (C0FPacketConfirmTransaction) p;
                     if (packet.getUid() < 0 && HypixelUtil.isVerifiedHypixel()) {
-                        if (bruh == -2) {
+                        if (bruh == -2 && lastSentUid == -1) {
                             if (debug)
-                                DevNotifications.getManager().post("\247aSent last bruh \247e" + mc.thePlayer.ticksExisted);
+                                DevNotifications.getManager().post("\247aSent last bruh A \247e" + mc.thePlayer.ticksExisted);
                             sendPackets();
                             bruh = -3;
                         }
 
                         if (bruh >= 0) {
-                            if (bruh == 0) {
+                            if (bruh == 0 && lastSentUid == -1) {
                                 if (debug)
-                                    DevNotifications.getManager().post("\247aSent last bruh \247e" + mc.thePlayer.ticksExisted);
+                                    DevNotifications.getManager().post("\247aSent last bruh B \247e" + mc.thePlayer.ticksExisted);
                                 sendPackets();
                             }
                             event.setCancelled(true);

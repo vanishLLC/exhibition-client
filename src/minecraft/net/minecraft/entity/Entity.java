@@ -9,6 +9,7 @@ import exhibition.Client;
 import exhibition.event.EventSystem;
 import exhibition.event.impl.EventStep;
 import exhibition.module.impl.combat.Killaura;
+import exhibition.module.impl.movement.AntiFall;
 import exhibition.module.impl.movement.Fly;
 import exhibition.module.impl.movement.FreecamTP;
 import exhibition.module.impl.player.AntiObby;
@@ -618,7 +619,8 @@ public abstract class Entity implements ICommandSender
             double var10 = x;
             final double var11 = y;
             double var12 = z;
-            final boolean var13 = onGround && (isSneaking() || (Client.getModuleManager().isEnabled(Scaffold.class) && this instanceof EntityPlayerSP && !Minecraft.getMinecraft().gameSettings.keyBindSneak.getIsKeyPressed()));
+            AntiFall antiFall = Client.getModuleManager().get(AntiFall.class);
+            final boolean var13 = onGround && (isSneaking() || antiFall.shouldSafeWalk() || (Client.getModuleManager().isEnabled(Scaffold.class) && this instanceof EntityPlayerSP && !Minecraft.getMinecraft().gameSettings.keyBindSneak.getIsKeyPressed()));
             if (var13) {
                 final double var14 = 0.05;
                 while (x != 0.0) {
@@ -867,7 +869,7 @@ public abstract class Entity implements ICommandSender
             if (var11 != y) {
                 var86.onLanded(this.worldObj, this);
             }
-            if (this.canTriggerWalking() && (!var13 || Client.getModuleManager().isEnabled(Scaffold.class)) && this.ridingEntity == null) {
+            if (this.canTriggerWalking() && (!var13 || Client.getModuleManager().isEnabled(Scaffold.class) || antiFall.shouldSafeWalk()) && this.ridingEntity == null) {
                 final double var88 = this.posX - var7;
                 double var89 = this.posY - var8;
                 final double var90 = this.posZ - var9;

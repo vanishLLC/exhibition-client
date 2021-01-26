@@ -576,7 +576,7 @@ public class GuiIngame extends Gui {
             i = Math.max(i, this.getFontRenderer().getStringWidth(s));
         }
 
-        BanStats banStats = Client.getModuleManager().getCast(BanStats.class);
+        BanStats banStats = Client.getModuleManager().get(BanStats.class);
 
         boolean renderBanStats = banStats.isEnabled() && HypixelUtil.isVerifiedHypixel();
 

@@ -49,7 +49,7 @@ public class NoSlowdown extends Module {
             }
             EventMotionUpdate em = (EventMotionUpdate) event;
             Killaura killaura = ((Killaura) Client.getModuleManager().get(Killaura.class));
-            Bypass bypass = Client.getModuleManager().getCast(Bypass.class);
+            Bypass bypass = Client.getModuleManager().get(Bypass.class);
             boolean allowVanilla = bypass.allowBypassing() && (bypass.option.getSelected().equals("Watchdog Off") || (bypass.bruh == 0 || bypass.bruh >= 10));
             if (shouldUnblock && allowVanilla) {
                 if (em.isPre() && (mc.thePlayer.isBlocking() && killaura.isBlocking)) {

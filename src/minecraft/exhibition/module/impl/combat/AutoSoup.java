@@ -77,7 +77,7 @@ public class AutoSoup extends Module {
                 boolean shouldHeal = (mc.thePlayer.getMaxHealth() == 20 ? mc.thePlayer.getHealth() <= minHealth : (mc.thePlayer.getHealth() / mc.thePlayer.getMaxHealth()) <= minHealth / 20F) ||
                         (shouldEat && mc.thePlayer.getFoodStats().needFood()) || shouldResistance;
 
-                Killaura killaura = Client.getModuleManager().getCast(Killaura.class);
+                Killaura killaura = Client.getModuleManager().get(Killaura.class);
 
                 if (lastItem != -1 && isHealing) {
                     NetUtil.sendPacketNoEvents(new C03PacketPlayer(em.isOnground()));

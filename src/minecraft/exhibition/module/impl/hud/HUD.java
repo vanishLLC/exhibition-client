@@ -248,7 +248,7 @@ public class HUD extends Module {
             mc.fontRendererObj.drawString(s, (int) (e.getResolution().getScaledWidth_double() / 2 - mc.fontRendererObj.getStringWidth(s) / 2), 30, -1);
         }
 
-        Bypass bypass = Client.getModuleManager().getCast(Bypass.class);
+        Bypass bypass = Client.getModuleManager().get(Bypass.class);
         if (bypass.option.getSelected().equals("Dong") && GlobalValues.allowDebug.getValue()) {
             int current = (bypass.bruh - 10);
             int max = (45 + bypass.randomDelay);

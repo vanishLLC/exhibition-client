@@ -32,13 +32,17 @@ public class AntiFall extends Module {
         settings.put(DISTANCE, new Setting<>(DISTANCE, 2, "The fall distance needed to catch.", 0.1, 2, 20));
     }
 
+    public boolean shouldSafeWalk() {
+        return isEnabled() && !timer.delay(250);
+    }
+
     @RegisterEvent(events = {EventMove.class, EventPacket.class})
     public void onEvent(Event event) {
-        if(mc.thePlayer == null || mc.theWorld == null) {
+        if (mc.thePlayer == null || mc.theWorld == null) {
             return;
         }
 
-        if(mc.thePlayer.capabilities.allowFlying)
+        if (mc.thePlayer.capabilities.allowFlying)
             return;
 
         if (event instanceof EventMove) {

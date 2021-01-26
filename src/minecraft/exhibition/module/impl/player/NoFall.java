@@ -51,7 +51,7 @@ public class NoFall extends Module {
                 double fallen = mc.thePlayer.fallDistance - dist;
                 double predictedFallen = fallen + -((fallY - 0.08D) * 0.9800000190734863D);
                 if (predictedFallen >= 3.0) {
-                    Bypass bypass = Client.getModuleManager().getCast(Bypass.class);
+                    Bypass bypass = Client.getModuleManager().get(Bypass.class);
                     boolean allowVanilla = bypass.allowBypassing() && (bypass.option.getSelected().equals("Watchdog Off") || (bypass.bruh == 0 || bypass.bruh > 10));
                     if (vanilla.getValue() && allowVanilla && HypixelUtil.isVerifiedHypixel()) {
                         if (em.isPre()) {

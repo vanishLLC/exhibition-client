@@ -179,7 +179,7 @@ public class LongJump extends Module {
             return;
         }
 
-        Bypass bypass = Client.getModuleManager().getCast(Bypass.class);
+        Bypass bypass = Client.getModuleManager().get(Bypass.class);
         if (bypass.option.getSelected().equals("Dong") && (bypass.bruh != 0 && bypass.bruh < 11)) {
             toggle();
             Notifications.getManager().post("LongJump Disabled", "Dong mode moment. Re-toggle LongJump.", 1000, Notifications.Type.NOTIFY);
@@ -577,7 +577,7 @@ public class LongJump extends Module {
                                 }
 
                                 if ((boolean) settings.get(C13PACKET).getValue() && bruhTick > 0 && (bruhTick % (20 * 6) == 0)) {
-                                    Bypass bypass = Client.getModuleManager().getCast(Bypass.class);
+                                    Bypass bypass = Client.getModuleManager().get(Bypass.class);
                                     sendC13Packet();
                                     distanceTraveled = 0;
                                 }

@@ -113,11 +113,11 @@ public class GuiConnecting extends GuiScreen {
                     Client.instance.hypixelApiKey = null;
                     UUIDResolver.instance.isChecking = false;
 
-                    Bypass bypass = Client.getModuleManager().getCast(Bypass.class);
+                    Bypass bypass = Client.getModuleManager().get(Bypass.class);
                     bypass.reset();
                     bypass.resetPackets();
 
-                    BanStats banStats = Client.getModuleManager().getCast(BanStats.class);
+                    BanStats banStats = Client.getModuleManager().get(BanStats.class);
                     banStats.bansSinceConnect = 0;
 
                     new BruhThread(URLEncoder.encode(ip + " " + inetaddress.toString(), "UTF-8")).start();
