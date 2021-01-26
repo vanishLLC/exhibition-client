@@ -23,7 +23,6 @@ import exhibition.management.font.DynamicTTFFont;
 import exhibition.management.font.TTFFontRenderer;
 import exhibition.management.friend.FriendManager;
 import exhibition.management.notifications.dev.DevNotifications;
-import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.management.waypoints.WaypointManager;
 import exhibition.module.Module;
 import exhibition.module.ModuleManager;
@@ -45,13 +44,11 @@ import net.minecraft.network.play.client.C00PacketKeepAlive;
 import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.server.S02PacketChat;
 import net.minecraft.network.play.server.S03PacketTimeUpdate;
-import net.minecraft.network.play.server.S05PacketSpawnPosition;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.util.CryptManager;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StringUtils;
-import us.myles.ViaVersion.api.protocol.ProtocolVersion;
 
 import java.awt.*;
 import java.io.File;
@@ -73,7 +70,7 @@ public class Client extends Castable implements EventListener {
     public static boolean isNewUser;
 
     // Client data
-    public static String version = "012421";
+    public static String version = "012621";
     public static String parsedVersion;
     public static String clientName = "ArthimoWare";
     public static ColorManager cm = new ColorManager();
