@@ -538,7 +538,8 @@ public class Killaura extends Module {
 
                             int bypassTicks = bypass.bruh - 10;
 
-                            boolean allowInvalidAngles = bypass.allowBypassing() && (!bypass.option.getSelected().equals("Dong") || bypassTicks > 5 && bypassTicks <= (40 + bypass.randomDelay)) && HypixelUtil.isVerifiedHypixel();
+                            boolean allowInvalidAngles = bypass.allowBypassing() && (bypass.option.getSelected().equals("Watchdog Off") || (bypass.option.getSelected().equals("Dong") ?
+                                    bypassTicks > 5 && bypassTicks <= (40 + bypass.randomDelay) : bypass.bruh > 10 && bypass.bruh % 100 > 10 && bypass.bruh % 100 < 99)) && HypixelUtil.isVerifiedHypixel();
 
                             if (shouldReduce) {
                                 float pitch = (float) -(Math.atan2(yDiff - (distance > 2.1 ? 0.75 : 1), dist) * 180.0D / 3.141592653589793D);

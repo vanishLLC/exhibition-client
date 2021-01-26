@@ -52,14 +52,13 @@ public class NoFall extends Module {
                 double predictedFallen = fallen + -((fallY - 0.08D) * 0.9800000190734863D);
                 if (predictedFallen >= 3.0) {
                     Bypass bypass = Client.getModuleManager().getCast(Bypass.class);
-                    boolean allowVanilla = bypass.allowBypassing() && (!bypass.option.getSelected().equals("Dong") || (bypass.bruh == 0 || bypass.bruh > 10));
+                    boolean allowVanilla = bypass.allowBypassing() && (bypass.option.getSelected().equals("Watchdog Off") || (bypass.bruh == 0 || bypass.bruh > 10));
                     if (vanilla.getValue() && allowVanilla && HypixelUtil.isVerifiedHypixel()) {
                         if (em.isPre()) {
                             if(bypass.bruh > 10) {
                                 bypass.bruh -= 1;
                             }
                             em.setGround(true);
-                            ChatUtil.printChat("A??? " + bypass.bruh);
                             dist = mc.thePlayer.fallDistance;
                         }
                     } else {

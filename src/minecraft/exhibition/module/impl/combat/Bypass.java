@@ -17,7 +17,6 @@ import exhibition.module.impl.movement.Fly;
 import exhibition.module.impl.movement.LongJump;
 import exhibition.util.*;
 import exhibition.util.Timer;
-import exhibition.util.misc.ChatUtil;
 import exhibition.util.render.Colors;
 import net.minecraft.client.gui.GuiDisconnected;
 import net.minecraft.client.gui.GuiDownloadTerrain;
@@ -45,7 +44,7 @@ public class Bypass extends Module {
 
     public Setting<Number> DELAY = new Setting<>("DELAY", 300, "Spoof offset. This should be 500 - (your ping).", 5, 0, 1000);
     public Setting<Boolean> AUTOBYPASS = new Setting<>("AUTOBYPASS", false, "Automatically detects optimal delay value.");
-    public Options option = new Options("Mode", "Watchdog Off", "Dong", "Watchdog Off");
+    public Options option = new Options("Mode", "Watchdog Off", "Old", "Dong", "Watchdog Off");
 
     private long startMS = -1;
     private int state = 0;
@@ -81,21 +80,16 @@ public class Bypass extends Module {
     }
 
     public void worldChange() {
-        initialValues[0] = -1;
-        initialValues[1] = -2;
-        initialValues[2] = -3;
         this.bruh = 0;
         this.lastUid = 0;
         this.lastSentUid = -1;
-        if (option.getSelected().equals("Dong"))
+        if (!option.getSelected().equals("Watchdog Off"))
             this.resetPackets();
         //DevNotifications.getManager().post("\247d\247lRESET");
 
     }
 
     private final boolean b = Boolean.parseBoolean(System.getProperty("bypassSecret"));
-
-    private double[] initialValues = new double[3];
 
     @Override
     public void onDisable() {
@@ -106,7 +100,7 @@ public class Bypass extends Module {
         }
     }
 
-    private Random random = new Random();
+    private final Random random = new Random();
 
     private String lastMode = null;
 
@@ -116,7 +110,7 @@ public class Bypass extends Module {
             return;
 
         // If bruh is not set or they're in a lobby and it's set, let them change it
-        if (lastMode != null && (lastMode.equals("Dong") ? bruh > 0 : bruh > 0 && !allowBypassing())) {
+        if (lastMode != null && bruh > 0 && allowBypassing()) {
             if (!option.getSelected().equals(lastMode)) {
                 option.setSelected(lastMode);
                 Notifications.getManager().post("Bypass Warning", "Please change the method before a match.", 3_000, Notifications.Type.WARNING);
@@ -131,6 +125,18 @@ public class Bypass extends Module {
         boolean isFlying = Client.getModuleManager().isEnabled(LongJump.class) || fallFly;
 
         if (event instanceof EventPacket) {
+
+            if (option.getSelected().equals("Old")) {
+                if (mc.thePlayer != null) {
+                    if (!isFlying || c13Timer.delay(15_000)) {
+                        c13Timer.reset();
+                        sendPackets();
+                    }
+                } else {
+                    resetPackets();
+                }
+            }
+
             List<BruhPacket> packetsToRemove = new ArrayList<>();
             for (BruhPacket bruhPacket : packetList) {
                 if (bruhPacket.timeToSend <= System.currentTimeMillis()) {
@@ -268,7 +274,7 @@ public class Bypass extends Module {
                         }
                     }
                 }
-            } else {
+            } else if (option.getSelected().equals("Watchdog Off")) {
                 if (c13Timer.delay(1000) && !Client.instance.isLagging() && bruh > 0) {
                     if (debug)
                         DevNotifications.getManager().post("\247bBypass is ready.");
@@ -328,15 +334,62 @@ public class Bypass extends Module {
                         c13Timer.reset();
                     }
                 }
+            } else {
+                if (p instanceof C0FPacketConfirmTransaction) {
+                    C0FPacketConfirmTransaction packet = (C0FPacketConfirmTransaction) p;
+                    if (packet.getUid() < 0 && HypixelUtil.isVerifiedHypixel()) {
+                        this.bruh++;
+
+                        if (bruh > 10) {
+                            event.setCancelled(true);
+
+                            if (Math.abs(packet.getUid() - lastUid) > 5 && packet.getUid() != -1) {
+                                C0FPacketConfirmTransaction confirmTransaction = new C0FPacketConfirmTransaction(packet.getWindowId(), packet.getUid(), packet.getAccepted());
+                                if (isFlying) {
+                                    chokePackets.add(confirmTransaction);
+                                } else {
+                                    c13Timer.reset();
+                                    NetUtil.sendPacketNoEvents(confirmTransaction);
+                                }
+                                bruh = 5;
+                                lastSentUid = packet.getUid();
+                                lastUid = packet.getUid();
+                                return;
+                            }
+
+                            boolean serverResetCounter = packet.getUid() == -1 && lastUid == -30000;
+
+                            if (bruh % 100 == 0 || serverResetCounter) {
+                                while (serverResetCounter ? lastSentUid >= -30000 : lastSentUid > packet.getUid()) {
+                                    --lastSentUid;
+                                    if (lastSentUid < -30000) {
+                                        lastSentUid = -1;
+                                    }
+
+                                    C0FPacketConfirmTransaction confirmTransaction = new C0FPacketConfirmTransaction(packet.getWindowId(), (short) lastSentUid, packet.getAccepted());
+                                    if (isFlying) {
+                                        chokePackets.add(confirmTransaction);
+                                    } else {
+                                        c13Timer.reset();
+                                        NetUtil.sendPacketNoEvents(confirmTransaction);
+                                    }
+
+                                    // We've reset the counter to -1, break the loop.
+                                    if(lastSentUid == -1) {
+                                        break;
+                                    }
+                                }
+                            }
+
+                        } else {
+                            lastSentUid = packet.getUid();
+                        }
+                        lastUid = packet.getUid();
+                    }
+                }
             }
 
             if (p instanceof C00PacketKeepAlive) {
-//                if(option.getSelected().equals("Dong") && isFlying) {
-//                    event.setCancelled(true);
-//                    chokePackets.add(p);
-//                    return;
-//                }
-
                 if (DELAY.getValue().longValue() != 0) {
                     packetList.add(new BruhPacket(p, DELAY.getValue().longValue()));
                     event.setCancelled(true);
@@ -370,7 +423,7 @@ public class Bypass extends Module {
 
         if (event instanceof EventTick) {
             setSuffix(option.getSelected());
-            if ((boolean) AUTOBYPASS.getValue()) {
+            if (AUTOBYPASS.getValue()) {
                 if (mc.currentScreen == null && mc.thePlayer.ticksExisted > 25 && startMS == -1 && state == 0) {
                     if (mc.thePlayer.inventory.getCurrentItem() != null && mc.thePlayer.inventory.getCurrentItem().getItem() != null) {
                         Item item = mc.thePlayer.inventory.getCurrentItem().getItem();
