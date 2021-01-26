@@ -251,6 +251,22 @@ public class GuiAltManager extends PanoramaScreen {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+                } else {
+                    if(!AltManager.registry.isEmpty()) {
+                        for (Alt alt : AltManager.registry) {
+                            if(alt.getMask().equals(mc.session.getUsername())) {
+                                this.selectedAlt = alt;
+                                this.selectedAlt.setFavorite(!this.selectedAlt.isFavorite());
+                                this.status = this.selectedAlt.isFavorite() ? "\2476Favorited Alt." : "\247cUnfavorited Alt.";
+                                try {
+                                    Client.getFileManager().getFile(Alts.class).saveFile();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                break;
+                            }
+                        }
+                    }
                 }
                 break;
             }

@@ -38,7 +38,7 @@ public class AutoMath extends Module {
                     ScriptEngine engine = mgr.getEngineByName("JavaScript");
                     String result = String.valueOf(engine.eval(calculate.trim()));
                     ChatUtil.printChat(Command.chatPrefix + "\247e" + result);
-                    ChatUtil.sendChat(result);
+                    ChatUtil.sendChat("/achat " + result);
                 } catch (Exception ignored) {
                     ChatUtil.printChat(Command.chatPrefix + "\247cfailed to solve. " + ignored.getMessage());
                 }

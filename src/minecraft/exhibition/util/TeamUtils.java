@@ -31,7 +31,11 @@ public class TeamUtils {
             if (nameFormated.contains("[")) {
                 nameFormated = "§" + nameFormated.split("\\[§(.).*§[0-9a-z]")[1];
             }
-        } else if(pitMode && !HypixelUtil.scoreboardContains("PIZZA")) {
+        } else if (pitMode && HypixelUtil.scoreboardContains("TDM")) {
+            if (nameFormated.contains("]")) {
+                nameFormated = nameFormated.split("]")[1];
+            }
+        } else if (pitMode && !HypixelUtil.scoreboardContains("PIZZA")) {
             if (nameFormated.contains("] ")) {
                 nameFormated = nameFormated.split("] ")[1];
             }
