@@ -157,7 +157,7 @@ public class ConfigManager {
 
     }
 
-    private File getFolder() {
+    public File getFolder() {
         File folder = new File(Client.getDataDir().getAbsolutePath() + File.separator + SubFolder.Configs.getFolderName());
         if (!folder.exists()) {
             folder.mkdirs();

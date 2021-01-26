@@ -29,8 +29,18 @@ public class ConfigButton {
         }
     }
 
-    public enum ButtonType {
-        LOAD,SAVE,DELETE,CREATE
+    public static class ButtonType {
+       public static ButtonType LOAD = new ButtonType("Load"), SAVE = new ButtonType("Save"), DELETE = new ButtonType("Delete"), CREATE = new ButtonType("Create"), OPEN_FOLDER = new ButtonType("Open Folder");
+
+       private String label;
+
+       public ButtonType(String label) {
+           this.label = label;
+       }
+
+        public String name() {
+            return label;
+        }
     }
 
 

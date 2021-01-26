@@ -10,20 +10,22 @@ public class GroupBox {
 
     public float x;
     public float y;
-    public float ySize;
+    public float width;
+    public float height;
     public String label;
     public boolean renderLabel;
     public CategoryPanel categoryPanel;
 
-    public GroupBox(String label, CategoryPanel categoryPanel, float x, float y, float ySize) {
-        this(label, categoryPanel, x, y, ySize, false);
+    public GroupBox(String label, CategoryPanel categoryPanel, float x, float y, float height) {
+        this(label, categoryPanel, x, y, 90, height, false);
     }
 
-    public GroupBox(String label, CategoryPanel categoryPanel, float x, float y, float ySize, boolean renderLabel) {
+    public GroupBox(String label, CategoryPanel categoryPanel, float x, float y, float width, float height, boolean renderLabel) {
         this.x = x;
         this.y = y;
         this.label = label;
-        this.ySize = ySize;
+        this.width = width;
+        this.height = height;
         this.renderLabel = renderLabel;
         this.categoryPanel = categoryPanel;
         categoryPanel.categoryButton.panel.theme.groupBoxConstructor(this, x, y);

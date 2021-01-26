@@ -23,10 +23,11 @@ public class ConfigList {
         this.y = y;
         this.categoryPanel = categoryPanel;
         this.configs = Client.configManager.getConfigs().toArray(new String[] {});
-        configButtonList.add(new ConfigButton(this,x,y + 32, ConfigButton.ButtonType.LOAD));
-        configButtonList.add(new ConfigButton(this,x,y + 42, ConfigButton.ButtonType.SAVE));
-        configButtonList.add(new ConfigButton(this,x,y + 52, ConfigButton.ButtonType.DELETE));
-        configButtonList.add(new ConfigButton(this,x,y + 62, ConfigButton.ButtonType.CREATE));
+        configButtonList.add(new ConfigButton(this,x + 88,y + 0, ConfigButton.ButtonType.LOAD));
+        configButtonList.add(new ConfigButton(this,x + 88,y + 10, ConfigButton.ButtonType.SAVE));
+        configButtonList.add(new ConfigButton(this,x + 88,y + 20, ConfigButton.ButtonType.DELETE));
+        configButtonList.add(new ConfigButton(this,x + 88,y + 30, ConfigButton.ButtonType.CREATE));
+        configButtonList.add(new ConfigButton(this,x + 88,y + 40, ConfigButton.ButtonType.OPEN_FOLDER));
         configTextBox = categoryPanel.configTextBox;
     }
 

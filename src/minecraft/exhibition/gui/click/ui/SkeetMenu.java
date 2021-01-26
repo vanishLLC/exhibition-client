@@ -1235,8 +1235,8 @@ public class SkeetMenu extends UI {
         }
         if (categoryButton.name.equalsIgnoreCase("Settings")) {
             float biggestY = yOff + y;
-            float globalsOffsetX = xOff + 95, globalsOffsetY = biggestY;
-            categoryPanel.groupBoxes.add(new GroupBox("Client Settings", categoryPanel, globalsOffsetX, globalsOffsetY, 40.5F, true));
+            float globalsOffsetX = xOff + 185, globalsOffsetY = biggestY;
+            categoryPanel.groupBoxes.add(new GroupBox("Client Settings", categoryPanel, globalsOffsetX, globalsOffsetY, 90, 40.5F, true));
             categoryPanel.checkboxes.add(new Checkbox(categoryPanel, globalsOffsetX + 0.5F, globalsOffsetY + 10, GlobalValues.centerNotifs));
             categoryPanel.checkboxes.add(new Checkbox(categoryPanel, globalsOffsetX + 0.5F, globalsOffsetY + 20, GlobalValues.scaleFix));
             categoryPanel.checkboxes.add(new Checkbox(categoryPanel, globalsOffsetX + 0.5F, globalsOffsetY + 30, GlobalValues.showCape));
@@ -1248,13 +1248,13 @@ public class SkeetMenu extends UI {
 
 
             float xOffsetXD = xOff, yOffsetXD = biggestY;
-            categoryPanel.groupBoxes.add(new GroupBox("Configs", categoryPanel, xOffsetXD, yOffsetXD, 100, true));
-            categoryPanel.configTextBox = new ConfigTextBox(xOffsetXD, yOffsetXD + 90, categoryPanel);
-            categoryPanel.configList = new ConfigList(xOffsetXD, yOffsetXD + 10, categoryPanel);
+            categoryPanel.groupBoxes.add(new GroupBox("Configs", categoryPanel, xOffsetXD, yOffsetXD, 180, 85 - 1.5F, true));
+            categoryPanel.configTextBox = new ConfigTextBox(xOffsetXD + 89, yOffsetXD + 67.5F, categoryPanel);
+            categoryPanel.configList = new ConfigList(xOffsetXD + 1, yOffsetXD + 10, categoryPanel);
 
             //                                 categoryPanel.checkboxes.add(new Checkbox(categoryPanel, setting.getName(), xOff + x1, yOff + y, setting));
-            categoryPanel.checkboxes.add(new Checkbox(categoryPanel, GlobalValues.saveVisuals.getName(), xOffsetXD + 0.5F, yOffsetXD + 100, GlobalValues.saveVisuals));
-            categoryPanel.checkboxes.add(new Checkbox(categoryPanel, GlobalValues.loadVisuals.getName(), xOffsetXD + 44.5F, yOffsetXD + 100, GlobalValues.loadVisuals));
+            categoryPanel.checkboxes.add(new Checkbox(categoryPanel, GlobalValues.saveVisuals.getName(), xOffsetXD + 89 + 0.5F, yOffsetXD + 80, GlobalValues.saveVisuals));
+            categoryPanel.checkboxes.add(new Checkbox(categoryPanel, GlobalValues.loadVisuals.getName(), xOffsetXD + 89 + 44.5F, yOffsetXD + 80, GlobalValues.loadVisuals));
         }
         if (categoryButton.name.equalsIgnoreCase("Colors")) {
             categoryPanel.colorPreviews.add(new ColorPreview(ColorManager.fVis, "Friendly Visible", xOff + 77.5F, y, categoryButton));
@@ -1444,7 +1444,7 @@ public class SkeetMenu extends UI {
         RenderingUtil.rectangle(xOff + 4.5, yOff - 6, xOff + Client.fs.getWidth(groupBox.label) + 6.5, yOff - 5.5, -1);
         RenderingUtil.rectangle(xOff + 5, yOff - 5.5, xOff + Client.fs.getWidth(groupBox.label) + 6, yOff - 5, -1);
         Depth.render(GL11.GL_LESS);
-        RenderingUtil.rectangleBordered(xOff, yOff - 6, xOff + 90, yOff + groupBox.ySize, 0.5, Colors.getColor(0, 0), Colors.getColor(10, (int) opacity.getOpacity()));
+        RenderingUtil.rectangleBordered(xOff, yOff - 6, xOff + groupBox.width, yOff + groupBox.height, 0.5, Colors.getColor(0, 0), Colors.getColor(10, (int) opacity.getOpacity()));
         Depth.post();
 
 
@@ -1454,7 +1454,7 @@ public class SkeetMenu extends UI {
         RenderingUtil.rectangle(xOff + 5, yOff - 5.5, xOff + Client.fs.getWidth(groupBox.label) + 6, yOff - 5, -1);
 
         Depth.render(GL11.GL_LESS);
-        RenderingUtil.rectangleBordered(xOff + 0.5, yOff - 5.5, xOff + 90 - 0.5, yOff + groupBox.ySize - 0.5, 0.5, Colors.getColor(17, (int) opacity.getOpacity()), Colors.getColor(48, (int) opacity.getOpacity()));
+        RenderingUtil.rectangleBordered(xOff + 0.5, yOff - 5.5, xOff + groupBox.width - 0.5, yOff + groupBox.height - 0.5, 0.5, Colors.getColor(17, (int) opacity.getOpacity()), Colors.getColor(48, (int) opacity.getOpacity()));
         Depth.post();
 
         if (groupBox.renderLabel) {
@@ -1488,7 +1488,7 @@ public class SkeetMenu extends UI {
         RenderingUtil.drawGradient(configButton.x + xOff, configButton.y + yOff, configButton.x + xOff + 85, configButton.y + yOff + 7.5, Colors.getColor(31, (int) opacity.getOpacity()), Colors.getColor(36, (int) opacity.getOpacity()));
         TTFFontRenderer font = Client.fsmallbold;
 
-        String name = configButton.buttonType.name().charAt(0) + configButton.buttonType.name().toLowerCase().substring(1);
+        String name = configButton.buttonType.name();
         font.drawStringWithShadow(name, (configButton.x + 85 / 2F + xOff) - font.getWidth(name) / 2, (configButton.y + 2 + yOff), hovering ? Colors.getColor(255, (int) opacity.getOpacity()) : Colors.getColor(150, (int) opacity.getOpacity()));
         if (hovering) {
             RenderingUtil.rectangleBordered(configButton.x + xOff, configButton.y + yOff, configButton.x + xOff + 85, configButton.y + yOff + 7.5, 0.3, Colors.getColor(0, 0), Colors.getColor(90, (int) opacity.getOpacity()));
@@ -1503,17 +1503,29 @@ public class SkeetMenu extends UI {
         if (hovering && button == 0 && configButton.buttonType == ConfigButton.ButtonType.CREATE) {
             Client.configManager.createConfig(configButton.configList.configTextBox.textString);
             configButton.configList.configs = Client.configManager.getConfigs().toArray(new String[]{});
+        } else if (hovering && button == 0 && configButton.buttonType == ConfigButton.ButtonType.OPEN_FOLDER) {
+            try {
+                if (Desktop.isDesktopSupported()) {
+                    Desktop desktop = Desktop.getDesktop();
+                    desktop.browse(Client.configManager.getFolder().toURI()); // Throws
+                }
+            } catch (Exception e) {
+                ChatUtil.printChat("Error opening Configs directory.");
+            }
         } else if (hovering && button == 0 && configButton.configList.configs.length > 0 && configButton.configList.selectedConfigID != -1) {
-            switch (configButton.buttonType) {
-                case LOAD:
+            switch (configButton.buttonType.name()) {
+                case "Load":
                     Client.configManager.load(configButton.configList.configs[configButton.configList.selectedConfigID]);
                     break;
-                case SAVE:
+                case "Save":
                     Client.configManager.save(configButton.configList.configs[configButton.configList.selectedConfigID]);
                     break;
-                case DELETE:
+                case "Delete":
                     Client.configManager.deleteConfig(configButton.configList.configs[configButton.configList.selectedConfigID]);
                     configButton.configList.selectedConfigID = -1;
+                    break;
+                case "Open Folder":
+
                     break;
             }
             configButton.configList.configs = Client.configManager.getConfigs().toArray(new String[]{});
@@ -1534,12 +1546,12 @@ public class SkeetMenu extends UI {
                 var10 = 1;
             }
 
-            configList.amountScrolled += (float) (var10 * (-7.5) / 2);
+            configList.amountScrolled += (float) (var10 * (-8.0F) / 2);
             if (configList.amountScrolled > 0) {
                 configList.amountScrolled = 0;
             }
-            if (configList.amountScrolled < ((configList.configs.length - 4) * -7.5F)) {
-                configList.amountScrolled = ((configList.configs.length - 4) * -7.5F);
+            if (configList.amountScrolled < ((configList.configs.length - 10) * -8.0F)) {
+                configList.amountScrolled = ((configList.configs.length - 10) * -8.0F);
             }
         }
     }
@@ -1549,26 +1561,28 @@ public class SkeetMenu extends UI {
         float xOff = configList.categoryPanel.categoryButton.panel.dragX;
         float yOff = configList.categoryPanel.categoryButton.panel.dragY;
 
+        int height = 80;
+
         if (configList.categoryPanel.visible)
             if (timer.delay(1000)) {
                 configList.configs = Client.configManager.getConfigs().toArray(new String[]{});
                 timer.reset();
             }
 
-        boolean hovering = configList.hovering = (x >= xOff + configList.x) && (y >= yOff + configList.y) && (x <= xOff + configList.x + 84) && (y <= yOff + configList.y + 30);
+        boolean hovering = configList.hovering = (x >= xOff + configList.x) && (y >= yOff + configList.y) && (x <= xOff + configList.x + 84) && (y <= yOff + configList.y + height);
 
-        RenderingUtil.rectangle(configList.x + xOff - 0.3, configList.y + yOff - 0.3, configList.x + xOff + 84 + 1.5, configList.y + yOff + 30 + 0.3, Colors.getColor(10, (int) opacity.getOpacity()));
-        RenderingUtil.drawGradient(configList.x + xOff, configList.y + yOff, configList.x + xOff + 85, configList.y + yOff + 30, Colors.getColor(31, (int) opacity.getOpacity()), Colors.getColor(36, (int) opacity.getOpacity()));
+        RenderingUtil.rectangle(configList.x + xOff - 0.3, configList.y + yOff - 0.3, configList.x + xOff + 84 + 1.5, configList.y + yOff + height + 0.3, Colors.getColor(10, (int) opacity.getOpacity()));
+        RenderingUtil.drawGradient(configList.x + xOff, configList.y + yOff, configList.x + xOff + 85, configList.y + yOff + height, Colors.getColor(31, (int) opacity.getOpacity()), Colors.getColor(36, (int) opacity.getOpacity()));
         if (hovering) {
-            RenderingUtil.rectangleBordered(configList.x + xOff, configList.y + yOff, configList.x + xOff + 85, configList.y + yOff + 30, 0.3, Colors.getColor(0, 0), Colors.getColor(90, (int) opacity.getOpacity()));
+            RenderingUtil.rectangleBordered(configList.x + xOff, configList.y + yOff, configList.x + xOff + 85, configList.y + yOff + height, 0.3, Colors.getColor(0, 0), Colors.getColor(90, (int) opacity.getOpacity()));
         }
 
         float offsetY = 2 + (configList.amountScrolled);
-        float offsetValueThing = (configList.amountScrolled / -7.5F);
-        float totalHeight = (configList.configs.length * 7.5F);
-        if (totalHeight > 30) {
-            float relativeScale = 29 * (30 / totalHeight);
-            float relativeOffset = (29) * (offsetValueThing / configList.configs.length);
+        float offsetValueThing = (configList.amountScrolled / -8.0F);
+        float totalHeight = (configList.configs.length * 8.0F);
+        if (totalHeight > height) {
+            float relativeScale = (height - 1) * (height / totalHeight);
+            float relativeOffset = (height - 1) * (offsetValueThing / configList.configs.length);
             float yPos = configList.y + yOff + relativeOffset;
             RenderingUtil.rectangle(configList.x + xOff + 82, yPos + 0.5, configList.x + xOff + 83, yPos + relativeScale + 0.5, Colors.getColor(10, (int) opacity.getOpacity()));
             RenderingUtil.rectangleBordered(configList.x + xOff + 81.5, yPos + 1, configList.x + xOff + 83.5, yPos + relativeScale, 0.5, Colors.getColor(50, (int) opacity.getOpacity()), Colors.getColor(10, (int) opacity.getOpacity()));
@@ -1577,15 +1591,15 @@ public class SkeetMenu extends UI {
 
         Depth.pre();
         Depth.mask();
-        RenderingUtil.rectangle(configList.x + xOff, configList.y + yOff + 0.5, configList.x + xOff + 84, configList.y + yOff + 30 - 0.5, -1);
+        RenderingUtil.rectangle(configList.x + xOff, configList.y + yOff + 0.5, configList.x + xOff + 84, configList.y + yOff + height - 0.5, -1);
         Depth.render();
         int i = 0;
         for (String cfgName : configList.configs) {
-            boolean hoveringName = (x >= xOff + configList.x) && (y >= yOff + configList.y + offsetY) && (x <= xOff + configList.x + 84) && (y <= yOff + configList.y + offsetY + 7.5F);
+            boolean hoveringName = (x >= xOff + configList.x) && (y >= yOff + configList.y + offsetY) && (x <= xOff + configList.x + 84) && (y <= yOff + configList.y + offsetY + 8.0F);
             TTFFontRenderer font = Client.fsmallbold;
             int color = configList.selectedConfigID == i ? Colors.getColor(ColorManager.hudColor.red, ColorManager.hudColor.green, ColorManager.hudColor.blue, (int) opacity.getOpacity()) : hoveringName ? Colors.getColor(255, (int) opacity.getOpacity()) : Colors.getColor(150, (int) opacity.getOpacity());
             font.drawStringWithShadow(cfgName, (configList.x + 1.5F + xOff), (configList.y + offsetY + yOff), color);
-            offsetY += 7.5F;
+            offsetY += 8.0F;
             i++;
         }
         Depth.post();
@@ -1598,12 +1612,15 @@ public class SkeetMenu extends UI {
         float yOff = configList.categoryPanel.categoryButton.panel.dragY;
         if (!configList.categoryPanel.visible)
             return;
-        boolean hovering = (x >= xOff + configList.x) && (y >= yOff + configList.y) && (x <= xOff + configList.x + 84) && (y <= yOff + configList.y + 30);
+
+        int height = 80;
+
+        boolean hovering = (x >= xOff + configList.x) && (y >= yOff + configList.y) && (x <= xOff + configList.x + 84) && (y <= yOff + configList.y + height);
         float offsetY = 2 + (configList.amountScrolled);
         int i = 0;
         for (String ignored : configList.configs) {
-            boolean hoveringName = hovering && (x >= xOff + configList.x) && (y >= yOff + configList.y + offsetY) && (x <= xOff + configList.x + 84) && (y <= yOff + configList.y + offsetY + 7.5F);
-            offsetY += 7.5F;
+            boolean hoveringName = hovering && (x >= xOff + configList.x) && (y >= yOff + configList.y + offsetY) && (x <= xOff + configList.x + 84) && (y <= yOff + configList.y + offsetY + 8.0F);
+            offsetY += 8.0F;
             if (hoveringName) {
                 configList.selectedConfigID = i;
                 break;
