@@ -167,7 +167,7 @@ public class Bypass extends Module {
                 }
             }
 
-            boolean debug = true;
+            boolean debug = false;
 
             if (option.getSelected().equals("Dong") && !option.getSelected().equals("Gast and Tasteful Skidding be like #NOVOONTOP")) {
                 if (mc.thePlayer == null) {
@@ -184,7 +184,8 @@ public class Bypass extends Module {
                                 NetUtil.sendPacketNoEvents(chokedPacket);
                             }
                         }
-                        DevNotifications.getManager().post("\247e\247lRELIEF " + bruh);
+                        if (debug)
+                            DevNotifications.getManager().post("\247e\247lRELIEF " + bruh);
                     }
                 }
 
@@ -318,7 +319,7 @@ public class Bypass extends Module {
                         } else {
                             event.setCancelled(true);
                             if (c13Timer.delay(1000)) {
-                                Notifications.getManager().post("Bypass Error", "Possible WD/Staff Alert. Please rejoin or finish your match quickly.", 7500, Notifications.Type.WARNING);
+                                Notifications.getManager().post("Bypass Error", "Possible WD ban. Please rejoin or finish your match quickly.", 7500, Notifications.Type.WARNING);
                                 c13Timer.reset();
                             }
                             if (debug)
@@ -402,7 +403,7 @@ public class Bypass extends Module {
         }
 
         if (sent > 0) {
-            DevNotifications.getManager().post("\247b\247lSent " + sent);
+            //DevNotifications.getManager().post("\247b\247lSent " + sent);
         }
         this.resetPackets();
     }
