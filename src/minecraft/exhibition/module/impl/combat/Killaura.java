@@ -743,6 +743,7 @@ public class Killaura extends Module {
                                     setupTick = 0;
                                 }
                             } else {
+                                setupTick = 0;
                                 isCritSetup = true;
                             }
 
