@@ -13,7 +13,6 @@ import exhibition.management.UUIDResolver;
 import exhibition.management.friend.Friend;
 import exhibition.management.friend.FriendManager;
 import exhibition.module.impl.other.StreamerMode;
-import exhibition.util.misc.ChatUtil;
 import exhibition.util.render.Colors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.network.NetHandlerPlayClient;

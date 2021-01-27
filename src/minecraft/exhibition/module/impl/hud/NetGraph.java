@@ -103,7 +103,7 @@ public class NetGraph extends Module {
                 GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
                 GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
                 GlStateManager.translate(e.getResolution().getScaledWidth_double() / 2 - 20, e.getResolution().getScaledHeight_double() / 2 - 70, 0);
-                RenderingUtil.glColor(Colors.getColor(255, 127, 0));
+                RenderingUtil.glColor(Colors.getColor(255));
                 GlStateManager.scale(0.5, 0.5, 0.5);
                 RenderingUtil.drawIcon(0, 0, 0, 0, 80, 80, 80, 80);
                 GL11.glColor4d(1, 1, 1, 1);

@@ -594,9 +594,6 @@ public class ESP2D extends Module {
     private void renderArmor(Entity ent, ScaledResolution scaledRes, double x, double y, double endx, double endy) {
         int mX = scaledRes.getScaledWidth(), mY = scaledRes.getScaledHeight();
         boolean hovering = mX > x - 15 && mX < endx + 15 && mY > y - 15 && mY < endy + 15;
-
-        List<ItemStack> renderStacks = new ArrayList<>();
-
         if ((boolean) settings.get(ARMOR).getValue()) {
             float var1 = (float) ((endy - y) / 4);
             ItemStack stack = ((EntityPlayer) ent).getEquipmentInSlot(4);

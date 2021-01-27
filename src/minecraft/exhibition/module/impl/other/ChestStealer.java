@@ -48,7 +48,6 @@ public class ChestStealer extends Module {
     private String IGNORE = "IGNORE";
     private String TRASH = "TRASH";
 
-
     private Options mode = new Options("Mode", "Normal", "Silent", "Render", "Normal");
 
     private Setting<Options> silent = new Setting<>("MODE", mode, "Chest stealer mode.");
@@ -121,6 +120,8 @@ public class ChestStealer extends Module {
             if (!mc.thePlayer.capabilities.allowEdit)
                 return;
 
+            boolean isPitMode = pitMode.getValue();
+
             if ((Boolean) settings.get(CHESTAURA).getValue() && (mc.currentScreen == null) && !isStealing && ((Killaura) Client.getModuleManager().get(Killaura.class)).loaded.isEmpty() && Killaura.getTarget() == null && (!HypixelUtil.isInGame("SKYWARS") || HypixelUtil.isGameActive())) {
                 if (stealTimer.delay(2000) && isStealing) {
                     stealTimer.reset();
@@ -169,7 +170,7 @@ public class ChestStealer extends Module {
                     if (!isStealing) {
                         canMissAgain = random.nextBoolean();
                     }
-                    if (!Client.instance.is1_9orGreater() || !isStealing) {
+                    if (isPitMode || (!Client.instance.is1_9orGreater()) || !isStealing) {
                         this.slotList = new ArrayList<>();
                         for (int i = 0; i < guiChest.lowerChestInventory.getSizeInventory(); i++) {
                             ItemStack stack = guiChest.lowerChestInventory.getStackInSlot(i);
@@ -177,14 +178,14 @@ public class ChestStealer extends Module {
                             if (stack != null) {
                                 this.slotList.add(i);
                                 canMissAgain = random.nextBoolean();
-                            } else if (!pitMode.getValue() && randomMiss.getValue() && canMissAgain && Math.random() > 0.95) {
+                            } else if (!isPitMode && randomMiss.getValue() && canMissAgain && Math.random() > 0.95) {
                                 canMissAgain = false;
                                 this.slotList.add(i);
                             }
                         }
                         Collections.shuffle(this.slotList);
 
-                        if (pitMode.getValue()) {
+                        if (isPitMode) {
                             this.slotList.sort(Comparator.comparingDouble((o) -> {
 
                                 double weight = 0;
@@ -193,7 +194,7 @@ public class ChestStealer extends Module {
                                     Item item = firstItem.getItem();
                                     if (item instanceof ItemArmor) {
                                         ItemArmor armor = (ItemArmor) item;
-                                        weight -= armor.hasColor(firstItem) ? 10 : 3;
+                                        weight -= armor.getArmorMaterial() == ItemArmor.ArmorMaterial.LEATHER ? 10 : 3;
                                     }
                                     if (item instanceof ItemSword) {
                                         weight -= 2;
@@ -206,7 +207,6 @@ public class ChestStealer extends Module {
                                 return weight;
                             }));
                         }
-
                     }
                     isStealing = true;
 

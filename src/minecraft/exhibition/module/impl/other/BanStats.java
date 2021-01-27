@@ -139,7 +139,7 @@ public class BanStats extends Module {
 
                             staffTotalBans = staff_total;
                         }
-                        Thread.sleep(20_000);
+                        Thread.sleep(10_000);
                     } catch (Exception e) {
                         Thread.sleep(5_000);
                         e.printStackTrace();

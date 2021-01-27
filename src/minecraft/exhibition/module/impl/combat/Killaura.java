@@ -411,10 +411,10 @@ public class Killaura extends Module {
                 isBlocking = false;
             }
         }
-        Scaffold scaffold = (Scaffold) Client.getModuleManager().get(Scaffold.class);
-        LongJump longjump = (LongJump) Client.getModuleManager().get(LongJump.class);
+        Scaffold scaffold = Client.getModuleManager().get(Scaffold.class);
+        LongJump longjump = Client.getModuleManager().get(LongJump.class);
         boolean disable = false;
-        if ((AutoPot.potting || AutoPot.haltTicks > 0) || scaffold.isEnabled() || scaffold.isPlacing() || longjump.allowAttack() || longjump.isBruhing()) {
+        if ((AutoPot.potting || AutoPot.haltTicks > 0) || scaffold.isEnabled() || scaffold.isPlacing() || longjump.allowAttack() || longjump.isBruhing() || Client.getModuleManager().isEnabled(FreecamTP.class)) {
             disable = true;
         }
 
@@ -647,9 +647,15 @@ public class Killaura extends Module {
 
                             boolean setupCrits = critModule.isOldCrits() || target.hurtTime <= 1 || (target.waitTicks <= 1);
 
-                            boolean badCrits = allowInvalidAngles && antiCritFunky.getValue() && shouldntCrit(target);
+                            boolean dontCrit = allowInvalidAngles && antiCritFunky.getValue() && hasEnchant(target, "Crit", "Funk");
 
-                            if (!badCrits) {
+                            if(target instanceof EntityPlayer && antiCritFunky.getValue() && hasEnchant(target, "Retro")) {
+                                if(((EntityPlayer)target).criticalHits > 2) {
+                                    dontCrit = true;
+                                }
+                            }
+
+                            if (!dontCrit) {
                                 if (crits) {
                                     if (critModule.isNewCrits()) {
                                         if (mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically && isNextTickGround()) {
@@ -740,7 +746,7 @@ public class Killaura extends Module {
                                 isCritSetup = true;
                             }
 
-                            if (antiCritFunky.getValue() && isCritFunky(target) && !em.isOnground() && !mc.thePlayer.onGround && allowInvalidAngles) {
+                            if (antiCritFunky.getValue() && hasEnchant(target) && !em.isOnground() && !mc.thePlayer.onGround && allowInvalidAngles) {
                                 boolean isAttacking = mc.thePlayer.getDistanceToEntity(target) <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && delay.roundDelay(50 * nextRandom);
                                 boolean canAttackRightNow = attack.equals("Always") || (attack.equals("Precise") ? target.waitTicks <= 0 : target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
 
@@ -825,7 +831,7 @@ public class Killaura extends Module {
 
                     if (((Number) settings.get(ANGLESTEP).getValue()).intValue() == 0 || (off <= 0.11 || (off <= 1 && off >= 0.22 && MathUtils.getIncremental(angleTimer.getDifference(), 50) < 100))) {
 
-                        if (crits && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically && critModule.isPacket() && setupCrits && isCritSetup) {
+                        if (crits && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically && critModule.isPacket() && setupCrits && isCritSetup && !em.isOnground()) {
                             if (HypixelUtil.isVerifiedHypixel() && mc.getCurrentServerData() != null && (mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net"))) {
                                 NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.0076092939542 - (0.0000000002475776F) * Math.random(), mc.thePlayer.posZ, false));
                             } else {
@@ -853,6 +859,14 @@ public class Killaura extends Module {
                             }
 
                             if (target.waitTicks <= 0) {
+                                if (target instanceof EntityPlayer) {
+                                    if ((!em.isOnground() && isCritSetup) || !mc.thePlayer.onGround) {
+                                        ((EntityPlayer) target).criticalHits++;
+                                    } else {
+                                        ((EntityPlayer) target).criticalHits = 0;
+                                    }
+                                }
+
                                 boolean b = Angle.INSTANCE.check(new Location(mc.thePlayer.posX, em.getY(), mc.thePlayer.posZ, em.getYaw(), 0), target);
                                 target.waitTicks = 10;
                             }
@@ -961,7 +975,7 @@ public class Killaura extends Module {
         }
     }
 
-    private boolean shouldntCrit(EntityLivingBase target) {
+    private boolean hasEnchant(EntityLivingBase target, String... enchants) {
         if (!HypixelUtil.isInGame("PIT")) {
             return false;
         }
@@ -969,25 +983,10 @@ public class Killaura extends Module {
         if (target instanceof EntityPlayer) {
             if (target.getEquipmentInSlot(2) != null) {
                 for (String pitEnchant : HypixelUtil.getPitEnchants(target.getEquipmentInSlot(2))) {
-                    if ((pitEnchant.contains("Crit") && pitEnchant.contains("Funk")) || pitEnchant.contains("Retro")) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    private boolean isCritFunky(EntityLivingBase target) {
-        if (!HypixelUtil.isInGame("PIT")) {
-            return false;
-        }
-
-        if (target instanceof EntityPlayer) {
-            if (target.getEquipmentInSlot(2) != null) {
-                for (String pitEnchant : HypixelUtil.getPitEnchants(target.getEquipmentInSlot(2))) {
-                    if (pitEnchant.contains("Crit") && pitEnchant.contains("Funk")) {
-                        return true;
+                    for (String enchant : enchants) {
+                        if(pitEnchant.contains(enchant)) {
+                            return true;
+                        }
                     }
                 }
             }

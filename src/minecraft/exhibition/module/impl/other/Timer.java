@@ -6,7 +6,6 @@ import exhibition.event.impl.EventTick;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
-import exhibition.util.MathUtils;
 
 /**
  * Created by Arithmo on 4/13/2017 at 11:29 PM.

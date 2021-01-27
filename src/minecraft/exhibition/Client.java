@@ -1,6 +1,8 @@
 package exhibition;
 
 import com.github.creeper123123321.viafabric.ViaFabric;
+import com.github.creeper123123321.viafabric.handler.CommonTransformer;
+import com.github.creeper123123321.viafabric.handler.clientside.VRDecodeHandler;
 import exhibition.event.Event;
 import exhibition.event.EventListener;
 import exhibition.event.EventSystem;
@@ -31,6 +33,7 @@ import exhibition.util.MathUtils;
 import exhibition.util.Timer;
 import exhibition.util.misc.ChatUtil;
 import exhibition.util.security.*;
+import io.netty.channel.ChannelHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.FontRenderer;
@@ -49,6 +52,8 @@ import net.minecraft.util.CryptManager;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StringUtils;
+import us.myles.ViaVersion.api.protocol.ProtocolVersion;
+import us.myles.ViaVersion.protocols.base.ProtocolInfo;
 
 import java.awt.*;
 import java.io.File;
@@ -255,11 +260,35 @@ public class Client extends Castable implements EventListener {
     }
 
     public boolean is1_16_4() {
-        return ViaFabric.config.getClientSideVersion() == 754;
+        try {
+            ChannelHandler viaDecoder = (Minecraft.getMinecraft().getNetHandler().getNetworkManager()).channel.pipeline().get(CommonTransformer.HANDLER_DECODER_NAME);
+            if (viaDecoder instanceof VRDecodeHandler) {
+                ProtocolInfo protocol = ((VRDecodeHandler) viaDecoder).getInfo().getProtocolInfo();
+                if (protocol != null) {
+                    return protocol.getServerProtocolVersion() == 754;
+                }
+            }
+        } catch (Exception e) {
+
+        }
+
+        return ViaFabric.config.getClientSideVersion() == 754 && Minecraft.getMinecraft().getIntegratedServer() == null;
     }
 
     public boolean is1_9orGreater() {
-        return ViaFabric.config.getClientSideVersion() >= 107;
+        try {
+            ChannelHandler viaDecoder = (Minecraft.getMinecraft().getNetHandler().getNetworkManager()).channel.pipeline().get(CommonTransformer.HANDLER_DECODER_NAME);
+            if (viaDecoder instanceof VRDecodeHandler) {
+                ProtocolInfo protocol = ((VRDecodeHandler) viaDecoder).getInfo().getProtocolInfo();
+                if (protocol != null) {
+                    return protocol.getServerProtocolVersion() >= 107;
+                }
+            }
+        } catch (Exception e) {
+
+        }
+
+        return ViaFabric.config.getClientSideVersion() >= 107 && Minecraft.getMinecraft().getIntegratedServer() == null;
     }
 
     public void killSwitch() {

@@ -27,19 +27,20 @@ public class TeamUtils {
     private static String isTeam(EntityLivingBase player) {
         boolean pitMode = HypixelUtil.isInGame("HYPIXEL PIT") && HypixelUtil.scoreboardContains("Event:");
         String nameFormated = player.getDisplayName().getFormattedText();
-        if (pitMode && HypixelUtil.scoreboardContains("SQUADS")) {
-            if (nameFormated.contains("[")) {
-                nameFormated = "§" + nameFormated.split("\\[§(.).*§[0-9a-z]")[1];
+        if (pitMode)
+            if (HypixelUtil.scoreboardContains("SQUADS")) {
+                if (nameFormated.contains("[")) {
+                    nameFormated = "§" + nameFormated.split("\\[")[1].substring(2);
+                }
+            } else if (HypixelUtil.scoreboardContains("TDM")) {
+                if (nameFormated.contains("]")) {
+                    nameFormated = nameFormated.split("]")[1];
+                }
+            } else if (!HypixelUtil.scoreboardContains("PIZZA")) {
+                if (nameFormated.contains("]")) {
+                    nameFormated = nameFormated.split("]")[1];
+                }
             }
-        } else if (pitMode && HypixelUtil.scoreboardContains("TDM")) {
-            if (nameFormated.contains("]")) {
-                nameFormated = nameFormated.split("]")[1];
-            }
-        } else if (pitMode && !HypixelUtil.scoreboardContains("PIZZA")) {
-            if (nameFormated.contains("] ")) {
-                nameFormated = nameFormated.split("] ")[1];
-            }
-        }
         final Matcher m = p.matcher(nameFormated);
         if (m.find()) {
             return m.group(1);

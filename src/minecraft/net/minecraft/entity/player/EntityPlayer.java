@@ -96,11 +96,11 @@ public abstract class EntityPlayer extends EntityLivingBase
     /** Hacker Detect values */
     public int flags;
     public boolean lastTickInvisible;
-    private boolean priority;
     public int flagged;
     public int lastMovedTick = -1;
     public int invWalkTicks;
     public int lastDroppedTick = -1;
+    public int criticalHits = 0;
 
     public double lastMotionY;
     public float lastAirYaw;
@@ -108,8 +108,6 @@ public abstract class EntityPlayer extends EntityLivingBase
     public int jumpedTick;
     public int speedFlags;
 
-    public int lastBlockSwingTick = -1;
-    
     public int lastFlaggedTick = -1;
     public int lowhopFlags;
 

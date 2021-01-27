@@ -43,14 +43,14 @@ public final class Notifications {
 		DevNotifications.getManager().post("[" + type.name() + "]: " + header + " | " + subtext);
 		if(!notifications.isEmpty()) {
 			for (INotification not : notifications) {
-				if(not.getHeader().startsWith(header) && not.getType().equals(type)) {
+				if(type != Type.WARNING && type != Type.OKAY && not.getHeader().startsWith(header) && not.getType().equals(type)) {
 					if(!not.getSubtext().equals(subtext)) {
 						not.setStart(System.currentTimeMillis());
 						not.setDisplayTime(displayTime);
 					}
 
 					try {
-						if (type != Type.WARNING && type != Type.OKAY && not.getHeader().length() > header.length() && not.getHeader().substring(header.length()).startsWith(" (") && not.getHeader().substring(header.length()).endsWith(")")) {
+						if (not.getHeader().length() > header.length() && not.getHeader().substring(header.length()).startsWith(" (") && not.getHeader().substring(header.length()).endsWith(")")) {
 							String[] e = not.getHeader().split(" \\(");
 							int currentNumber = Integer.parseInt(e[1].replace(")", "")) + 1;
 							not.setHeader(e[0] + " (" + currentNumber + ")");

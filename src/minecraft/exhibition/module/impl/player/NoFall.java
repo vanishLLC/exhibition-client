@@ -11,7 +11,6 @@ import exhibition.module.impl.combat.Bypass;
 import exhibition.util.HypixelUtil;
 import exhibition.util.NetUtil;
 import exhibition.util.PlayerUtil;
-import exhibition.util.misc.ChatUtil;
 import net.minecraft.block.BlockAir;
 import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.util.BlockPos;
