@@ -173,7 +173,7 @@ public class Bypass extends Module {
                 }
             }
 
-            boolean debug = true;
+            boolean debug = false;
 
             if (option.getSelected().equals("Dong") && !option.getSelected().equals("Gast and Tasteful Skidding be like #NOVOONTOP")) {
                 if (mc.thePlayer == null) {
@@ -463,7 +463,7 @@ public class Bypass extends Module {
             }
         }
 
-        boolean debug = true;
+        boolean debug = false;
         if (sent > 0 && debug) {
             DevNotifications.getManager().post("\247b\247lSent " + sent);
         }

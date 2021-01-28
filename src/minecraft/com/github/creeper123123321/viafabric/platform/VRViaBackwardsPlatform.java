@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 
 public class VRViaBackwardsPlatform implements ViaBackwardsPlatform {
 
-    private Logger logger = (Logger)new LoggerWrapper(LogManager.getLogger("ViaBackwards"));
+    private Logger logger = (Logger) new LoggerWrapper(LogManager.getLogger("ViaBackwards"));
 
     private File configDir;
 
@@ -56,7 +56,8 @@ public class VRViaBackwardsPlatform implements ViaBackwardsPlatform {
     }
 
     @Override
-    public void disable() {}
+    public void disable() {
+    }
 
     @Override
     public File getDataFolder() {
