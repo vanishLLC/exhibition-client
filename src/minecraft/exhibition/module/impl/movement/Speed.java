@@ -292,8 +292,7 @@ public class Speed extends Module {
                     if ((stage == 1) && (mc.thePlayer.isCollidedVertically) && ((mc.thePlayer.moveForward != 0.0F) || (mc.thePlayer.moveStrafing != 0.0F))) {
                         speed = (0.25D + defaultSpeed() - 0.01D);
                     } else if ((stage == 2) && (mc.thePlayer.isCollidedVertically) && ((mc.thePlayer.moveForward != 0.0F) || (mc.thePlayer.moveStrafing != 0.0F))) {
-                        mc.thePlayer.motionY = 0.4D;
-                        em.setY(0.4D);
+                        em.setY(mc.thePlayer.motionY = 0.42F);
                         speed *= 1.749D;
                     } else if (stage == 3) {
                         double difference = 0.66D * (this.lastDist - defaultSpeed());
@@ -1030,7 +1029,7 @@ public class Speed extends Module {
                     if ((stage == 1) && (mc.thePlayer.isCollidedVertically) && ((mc.thePlayer.moveForward != 0.0F) || (mc.thePlayer.moveStrafing != 0.0F))) {
                         speed = (0.25D + defaultSpeed() - 0.01D);
                     } else if ((stage == 2) && (mc.thePlayer.isCollidedVertically) && ((mc.thePlayer.moveForward != 0.0F) || (mc.thePlayer.moveStrafing != 0.0F))) {
-                        double gay = UselessBypassClass.getBypassSpeed();
+                        double gay = 0.42F;
                         if (mc.thePlayer.isPotionActive(Potion.jump)) {
                             gay += (mc.thePlayer.getActivePotionEffect(Potion.jump).getAmplifier() + 1) * 0.1F;
                         }

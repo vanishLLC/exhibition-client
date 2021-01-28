@@ -173,7 +173,7 @@ public class Bypass extends Module {
                 }
             }
 
-            boolean debug = false;
+            boolean debug = true;
 
             if (option.getSelected().equals("Dong") && !option.getSelected().equals("Gast and Tasteful Skidding be like #NOVOONTOP")) {
                 if (mc.thePlayer == null) {
@@ -280,7 +280,7 @@ public class Bypass extends Module {
                         DevNotifications.getManager().post("\247bBypass is ready.");
                     int sent = 0;
                     int max = chokePackets.size();
-                    while (chokePackets.peek() != null && sent < 2) {
+                    while (chokePackets.peek() != null && sent < max - 1) {
                         Packet chokedPacket = chokePackets.poll();
                         if (chokedPacket != null) {
                             sent++;
@@ -325,13 +325,19 @@ public class Bypass extends Module {
                             }
                         } else {
                             event.setCancelled(true);
-                            if (c13Timer.delay(1000)) {
-                                Notifications.getManager().post("Bypass Error", "Possible WD ban. Please rejoin or finish your match quickly.", 7500, Notifications.Type.WARNING);
+                            if (c13Timer.delay(1000) && lastSentUid != 3) {
+                                DevNotifications.getManager().post("\2476Burst detected \247c" + packet.getUid() + " \2476" + mc.thePlayer.ticksExisted);
+                                //Notifications.getManager().post("Bypass Error", "Possible WD ban. Please rejoin or finish your match quickly.", 7500, Notifications.Type.WARNING);
                                 c13Timer.reset();
+                                if(lastSentUid == 2) {
+                                    DevNotifications.getManager().post("\247aWatchdog is now off " + mc.thePlayer.ticksExisted);
+                                    sendPackets();
+                                    resetPackets();
+                                }
+                                lastSentUid++;
                             }
                             if (debug)
                                 DevNotifications.getManager().post("\2476Canceled \247c" + packet.getUid() + " \2476" + mc.thePlayer.ticksExisted);
-                            chokePackets.add(packet);
                         }
                         c13Timer.reset();
                     }
@@ -457,7 +463,7 @@ public class Bypass extends Module {
             }
         }
 
-        boolean debug = false;
+        boolean debug = true;
         if (sent > 0 && debug) {
             DevNotifications.getManager().post("\247b\247lSent " + sent);
         }
