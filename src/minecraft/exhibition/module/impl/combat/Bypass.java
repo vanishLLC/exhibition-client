@@ -326,7 +326,7 @@ public class Bypass extends Module {
                         } else {
                             event.setCancelled(true);
                             if (c13Timer.delay(1000) && lastSentUid != 3) {
-                                DevNotifications.getManager().post("\2476Burst detected \247c" + packet.getUid() + " \2476" + mc.thePlayer.ticksExisted);
+                                DevNotifications.getManager().post("\247e\247lBurst detected \247c" + packet.getUid() + " \2476" + mc.thePlayer.ticksExisted);
                                 //Notifications.getManager().post("Bypass Error", "Possible WD ban. Please rejoin or finish your match quickly.", 7500, Notifications.Type.WARNING);
                                 c13Timer.reset();
                                 if(lastSentUid == 2) {

@@ -526,19 +526,22 @@ public class Client extends Castable implements EventListener {
                     return;
                 }
                 if (packet instanceof S03PacketTimeUpdate) {
-                    if (lastTime == -1) {
-                        lastTime = System.currentTimeMillis();
-                        return;
+                    try {
+                        if (lastTime == -1) {
+                            lastTime = System.currentTimeMillis();
+                            return;
+                        }
+
+                        while (differenceQueue.remainingCapacity() == 0) {
+                            differenceQueue.remove();
+                        }
+
+                        long current = System.currentTimeMillis();
+                        differenceQueue.offer(current - lastTime);
+                        lastTime = current;
+                    } catch (Exception ignored) {
+
                     }
-
-                    if (differenceQueue.remainingCapacity() == 0) {
-                        differenceQueue.remove();
-                    }
-
-                    long current = System.currentTimeMillis();
-                    differenceQueue.add(current - lastTime);
-                    lastTime = current;
-
                 }
                 if (packet instanceof S02PacketChat) {
                     S02PacketChat packetChat = (S02PacketChat) packet;
