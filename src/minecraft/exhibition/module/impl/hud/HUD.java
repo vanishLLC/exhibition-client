@@ -249,13 +249,17 @@ public class HUD extends Module {
         }
 
         Bypass bypass = Client.getModuleManager().get(Bypass.class);
-        if (bypass.option.getSelected().equals("Dong") && GlobalValues.allowDebug.getValue()) {
-            int current = (bypass.bruh - 10);
-            int max = (45 + bypass.randomDelay);
+        if (GlobalValues.allowDebug.getValue())
+            if (bypass.option.getSelected().equals("Dong")) {
+                int current = (bypass.bruh - 10);
+                int max = (45 + bypass.randomDelay);
 
-            String bruh = bypass.bruh == 0 ? "Watchdog Inactive" : current < 0 ? "Waiting" : current + "/" + max;
-            mc.fontRendererObj.drawString(bruh, (int) (e.getResolution().getScaledWidth_double() / 2 - mc.fontRendererObj.getStringWidth(bruh) / 2), 20, -1);
-        }
+                String bruh = bypass.bruh == 0 ? "Watchdog Inactive" : current < 0 ? "Waiting" : current + "/" + max;
+                mc.fontRendererObj.drawString(bruh, (int) (e.getResolution().getScaledWidth_double() / 2 - mc.fontRendererObj.getStringWidth(bruh) / 2), 20, -1);
+            } else if(bypass.option.getSelected().equals("Watchdog Off")) {
+                String bruh = bypass.lastSentUid != 3 ? "Watchdog Inactive" : "id: " + bypass.lastUid;
+                mc.fontRendererObj.drawString(bruh, (int) (e.getResolution().getScaledWidth_double() / 2 - mc.fontRendererObj.getStringWidth(bruh) / 2), 20, -1);
+            }
 
 //        String okbruh = Angle.INSTANCE.angleVL + " Angle VL | Size: " + Angle.INSTANCE.angleHits.size();
 //        mc.fontRendererObj.drawStringWithShadow(okbruh, e.getResolution().getScaledWidth_double() / 2 - 50, 250, -1);

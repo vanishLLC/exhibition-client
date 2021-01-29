@@ -75,7 +75,7 @@ public class Client extends Castable implements EventListener {
     public static boolean isNewUser;
 
     // Client data
-    public static String version = "012721";
+    public static String version = "012821";
     public static String parsedVersion;
     public static String clientName = "ArthimoWare";
     public static ColorManager cm = new ColorManager();

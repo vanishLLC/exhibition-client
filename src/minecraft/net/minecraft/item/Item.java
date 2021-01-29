@@ -938,6 +938,7 @@ public class Item
         registerItem(429, "jungle_door", (new ItemDoor(Blocks.jungle_door)).setUnlocalizedName("doorJungle"));
         registerItem(430, "acacia_door", (new ItemDoor(Blocks.acacia_door)).setUnlocalizedName("doorAcacia"));
         registerItem(431, "dark_oak_door", (new ItemDoor(Blocks.dark_oak_door)).setUnlocalizedName("doorDarkOak"));
+        registerItem(442, "shield", (new Item()).setUnlocalizedName("shield"));
         registerItem(2256, "record_13", (new ItemRecord("13")).setUnlocalizedName("record"));
         registerItem(2257, "record_cat", (new ItemRecord("cat")).setUnlocalizedName("record"));
         registerItem(2258, "record_blocks", (new ItemRecord("blocks")).setUnlocalizedName("record"));

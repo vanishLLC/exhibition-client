@@ -56,7 +56,7 @@ public class Scaffold extends Module {
 
     private static final List<Block> blacklistedBlocks = Arrays.asList(Blocks.rail, Blocks.activator_rail, Blocks.detector_rail, Blocks.golden_rail,
             Blocks.air, Blocks.water, Blocks.flowing_water, Blocks.lava, Blocks.flowing_lava, Blocks.enchanting_table, Blocks.carpet, Blocks.mob_spawner,
-            Blocks.glass_pane, Blocks.stained_glass_pane, Blocks.iron_bars, Blocks.web, Blocks.snow_layer, Blocks.ice, Blocks.packed_ice,
+            Blocks.glass_pane, Blocks.stained_glass_pane, Blocks.iron_bars, Blocks.web, Blocks.snow_layer, Blocks.ice, Blocks.packed_ice, Blocks.double_plant,
             Blocks.coal_ore, Blocks.diamond_ore, Blocks.emerald_ore, Blocks.ender_chest, Blocks.chest, Blocks.torch, Blocks.anvil, Blocks.trapped_chest,
             Blocks.noteblock, Blocks.jukebox, Blocks.tnt, Blocks.cobblestone_wall, Blocks.gold_ore, Blocks.iron_ore, Blocks.lapis_ore, Blocks.lit_redstone_ore,
             Blocks.quartz_ore, Blocks.redstone_ore, Blocks.wall_sign, Blocks.wooden_pressure_plate, Blocks.stone_pressure_plate, Blocks.light_weighted_pressure_plate,
@@ -114,7 +114,7 @@ public class Scaffold extends Module {
     }
 
     public void onDisable() {
-        if (!(mc.thePlayer == null)){
+        if (!(mc.thePlayer == null)) {
             if (mc.thePlayer.isSwingInProgress) {
                 mc.thePlayer.swingProgress = 0;
                 mc.thePlayer.swingProgressInt = 0;
@@ -122,9 +122,9 @@ public class Scaffold extends Module {
             }
             NetUtil.sendPacket(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.STOP_SNEAKING));
         }
-            if (fastTower.getValue()) {
-                mc.timer.timerSpeed = 1F;
-            }
+        if (fastTower.getValue()) {
+            mc.timer.timerSpeed = 1F;
+        }
     }
 
 
@@ -275,7 +275,7 @@ public class Scaffold extends Module {
 
                     if (!mc.gameSettings.keyBindJump.getIsKeyPressed()) {
                         towerTimer.reset();
-                        if(fastTower.getValue()) {
+                        if (fastTower.getValue()) {
                             mc.timer.timerSpeed = 1;
                         }
                     }
@@ -346,7 +346,7 @@ public class Scaffold extends Module {
 
                 if (!mc.gameSettings.keyBindJump.getIsKeyPressed()) {
                     towerTimer.reset();
-                    if(fastTower.getValue()) {
+                    if (fastTower.getValue()) {
                         mc.timer.timerSpeed = 1;
                     }
                 }
@@ -460,7 +460,7 @@ public class Scaffold extends Module {
                                     mc.timer.timerSpeed = 2.23F + (float) (0.04F * Math.random());
                                     fastPlaceTimer.reset();
                                 }
-                                if(fastPlaceTimer.delay(500)) {
+                                if (fastPlaceTimer.delay(500)) {
                                     mc.timer.timerSpeed = 1;
                                     fastPlaceTimer.reset();
                                 }

@@ -51,8 +51,8 @@ public class Bypass extends Module {
 
     public int bruh;
     public int randomDelay;
-    private int lastUid;
-    private int lastSentUid = -1;
+    public int lastUid;
+    public int lastSentUid = -1;
 
     private final Timer c13Timer = new Timer();
 
@@ -213,10 +213,10 @@ public class Bypass extends Module {
                                     return;
                                 }
 
-                                boolean canSend = mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically;
+                                boolean canSend = !isFlying ? mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically : (longJump.isEnabled() ? (longJump.bruhTick % 7 == 3 || longJump.bruhTick % 7 == 4) : mc.thePlayer.ticksExisted % 7 != 0);
 
                                 if (isFlying && (bruh - 10) >= (45 + randomDelay)) {
-                                    bruh -= 7;
+                                    bruh -= 10;
                                 }
 
                                 if ((bruh - 10) >= (45 + randomDelay) && (!isFlying || canSend)) {
@@ -338,6 +338,8 @@ public class Bypass extends Module {
                             }
                             if (debug)
                                 DevNotifications.getManager().post("\2476Canceled \247c" + packet.getUid() + " \2476" + mc.thePlayer.ticksExisted);
+
+                            lastUid = packet.getUid();
                         }
                         c13Timer.reset();
                     }

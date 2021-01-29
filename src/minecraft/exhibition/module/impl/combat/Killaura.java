@@ -246,7 +246,6 @@ public class Killaura extends Module {
 
     private int critWaitTicks;
 
-
     @RegisterEvent(events = {EventMotionUpdate.class, EventPacket.class, EventStep.class, EventRender3D.class})
     public void onEvent(Event event) {
         if (mc.thePlayer == null || mc.theWorld == null) {
@@ -622,7 +621,7 @@ public class Killaura extends Module {
                                             HypixelUtil.isInGame("DUEL") ? 1.2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1);
 
                                     if (backwardsDiff < normalDiff && newOffReverse < 0.1 && normalDiff > 120) {
-                                        em.setYaw(lastAngles.x += MathHelper.wrapAngleTo180_float((targetYaw + 180)) / 1.1F);
+                                        em.setYaw(lastAngles.x += MathHelper.wrapAngleTo180_float((targetYaw + 180)) / 1.1F + (float)randomNumber(2, -2));
 
                                         boolean isAttacking = mc.thePlayer.getDistanceToEntity(target) <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && delay.roundDelay(50 * nextRandom);
                                         boolean canAttackRightNow = (attack.equals("Always")) ||
@@ -630,16 +629,20 @@ public class Killaura extends Module {
                                                         target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
 
                                         // Only headsnap when attacking to reduce others figuring this out
-                                        em.setPitch(MathHelper.wrapAngleTo180_float(180 - em.getPitch()));
+                                        if (isAttacking && canAttackRightNow) {
+                                            em.setPitch(MathHelper.wrapAngleTo180_float(180 - em.getPitch()));
+                                        } else {
+                                            em.setPitch(em.getPitch() + 360);
+                                        }
                                     } else {
                                         angleTimer.reset();
-                                        em.setYaw((lastAngles.x += targetYaw / 1.1F));
+                                        em.setYaw((lastAngles.x += targetYaw / 1.1F) + (float)randomNumber(2, -2));
                                     }
                                 } else {
                                     float pitch = (float) -(Math.atan2(yDiff, dist) * 180.0D / 3.141592653589793D);
 
-                                    em.setYaw((lastAngles.x += targetYaw / 1.1F));
-                                    em.setPitch(MathHelper.clamp_float(pitch / 1.1F, -90, 90));
+                                    em.setYaw((lastAngles.x += targetYaw / 1.1F) + (float)randomNumber(2, -2));
+                                    em.setPitch(MathHelper.clamp_float(pitch / 1.1F + (float)randomNumber(2, -2), -90, 90));
                                 }
                             }
 
@@ -650,7 +653,9 @@ public class Killaura extends Module {
                             boolean dontCrit = allowInvalidAngles && antiCritFunky.getValue() && hasEnchant(target, "Crit", "Funk");
 
                             if(target instanceof EntityPlayer && antiCritFunky.getValue() && hasEnchant(target, "Retro")) {
-                                if(((EntityPlayer)target).criticalHits > 2) {
+                                if(((EntityPlayer)target).criticalHits > 1) {
+                                    em.setGround(true);
+                                    crits = false;
                                     dontCrit = true;
                                 }
                             }
@@ -786,9 +791,10 @@ public class Killaura extends Module {
                 boolean packetMode = Client.getModuleManager().isEnabled(NoSlowdown.class);
                 if (mc.thePlayer.isBlocking() && isBlocking && packetMode && PlayerUtil.isMoving() && mc.thePlayer.ticksExisted % 2 == 0 && !AutoSoup.isHealing) {
                     isBlocking = false;
-                    NetUtil.sendPacket(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
+                    NetUtil.sendPacketNoEvents(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
                     blockTimer.reset();
                 }
+
             } else if (em.isPost() && (loaded.size() > 0) && (loaded.get(Math.min(loaded.size() - 1, index)) != null) && target != null && !disable) {
 
                 boolean alwaysCrit = (!Client.getModuleManager().isEnabled(LongJump.class) && !Client.getModuleManager().isEnabled(Fly.class) && (boolean) critModule.getSetting("ALWAYS-CRIT").getValue());
