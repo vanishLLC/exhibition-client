@@ -83,7 +83,7 @@ public class HUD extends Module {
                 new Setting<>("TIME", false),
                 new Setting<>("PING", false),
                 new Setting<>("FPS", false),
-                new Setting<>("TPS", false)};
+                drawTicksPerSecond};
         settings.put("OPTIONS", new Setting<>("OPTIONS", options = new MultiBool("HUD Options", ents), "Extra options you can enable in the HUD."));
         settings.put("RENDERER", new Setting<>("RENDERER", selectedFont, "Select which fontrenderer to use for the overlay."));
     }
