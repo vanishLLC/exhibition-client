@@ -10,7 +10,7 @@ import java.util.Arrays;
 public abstract class Command implements Fireable, MinecraftUtil {
 	private final String[] names;
 	private final String description;
-	public final static String chatPrefix = "\2474[\247cE\2474]\2478 ";
+	public final static String chatPrefix = "\2474[\247cE\2474]\2477 ";
 	public Minecraft mc = Minecraft.getMinecraft();
 
 	public Command(String[] names, String description) {

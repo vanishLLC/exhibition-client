@@ -145,8 +145,6 @@ public class LongJump extends Module {
         }
         velocityBoost = 0;
 
-        randomIncrement = 10 + random.nextInt(6);
-
         distanceTraveled = 0;
         packetList.clear();
 
@@ -265,7 +263,6 @@ public class LongJump extends Module {
     private double speed;
     private double distance;
     private boolean onGroundLastTick;
-    private int randomIncrement;
 
     private Random random = new Random();
 
@@ -421,7 +418,7 @@ public class LongJump extends Module {
                 if (mc.thePlayer.onGround) {
                     if (onGroundLastTick) { // B
                         speed *= 1.83949644F;
-                        double gay = (double) (0.42F) - 0.07840000152587834;
+                        double gay = (double) (0.42F) - (autism ? 0.07840000152587834 : 0);
                         em.setY(mc.thePlayer.motionY = gay);
 
                     } else { // A
@@ -438,7 +435,8 @@ public class LongJump extends Module {
                     if (distance < 1.73949644) {
                         distance = 1.73949644;
                     }
-                    em.setY(mc.thePlayer.motionY = 0);
+                    if (autism)
+                        em.setY(mc.thePlayer.motionY = 0);
 //                if (lower.getValue()) {
 //                    em.setY(mc.thePlayer.motionY = -0.07840000152587834);
 //                }
@@ -594,7 +592,7 @@ public class LongJump extends Module {
 
                     if (isHypixel && mc.thePlayer.motionY > 0.23) {
                         em.setGround(true);
-                        em.setY(em.getY() + 0.07840000152587834);
+                        em.setY(em.getY() + (autism ? 0.07840000152587834 : 0));
                     }
 
                     if (delay < 3) {
