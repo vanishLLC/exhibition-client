@@ -175,229 +175,230 @@ public class Bypass extends Module {
 
             boolean debug = true;
 
-            if (option.getSelected().equals("Dong") && !option.getSelected().equals("Gast and Tasteful Skidding be like #NOVOONTOP")) {
-                if (mc.thePlayer == null) {
-                    resetPackets();
-                } else {
-                    boolean canSend = (longJump.isEnabled() ? (longJump.bruhTick % 7 == 3 || longJump.bruhTick % 7 == 4) : mc.thePlayer.ticksExisted % 7 != 0);
-                    if (canSend && isFlying && c13Timer.delay(2500) && bruh > 20) {
-                        c13Timer.reset();
+            if (HypixelUtil.isVerifiedHypixel())
+                if (option.getSelected().equals("Dong") && !option.getSelected().equals("Gast and Tasteful Skidding be like #NOVOONTOP")) {
+                    if (mc.thePlayer == null) {
+                        resetPackets();
+                    } else {
+                        boolean canSend = (longJump.isEnabled() ? (longJump.bruhTick % 7 == 3 || longJump.bruhTick % 7 == 4) : mc.thePlayer.ticksExisted % 7 != 0);
+                        if (canSend && isFlying && c13Timer.delay(2500) && bruh > 20) {
+                            c13Timer.reset();
+                            int sent = 0;
+                            while (chokePackets.peek() != null && sent < 1) {
+                                Packet chokedPacket = chokePackets.poll();
+                                if (chokedPacket != null) {
+                                    sent++;
+                                    NetUtil.sendPacketNoEvents(chokedPacket);
+                                }
+                            }
+                            if (debug)
+                                DevNotifications.getManager().post("\247e\247lRELIEF " + bruh);
+                        }
+                    }
+
+                    if (p instanceof C0FPacketConfirmTransaction) {
+                        C0FPacketConfirmTransaction packet = (C0FPacketConfirmTransaction) p;
+                        if (packet.getUid() < 0) {
+                            if (HypixelUtil.isVerifiedHypixel() && allowBypassing()) {
+                                this.bruh++;
+
+                                if (bruh > 5) {
+                                    event.setCancelled(true);
+                                    if (Math.abs(packet.getUid() - lastUid) > 5 && packet.getUid() != -1) {
+                                        chokePackets.add(packet);
+                                        sendPackets();
+                                        if (debug)
+                                            DevNotifications.getManager().post("\247bRESET BRUH TO " + packet.getUid() + " " + lastUid);
+                                        bruh = 0;
+                                        lastUid = packet.getUid();
+                                        return;
+                                    }
+
+                                    boolean canSend = !isFlying ? mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically : (longJump.isEnabled() ? (longJump.bruhTick % 7 == 3 || longJump.bruhTick % 7 == 4) : mc.thePlayer.ticksExisted % 7 != 0);
+
+                                    if (isFlying && (bruh - 10) >= (45 + randomDelay)) {
+                                        bruh -= 10;
+                                    }
+
+                                    if ((bruh - 10) >= (45 + randomDelay) && (!isFlying || canSend)) {
+                                        short lastbruh = (short) lastSentUid;
+                                        int sent = 0;
+                                        int size = chokePackets.size();
+                                        chokePackets.add(packet);
+                                        while (chokePackets.peek() != null) {
+                                            Packet chokedPacket = chokePackets.poll();
+                                            if (chokedPacket != null) {
+                                                sent++;
+                                                NetUtil.sendPacketNoEvents(chokedPacket);
+                                            }
+                                        }
+
+                                        if (sent > 0 && debug) {
+                                            DevNotifications.getManager().post("\247b\247lSent " + sent + " out of " + size);
+                                        }
+
+                                        lastSentUid = packet.getUid();
+                                        if (debug)
+                                            DevNotifications.getManager().post("\247eSent from \247c" + (lastbruh) + "\247e to \247a" + (lastSentUid + 1) + " " + mc.thePlayer.ticksExisted);
+                                        randomDelay = random.nextInt(30);
+                                        bruh = 10;
+                                    } else {
+                                        chokePackets.add(packet);
+                                    }
+
+                                    if (!isFlying)
+                                        c13Timer.reset();
+
+                                } else {
+                                    event.setCancelled(true);
+                                    C0FPacketConfirmTransaction confirmTransaction = new C0FPacketConfirmTransaction(packet.getWindowId(), packet.getUid(), packet.getAccepted());
+                                    this.packetList.add(new BruhPacket(confirmTransaction, Math.max(250, DELAY.getValue().longValue())));
+
+                                    int transactions = 0;
+
+                                    for (Packet chokePacket : chokePackets) {
+                                        if (chokePacket instanceof C0FPacketConfirmTransaction)
+                                            transactions++;
+                                    }
+
+                                    if (debug)
+                                        DevNotifications.getManager().post("\247eNormal " + confirmTransaction.getUid() + " " + transactions);
+
+                                    c13Timer.reset();
+
+                                    lastSentUid = packet.getUid();
+                                }
+                                lastUid = packet.getUid();
+                            } else {
+                                event.setCancelled(true);
+                                this.packetList.add(new BruhPacket(packet, Math.max(250, DELAY.getValue().longValue())));
+                            }
+                        }
+                    }
+                } else if (option.getSelected().equals("Watchdog Off")) {
+                    if (c13Timer.delay(1000) && !Client.instance.isLagging() && bruh > 0) {
+                        if (debug)
+                            DevNotifications.getManager().post("\247bBypass is ready.");
                         int sent = 0;
-                        while (chokePackets.peek() != null && sent < 1) {
+                        int max = chokePackets.size();
+                        while (chokePackets.peek() != null && sent < max - 1) {
                             Packet chokedPacket = chokePackets.poll();
                             if (chokedPacket != null) {
                                 sent++;
                                 NetUtil.sendPacketNoEvents(chokedPacket);
                             }
                         }
-                        if (debug)
-                            DevNotifications.getManager().post("\247e\247lRELIEF " + bruh);
+                        if (debug && sent > 0) {
+                            DevNotifications.getManager().post("\247b\247lSent " + sent);
+                        }
+                        bruh = -1;
                     }
-                }
 
-                if (p instanceof C0FPacketConfirmTransaction) {
-                    C0FPacketConfirmTransaction packet = (C0FPacketConfirmTransaction) p;
-                    if (packet.getUid() < 0) {
-                        if (HypixelUtil.isVerifiedHypixel() && allowBypassing()) {
-                            this.bruh++;
+                    if (c13Timer.delay(1000) && !Client.instance.isLagging() && bruh == -1) {
+                        if (debug)
+                            DevNotifications.getManager().post("\247aReady to resend bursts.");
+                        bruh = -2;
+                        lastSentUid = 1;
+                    }
 
-                            if (bruh > 5) {
-                                event.setCancelled(true);
-                                if (Math.abs(packet.getUid() - lastUid) > 5 && packet.getUid() != -1) {
-                                    chokePackets.add(packet);
+                    if (p instanceof C0FPacketConfirmTransaction) {
+                        C0FPacketConfirmTransaction packet = (C0FPacketConfirmTransaction) p;
+                        if (packet.getUid() < 0 && HypixelUtil.isVerifiedHypixel()) {
+                            if (bruh == -2 && lastSentUid == -1) {
+                                if (debug)
+                                    DevNotifications.getManager().post("\247aSent last bruh A \247e" + mc.thePlayer.ticksExisted);
+                                sendPackets();
+                                bruh = -3;
+                            }
+
+                            if (bruh >= 0) {
+                                if (bruh == 0 && lastSentUid == -1) {
+                                    if (debug)
+                                        DevNotifications.getManager().post("\247aSent last bruh B \247e" + mc.thePlayer.ticksExisted);
                                     sendPackets();
-                                    if (debug)
-                                        DevNotifications.getManager().post("\247bRESET BRUH TO " + packet.getUid() + " " + lastUid);
-                                    bruh = 0;
-                                    lastUid = packet.getUid();
-                                    return;
                                 }
-
-                                boolean canSend = !isFlying ? mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically : (longJump.isEnabled() ? (longJump.bruhTick % 7 == 3 || longJump.bruhTick % 7 == 4) : mc.thePlayer.ticksExisted % 7 != 0);
-
-                                if (isFlying && (bruh - 10) >= (45 + randomDelay)) {
-                                    bruh -= 10;
+                                event.setCancelled(true);
+                                chokePackets.add(packet);
+                                if (debug)
+                                    DevNotifications.getManager().post("\247eChoking \247c" + packet.getUid() + " \247e" + mc.thePlayer.ticksExisted);
+                                if (bruh == 0 || !c13Timer.delay(5)) { // You get sent them in an instant
+                                    bruh++;
                                 }
-
-                                if ((bruh - 10) >= (45 + randomDelay) && (!isFlying || canSend)) {
-                                    short lastbruh = (short) lastSentUid;
-                                    int sent = 0;
-                                    int size = chokePackets.size();
-                                    chokePackets.add(packet);
-                                    while (chokePackets.peek() != null) {
-                                        Packet chokedPacket = chokePackets.poll();
-                                        if (chokedPacket != null) {
-                                            sent++;
-                                            NetUtil.sendPacketNoEvents(chokedPacket);
-                                        }
-                                    }
-
-                                    if (sent > 0 && debug) {
-                                        DevNotifications.getManager().post("\247b\247lSent " + sent + " out of " + size);
-                                    }
-
-                                    lastSentUid = packet.getUid();
-                                    if (debug)
-                                        DevNotifications.getManager().post("\247eSent from \247c" + (lastbruh) + "\247e to \247a" + (lastSentUid + 1) + " " + mc.thePlayer.ticksExisted);
-                                    randomDelay = random.nextInt(30);
-                                    bruh = 10;
-                                } else {
-                                    chokePackets.add(packet);
-                                }
-
-                                if (!isFlying)
-                                    c13Timer.reset();
-
                             } else {
                                 event.setCancelled(true);
-                                C0FPacketConfirmTransaction confirmTransaction = new C0FPacketConfirmTransaction(packet.getWindowId(), packet.getUid(), packet.getAccepted());
-                                this.packetList.add(new BruhPacket(confirmTransaction, Math.max(250, DELAY.getValue().longValue())));
-
-                                int transactions = 0;
-
-                                for (Packet chokePacket : chokePackets) {
-                                    if (chokePacket instanceof C0FPacketConfirmTransaction)
-                                        transactions++;
-                                }
-
-                                if (debug)
-                                    DevNotifications.getManager().post("\247eNormal " + confirmTransaction.getUid() + " " + transactions);
-
-                                c13Timer.reset();
-
-                                lastSentUid = packet.getUid();
-                            }
-                            lastUid = packet.getUid();
-                        } else {
-                            event.setCancelled(true);
-                            this.packetList.add(new BruhPacket(packet, Math.max(250, DELAY.getValue().longValue())));
-                        }
-                    }
-                }
-            } else if (option.getSelected().equals("Watchdog Off")) {
-                if (c13Timer.delay(1000) && !Client.instance.isLagging() && bruh > 0) {
-                    if (debug)
-                        DevNotifications.getManager().post("\247bBypass is ready.");
-                    int sent = 0;
-                    int max = chokePackets.size();
-                    while (chokePackets.peek() != null && sent < max - 1) {
-                        Packet chokedPacket = chokePackets.poll();
-                        if (chokedPacket != null) {
-                            sent++;
-                            NetUtil.sendPacketNoEvents(chokedPacket);
-                        }
-                    }
-                    if (debug && sent > 0) {
-                        DevNotifications.getManager().post("\247b\247lSent " + sent);
-                    }
-                    bruh = -1;
-                }
-
-                if (c13Timer.delay(1000) && !Client.instance.isLagging() && bruh == -1) {
-                    if (debug)
-                        DevNotifications.getManager().post("\247aReady to resend bursts.");
-                    bruh = -2;
-                    lastSentUid = 1;
-                }
-
-                if (p instanceof C0FPacketConfirmTransaction) {
-                    C0FPacketConfirmTransaction packet = (C0FPacketConfirmTransaction) p;
-                    if (packet.getUid() < 0 && HypixelUtil.isVerifiedHypixel()) {
-                        if (bruh == -2 && lastSentUid == -1) {
-                            if (debug)
-                                DevNotifications.getManager().post("\247aSent last bruh A \247e" + mc.thePlayer.ticksExisted);
-                            sendPackets();
-                            bruh = -3;
-                        }
-
-                        if (bruh >= 0) {
-                            if (bruh == 0 && lastSentUid == -1) {
-                                if (debug)
-                                    DevNotifications.getManager().post("\247aSent last bruh B \247e" + mc.thePlayer.ticksExisted);
-                                sendPackets();
-                            }
-                            event.setCancelled(true);
-                            chokePackets.add(packet);
-                            if (debug)
-                                DevNotifications.getManager().post("\247eChoking \247c" + packet.getUid() + " \247e" + mc.thePlayer.ticksExisted);
-                            if (bruh == 0 || !c13Timer.delay(5)) { // You get sent them in an instant
-                                bruh++;
-                            }
-                        } else {
-                            event.setCancelled(true);
-                            if (c13Timer.delay(1000) && lastSentUid != 3) {
-                                DevNotifications.getManager().post("\247e\247lBurst detected \247c" + packet.getUid() + " \2476" + mc.thePlayer.ticksExisted);
-                                c13Timer.reset();
-                                if(lastSentUid == 2) {
-                                    Notifications.getManager().post("Bypass Error", "Possible WD ban. Please rejoin or finish your match quickly.", 7500, Notifications.Type.WARNING);
-                                    DevNotifications.getManager().post("\247aWatchdog has handshaked " + mc.thePlayer.ticksExisted);
-                                    sendPackets();
-                                    resetPackets();
-                                }
-                                lastSentUid++;
-                            }
-                            if (debug)
-                                DevNotifications.getManager().post("\2476Canceled \247c" + packet.getUid() + " \2476" + mc.thePlayer.ticksExisted);
-
-                            lastUid = packet.getUid();
-                        }
-                        c13Timer.reset();
-                    }
-                }
-            } else {
-                if (p instanceof C0FPacketConfirmTransaction) {
-                    C0FPacketConfirmTransaction packet = (C0FPacketConfirmTransaction) p;
-                    if (packet.getUid() < 0 && HypixelUtil.isVerifiedHypixel()) {
-                        this.bruh++;
-
-                        if (bruh > 10) {
-                            event.setCancelled(true);
-
-                            if (Math.abs(packet.getUid() - lastUid) > 5 && packet.getUid() != -1) {
-                                C0FPacketConfirmTransaction confirmTransaction = new C0FPacketConfirmTransaction(packet.getWindowId(), packet.getUid(), packet.getAccepted());
-                                if (isFlying) {
-                                    chokePackets.add(confirmTransaction);
-                                } else {
+                                if (c13Timer.delay(1000) && lastSentUid != 3) {
+                                    DevNotifications.getManager().post("\247e\247lBurst detected \247c" + packet.getUid() + " \2476" + mc.thePlayer.ticksExisted);
                                     c13Timer.reset();
-                                    NetUtil.sendPacketNoEvents(confirmTransaction);
-                                }
-                                bruh = 5;
-                                lastSentUid = packet.getUid();
-                                lastUid = packet.getUid();
-                                return;
-                            }
-
-                            boolean serverResetCounter = packet.getUid() == -1 && lastUid == -30000;
-
-                            if (bruh % 100 == 0 || serverResetCounter) {
-                                while (serverResetCounter ? lastSentUid >= -30000 : lastSentUid > packet.getUid()) {
-                                    --lastSentUid;
-                                    if (lastSentUid < -30000) {
-                                        lastSentUid = -1;
+                                    if (lastSentUid == 2) {
+                                        Notifications.getManager().post("Bypass Error", "Possible WD ban. Please rejoin or finish your match quickly.", 7500, Notifications.Type.WARNING);
+                                        DevNotifications.getManager().post("\247aWatchdog has handshaked " + mc.thePlayer.ticksExisted);
+                                        sendPackets();
+                                        resetPackets();
                                     }
+                                    lastSentUid++;
+                                }
+                                if (debug)
+                                    DevNotifications.getManager().post("\2476Canceled \247c" + packet.getUid() + " \2476" + mc.thePlayer.ticksExisted);
 
-                                    C0FPacketConfirmTransaction confirmTransaction = new C0FPacketConfirmTransaction(packet.getWindowId(), (short) lastSentUid, packet.getAccepted());
+                                lastUid = packet.getUid();
+                            }
+                            c13Timer.reset();
+                        }
+                    }
+                } else {
+                    if (p instanceof C0FPacketConfirmTransaction) {
+                        C0FPacketConfirmTransaction packet = (C0FPacketConfirmTransaction) p;
+                        if (packet.getUid() < 0 && HypixelUtil.isVerifiedHypixel()) {
+                            this.bruh++;
+
+                            if (bruh > 10) {
+                                event.setCancelled(true);
+
+                                if (Math.abs(packet.getUid() - lastUid) > 5 && packet.getUid() != -1) {
+                                    C0FPacketConfirmTransaction confirmTransaction = new C0FPacketConfirmTransaction(packet.getWindowId(), packet.getUid(), packet.getAccepted());
                                     if (isFlying) {
                                         chokePackets.add(confirmTransaction);
                                     } else {
                                         c13Timer.reset();
                                         NetUtil.sendPacketNoEvents(confirmTransaction);
                                     }
+                                    bruh = 5;
+                                    lastSentUid = packet.getUid();
+                                    lastUid = packet.getUid();
+                                    return;
+                                }
 
-                                    // We've reset the counter to -1, break the loop.
-                                    if(lastSentUid == -1) {
-                                        break;
+                                boolean serverResetCounter = packet.getUid() == -1 && lastUid == -30000;
+
+                                if (bruh % 100 == 0 || serverResetCounter) {
+                                    while (serverResetCounter ? lastSentUid >= -30000 : lastSentUid > packet.getUid()) {
+                                        --lastSentUid;
+                                        if (lastSentUid < -30000) {
+                                            lastSentUid = -1;
+                                        }
+
+                                        C0FPacketConfirmTransaction confirmTransaction = new C0FPacketConfirmTransaction(packet.getWindowId(), (short) lastSentUid, packet.getAccepted());
+                                        if (isFlying) {
+                                            chokePackets.add(confirmTransaction);
+                                        } else {
+                                            c13Timer.reset();
+                                            NetUtil.sendPacketNoEvents(confirmTransaction);
+                                        }
+
+                                        // We've reset the counter to -1, break the loop.
+                                        if (lastSentUid == -1) {
+                                            break;
+                                        }
                                     }
                                 }
-                            }
 
-                        } else {
-                            lastSentUid = packet.getUid();
+                            } else {
+                                lastSentUid = packet.getUid();
+                            }
+                            lastUid = packet.getUid();
                         }
-                        lastUid = packet.getUid();
                     }
                 }
-            }
 
             if (p instanceof C00PacketKeepAlive) {
                 if (DELAY.getValue().longValue() != 0) {

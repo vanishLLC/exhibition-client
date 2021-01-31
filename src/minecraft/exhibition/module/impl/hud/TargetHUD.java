@@ -88,8 +88,8 @@ public class TargetHUD extends Module {
                 //RenderingUtil.rectangleBordered(xOffset + 2.5, yOffset + 2.5, xOffset + size - 2.5, yOffset + size - 2.5, 0.5, Colors.getColor(61), Colors.getColor(0));
                 RenderingUtil.rectangleBordered(0, 0, Math.max(boxWidth, 120), 40, 0.5, Colors.getColor(22), Colors.getColor(60));
 
-                RenderingUtil.rectangleBordered(2, 2, 38, 38, 0.5, Colors.getColor(0, 0), Colors.getColor(10, 255));
-                RenderingUtil.rectangleBordered(2.5, 2.5, 38 - 0.5, 38 - 0.5, 0.5, Colors.getColor(17,255), Colors.getColor(48, 255));
+                RenderingUtil.rectangleBordered(2, 2, 38, 38, 0.5, Colors.getColor(0, 0), Colors.getColor(10));
+                RenderingUtil.rectangleBordered(2.5, 2.5, 38 - 0.5, 38 - 0.5, 0.5, Colors.getColor(17), Colors.getColor(48));
 
                 GlStateManager.pushMatrix();
                 ScaledResolution scale = er.getResolution();

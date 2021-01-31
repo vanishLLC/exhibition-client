@@ -18,8 +18,11 @@ import exhibition.module.impl.combat.Killaura;
 import exhibition.util.HypixelUtil;
 import exhibition.util.RenderingUtil;
 import exhibition.util.render.Colors;
+import exhibition.util.render.Depth;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -52,25 +55,37 @@ public class TargetESP extends Module {
 
         EventRenderGui er = event.cast();
 
+        double longestString = 75;
+
         List<EntityPlayer> players = new ArrayList<>();
         for (Entity entity : mc.theWorld.getLoadedEntityList())
             if (entity instanceof EntityPlayer) {
                 EntityPlayer player = (EntityPlayer) entity;
-                if (player != mc.thePlayer && TargetESP.isPriority(player) && !FriendManager.isFriend(player.getName()))
+                if (player != mc.thePlayer && TargetESP.isPriority(player) && !FriendManager.isFriend(player.getName())) {
                     players.add(player);
+                    longestString = Math.max(Client.fss.getWidth(player.getDisplayName().getFormattedText()), longestString);
+                }
             }
 
         double x = (((Number) this.x.getValue()).doubleValue()) / er.getResolution().getScaleFactor() - 75 / 2D;
         double y = ((Number) this.y.getValue()).doubleValue() / er.getResolution().getScaleFactor();
-        double width = 75;
+        double width = longestString;
         double height = 10 + (players.size() == 0 ? 0 : 1 + players.size() * 8);
 
-        RenderingUtil.drawRoundedRect(x, y, x + width, y + height, 2, Colors.getColor(0));
-        RenderingUtil.drawRoundedRect(x + 1, y + 1, x + width - 1, y + height - 1, 2, Colors.getColor(55));
+        String string = "Target List [" + players.size() + "]";
 
-        RenderingUtil.rectangle(x + 3, y + 9, x + width - 3, y + 9.5, Colors.getColor(20));
+        Depth.pre();
+        Depth.mask();
+        RenderingUtil.rectangle(x + 1.5, y + 3, x + Client.fss.getWidth(string) + 2, y + 3.5, -1);
+        RenderingUtil.rectangle(x + 2, y + 3.5, x + Client.fss.getWidth(string) + 1.5, y + 4, -1);
+        Depth.render(GL11.GL_LESS);
+        RenderingUtil.rectangleBordered(x, y + 3, x + width, y + height, 0.5, Colors.getColor(0,0), Colors.getColor(10));
+        RenderingUtil.rectangleBordered(x + 0.5, y + 3.5, x + width - 0.5, y + height - 0.5, 0.5, Colors.getColor(17), Colors.getColor(48));
+        Depth.post();
 
-        Client.fss.drawStringWithShadow("Target List [" + players.size() + "]", (float) x + 2, (float) y + 2.5F, -1);
+        RenderingUtil.rectangle(x + 3, y + 9, x + width - 3, y + 9.5, Colors.getColor(48));
+
+        Client.fss.drawStringWithShadow(string, (float) x + 2, (float) y + 2.5F, -1);
 
         float yOff = 1;
         for (EntityPlayer player : players) {
