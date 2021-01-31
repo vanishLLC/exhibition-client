@@ -22,8 +22,7 @@ import us.myles.ViaVersion.packets.State;
 import java.util.logging.Logger;
 
 public class VRViaRewindPlatform implements ViaRewindPlatform {
-    private final Logger logger = (Logger)new LoggerWrapper(
-            LogManager.getLogger("ViaRewind"));
+    private final Logger logger = (Logger) new LoggerWrapper(LogManager.getLogger("ViaRewind"));
 
     public VRViaRewindPlatform() {
         init(new ViaRewindConfig() {
@@ -45,20 +44,20 @@ public class VRViaRewindPlatform implements ViaRewindPlatform {
 
         try {
             Protocol protocol = ProtocolRegistry.getProtocol(Protocol1_8TO1_9.class);
-            protocol.registerIncoming(State.PLAY, 26, 10, new PacketRemapper() {
+            protocol.registerIncoming(State.PLAY, 0x1A, 0x0A, new PacketRemapper() {
                 public void registerMap() {
                     this.create(new ValueCreator() {
                         public void write(PacketWrapper packetWrapper) throws Exception {
                             packetWrapper.cancel();
-                            final PacketWrapper delayedPacket = new PacketWrapper(26, (ByteBuf) null, packetWrapper.user());
+                            final PacketWrapper delayedPacket = new PacketWrapper(0x1A, null, packetWrapper.user());
                             delayedPacket.write(Type.VAR_INT, 0);
-                            PacketUtil.sendToServer(delayedPacket, Protocol1_8TO1_9.class);
+                            PacketUtil.sendToServer(delayedPacket, Protocol1_8TO1_9.class, true, true);
                         }
                     });
                     this.handler(new PacketHandler() {
                         public void handle(PacketWrapper packetWrapper) throws Exception {
-                            ((BlockPlaceDestroyTracker) packetWrapper.user().get(BlockPlaceDestroyTracker.class)).updateMining();
-                            ((Cooldown) packetWrapper.user().get(Cooldown.class)).hit();
+                            packetWrapper.user().get(BlockPlaceDestroyTracker.class).updateMining();
+                            packetWrapper.user().get(Cooldown.class).hit();
                         }
                     });
                 }
@@ -107,7 +106,7 @@ public class VRViaRewindPlatform implements ViaRewindPlatform {
                         }
                     });
                 }
-            });
+            }, true);
 
         } catch (Exception e) {
             e.printStackTrace();

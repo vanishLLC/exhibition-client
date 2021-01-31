@@ -1376,9 +1376,9 @@ public class Minecraft implements IThreadListener, IPlayerUsage {
 
     public void clickMouse() {
         if (this.leftClickCounter <= 0) {
-            boolean block = Client.instance.is1_9orGreater();
+            boolean newerVersionSwing = Client.instance.is1_9orGreater();
 
-            if (!block)
+            if (!newerVersionSwing)
                 this.thePlayer.swingItem();
 
             if (this.objectMouseOver == null) {
@@ -1408,7 +1408,7 @@ public class Minecraft implements IThreadListener, IPlayerUsage {
                         }
                 }
 
-                if (block)
+                if (newerVersionSwing)
                     this.thePlayer.swingItem();
             }
         }

@@ -653,7 +653,11 @@ public class Killaura extends Module {
                             boolean dontCrit = allowInvalidAngles && antiCritFunky.getValue() && hasEnchant(target, "Crit", "Funk");
 
                             if(target instanceof EntityPlayer && antiCritFunky.getValue() && hasEnchant(target, "Retro")) {
-                                if(((EntityPlayer)target).criticalHits > 1) {
+                                int criticalHits = ((EntityPlayer)target).criticalHits;
+                                if(criticalHits == 0 || criticalHits > 3 || target.waitTicks > 0) {
+                                    if(criticalHits == 0) {
+                                        ((EntityPlayer)target).criticalHits++;
+                                    }
                                     em.setGround(true);
                                     crits = false;
                                     dontCrit = true;
@@ -789,7 +793,7 @@ public class Killaura extends Module {
                 }
 
                 boolean packetMode = Client.getModuleManager().isEnabled(NoSlowdown.class);
-                if (mc.thePlayer.isBlocking() && isBlocking && packetMode && PlayerUtil.isMoving() && mc.thePlayer.ticksExisted % 2 == 0 && !AutoSoup.isHealing) {
+                if (mc.thePlayer.isBlocking() && (isBlocking) && packetMode && PlayerUtil.isMoving() && mc.thePlayer.ticksExisted % 2 == 0 && !AutoSoup.isHealing) {
                     isBlocking = false;
                     NetUtil.sendPacketNoEvents(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
                     blockTimer.reset();
@@ -824,7 +828,7 @@ public class Killaura extends Module {
 
                 boolean canAttackRightNow = attack.equals("Always") || (attack.equals("Precise") ? target.waitTicks <= 0 : target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
 
-                if (isAttacking && shouldAttack && isBlocking && canAttackRightNow && !AutoSoup.isHealing) {
+                if (isAttacking && shouldAttack && (isBlocking) && canAttackRightNow && !AutoSoup.isHealing) {
                     isBlocking = false;
                     NetUtil.sendPacket(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
                     blockTimer.reset();
@@ -928,7 +932,7 @@ public class Killaura extends Module {
             if (em.isPost()) {
                 wait--;
 
-                if (loaded.isEmpty() && target == null && isBlocking && (blockTimer.delay(50)) && block && !AutoSoup.isHealing) {
+                if (loaded.isEmpty() && target == null && (isBlocking) && (blockTimer.delay(50)) && block && !AutoSoup.isHealing) {
                     // Unblock, set next random blockWait
                     blockTimer.reset();
                     isBlocking = false;

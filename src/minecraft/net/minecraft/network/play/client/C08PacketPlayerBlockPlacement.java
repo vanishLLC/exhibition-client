@@ -9,7 +9,7 @@ import net.minecraft.util.BlockPos;
 
 public class C08PacketPlayerBlockPlacement implements Packet<INetHandlerPlayServer>
 {
-    private static final BlockPos field_179726_a = new BlockPos(-1, -1, -1);
+    public static final BlockPos USE_ITEM_POS = new BlockPos(-1, -1, -1);
     private BlockPos position;
     private int placedBlockDirection;
     private ItemStack stack;
@@ -23,7 +23,7 @@ public class C08PacketPlayerBlockPlacement implements Packet<INetHandlerPlayServ
 
     public C08PacketPlayerBlockPlacement(ItemStack stackIn)
     {
-        this(field_179726_a, 255, stackIn, 0.0F, 0.0F, 0.0F);
+        this(USE_ITEM_POS, 255, stackIn, 0.0F, 0.0F, 0.0F);
     }
 
     public C08PacketPlayerBlockPlacement(BlockPos positionIn, int placedBlockDirectionIn, ItemStack stackIn, float facingXIn, float facingYIn, float facingZIn)

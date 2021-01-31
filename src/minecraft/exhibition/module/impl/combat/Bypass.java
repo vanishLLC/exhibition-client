@@ -173,7 +173,7 @@ public class Bypass extends Module {
                 }
             }
 
-            boolean debug = false;
+            boolean debug = true;
 
             if (option.getSelected().equals("Dong") && !option.getSelected().equals("Gast and Tasteful Skidding be like #NOVOONTOP")) {
                 if (mc.thePlayer == null) {
@@ -327,10 +327,10 @@ public class Bypass extends Module {
                             event.setCancelled(true);
                             if (c13Timer.delay(1000) && lastSentUid != 3) {
                                 DevNotifications.getManager().post("\247e\247lBurst detected \247c" + packet.getUid() + " \2476" + mc.thePlayer.ticksExisted);
-                                //Notifications.getManager().post("Bypass Error", "Possible WD ban. Please rejoin or finish your match quickly.", 7500, Notifications.Type.WARNING);
                                 c13Timer.reset();
                                 if(lastSentUid == 2) {
-                                    DevNotifications.getManager().post("\247aWatchdog is now off " + mc.thePlayer.ticksExisted);
+                                    Notifications.getManager().post("Bypass Error", "Possible WD ban. Please rejoin or finish your match quickly.", 7500, Notifications.Type.WARNING);
+                                    DevNotifications.getManager().post("\247aWatchdog has handshaked " + mc.thePlayer.ticksExisted);
                                     sendPackets();
                                     resetPackets();
                                 }
@@ -465,7 +465,7 @@ public class Bypass extends Module {
             }
         }
 
-        boolean debug = false;
+        boolean debug = true;
         if (sent > 0 && debug) {
             DevNotifications.getManager().post("\247b\247lSent " + sent);
         }

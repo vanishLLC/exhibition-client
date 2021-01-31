@@ -88,27 +88,29 @@ public class ClickTP extends Module {
             EventRender3D er = (EventRender3D) event;
             try {
                 MovingObjectPosition blinkPos = getBlinkBlock();
-                final int x = blinkPos.getBlockPos().getX();
-                final int y = blinkPos.getBlockPos().getY();
-                final int z = blinkPos.getBlockPos().getZ();
-                final Block block1 = getBlock(x, y, z);
-                final Block block2 = getBlock(x, y + 1, z);
-                final Block block3 = getBlock(x, y + 2, z);
-                final boolean blockBelow = !(block1 instanceof BlockSign) && block1.getMaterial().isSolid();
-                final boolean blockLevel = !(block2 instanceof BlockSign) && block1.getMaterial().isSolid();
-                final boolean blockAbove = !(block3 instanceof BlockSign) && block1.getMaterial().isSolid();
-                if (getBlock(blinkPos.getBlockPos()).getMaterial() != Material.air && blockBelow && blockLevel && blockAbove && !(getBlock(blinkPos.getBlockPos()) instanceof BlockChest)) {
-                    canTP = true;
-                    GL11.glPushMatrix();
-                    RenderingUtil.pre3D();
-                    mc.entityRenderer.setupCameraTransform(er.renderPartialTicks, 2);
-                    GL11.glColor4d(0.6, 0, 0, 0.25);
-                    RenderingUtil.drawBoundingBox(new AxisAlignedBB(x - RenderManager.renderPosX, y - RenderManager.renderPosY, z - RenderManager.renderPosZ, x - RenderManager.renderPosX + 1.0, y + getBlock(blinkPos.getBlockPos()).getBlockBoundsMaxY() - RenderManager.renderPosY, z - RenderManager.renderPosZ + 1.0));
-                    GL11.glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
-                    RenderingUtil.post3D();
-                    GL11.glPopMatrix();
-                } else {
-                    canTP = false;
+                if(blinkPos != null) {
+                    final int x = blinkPos.getBlockPos().getX();
+                    final int y = blinkPos.getBlockPos().getY();
+                    final int z = blinkPos.getBlockPos().getZ();
+                    final Block block1 = getBlock(x, y, z);
+                    final Block block2 = getBlock(x, y + 1, z);
+                    final Block block3 = getBlock(x, y + 2, z);
+                    final boolean blockBelow = !(block1 instanceof BlockSign) && block1.getMaterial().isSolid();
+                    final boolean blockLevel = !(block2 instanceof BlockSign) && block1.getMaterial().isSolid();
+                    final boolean blockAbove = !(block3 instanceof BlockSign) && block1.getMaterial().isSolid();
+                    if (getBlock(blinkPos.getBlockPos()).getMaterial() != Material.air && blockBelow && blockLevel && blockAbove && !(getBlock(blinkPos.getBlockPos()) instanceof BlockChest)) {
+                        canTP = true;
+                        GL11.glPushMatrix();
+                        RenderingUtil.pre3D();
+                        mc.entityRenderer.setupCameraTransform(er.renderPartialTicks, 2);
+                        GL11.glColor4d(0.6, 0, 0, 0.25);
+                        RenderingUtil.drawBoundingBox(new AxisAlignedBB(x - RenderManager.renderPosX, y - RenderManager.renderPosY, z - RenderManager.renderPosZ, x - RenderManager.renderPosX + 1.0, y + getBlock(blinkPos.getBlockPos()).getBlockBoundsMaxY() - RenderManager.renderPosY, z - RenderManager.renderPosZ + 1.0));
+                        GL11.glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+                        RenderingUtil.post3D();
+                        GL11.glPopMatrix();
+                    } else {
+                        canTP = false;
+                    }
                 }
             } catch (Exception e) {
 

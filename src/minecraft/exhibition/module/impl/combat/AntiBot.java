@@ -201,7 +201,7 @@ public class AntiBot extends Module {
                             }
                         }
 
-                        if (waitTimer.delay(1250) && ent.ticksExisted <= 1 && !ent.illegalSpawn) {
+                        if (waitTimer.delay(1250) && ent.ticksExisted <= 2 && !ent.illegalSpawn) {
                             if (ent != mc.thePlayer) {
                                 spawnedList.add(ent);
 
@@ -215,7 +215,7 @@ public class AntiBot extends Module {
 
 //                                double roundedY = MathUtils.roundToPlace(ent.posY, 6);
 
-                                if (Math.abs(distance) > 3 && mc.thePlayer.ticksExisted > 260 && spawnedSinceUpdate <= 2) {
+                                if (Math.abs(distance) > 3 && mc.thePlayer.ticksExisted > 260 && spawnedSinceUpdate <= 12) {
 //                        DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "------------------------------------------------------------------------");
 //                        DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "Illegal Spawn: " + player.getDisplayName().getFormattedText() + " \247a Distance: " + MathUtils.roundToPlace(distance, 3) +
 //                                " \247bDX: " + MathUtils.roundToPlace(var7, 3) +
@@ -234,8 +234,13 @@ public class AntiBot extends Module {
 //                                    if ((roundedY == -200 || roundedY == 400)) {
 //                                        //DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " \247e" + "Weird bot spawn pos?");
 //                                    }
+                                    //Get formatted name
+                                    String str = ent.getDisplayName().getFormattedText();
+                                    // if the formatted name is equal to a default name "name + \247r" or the name contains "NPC" or they're not in the tab list, remove the entity.
+                                    boolean botNameFormat = str.endsWith("\247c" + ent.getName() + "\247r");
 
-                                    //DevNotifications.getManager().post("Suspicious Spawn " + ent.getName() + " " + ent.getDisplayName().getFormattedText() + " " + ent.ticksExisted + " " + Math.abs(distance));
+                                    if (botNameFormat)
+                                        DevNotifications.getManager().post("Suspicious Spawn " + ent.getName() + " " + ent.getDisplayName().getFormattedText() + " " + ent.ticksExisted + " " + Math.abs(distance));
                                     //DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "------------------------------------------------------------------------");
                                     ent.illegalSpawn = true;
                                 }
@@ -353,6 +358,14 @@ public class AntiBot extends Module {
                                                 Notifications.getManager().post("Illegal Player", "An Illegal player has spawned in.", 6000, Notifications.Type.WARNING);
                                                 // mc.theWorld.removeEntity(ent);
                                             }
+                                        }
+                                    }
+
+                                    if (HypixelUtil.isInGame("PIT")) {
+                                        if (botNameFormat && !str.contains("[")) {
+                                            invalid.add(ent);
+                                            ticksOnGroundMap.put(ent.getName(), -300);
+                                            // mc.theWorld.removeEntity(ent);
                                         }
                                     }
 
