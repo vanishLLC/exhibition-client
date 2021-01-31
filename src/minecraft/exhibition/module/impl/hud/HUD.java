@@ -249,7 +249,7 @@ public class HUD extends Module {
         }
 
         Bypass bypass = Client.getModuleManager().get(Bypass.class);
-        if (GlobalValues.allowDebug.getValue())
+        if (GlobalValues.allowDebug.getValue() && bypass.isEnabled() && mc.getIntegratedServer() == null)
             if (bypass.option.getSelected().equals("Dong")) {
                 int current = (bypass.bruh - 10);
                 int max = (45 + bypass.randomDelay);
