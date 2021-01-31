@@ -620,7 +620,7 @@ public class Killaura extends Module {
                                             target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height,
                                             HypixelUtil.isInGame("DUEL") ? 1.2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1);
 
-                                    if (backwardsDiff < normalDiff && newOffReverse < 0.1 && normalDiff > 120) {
+                                    if (pitch >= 0 && backwardsDiff < normalDiff && newOffReverse < 0.1 && normalDiff > 120) {
                                         em.setYaw(lastAngles.x += MathHelper.wrapAngleTo180_float((targetYaw + 180)) / 1.1F + (float)randomNumber(2, -2));
 
                                         boolean isAttacking = mc.thePlayer.getDistanceToEntity(target) <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && delay.roundDelay(50 * nextRandom);

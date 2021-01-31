@@ -217,7 +217,7 @@ public class Bypass extends Module {
                                     boolean canSend = !isFlying ? mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically : (longJump.isEnabled() ? (longJump.bruhTick % 7 == 3 || longJump.bruhTick % 7 == 4) : mc.thePlayer.ticksExisted % 7 != 0);
 
                                     if (isFlying && (bruh - 10) >= (45 + randomDelay)) {
-                                        bruh -= 10;
+                                        bruh = 30;
                                     }
 
                                     if ((bruh - 10) >= (45 + randomDelay) && (!isFlying || canSend)) {
@@ -240,7 +240,7 @@ public class Bypass extends Module {
                                         lastSentUid = packet.getUid();
                                         if (debug)
                                             DevNotifications.getManager().post("\247eSent from \247c" + (lastbruh) + "\247e to \247a" + (lastSentUid + 1) + " " + mc.thePlayer.ticksExisted);
-                                        randomDelay = random.nextInt(30);
+                                        randomDelay = random.nextInt(55);
                                         bruh = 10;
                                     } else {
                                         chokePackets.add(packet);
