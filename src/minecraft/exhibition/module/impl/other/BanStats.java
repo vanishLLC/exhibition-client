@@ -126,7 +126,7 @@ public class BanStats extends Module {
                             }
 
                             if (staffTotalBans != 0 && diff > 0 && banStats.alertBans.getValue() && banStats.banTimer.getDifference() >= 120_000) {
-                                Notifications.getManager().post("Staff Activity", "Staff are no longer inactive.", 3000, Notifications.Type.WARNING);
+                                Notifications.getManager().post("Staff Activity", "Staff are now active.", 3000, Notifications.Type.WARNING);
                             }
 
                             if (staffTotalBans != 0)
