@@ -51,18 +51,18 @@ import java.util.stream.Collectors;
 
 public class HUD extends Module {
 
-    private String SPEED = "SPEED";
-    private String COLOR = "COLOR";
-    private MultiBool options;
-    private String UGLYGOD = "CLIENT-NAME";
-    private Options arrayPos = new Options("Array Position", "Top-Right", "Top-Right", "Top-Left");
-    private Opacity hueThing = new Opacity(0);
+    private final String SPEED = "SPEED";
+    private final String COLOR = "COLOR";
+    private final MultiBool options;
+    private final String UGLYGOD = "CLIENT-NAME";
+    private final Options arrayPos = new Options("Array Position", "Top-Right", "Top-Right", "Top-Left");
+    private final Opacity hueThing = new Opacity(0);
 
-    private Setting<Boolean> showUID = new Setting<>("SHOW-UID", false, "Shows your UID instead of your username.");
+    private final Setting<Boolean> showUID = new Setting<>("SHOW-UID", false, "Shows your UID instead of your username.");
 
-    private Setting<Boolean> showSessionTime = new Setting<>("SESSION TIME", false);
-    private Setting<Boolean> showProtocol = new Setting<>("PROTOCOL", true);
-    private Setting<Boolean> drawTicksPerSecond = new Setting<>("TPS", true);
+    private final Setting<Boolean> showSessionTime = new Setting<>("SESSION TIME", false);
+    private final Setting<Boolean> showProtocol = new Setting<>("PROTOCOL", true);
+    private final Setting<Boolean> drawTicksPerSecond = new Setting<>("TPS", true);
 
     private final ResourceLocation etb = new ResourceLocation("textures/shit.png"); // 512 x 512
 
@@ -88,13 +88,13 @@ public class HUD extends Module {
         settings.put("RENDERER", new Setting<>("RENDERER", selectedFont, "Select which fontrenderer to use for the overlay."));
     }
 
-    private Options selectedFont = new Options("Font Renderer", "SmoothTTF", "SmoothTTF", "Minecraft");
+    private final Options selectedFont = new Options("Font Renderer", "SmoothTTF", "SmoothTTF", "Minecraft");
 
     private long lastPinged;
     private int ping;
 
     public boolean showUID() {
-        return (boolean) showUID.getValue();
+        return showUID.getValue();
     }
 
     private void checkPing() {
@@ -115,7 +115,7 @@ public class HUD extends Module {
         }
     }
 
-    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh:mm a");
+    private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh:mm a");
 
     @Override
     public Priority getPriority() {
@@ -123,10 +123,10 @@ public class HUD extends Module {
     }
 
     private int currentColor;
-    private Opacity fadeState = new Opacity(0);
+    private final Opacity fadeState = new Opacity(0);
     private boolean goingUp;
 
-    private DynamicTTFFont.DynamicTTForMC font = Client.hudFont;
+    private final DynamicTTFFont.DynamicTTForMC font = Client.hudFont;
 
     public DynamicTTFFont.DynamicTTForMC getFont() {
         return this.font;
@@ -283,7 +283,6 @@ public class HUD extends Module {
 //            deltaYaw += yawDiff;
 //            deltaTime += refLoc.timeDiff;
 //            if (refLoc.idDiffLast && yawDiff > 30.0) {
-//                // TODO: Configurable sensitivity ? Scale with yawDiff?
 //                deltaSwitchTarget += 1;
 //            }
 //        }
@@ -513,9 +512,8 @@ public class HUD extends Module {
             if (clientName.equalsIgnoreCase("") || clientName.toLowerCase().equalsIgnoreCase("Astolfo")) {
                 clientName = "Exhibition";
             }
-            String prefix = (clientName.toLowerCase().startsWith("novoline") || clientName.toLowerCase().startsWith("astolfo") ? "" : "\247l") + clientName.substring(0, 1);
+            String prefix = (clientName.toLowerCase().startsWith("novoline") || clientName.toLowerCase().startsWith("astolfo") ? "" : "\247l") + clientName.charAt(0);
 
-            String username = Client.getAuthUser().getDecryptedUsername();
             String ok = new ChatComponentText(clientName.substring(1).replace("&", "\247")).getFormattedText();
             SimpleDateFormat sdfDate = simpleDateFormat;
             Date now = new Date();
@@ -534,7 +532,7 @@ public class HUD extends Module {
             GlStateManager.pushMatrix();
             GlStateManager.translate(2, 2, 0);
             font.drawStringWithShadow(prefix, 0, 0, colorXD);
-            float weirdFix = clientName.length() >= 2 ? font.getWidth(prefix + "\247r" + clientName.substring(1, 2)) - font.getWidth(prefix) - font.getWidth(clientName.substring(1, 2)) : 0;
+            float weirdFix = clientName.length() >= 2 ? font.getWidth(prefix + "\247r" + clientName.charAt(1)) - font.getWidth(prefix) - font.getWidth(clientName.substring(1, 2)) : 0;
             font.drawStringWithShadow((font.renderMC ? "" : "\247l") + ok, font.getWidth(prefix) + weirdFix, 0, Colors.getColor(255, 220));
 
             GlStateManager.popMatrix();
@@ -697,8 +695,7 @@ public class HUD extends Module {
         String selected = ((Options) settings.get(COLOR).getValue()).getSelected();
         final Color color2222 = Color.getHSBColor(hueThing.getOpacity() / 255.0f, 0.55f, 0.9f);
         final int c2222 = color2222.getRGB();
-        int colorXD = selected.equalsIgnoreCase("Rainbow") ? c2222 : selected.equalsIgnoreCase("Fade") ? currentColor : Colors.getColor(ColorManager.hudColor.red, ColorManager.hudColor.green, ColorManager.hudColor.blue, 220);
-        return colorXD;
+        return selected.equalsIgnoreCase("Rainbow") ? c2222 : selected.equalsIgnoreCase("Fade") ? currentColor : Colors.getColor(ColorManager.hudColor.red, ColorManager.hudColor.green, ColorManager.hudColor.blue, 220);
     }
 
     private String getRenderName(Module module) {
