@@ -515,9 +515,8 @@ public class HUD extends Module {
             String prefix = (clientName.toLowerCase().startsWith("novoline") || clientName.toLowerCase().startsWith("astolfo") ? "" : "\247l") + clientName.charAt(0);
 
             String ok = new ChatComponentText(clientName.substring(1).replace("&", "\247")).getFormattedText();
-            SimpleDateFormat sdfDate = simpleDateFormat;
             Date now = new Date();
-            String strDate = sdfDate.format(now);
+            String strDate = simpleDateFormat.format(now);
             if (drawProtocol)
                 ok += " \2477[\247r" + (font.renderMC ? "" : "\247l") + getServerProtocol() + "\2477]\247f";
             if (drawTime)
@@ -571,9 +570,8 @@ public class HUD extends Module {
                 }
             }
         } else {
-            SimpleDateFormat sdfDate = simpleDateFormat;
             Date now = new Date();
-            String strDate = sdfDate.format(now);
+            String strDate = simpleDateFormat.format(now);
 
             if (clientName.equalsIgnoreCase("") || clientName.equalsIgnoreCase("Exhibition")) {
                 clientName = "Exhibition";
