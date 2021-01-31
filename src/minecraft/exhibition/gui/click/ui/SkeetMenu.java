@@ -1452,6 +1452,7 @@ public class SkeetMenu extends UI {
         Depth.mask();
         RenderingUtil.rectangle(xOff + 4.5, yOff - 6, xOff + Client.fs.getWidth(groupBox.label) + 6.5, yOff - 5.5, -1);
         RenderingUtil.rectangle(xOff + 5, yOff - 5.5, xOff + Client.fs.getWidth(groupBox.label) + 6, yOff - 5, -1);
+
         Depth.render(GL11.GL_LESS);
         RenderingUtil.rectangleBordered(xOff + 0.5, yOff - 5.5, xOff + groupBox.width - 0.5, yOff + groupBox.height - 0.5, 0.5, Colors.getColor(17, (int) opacity.getOpacity()), Colors.getColor(48, (int) opacity.getOpacity()));
         Depth.post();

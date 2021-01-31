@@ -52,7 +52,6 @@ import net.minecraft.util.CryptManager;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StringUtils;
-import us.myles.ViaVersion.api.protocol.ProtocolVersion;
 import us.myles.ViaVersion.protocols.base.ProtocolInfo;
 
 import java.awt.*;

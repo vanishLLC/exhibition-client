@@ -9,6 +9,7 @@ import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
+import exhibition.util.HypixelUtil;
 import exhibition.util.NetUtil;
 import exhibition.util.RenderingUtil;
 import exhibition.util.misc.ChatUtil;
@@ -30,7 +31,7 @@ public class FreecamTP extends Module {
 
     private Vec3 initialPosition = null;
     private List<Vec3> positions = new ArrayList<>();
-    private int stage = -1;
+    public int stage = -1;
     private int ticks = 60;
 
     private Setting<Boolean> tpBack = new Setting<>("TPBACK", false);
@@ -82,6 +83,13 @@ public class FreecamTP extends Module {
     public void onEnable() {
         if (mc.thePlayer == null || mc.theWorld == null) {
             stage = -1;
+            return;
+        }
+
+        if(!HypixelUtil.isVerifiedHypixel()) {
+            Notifications.getManager().post("Hypixel Only", "You can only FreecamTP on Hypixel.", Notifications.Type.NOTIFY);
+            stage = -1;
+            toggle();
             return;
         }
 

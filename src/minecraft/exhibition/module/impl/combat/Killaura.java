@@ -413,7 +413,7 @@ public class Killaura extends Module {
         Scaffold scaffold = Client.getModuleManager().get(Scaffold.class);
         LongJump longjump = Client.getModuleManager().get(LongJump.class);
         boolean disable = false;
-        if ((AutoPot.potting || AutoPot.haltTicks > 0) || scaffold.isEnabled() || scaffold.isPlacing() || longjump.allowAttack() || longjump.isBruhing() || Client.getModuleManager().isEnabled(FreecamTP.class)) {
+        if ((AutoPot.potting || AutoPot.haltTicks > 0) || scaffold.isEnabled() || scaffold.isPlacing() || longjump.allowAttack() || longjump.isBruhing() || (Client.getModuleManager().get(FreecamTP.class).stage == 1)) {
             disable = true;
         }
 

@@ -1,8 +1,6 @@
 package exhibition.util;
 
-import exhibition.util.misc.ChatUtil;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

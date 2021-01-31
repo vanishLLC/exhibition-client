@@ -257,7 +257,7 @@ public class HUD extends Module {
                 String bruh = bypass.bruh == 0 ? "Watchdog Inactive" : current < 0 ? "Waiting" : current + "/" + max;
                 mc.fontRendererObj.drawString(bruh, (int) (e.getResolution().getScaledWidth_double() / 2 - mc.fontRendererObj.getStringWidth(bruh) / 2), 20, -1);
             } else if(bypass.option.getSelected().equals("Watchdog Off")) {
-                String bruh = bypass.lastSentUid != 3 ? "Watchdog Inactive" : "id: " + bypass.lastUid;
+                String bruh = bypass.lastSentUid != 3 ? "Watchdog Inactive" : "Watchdog Bugged";
                 mc.fontRendererObj.drawString(bruh, (int) (e.getResolution().getScaledWidth_double() / 2 - mc.fontRendererObj.getStringWidth(bruh) / 2), 20, -1);
             }
 
