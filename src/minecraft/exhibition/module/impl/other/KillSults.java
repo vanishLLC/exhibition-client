@@ -89,12 +89,16 @@ public class KillSults extends Module {
                 in.close();
             } catch (Exception e) {
             }
+
+            if(insults.isEmpty()) {
+                insults.addAll(Arrays.asList(getDefaultInsults()));
+            }
         } else {
             try {
                 if (saveFile.createNewFile()) {
                     insults.addAll(Arrays.asList(getDefaultInsults()));
                     System.out.println("Created insults file successfully!");
-                    final Writer out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(saveFile), "UTF-8"));
+                    final Writer out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(saveFile), StandardCharsets.UTF_8));
                     for (String str : insults) {
                         out.write(str + System.getProperty("line.separator"));
                     }
