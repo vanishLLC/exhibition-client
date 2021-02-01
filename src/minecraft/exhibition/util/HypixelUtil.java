@@ -63,7 +63,7 @@ public class HypixelUtil {
     }
 
     public static boolean isInGame(String gameString) {
-        if(Minecraft.getMinecraft().theWorld == null)
+        if(Minecraft.getMinecraft().theWorld == null || Minecraft.getMinecraft().thePlayer == null)
             return false;
 
         Scoreboard scoreboard = Minecraft.getMinecraft().theWorld.getScoreboard();
@@ -101,7 +101,7 @@ public class HypixelUtil {
      * split("Event:", ": ") in order to read stuff like "TDM" in "Event: TDM"
      */
     public static String[] scoreboardSplit(String contains, String regex) {
-        if(Minecraft.getMinecraft().theWorld == null)
+        if(Minecraft.getMinecraft().theWorld == null || Minecraft.getMinecraft().thePlayer == null)
             return null;
 
         Scoreboard scoreboard = Minecraft.getMinecraft().theWorld.getScoreboard();
@@ -154,7 +154,7 @@ public class HypixelUtil {
     }
 
     public static boolean scoreboardContains(String str) {
-        if(Minecraft.getMinecraft().theWorld == null)
+        if(Minecraft.getMinecraft().theWorld == null || Minecraft.getMinecraft().thePlayer == null)
             return false;
 
         Scoreboard scoreboard = Minecraft.getMinecraft().theWorld.getScoreboard();
