@@ -269,7 +269,8 @@ public class Nametags extends Module {
 
                 if (healthOption || hovered && selectHealth.equals("Hover")) {
                     float health = Float.isNaN(ent.getHealth()) ? 0 : ent.getHealth();
-                    String healthInfo = String.valueOf(MathUtils.roundToPlace(health/2F, 1)).replaceFirst("\\.0", "") + (ent.getAbsorptionAmount() > 0 ? " \2476" + (int) ent.getAbsorptionAmount() : "");
+                    String healthInfo = String.valueOf(MathUtils.roundToPlace(health/2F, 1)).replaceFirst("\\.0", "") +
+                            (ent.getAbsorptionAmount() > 0 ? " \2476" + String.valueOf((int)ent.getAbsorptionAmount()/2F).replaceFirst("\\.0", "") : "");
 
                     float strWidth2 = font.getWidth(healthInfo);
 
