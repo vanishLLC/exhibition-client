@@ -106,7 +106,7 @@ public class Killaura extends Module {
 
     public Killaura(ModuleData data) {
         super(data);
-        settings.put(FOVCHECK, new Setting<>(FOVCHECK, 180, /*Targets must be in FOV.*/decodeByteArray(new byte[]{84, 97, 114, 103, 101, 116, 115, 32, 109, 117, 115, 116, 32, 98, 101, 32, 105, 110, 32, 70, 79, 86, 46}), 15, 45, 180));
+        settings.put(FOVCHECK, new Setting<>(FOVCHECK, 180, /*Targets must be in FOV.*/decodeByteArray(new byte[]{84, 97, 114, 103, 101, 116, 115, 32, 109, 117, 115, 116, 32, 98, 101, 32, 105, 110, 32, 70, 79, 86, 46}), 1, 1, 180));
         settings.put(TICK, new Setting<>(TICK, 50, /*Existed ticks before attacking.*/decodeByteArray(new byte[]{69, 120, 105, 115, 116, 101, 100, 32, 116, 105, 99, 107, 115, 32, 98, 101, 102, 111, 114, 101, 32, 97, 116, 116, 97, 99, 107, 105, 110, 103, 46}), 5, 1, 120));
         settings.put(AUTOBLOCK, new Setting<>(AUTOBLOCK, true, /*Automatically blocks for you.*/decodeByteArray(new byte[]{65, 117, 116, 111, 109, 97, 116, 105, 99, 97, 108, 108, 121, 32, 98, 108, 111, 99, 107, 115, 32, 102, 111, 114, 32, 121, 111, 117, 46})));
         settings.put(RANGE, new Setting<>(RANGE, 4.5, /*Range for killaura.*/decodeByteArray(new byte[]{82, 97, 110, 103, 101, 32, 102, 111, 114, 32, 107, 105, 108, 108, 97, 117, 114, 97, 46}), 0.1, 1, 7));
@@ -512,7 +512,7 @@ public class Killaura extends Module {
                         if (!disable) {
                             double[] p = getPrediction(target, predictionTicks.getValue().intValue(), predictionTicks.getValue().doubleValue());
                             double xDiff = (target.posX + p[0]) - mc.thePlayer.posX;
-                            double yDiff = (target.posY + p[1]) - mc.thePlayer.posY - 1;
+                            double yDiff = (target.posY + p[1]) - mc.thePlayer.posY - 0.5;
                             double zDiff = (target.posZ + p[2]) - mc.thePlayer.posZ;
 
                             double yDifference = Math.abs((target.posY + p[2]) - mc.thePlayer.posY);
@@ -541,7 +541,7 @@ public class Killaura extends Module {
                                     bypassTicks > 5 && bypassTicks <= (40 + bypass.randomDelay) : bypass.bruh > 10 && bypass.bruh % 100 > 10 && bypass.bruh % 100 < 99)) && HypixelUtil.isVerifiedHypixel();
 
                             if (shouldReduce) {
-                                float pitch = (float) -(Math.atan2(yDiff - (distance > 2.1 ? 0.75 : 1), dist) * 180.0D / 3.141592653589793D);
+                                float pitch = (float) -(Math.atan2(yDiff - (distance > 2.1 ? 1.25 : 1.5), dist) * 180.0D / 3.141592653589793D);
                                 float newYaw = 0F;
 
                                 if (distance <= (HypixelUtil.isInGame("DUEL") ? 1.12 : 0.75) && yDifference <= 1.5) {
