@@ -12,6 +12,7 @@ import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.Options;
 import exhibition.module.data.settings.Setting;
+import exhibition.module.impl.combat.Bypass;
 import exhibition.module.impl.player.Scaffold;
 import exhibition.util.HypixelUtil;
 import exhibition.util.NetUtil;
@@ -117,6 +118,13 @@ public class Fly extends Module {
     public void onEnable() {
         if (mc.thePlayer == null)
             return;
+
+        Bypass bypass = Client.getModuleManager().get(Bypass.class);
+        if (!bypass.isEnabled()) {
+            toggle();
+            Notifications.getManager().post("Fly Disabled", "This feature requires Bypass.", 1000, Notifications.Type.NOTIFY);
+            return;
+        }
 
         bruhTick = 0;
         mc.timer.timerSpeed = 1f;
