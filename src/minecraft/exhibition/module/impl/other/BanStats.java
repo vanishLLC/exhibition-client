@@ -122,7 +122,7 @@ public class BanStats extends Module {
                             long diff = staff_total - staffTotalBans;
 
                             if (staffTotalBans != 0 && diff >= 4 && banStats.alertBans.getValue()) {
-                                Notifications.getManager().post("Staff Activity", "Staff seem to be banning a lot.", 3000, Notifications.Type.WARNING);
+                                Notifications.getManager().post("Staff Activity", "Staff seem to be banning a lot. (+" + diff + ")", 3000, Notifications.Type.WARNING);
                             }
 
                             if (staffTotalBans != 0 && diff > 0 && banStats.alertBans.getValue() && banStats.banTimer.getDifference() >= 120_000) {

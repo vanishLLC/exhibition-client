@@ -292,7 +292,6 @@ public class Nametags extends Module {
 
                 if (armor || hovered && selectArmor.equals("Hover") || isPriority) {
 
-                    boolean showPitEnchants = HypixelUtil.isInGame("THE HYPIXEL PIT");
 
                     List<ItemStack> itemsToRender = new ArrayList<>();
                     for (int i = 0; i < 5; i++) {
@@ -320,6 +319,7 @@ public class Nametags extends Module {
                         x += 3;
                         int y = 21;
 
+                        boolean showPitEnchants = HypixelUtil.isInGame("THE HYPIXEL PIT");
                         if (showPitEnchants && stack.hasTagCompound()) {
                             List<String> enchants = HypixelUtil.getPitEnchants(stack);
 
@@ -331,7 +331,7 @@ public class Nametags extends Module {
                                 boolean strongEnchant = enchant.contains("Retro") || enchant.contains("Stun") || enchant.contains("Funky") ||
                                         enchant.contains("Wrath I") || enchant.contains("Duelist I") || enchant.contains("David") ||
                                         enchant.contains("Billionaire I") || enchant.contains("Hemorrhage") || enchant.contains("Mirror") ||
-                                        enchant.contains("Venom") || enchant.contains("Gamble");
+                                        enchant.contains("Venom") || enchant.contains("Gamble") || enchant.contains("Crush");
 
                                 int level = 1;
 

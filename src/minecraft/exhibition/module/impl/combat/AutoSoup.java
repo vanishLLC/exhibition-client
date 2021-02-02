@@ -178,8 +178,12 @@ public class AutoSoup extends Module {
 
         boolean isInPit = HypixelUtil.isInGame("PIT");
 
+
+        float minHealth = ((Number) settings.get(HEALTH).getValue()).floatValue();
+        boolean shouldHeal = (mc.thePlayer.getMaxHealth() == 20 ? mc.thePlayer.getHealth() <= minHealth : (mc.thePlayer.getHealth() / mc.thePlayer.getMaxHealth()) <= minHealth / 20F);
+
         boolean needsRegenOrAbsorption = (!mc.thePlayer.isPotionActive(Potion.regeneration) || (mc.thePlayer.getAbsorptionAmount() <= 0) ||
-                (mc.thePlayer.isPotionActive(Potion.regeneration) && mc.thePlayer.getActivePotionEffect(Potion.regeneration).getDuration() < 5));
+                (mc.thePlayer.isPotionActive(Potion.regeneration) && mc.thePlayer.getActivePotionEffect(Potion.regeneration).getDuration() < 5)) && shouldHeal;
 
         boolean shouldResistance = mc.thePlayer.getMaxHealth() == 20 ? mc.thePlayer.getHealth() / 2F <= resHealth.getValue().floatValue() : (mc.thePlayer.getHealth() / mc.thePlayer.getMaxHealth()) <= resHealth.getValue().floatValue() / 10F;
 

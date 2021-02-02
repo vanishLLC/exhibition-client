@@ -11,6 +11,7 @@ import exhibition.module.data.ModuleData;
 import exhibition.module.impl.combat.Killaura;
 import exhibition.module.impl.gta.Aimbot;
 import exhibition.module.impl.render.ESP2D;
+import exhibition.util.HypixelUtil;
 import exhibition.util.MathUtils;
 import exhibition.util.RenderingUtil;
 import exhibition.util.render.Colors;
@@ -25,10 +26,12 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.*;
+import net.minecraft.util.StringUtils;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import static exhibition.module.impl.hud.ArmorStatus.drawEnchantTag;
@@ -257,6 +260,60 @@ public class TargetHUD extends Module {
                             }
                         } else if (itemStack.getRarity() == EnumRarity.EPIC) {
                             drawEnchantTag("\247e\247lGod", split, y);
+                        }
+
+                        boolean showPitEnchants = HypixelUtil.isInGame("THE HYPIXEL PIT");
+                        if (showPitEnchants && itemStack.hasTagCompound()) {
+                            List<String> enchants = HypixelUtil.getPitEnchants(itemStack);
+
+                            List<String> render = new ArrayList<>();
+
+                            int enchantOffsetY = 0;
+
+                            for (String enchant : enchants) {
+                                boolean strongEnchant = enchant.contains("Retro") || enchant.contains("Stun") || enchant.contains("Funky") ||
+                                        enchant.contains("Wrath I") || enchant.contains("Duelist I") || enchant.contains("David") ||
+                                        enchant.contains("Billionaire I") || enchant.contains("Hemorrhage") || enchant.contains("Mirror") ||
+                                        enchant.contains("Venom") || enchant.contains("Gamble") || enchant.contains("Crush");
+
+                                int level = 1;
+
+                                if (enchant.length() > 1) {
+                                    StringBuilder temp = new StringBuilder();
+                                    for (String s : StringUtils.stripHypixelControlCodes(enchant)
+                                            .replace("\247f\2477\2479", "")
+                                            .replace("“", "")
+                                            .replace("”","")
+                                            .replace("\"","")
+                                            .replace("(", "").split(" ")) {
+                                        if (s.contains("RARE")) {
+                                            continue;
+                                        }
+
+                                        if (!s.startsWith("II")) {
+                                            temp.append(s.charAt(0));
+                                        } else {
+                                            level += s.equals("II") ? 1 : 2;
+                                        }
+                                    }
+                                    if(!temp.toString().equals("")) {
+                                        render.add((strongEnchant ? "\247c\247l" : "\247e\247l") + temp + getColor(level) + "\247l" + level);
+                                    }
+                                }
+                            }
+
+                            render.sort(Comparator.comparingInt(String::length));
+
+                            for (String string : render) {
+
+                                GlStateManager.pushMatrix();
+                                GlStateManager.disableDepth();
+                                Client.fsmallbold.drawBorderedString(string, split, y + enchantOffsetY, -1, Colors.getColor(0, 255));
+                                GlStateManager.enableDepth();
+                                GlStateManager.popMatrix();
+
+                                enchantOffsetY += 5;
+                            }
                         }
 
                         GlStateManager.disableBlend();

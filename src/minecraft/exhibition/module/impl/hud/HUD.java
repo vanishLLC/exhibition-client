@@ -429,15 +429,8 @@ public class HUD extends Module {
                     }
                 } else {
                     int y = 1;
-                    List<Module> modules = new CopyOnWriteArrayList<>();
-                    for (Module module : Client.getModuleManager().getArray()) {
-                        if (!shouldHide(module))
-                            modules.add(module);
-                    }
-                    modules.sort(Comparator.comparingDouble(o -> -mc.fontRendererObj.getStringWidth(o.getSuffix() != null ? o.getName() + " - " + o.getSuffix() : o.getName())));
-                    for (Module module : modules) {
-                        if (!module.isEnabled())
-                            continue;
+                    List<Module> moduleList = Arrays.stream(Client.getModuleManager().getArray()).filter(module -> (!shouldHide(module) && module.isEnabled())).sorted(Comparator.comparingDouble(o -> -mc.fontRendererObj.getStringWidth(o.getSuffix() != null ? o.getName() + " - " + o.getSuffix() : o.getName()))).collect(Collectors.toList());
+                    for (Module module : moduleList) {
                         if (h > 255) {
                             h = 0;
                         }
