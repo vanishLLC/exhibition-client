@@ -236,7 +236,7 @@ public class AuthenticationUtil {
                                                         loginInstance.setProgress(1);
                                                         LoginUtil.cachedLogin = AuthenticationUtil.authListPos = 1;
                                                     } catch (Exception e) {
-                                                        e.printStackTrace();
+                                                        //e.printStackTrace();
                                                     }
                                                 } else {
                                                     loginInstance.setInvalidHWID();

@@ -2301,8 +2301,8 @@ public class SkeetMenu extends UI {
             } else if (a.equals("health")) {
                 labelText += (slider.setting.getMax() == 20 ? "hp" : "hp");
             }
-            if (a.equalsIgnoreCase("Mxaxaps")) {
-                xd = "Maxaps";
+            if (a.contains("mxax")) {
+                xd = xd.replace("Mxax", "Max");
             }
             float strWidth = Client.fs.getWidth(labelText);
             Client.fsmallbold.drawBorderedString(labelText, (slider.x + xOff + 42) - strWidth, (slider.y - 6 + yOff), Colors.getColor(220, (int) opacity.getOpacity()), Colors.getColor(0, (int) opacity.getOpacity()));
