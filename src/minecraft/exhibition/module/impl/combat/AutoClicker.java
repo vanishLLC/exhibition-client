@@ -12,8 +12,12 @@ import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
 import exhibition.util.Timer;
+import net.minecraft.client.settings.KeyBinding;
 import org.lwjgl.input.Mouse;
 
+/**
+ * @author cool1
+ */
 public class AutoClicker extends Module {
 
     private final Timer timer = new Timer();
@@ -39,12 +43,14 @@ public class AutoClicker extends Module {
         if (mc.currentScreen == null && mc.thePlayer.isEntityAlive()) {
             if (Mouse.isButtonDown(0)) {
                 if (timer.delay(nextDelay)) {
-                    mc.clickMouse();
+                    KeyBinding.setKeyBindState(mc.gameSettings.keyBindAttack.getKeyCode(), true);
+                    KeyBinding.onTick(mc.gameSettings.keyBindAttack.getKeyCode());
+                    KeyBinding.setKeyBindState(mc.gameSettings.keyBindAttack.getKeyCode(), false);
 
                     long minimumDelay = 1000 / minDelay.getValue().longValue();
                     long maximumDelay = 1000 / maxDelay.getValue().longValue();
 
-                    nextDelay = randomNumber(minimumDelay, maximumDelay);
+                    nextDelay = randomNumber(maximumDelay, minimumDelay);
 
                     timer.reset();
                 }
