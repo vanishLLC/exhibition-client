@@ -44,7 +44,7 @@ public class Bypass extends Module {
 
     public Setting<Number> DELAY = new Setting<>("DELAY", 300, "Spoof offset. This should be 500 - (your ping).", 5, 0, 1000);
     public Setting<Boolean> AUTOBYPASS = new Setting<>("AUTOBYPASS", false, "Automatically detects optimal delay value.");
-    public Options option = new Options("Mode", "Watchdog Off", "Old", "Dong", "Watchdog Off");
+    public Options option = new Options("Mode", "Watchdog Off", "Watchdog Off", "Dong", "Old");
 
     private long startMS = -1;
     private int state = 0;
