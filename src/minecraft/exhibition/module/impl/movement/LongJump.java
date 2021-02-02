@@ -109,9 +109,6 @@ public class LongJump extends Module {
             return;
         velocityBoost = 0;
 
-        if (waitTimer.delay(2500) && bruhTick != 0) {
-            waitTimer.reset();
-        }
         mc.timer.timerSpeed = 1f;
         if (mc.thePlayer.onGround && !mc.thePlayer.isCollidedVertically) {
             mc.thePlayer.onGround = false;
@@ -176,6 +173,12 @@ public class LongJump extends Module {
         }
 
         Bypass bypass = Client.getModuleManager().get(Bypass.class);
+        if (!bypass.isEnabled()) {
+            toggle();
+            Notifications.getManager().post("LongJump Disabled", "This feature requires Bypass.", 1000, Notifications.Type.NOTIFY);
+            return;
+        }
+
         if (bypass.option.getSelected().equals("Dong") && (bypass.bruh != 0 && bypass.bruh < 11)) {
             toggle();
             Notifications.getManager().post("LongJump Disabled", "Dong mode moment. Re-toggle LongJump.", 1000, Notifications.Type.NOTIFY);
