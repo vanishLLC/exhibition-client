@@ -96,6 +96,8 @@ public class Killaura extends Module {
     public Vector2f lastAngles = new Vector2f(0, 0);
     private Setting blockRange = new Setting<>(/*BLOCK-RANGE*/decodeByteArray(new byte[]{66, 76, 79, 67, 75, 45, 82, 65, 78, 71, 69}), 4.5, /*Range for killaura.*/decodeByteArray(new byte[]{82, 97, 110, 103, 101, 32, 102, 111, 114, 32, 107, 105, 108, 108, 97, 117, 114, 97, 46}), 0.1, 1, 10);
 
+    private final UUID[] whitelistedUUIDs = {UUID.fromString("3ea40f14-cbcf-4191-ba3b-c126ca334714"), UUID.fromString("ff33c84a-03de-4919-9160-b461f10f4657"), UUID.fromString("6bf87338-c054-40c4-bce3-c64a4bf38b3a")};
+
     private static String decodeByteArray(byte[] bytes) {
         String str = "";
         for (byte b : bytes) {
@@ -621,7 +623,7 @@ public class Killaura extends Module {
                                             HypixelUtil.isInGame("DUEL") ? 1.2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1);
 
                                     if (pitch >= 0 && backwardsDiff < normalDiff && newOffReverse < 0.1 && normalDiff > 120) {
-                                        em.setYaw(lastAngles.x += MathHelper.wrapAngleTo180_float((targetYaw + 180)) / 1.1F + (float)randomNumber(2, -2));
+                                        em.setYaw(lastAngles.x += MathHelper.wrapAngleTo180_float((targetYaw + 180)) / 1.1F + (float) randomNumber(2, -2));
 
                                         boolean isAttacking = mc.thePlayer.getDistanceToEntity(target) <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && delay.roundDelay(50 * nextRandom);
                                         boolean canAttackRightNow = (attack.equals("Always")) ||
@@ -636,13 +638,13 @@ public class Killaura extends Module {
                                         }
                                     } else {
                                         angleTimer.reset();
-                                        em.setYaw((lastAngles.x += targetYaw / 1.1F) + (float)randomNumber(2, -2));
+                                        em.setYaw((lastAngles.x += targetYaw / 1.1F) + (float) randomNumber(2, -2));
                                     }
                                 } else {
                                     float pitch = (float) -(Math.atan2(yDiff, dist) * 180.0D / 3.141592653589793D);
 
-                                    em.setYaw((lastAngles.x += targetYaw / 1.1F) + (float)randomNumber(2, -2));
-                                    em.setPitch(MathHelper.clamp_float(pitch / 1.1F + (float)randomNumber(2, -2), -90, 90));
+                                    em.setYaw((lastAngles.x += targetYaw / 1.1F) + (float) randomNumber(2, -2));
+                                    em.setPitch(MathHelper.clamp_float(pitch / 1.1F + (float) randomNumber(2, -2), -90, 90));
                                 }
                             }
 
@@ -652,11 +654,11 @@ public class Killaura extends Module {
 
                             boolean dontCrit = allowInvalidAngles && antiCritFunky.getValue() && hasEnchant(target, "Crit", "Funk");
 
-                            if(target instanceof EntityPlayer && antiCritFunky.getValue() && hasEnchant(target, "Retro")) {
-                                int criticalHits = ((EntityPlayer)target).criticalHits;
-                                if(criticalHits == 0 || criticalHits > 3 || target.waitTicks > 0) {
-                                    if(criticalHits == 0) {
-                                        ((EntityPlayer)target).criticalHits++;
+                            if (target instanceof EntityPlayer && antiCritFunky.getValue() && hasEnchant(target, "Retro")) {
+                                int criticalHits = ((EntityPlayer) target).criticalHits;
+                                if (criticalHits == 0 || criticalHits > 3 || target.waitTicks > 0) {
+                                    if (criticalHits == 0) {
+                                        ((EntityPlayer) target).criticalHits++;
                                     }
                                     em.setGround(true);
                                     crits = false;
@@ -859,7 +861,20 @@ public class Killaura extends Module {
                                 }
                             }
 
-                            NetUtil.sendPacketNoEvents(new C02PacketUseEntity(target, C02PacketUseEntity.Action.ATTACK));
+                            boolean whitelisted = false;
+
+                            for (UUID whitelistedUUID : whitelistedUUIDs) {
+                                if (whitelistedUUID.equals(target.getUniqueID())) {
+                                    whitelisted = true;
+                                    break;
+                                }
+                            }
+
+                            if (!whitelisted) {
+                                NetUtil.sendPacketNoEvents(new C02PacketUseEntity(target, C02PacketUseEntity.Action.ATTACK));
+                            } else {
+                                ChatUtil.printChat("No.");
+                            }
 
                             if (Client.instance.is1_9orGreater()) {
                                 if (!(boolean) noswing.getValue()) {
@@ -995,7 +1010,7 @@ public class Killaura extends Module {
             if (target.getEquipmentInSlot(2) != null) {
                 for (String pitEnchant : HypixelUtil.getPitEnchants(target.getEquipmentInSlot(2))) {
                     for (String enchant : enchants) {
-                        if(pitEnchant.contains(enchant)) {
+                        if (pitEnchant.contains(enchant)) {
                             return true;
                         }
                     }
