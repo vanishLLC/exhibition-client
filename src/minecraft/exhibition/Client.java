@@ -501,7 +501,7 @@ public class Client extends Castable implements EventListener {
             if (eventPacket.isIncoming() && !(packet instanceof C00PacketKeepAlive)) {
                 packetTimer.reset();
             }
-            if (packet instanceof S08PacketPlayerPosLook) {
+            if (packet instanceof S08PacketPlayerPosLook && (mc.thePlayer == null || mc.thePlayer.ticksExisted < 40)) {
                 S08PacketPlayerPosLook spawnPosition = (S08PacketPlayerPosLook) packet;
 
                 double x = spawnPosition.getX();
@@ -512,7 +512,7 @@ public class Client extends Castable implements EventListener {
 
                 double yOffset = MathUtils.roundToPlace((y - (int) y), 10);
 
-                if (distance < 20 && yOffset == 0.6) {
+                if (distance < 50 && (yOffset == 0.6 || yOffset == 0)) {
                     spawnY = y - 4;
                 }
             }

@@ -524,30 +524,29 @@ public class SkeetMenu extends UI {
 
                 if (module.getType() == ModuleData.Type.Combat) {
                     if (module.getName().equalsIgnoreCase("AutoSword")) {
-                        yOff -= 95 + 46;
+                        yOff -= 178 - 16;
                         xOff += 95;
-                    }
-                    if (module.getName().equalsIgnoreCase("AimBot")) {
-                        yOff -= 95 + 56;
-                        xOff += 95;
-                    }
-
-                    if (module.getName().equalsIgnoreCase("ZombieAim")) {
-                        yOff += 13;
                     }
                     if (module.getName().equalsIgnoreCase("AutoPot")) {
                         yOff -= 5;
                     }
                     if (module.getName().equalsIgnoreCase("Bypass")) {
-                        yOff += 12;
+                        yOff += 12 + 21;
                     }
-                    if (module.getName().equalsIgnoreCase("AntiVelocity"))
+                    if (module.getName().equalsIgnoreCase("AntiVelocity")) {
+                        yOff -= 16;
                         xOff += 95;
-                    if (module.getName().equalsIgnoreCase("Killaura"))
+                    }
+                    if (module.getName().equalsIgnoreCase("Killaura")) {
                         xOff -= 95 * 2;
+                    }
+                    if(module.getName().equals("AutoClicker")) {
+                        xOff += 95;
+                        yOff -= 148 + 21;
+                    }
                     if (module.getName().equalsIgnoreCase("AutoPot")) {
                         xOff += 95;
-                        yOff += 5;
+                        yOff += 5 + 16;
                     }
                     y = 20;
                     List<Setting> list = getSettings(module);

@@ -13,6 +13,7 @@ import exhibition.management.UUIDResolver;
 import exhibition.management.friend.Friend;
 import exhibition.management.friend.FriendManager;
 import exhibition.module.impl.other.StreamerMode;
+import exhibition.module.impl.render.TargetESP;
 import exhibition.util.render.Colors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.network.NetHandlerPlayClient;
@@ -190,6 +191,12 @@ public class GuiPlayerTabOverlay extends Gui {
                 } else if (UUIDResolver.instance.isInvalidName(name)) {
                     drawRect(j2, k2, j2 + i1, k2 + 8, Colors.getColor(255, 255, 0, 160));
                     GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+                } else {
+                    EntityPlayer entityplayer = this.mc.theWorld.getPlayerEntityByUUID(gameprofile.getId());
+                    if(entityplayer != null && TargetESP.isPriority(entityplayer)) {
+                        drawRect(j2, k2, j2 + i1, k2 + 8, Colors.getColor(234, 36, 255, 100));
+                        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+                    }
                 }
 
                 if (flag) {

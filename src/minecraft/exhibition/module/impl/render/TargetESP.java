@@ -26,6 +26,7 @@ import org.lwjgl.opengl.GL11;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class TargetESP extends Module {
 
@@ -95,24 +96,20 @@ public class TargetESP extends Module {
         RenderingUtil.rectangle(0, 0, 0, 0, -1);
     }
 
+    private static final Pattern bountyPattern = Pattern.compile("\247l[\\d]+g");
+
     public static boolean isPriority(EntityPlayer player) {
-        if (player.equals(((Killaura)Client.getModuleManager().get(Killaura.class)).vip))
+        if (player.equals(Client.getModuleManager().get(Killaura.class).vip))
             return true;
         if (PriorityManager.isPriority(player))
             return true;
 
         String formatted = player.getDisplayName().getFormattedText();
 
-        if(Client.getModuleManager().isEnabled(TargetESP.class) && (formatted.contains("\2476\247l") && !formatted.contains("\2476\247l100g"))) {
-            if (player.getDisplayName().getFormattedText().contains(" \2476\247l")) {
-                return true;
-            }
-            if (player.getDisplayName().getFormattedText().contains(" \247b\247l")) {
-                return true;
-            }
-            return player.getDisplayName().getFormattedText().contains(" \247c\247l");
+        if(Client.getModuleManager().isEnabled(TargetESP.class) && (bountyPattern.matcher(formatted).find() && !formatted.contains("\247l100g"))) {
+            return true;
         }
-        if(Client.getModuleManager().isEnabled(TargetESP.class) && (formatted.contains("HELD") || formatted.contains("BEAST")) && HypixelUtil.scoreboardContains("Event")) {
+        if(Client.getModuleManager().isEnabled(TargetESP.class) && (formatted.contains("HELD") || (formatted.contains("BEAST") && !mc.thePlayer.getDisplayName().getFormattedText().contains("\247lBEAST"))) && HypixelUtil.scoreboardContains("Event")) {
             return true;
         }
         return false;

@@ -331,7 +331,7 @@ public class Nametags extends Module {
                                 boolean strongEnchant = enchant.contains("Retro") || enchant.contains("Stun") || enchant.contains("Funky") ||
                                         enchant.contains("Wrath I") || enchant.contains("Duelist I") || enchant.contains("David") ||
                                         enchant.contains("Billionaire I") || enchant.contains("Hemorrhage") || enchant.contains("Mirror") ||
-                                        enchant.contains("Venom") || enchant.contains("Gamble") || enchant.contains("Crush");
+                                        enchant.contains("Venom") || enchant.contains("Gamble") || enchant.contains("Crush") || enchant.contains("Solitude");
 
                                 int level = 1;
 
