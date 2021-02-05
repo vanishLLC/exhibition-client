@@ -583,7 +583,7 @@ public class GuiIngame extends Gui {
         int j1 = arraylist1.size() * this.getFontRenderer().FONT_HEIGHT;
 
         if (renderBanStats) {
-            j1 += this.getFontRenderer().FONT_HEIGHT * 3;
+            j1 += this.getFontRenderer().FONT_HEIGHT * 4;
         }
 
         int k1 = p_180475_2_.getScaledHeight() / 2 + j1 / 3;
@@ -622,7 +622,7 @@ public class GuiIngame extends Gui {
 
                 if (k == arraylist.size()) {
                     if (renderBanStats) {
-                        l -= 3 * this.getFontRenderer().FONT_HEIGHT;
+                        l -= 4 * this.getFontRenderer().FONT_HEIGHT;
                     }
                     String s3 = p_180475_1_.getDisplayName();
                     drawRect(j - 2, l - this.getFontRenderer().FONT_HEIGHT - 1, i1, l - 1, 1610612736);
@@ -640,6 +640,15 @@ public class GuiIngame extends Gui {
 
                     if ((Client.instance.hypixelApiKey == null || Client.instance.hypixelApiKey.equals("")))
                         this.getFontRenderer().drawString("\247cType /api new", j, l, 553648127);
+                }
+                {
+                    long sinceConnected = banStats.bansSinceConnect;
+                    ++k;
+                    int l = k1 - k * this.getFontRenderer().FONT_HEIGHT;
+                    int i1 = p_180475_2_.getScaledWidth() - b0 + 2;
+                    drawRect(j - 2, l, i1, l + this.getFontRenderer().FONT_HEIGHT, 1342177280);
+
+                    this.getFontRenderer().drawString("Total: " + (sinceConnected >= 25 ? "\247c" : sinceConnected == 0 ? "\247a" : sinceConnected > 5 ? "\2476" : "\247e") + sinceConnected, j, l, 553648127);
                 }
                 {
                     long lastMinuteBans = banStats.bansLastMinute;

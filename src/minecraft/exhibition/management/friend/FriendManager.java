@@ -2,6 +2,7 @@ package exhibition.management.friend;
 
 import exhibition.util.FileUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.pathfinding.Path;
 import net.minecraft.util.StringUtils;
 
 import java.io.File;
@@ -22,6 +23,10 @@ public class FriendManager {
     }
 
     public static void addFriend(final String name, final String alias) {
+        if (name.equals("")) {
+            return;
+        }
+
         if (!isFriend(name))
             FriendManager.friendsList.add(new Friend(name, alias));
         save();
@@ -70,7 +75,7 @@ public class FriendManager {
                 final String[] split = line.split(":");
                 final String name = split[0];
                 final String alias = split[1];
-                if (!isFriend(name))
+                if (!isFriend(name) && !name.equals(""))
                     FriendManager.friendsList.add(new Friend(name, alias));
             } catch (Exception ex) {
             }

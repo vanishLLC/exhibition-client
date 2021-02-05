@@ -145,7 +145,7 @@ public class GuiConnecting extends GuiScreen {
                     GuiConnecting.this.mc.displayGuiScreen(new GuiDisconnected(GuiConnecting.this.previousGuiScreen, "connect.failed", new ChatComponentTranslation("disconnect.genericReason", new Object[]{s})));
                 }
 
-                Client.loginTime = System.currentTimeMillis();
+                Client.ticksInGame = -1;
             }
         }).start();
     }

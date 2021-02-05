@@ -744,7 +744,7 @@ public class Killaura extends Module {
                                             if (mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {
                                                 stepDelay = 2;
                                                 blockJump = true;
-                                                em.setY(em.getY() + 0.07840000152587834 + (0.0000023423F) * Math.random());
+                                                em.setY(em.getY() + 0.0625234F + ((mc.thePlayer.ticksExisted % 1000) / 1000000F));
                                                 em.setGround(false);
                                                 em.setForcePos(true);
                                                 isCritSetup = true;
@@ -846,7 +846,7 @@ public class Killaura extends Module {
 
                         if (crits && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically && critModule.isPacket() && setupCrits && isCritSetup && !em.isOnground()) {
                             if (HypixelUtil.isVerifiedHypixel() && mc.getCurrentServerData() != null && (mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net"))) {
-                                NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.0076092939542 - (0.0000000002475776F) * Math.random(), mc.thePlayer.posZ, false));
+                                NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.000134F + ((mc.thePlayer.ticksExisted % 1000) / 1000000F), mc.thePlayer.posZ, false));
                             } else {
                                 Criticals.doCrits();
                             }
@@ -884,18 +884,19 @@ public class Killaura extends Module {
                                 }
                             }
 
-                            if (target.waitTicks <= 0) {
-                                if (target instanceof EntityPlayer) {
-                                    if ((!em.isOnground() && isCritSetup) || !mc.thePlayer.onGround) {
-                                        ((EntityPlayer) target).criticalHits++;
-                                    } else {
-                                        ((EntityPlayer) target).criticalHits = 0;
+                            if (target != null)
+                                if (target.waitTicks <= 0) {
+                                    if (target instanceof EntityPlayer) {
+                                        if ((!em.isOnground() && isCritSetup) || !mc.thePlayer.onGround) {
+                                            ((EntityPlayer) target).criticalHits++;
+                                        } else {
+                                            ((EntityPlayer) target).criticalHits = 0;
+                                        }
                                     }
-                                }
 
-                                boolean b = Angle.INSTANCE.check(new Location(mc.thePlayer.posX, em.getY(), mc.thePlayer.posZ, em.getYaw(), 0), target);
-                                target.waitTicks = 10;
-                            }
+                                    boolean b = Angle.INSTANCE.check(new Location(mc.thePlayer.posX, em.getY(), mc.thePlayer.posZ, em.getYaw(), 0), target);
+                                    target.waitTicks = 10;
+                                }
 
                             delay.reset();
                             nextRandom = (int) Math.round((20 / randomInt(min, max)));

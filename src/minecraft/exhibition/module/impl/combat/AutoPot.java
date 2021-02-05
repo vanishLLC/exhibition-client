@@ -167,11 +167,13 @@ public class AutoPot extends Module {
                                 if (splashPot)
                                     e.setPitch(-88.9F);
 
-                                Killaura aura = (Killaura) Client.getModuleManager().get(Killaura.class);
-                                float yaw = aura.isEnabled() && !((Killaura) Client.getModuleManager().get(Killaura.class)).loaded.isEmpty() ? aura.getLastYaw() : e.getYaw();
+                                Killaura aura = Client.getModuleManager().get(Killaura.class);
+                                float yaw = aura.target != null ? aura.getLastYaw() : e.getYaw();
 
                                 if (splashPot)
                                     NetUtil.sendPacketNoEvents(new C03PacketPlayer.C06PacketPlayerPosLook(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, yaw, -89.9F, true)); // First canceled
+
+                                e.setYaw(yaw);
 
                                 int hotbarSlot = 6;
 

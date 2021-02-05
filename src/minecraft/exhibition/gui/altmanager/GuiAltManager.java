@@ -237,6 +237,7 @@ public class GuiAltManager extends PanoramaScreen {
                             continue;
                         alts.println(alt.getUsername() + ":" + alt.getPassword());
                     }
+                    alts.flush();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

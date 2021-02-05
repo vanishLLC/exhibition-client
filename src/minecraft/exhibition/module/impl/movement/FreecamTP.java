@@ -185,7 +185,6 @@ public class FreecamTP extends Module {
                 if (mc.thePlayer.posX != mc.thePlayer.lastTickPosX || mc.thePlayer.posY != mc.thePlayer.lastTickPosY || mc.thePlayer.posZ != mc.thePlayer.lastTickPosZ) {
                     Vec3 vec3 = new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ);
                     positions.add(vec3);
-                    DevNotifications.getManager().post(vec3.toString());
                 }
                 em.setCancelled(true);
                 return;

@@ -35,9 +35,9 @@ public class GuiDisconnected extends GuiScreen {
         this.message = p_i45020_3_;
         boolean changed = false;
 
-        if (Client.loginTime != -1) {
-            this.timeDifference = (System.currentTimeMillis() - Client.loginTime);
-            Client.loginTime = -1;
+        if (Client.ticksInGame != -1) {
+            this.timeDifference = Client.ticksInGame * 50;
+            Client.ticksInGame = -1;
         } else {
             this.timeDifference = -1;
         }
@@ -292,7 +292,7 @@ public class GuiDisconnected extends GuiScreen {
         fontRendererObj.drawStringWithShadow(str, this.width / 2F - fontRendererObj.getStringWidth(str) - 5, this.height / 2F + this.field_175353_i / 2F + this.fontRendererObj.FONT_HEIGHT + 56, -1);
 
         if (timeDifference != -1 && this.message.getUnformattedText().contains("ban")) {
-            String timeDiff = "Account lasted " + getTimeLength(timeDifference);
+            String timeDiff = "Playtime: " + getTimeLength(timeDifference);
             fontRendererObj.drawStringWithShadow(timeDiff, width / 2D - fontRendererObj.getStringWidth(timeDiff) / 2D, 12, -1);
         }
 

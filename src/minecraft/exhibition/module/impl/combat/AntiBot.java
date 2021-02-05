@@ -186,6 +186,19 @@ public class AntiBot extends Module {
                     }
                 }
 
+                final NetHandlerPlayClient var4 = mc.thePlayer.sendQueue;
+                List<NetworkPlayerInfo> list = new ArrayList<>(var4.getPlayerInfoMap());
+                if (playerInfo == null || !list.contains(playerInfo)) {
+                    GameProfile gameProfile = mc.thePlayer.getGameProfile();
+                    for (NetworkPlayerInfo networkPlayerInfo : list) {
+                        if (networkPlayerInfo.getGameProfile() != null && gameProfile != null)
+                            if (gameProfile.equals(networkPlayerInfo.getGameProfile()) || gameProfile.getName().equals(networkPlayerInfo.getGameProfile().getName())) {
+                                playerInfo = networkPlayerInfo;
+                                break;
+                            }
+                    }
+                }
+
                 for (Entity o : mc.theWorld.getLoadedEntityList()) {
                     if (o instanceof EntityPlayer) {
                         EntityPlayer ent = (EntityPlayer) o;
@@ -313,19 +326,6 @@ public class AntiBot extends Module {
 
                                 int ticksOnGround = ticksOnGroundMap.getOrDefault(ent.getName(), 0);
                                 ticksOnGroundMap.put(ent.getName(), Math.max(ticksOnGround - 20, -20));
-                            }
-                        }
-
-                        final NetHandlerPlayClient var4 = mc.thePlayer.sendQueue;
-                        List<NetworkPlayerInfo> list = new ArrayList<>(var4.getPlayerInfoMap());
-                        if (playerInfo == null || !list.contains(playerInfo)) {
-                            GameProfile gameProfile = mc.thePlayer.getGameProfile();
-                            for (NetworkPlayerInfo networkPlayerInfo : list) {
-                                if (networkPlayerInfo.getGameProfile() != null && gameProfile != null)
-                                    if (gameProfile.equals(networkPlayerInfo.getGameProfile()) || gameProfile.getName().equals(networkPlayerInfo.getGameProfile().getName())) {
-                                        playerInfo = networkPlayerInfo;
-                                        break;
-                                    }
                             }
                         }
 
@@ -486,8 +486,7 @@ public class AntiBot extends Module {
     }
 
     public static boolean isInTabList(List<NetworkPlayerInfo> players, EntityPlayer player) {
-        for (final Object o : players) {
-            final NetworkPlayerInfo info = (NetworkPlayerInfo) o;
+        for (NetworkPlayerInfo info : players) {
             if (info == null) {
                 continue;
             }

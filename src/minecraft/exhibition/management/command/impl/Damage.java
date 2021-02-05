@@ -52,8 +52,8 @@ public class Damage extends Command {
 
         for (int index = 0; amountFallen < minimalFall; index++) {
 
-            double top = 0.0625234F + ((0.00039F * (Math.min(index, 35) / 39F)));
-            double bottom = 0.000134F + ((0.0000000039F * (Math.min(index, 35) / 39F)));
+            double top = 0.0625234F + (0.0000012F * index);
+            double bottom = 0.000134F + (0.0000012F * index);
 
             double bruh = top - bottom;
 

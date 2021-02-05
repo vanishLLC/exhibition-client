@@ -231,8 +231,8 @@ public class HUD extends Module {
 
         EventRenderGui e = (EventRenderGui) event;
 
-        if (Client.loginTime != -1 && showSessionTime.getValue()) {
-            long timeDifference = System.currentTimeMillis() - Client.loginTime;
+        if (Client.ticksInGame != -1 && showSessionTime.getValue()) {
+            long timeDifference = Client.ticksInGame * 50;
             long seconds = (timeDifference / 1000) % 60;
             long minutes = (timeDifference / 60000) % 60;
             long hours = (timeDifference / 3600000) % 24;
@@ -245,7 +245,7 @@ public class HUD extends Module {
 
             String s = stringBuilder.toString();
 
-            mc.fontRendererObj.drawString(s, (int) (e.getResolution().getScaledWidth_double() / 2 - mc.fontRendererObj.getStringWidth(s) / 2), 30, -1);
+            mc.fontRendererObj.drawStringWithShadow(s, (int) (e.getResolution().getScaledWidth_double() / 2 - mc.fontRendererObj.getStringWidth(s) / 2), 30, -1);
         }
 
         Bypass bypass = Client.getModuleManager().get(Bypass.class);
@@ -255,10 +255,10 @@ public class HUD extends Module {
                 int max = (45 + bypass.randomDelay);
 
                 String bruh = bypass.bruh == 0 ? "Watchdog Inactive" : Math.round((current / (float) max) * 100) + "%";
-                mc.fontRendererObj.drawString(bruh, (int) (e.getResolution().getScaledWidth_double() / 2 - mc.fontRendererObj.getStringWidth(bruh) / 2), 20, -1);
+                mc.fontRendererObj.drawStringWithShadow(bruh, (int) (e.getResolution().getScaledWidth_double() / 2 - mc.fontRendererObj.getStringWidth(bruh) / 2), 20, -1);
             } else if (bypass.option.getSelected().equals("Watchdog Off")) {
-                String bruh = bypass.lastSentUid != 3 ? "Watchdog Inactive" : "Watchdog Bugged";
-                mc.fontRendererObj.drawString(bruh, (int) (e.getResolution().getScaledWidth_double() / 2 - mc.fontRendererObj.getStringWidth(bruh) / 2), 20, -1);
+                String bruh = bypass.lastSentUid != 2 ? bypass.lastSentUid == 1 ? "Watchdog Off" : "Watchdog Inactive" : "\247c\247lWatchdog Bugged";
+                mc.fontRendererObj.drawStringWithShadow(bruh, (int) (e.getResolution().getScaledWidth_double() / 2 - mc.fontRendererObj.getStringWidth(bruh) / 2), 20, -1);
             }
 
 //        String okbruh = Angle.INSTANCE.angleVL + " Angle VL | Size: " + Angle.INSTANCE.angleHits.size();

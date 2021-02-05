@@ -22,6 +22,9 @@ public class Alts extends FileManager.CustomFile {
         String altName = null;
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine();
+            if (line.equals("") || line.equals("\n") || !line.contains(":"))
+                continue;
+
             if (!line.startsWith("lastalt:")) {
                 final String[] arguments = line.split(" ")[0].split(" \\(")[0].replace(" - SFA", "").replace(" | SFA", "").split(":");
                 if (arguments.length >= 5) {

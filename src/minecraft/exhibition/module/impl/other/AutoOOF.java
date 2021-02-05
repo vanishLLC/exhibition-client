@@ -73,8 +73,13 @@ public class AutoOOF extends Module {
 
                     Class<? extends Module>[] classes = new Class[]{Killaura.class, AntiVelocity.class, Speed.class, Fly.class, LongJump.class, BedFucker.class, BorderHop.class};
                     for (Class<? extends Module> module : classes) {
-                        if (Client.getModuleManager().isEnabled(module)) {
-                            Client.getModuleManager().get(module).toggle();
+                        Module mod = Client.getModuleManager().get(module);
+                        if (mod.isEnabled()) {
+                            if(mod instanceof Killaura) {
+                                ((Killaura)mod).shouldToggle = true;
+                            } else {
+                                Client.getModuleManager().get(module).toggle();
+                            }
                         }
                     }
                 }

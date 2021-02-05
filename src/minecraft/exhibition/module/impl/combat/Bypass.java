@@ -180,7 +180,7 @@ public class Bypass extends Module {
                     if (mc.thePlayer == null) {
                         resetPackets();
                     } else {
-                        boolean canSend = (longJump.isEnabled() ? (longJump.bruhTick % 7 == 3 || longJump.bruhTick % 7 == 4) : mc.thePlayer.ticksExisted % 7 != 0);
+                        boolean canSend = (longJump.isEnabled() ? (longJump.bruhTick % 6 == 3) : mc.thePlayer.ticksExisted % 7 != 0);
                         if (canSend && isFlying && c13Timer.delay(2500) && bruh > 20) {
                             c13Timer.reset();
                             int sent = 0;
@@ -214,10 +214,10 @@ public class Bypass extends Module {
                                         return;
                                     }
 
-                                    boolean canSend = !isFlying ? mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically : (longJump.isEnabled() ? (longJump.bruhTick % 7 == 3 || longJump.bruhTick % 7 == 4) : mc.thePlayer.ticksExisted % 7 != 0);
+                                    boolean canSend = !isFlying ? mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically : (longJump.isEnabled() ? (longJump.bruhTick % 6 == 3 || longJump.bruhTick % 6 == 4) : mc.thePlayer.ticksExisted % 7 != 0);
 
-                                    if (isFlying && (bruh - 10) >= (45 + randomDelay)) {
-                                        bruh = 30;
+                                    if (isFlying && (bruh - 10) >= (10)) {
+                                        bruh = 20;
                                     }
 
                                     if ((bruh - 10) >= (45 + randomDelay) && (!isFlying || canSend)) {
@@ -240,7 +240,7 @@ public class Bypass extends Module {
                                         lastSentUid = packet.getUid();
                                         if (debug)
                                             DevNotifications.getManager().post("\247eSent from \247c" + (lastbruh) + "\247e to \247a" + (lastSentUid + 1) + " " + mc.thePlayer.ticksExisted);
-                                        randomDelay = random.nextInt(55);
+                                        randomDelay = random.nextInt(65);
                                         bruh = 10;
                                     } else {
                                         chokePackets.add(packet);
@@ -326,12 +326,14 @@ public class Bypass extends Module {
                                 }
                             } else {
                                 event.setCancelled(true);
-                                if (c13Timer.delay(1000) && lastSentUid != 3) {
-                                    DevNotifications.getManager().post("\247e\247lBurst detected \247c" + packet.getUid() + " \2476" + mc.thePlayer.ticksExisted);
+                                if (c13Timer.delay(1000) && lastSentUid != 2) {
+                                    if (debug)
+                                        DevNotifications.getManager().post("\247e\247lBurst detected \247c" + packet.getUid() + " \2476" + mc.thePlayer.ticksExisted);
                                     c13Timer.reset();
-                                    if (lastSentUid == 2) {
+                                    if (lastSentUid == 1) {
                                         Notifications.getManager().post("Bypass Error", "Possible WD ban. Please rejoin or finish your match quickly.", 7500, Notifications.Type.WARNING);
-                                        DevNotifications.getManager().post("\247aWatchdog has handshaked " + mc.thePlayer.ticksExisted);
+                                        if (debug)
+                                            DevNotifications.getManager().post("\247aWatchdog has handshaked " + mc.thePlayer.ticksExisted);
                                         sendPackets();
                                         resetPackets();
                                     }

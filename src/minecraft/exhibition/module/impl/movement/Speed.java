@@ -807,7 +807,7 @@ public class Speed extends Module {
 
                         if (PlayerUtil.isMoving() && stage > 0) {
                             if (em.getY() % 0.015625 == 0) {
-                                em.setY(em.getY() + 0.00625101F);
+                                em.setY(em.getY() + 0.00053424);
                                 em.setGround(false);
                             }
 

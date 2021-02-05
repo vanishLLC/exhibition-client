@@ -108,7 +108,7 @@ public class LongJump extends Module {
         if (mc.thePlayer == null)
             return;
         velocityBoost = 0;
-
+        bowTicks = 0;
         mc.timer.timerSpeed = 1f;
         if (mc.thePlayer.onGround && !mc.thePlayer.isCollidedVertically) {
             mc.thePlayer.onGround = false;
@@ -589,7 +589,7 @@ public class LongJump extends Module {
 
                     if (isHypixel && em.getY() % 0.015625 == 0 && delay == 6 & mc.thePlayer.onGround) {
                         em.setForcePos(true);
-                        em.setY(em.getY() + 0.00625101F);
+                        em.setY(em.getY() + 0.00053424);
                         em.setGround(false);
                     }
 
@@ -599,7 +599,7 @@ public class LongJump extends Module {
                     }
 
                     if (delay < 3) {
-                        em.setGround(bruhTick % 7 == 0 && HypixelUtil.isVerifiedHypixel());
+                        em.setGround(bruhTick % 6 == 0 && HypixelUtil.isVerifiedHypixel());
                     }
                 } else {
                     if (bowTicks == 19) {

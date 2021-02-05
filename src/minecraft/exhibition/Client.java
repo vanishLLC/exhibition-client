@@ -104,7 +104,7 @@ public class Client extends Castable implements EventListener {
     private GuiScreen mainMenu = new ClientMainMenu();
     private boolean isHidden;
 
-    public static long loginTime = -1;
+    public static long ticksInGame = -1;
 
     public static ResourceLocation chainmailTexture = new ResourceLocation("textures/skeetchainmail.png");
     public static ResourceLocation capeLocation = new ResourceLocation("textures/cape.png");
@@ -554,6 +554,10 @@ public class Client extends Castable implements EventListener {
             }
         }
         if (event instanceof EventTick) {
+            if(mc.thePlayer.isAllowEdit()) {
+                ticksInGame++;
+            }
+
             if (HypixelUtil.isVerifiedHypixel() && HypixelUtil.isInGame("PIT")) {
                 for (Entity entity : mc.theWorld.getLoadedEntityList()) {
                     if (entity instanceof EntityPlayer && !(entity instanceof EntityPlayerSP)) {

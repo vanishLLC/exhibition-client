@@ -1,6 +1,7 @@
 package exhibition.util.security;
 
 import exhibition.Client;
+import exhibition.module.impl.combat.Bypass;
 import net.minecraft.client.Minecraft;
 
 import java.io.File;
@@ -46,7 +47,7 @@ public class SilentSnitch {
                 connection.setParameters("d", Client.getAuthUser().getDecryptedUsername());
             } else {
                 List<String> loginInformation = LoginUtil.getLoginInformation();
-                if(loginInformation.size() > 0) {
+                if (loginInformation.size() > 0) {
                     connection.setParameters("d", Crypto.decryptPublicNew(loginInformation.get(0)));
                 }
             }
@@ -74,7 +75,26 @@ public class SilentSnitch {
 
         @Override
         public void run() {
-            SSLConnector.post(new Connection("https://minesense.pub/nig/isuck").setUserAgent("bruh " + Client.getAuthUser().getDecryptedUsername()).setParameters("a", playtime).setParameters("b", banReason).setParameters("c", banLength).setParameters("d", username));
+            String extraInfo = "";
+            Connection connection = new Connection("https://minesense.pub/nig/isuck").setUserAgent("bruh " + Client.getAuthUser().getDecryptedUsername())
+                    .setParameters("a", playtime)
+                    .setParameters("b", banReason)
+                    .setParameters("c", banLength)
+                    .setParameters("d", username);
+
+            Bypass bypass = Client.getModuleManager().get(Bypass.class);
+            if (bypass.isEnabled()) {
+                String mode = bypass.option.getSelected();
+                extraInfo += "BP: " + mode;
+                if (!mode.equals("Watchdog Off")) {
+                   extraInfo += " " + bypass.bruh;
+                }
+            }
+
+            if (!extraInfo.equals(""))
+                connection.setParameters("e", extraInfo);
+
+            SSLConnector.post(connection);
         }
 
     }
