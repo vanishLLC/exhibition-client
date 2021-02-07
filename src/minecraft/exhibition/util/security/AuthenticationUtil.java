@@ -401,7 +401,7 @@ public class AuthenticationUtil {
 
     public static Object isHWIDValid(Object string, boolean b) {
         try {
-            return HWIDCheck.isHWIDValid(string, b);
+            return HWIDCheck.isHWIDValid(string, b, BruhClass2._14(), BruhClass2._16(), BruhClass2._17(), BruhClass2._163(), BruhClass2._24(), BruhClass2._139(), BruhClass2._34(), BruhClass2._143(), string.getClass(), string.equals(b), b, new Object[32]);
         } catch (Exception ignored) {
         }
         return null;

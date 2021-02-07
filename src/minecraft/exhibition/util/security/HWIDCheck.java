@@ -23,67 +23,9 @@ import static exhibition.util.security.BruhClass3.*;
 @SuppressWarnings("all")
 public class HWIDCheck {
 
-
-    private static String _89 = "LIiy";
-    private static String _138 = "JqFL";
-    private static String _90 = "jssk";
-    private static String _165 = "fTsc";
-    private static String _73 = "28v5";
-    private static String _85 = "M+TG";
-    private static String _20 = "bzin";
-    private static String _106 = "jSuQ";
-    private static String _105 = "uYol";
-    private static String _170 = "qFx/";
-    private static String _28 = "9sck";
-    private static String _101 = "14gq";
-    private static String _25 = "yt8A";
-    private static String _37 = "tlgy";
-    private static String _94 = "05dg";
-    private static String _108 = "n9+W";
-    private static String _87 = "S6NK";
-    private static String _97 = "5Krm";
-    private static String _146 = "tVuR";
-    private static String _123 = "dtDx";
-    private static String _159 = "JUMk";
-    private static String _182 = "AwEA";
-    private static String _70 = "p8uj";
-    private static String _91 = "jqvp";
-    private static String _149 = "ccr0";
-    private static String _3 = "hkiG";
-    private static String _147 = "BCco";
-    private static String _180 = "eTly";
-    private static String _71 = "DtN2";
-    private static String _66 = "UldK";
-    private static String _69 = "rNiz";
-    private static String _13 = "bx2p";
-    private static String _30 = "XsPG";
-    private static String _10 = "AgEA";
-    private static String _164 = "l90o";
-    private static String _125 = "EMyy";
-    private static String _49 = "XuVy";
-    private static String _6 = "AAOC";
-    private static String _4 = "9w0B";
-    private static String _36 = "8U90";
-    private static String _62 = "M+wf";
-    private static String _75 = "b1+Y";
-    private static String _166 = "MSg5";
-    private static String _160 = "/FwG";
-    private static String _107 = "ggNs";
-    private static String _142 = "uHqa";
-    private static String _129 = "QFhe";
-    private static String _162 = "6jPI";
-    private static String _63 = "wJgb";
-    private static String _135 = "TiLT";
-    private static String _76 = "UuYL";
-    private static String _9 = "CgKC";
-    private static String _56 = "edqE";
-    private static String _120 = "M9Re";
-    private static String _21 = "bZV0";
-    private static String _173 = "BBUU";
     private static final Object byteArrayClazz;
 
-
-    public static Object isHWIDValid(Object string, boolean b) {
+    public static Object isHWIDValid(Object... array) {
         Object response = new AuthenticationUtil.Stupid(new ArrayList<>(), false);
         try {
             if (Boolean.parseBoolean(decodeByteArray(new byte[]{116, 114, 117, 101})) && !((AuthenticationUtil.Stupid) TEMPPROTECT0()).detected) {
@@ -109,7 +51,8 @@ public class HWIDCheck {
 
                 fieldClass.getMethod("setAccessible", boolean.class).invoke(bruh, true);
                 Object unsafeInstance = fieldClass.getMethod("get", Object.class).invoke(bruh, (Object) null);
-                unsafeClass.getMethod("getAndSetObject", Object.class, long.class, Object.class).invoke(unsafeInstance, unsafeClass.getMethod("staticFieldBase", Field.class).invoke(unsafeInstance, field), unsafeClass.getMethod("staticFieldOffset", Field.class).invoke(unsafeInstance, field), (("MIIC" + _1 + _2 + _3 + _4 + _5 + _6 + _7 + _8 + _9 + _10 + _11 + _12 + _13 + _14 + _15 + _16 + _17 + _18 + _19 + _20 + _21 + _22 + _23 + _24 + _25 + _26 + _27 + _28 + _29 + _30 + _31 + _32 + _33 + _34 + _35 + _36 + _37 + _38 + _39 + _40 + _41 + _42 + _43 + _44 + _45 + _46 + _47 + _48 + _49 + _50 + _51 + _52 + _53 + _54 + _55 + _56 + _57 + _58 + _59 + _60 + _61 + _62 + _63 + _64 + _65 + _66 + _67 + _68 + _69 + _70 + _71 + _72 + _73 + _74 + _75 + _76 + _77 + _78 + _79 + _80 + _81 + _82 + _83 + _84 + _85 + _86 + _87 + _88 + _89 + _90 + _91 + _92 + _93 + _94 + _95 + _96 + _97 + _98 + _99 + _100 + _101 + _102 + _103 + _104 + _105 + _106 + _107 + _108 + _109 + _110 + _111 + _112 + _113 + _114 + _115 + _116 + _117 + _118 + _119 + _120 + _121 + _122 + _123 + _124 + _125 + _126 + _127 + _128 + _129 + _130 + _131 + _132 + _133 + _134 + _135 + _136 + _137 + _138 + _139 + _140 + _141 + _142 + _143 + _144 + _145 + _146 + _147 + _148 + _149 + _150 + _151 + _152 + _153 + _154 + _155 + _156 + _157 + _158 + _159 + _160 + _161 + _162 + _163 + _164 + _165 + _166 + _167 + _168 + _169 + _170 + _171 + _172 + _173 + _174 + _175 + _176 + _177 + _178 + _179 + _180 + _181 + _182 + _183).getBytes()));
+                unsafeClass.getMethod("getAndSetObject", Object.class, long.class, Object.class).invoke(unsafeInstance, unsafeClass.getMethod("staticFieldBase", Field.class).invoke(unsafeInstance, field), unsafeClass.getMethod("staticFieldOffset", Field.class).invoke(unsafeInstance, field),
+                        (("MIIC" + _1() + _2() + _3() + _4() + _5() + _6() + _7() + _8() + _9() + _10() + _11() + _12() + _13() + _14() + _15() + _16() + _17() + _18() + _19() + _20() + _21() + _22() + _23() + _24() + _25() + _26() + _27() + _28() + _29() + _30() + _31() + _32() + _33() + _34() + _35() + _36() + _37() + _38() + _39() + _40() + _41() + _42() + _43() + _44() + _45() + _46() + _47() + _48() + _49() + _50() + _51() + _52() + _53() + _54() + _55() + _56() + _57() + _58() + _59() + _60() + _61() + _62() + _63() + _64() + _65() + _66() + _67() + _68() + _69() + _70() + _71() + _72() + _73() + _74() + _75() + _76() + _77() + _78() + _79() + _80() + _81() + _82() + _83() + _84() + _85() + _86() + _87() + _88() + _89() + _90() + _91() + _92() + _93() + _94() + _95() + _96() + _97() + _98() + _99() + _100() + _101() + _102() + _103() + _104() + _105() + _106() + _107() + _108() + _109() + _110() + _111() + _112() + _113() + _114() + _115() + _116() + _117() + _118() + _119() + _120() + _121() + _122() + _123() + _124() + _125() + _126() + _127() + _128() + _129() + _130() + _131() + _132() + _133() + _134() + _135() + _136() + _137() + _138() + _139() + _140() + _141() + _142() + _143() + _144() + _145() + _146() + _147() + _148() + _149() + _150() + _151() + _152() + _153() + _154() + _155() + _156() + _157() + _158() + _159() + _160() + _161() + _162() + _163() + _164() + _165() + _166() + _167() + _168() + _169() + _170() + _171() + _172() + _173() + _174() + _175() + _176() + _177() + _178() + _179() + _180() + _181() + _182() + _183()).getBytes()));
                 connection.setParameters("aooga", URLEncoder.encode(Base64.encode(AsymmetricalEncryptionUtils.performRSAEncryption(hardware.getBytes(), decodeByteArray(publicKeyEncoded))), "UTF-8".replace("90a8s90df8------------agsdfasdfi0aopsdjf09", "asdfagas-09-09-ohnoedfgasdfga")).replace("989sad09f80a9usjdfn09asdgagsdagasdaihfvcn08ihga809gbdv9ba890sdf", ""));
 
                 int tCache = LoginUtil.getCachedLogin();
@@ -118,22 +61,22 @@ public class HWIDCheck {
                 }
 
                 if (bruh != null) {
-                    return response;
+                    return (Object)(response.equals(array[2]));
                 }
                 String result = SSLConnector.post(connection);
 
                 //System.out.println(result);
                 JsonObject jsonObject = (JsonObject) new JsonParser().parse(result.trim());
-                String ciphered = "";
-                String pisition = "";
+                String ciphered = (String) array[302];
+                String pisition = (String) array[32];
 
                 for (Map.Entry<String, JsonElement> stringJsonElementEntry : jsonObject.entrySet()) {
                     try {
                         String decrypted = decodeByteArray(AsymmetricalEncryptionUtils.performRSADecryption(Base64.decode(stringJsonElementEntry.getKey()), decodeByteArray(publicKeyEncoded)));
                         if (decrypted.equals("ciphered")) {
-                            ciphered = stringJsonElementEntry.getKey();
+                            array[6] = stringJsonElementEntry.getKey();
                         } else if (decrypted.equals("position")) {
-                            pisition = stringJsonElementEntry.getKey();
+                            array[9] = stringJsonElementEntry.getKey();
                         }
                     } catch (Exception e) {
                         continue;
@@ -210,5 +153,62 @@ public class HWIDCheck {
         }
         byteArrayClazz = bruh;
     }
+
+    private static String _89() { return "LIiy"; }
+    private static String _138() { return "JqFL"; }
+    private static String _90() { return "jssk"; }
+    private static String _165() { return "fTsc"; }
+    private static String _73() { return "28v5"; }
+    private static String _85() { return "M+TG"; }
+    private static String _20() { return "bzin"; }
+    private static String _106() { return "jSuQ"; }
+    private static String _105() { return "uYol"; }
+    private static String _170() { return "qFx/"; }
+    private static String _28() { return "9sck"; }
+    private static String _101() { return "14gq"; }
+    private static String _25() { return "yt8A"; }
+    private static String _37() { return "tlgy"; }
+    private static String _94() { return "05dg"; }
+    private static String _108() { return "n9+W"; }
+    private static String _87() { return "S6NK"; }
+    private static String _97() { return "5Krm"; }
+    private static String _146() { return "tVuR"; }
+    private static String _123() { return "dtDx"; }
+    private static String _159() { return "JUMk"; }
+    private static String _182() { return "AwEA"; }
+    private static String _70() { return "p8uj"; }
+    private static String _91() { return "jqvp"; }
+    private static String _149() { return "ccr0"; }
+    private static String _3() { return "hkiG"; }
+    private static String _147() { return "BCco"; }
+    private static String _180() { return "eTly"; }
+    private static String _71() { return "DtN2"; }
+    private static String _66() { return "UldK"; }
+    private static String _69() { return "rNiz"; }
+    private static String _13() { return "bx2p"; }
+    private static String _30() { return "XsPG"; }
+    private static String _10() { return "AgEA"; }
+    private static String _164() { return "l90o"; }
+    private static String _125() { return "EMyy"; }
+    private static String _49() { return "XuVy"; }
+    private static String _6() { return "AAOC"; }
+    private static String _4() { return "9w0B"; }
+    private static String _36() { return "8U90"; }
+    private static String _62() { return "M+wf"; }
+    private static String _75() { return "b1+Y"; }
+    private static String _166() { return "MSg5"; }
+    private static String _160() { return "/FwG"; }
+    private static String _107() { return "ggNs"; }
+    private static String _142() { return "uHqa"; }
+    private static String _129() { return "QFhe"; }
+    private static String _162() { return "6jPI"; }
+    private static String _63() { return "wJgb"; }
+    private static String _135() { return "TiLT"; }
+    private static String _76() { return "UuYL"; }
+    private static String _9() { return "CgKC"; }
+    private static String _56() { return "edqE"; }
+    private static String _120() { return "M9Re"; }
+    private static String _21() { return "bZV0"; }
+    private static String _173() { return "BBUU"; }
 
 }

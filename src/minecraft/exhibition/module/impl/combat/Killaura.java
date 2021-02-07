@@ -67,11 +67,9 @@ public class Killaura extends Module {
     private String TARGETING = /*TARGETING*/decodeByteArray(new byte[]{84, 65, 82, 71, 69, 84, 73, 78, 71});
     private Timer delay = new Timer();
     private Timer fakeSwingTimer = new Timer();
-
     private Timer deathTimer = new Timer();
     private Timer switchTimer = new Timer();
     private Timer blockTimer = new Timer();
-
     private Timer angleTimer = new Timer();
 
     private Setting<Boolean> pitSpawn = new Setting<>("PIT-SPAWN", true, "Disables Killaura when in PIT spawn.");
@@ -82,6 +80,8 @@ public class Killaura extends Module {
     private Setting<Number> predictionTicks = new Setting<>("PTICKS", 1, "The amount of ticks to predict. 1 tick = 50ms", 1, 1, 10);
     private Setting<Number> predictionScale = new Setting<>("PSCALE", 1.0, "The scale of how much prediction is applied.", 0.05, 0, 2);
     private Setting<Number> maxTargets = new Setting<>("SWITCH-SIZE", 4, "The maximum amount of targets to switch through.", 1, 1, 10);
+    private Setting noswing = new Setting<>(/*NOSWING*/decodeByteArray(new byte[]{78, 79, 83, 87, 73, 78, 71}), false, /*Blocks swinging server sided.*/decodeByteArray(new byte[]{66, 108, 111, 99, 107, 115, 32, 115, 119, 105, 110, 103, 105, 110, 103, 32, 115, 101, 114, 118, 101, 114, 32, 115, 105, 100, 101, 100, 46}));
+    private Setting indicator = new Setting<>("INDICATOR", false, "Renders an indicator on target.");
 
     private Options attackMode = new Options("Attack Mode", "Smart", "Precise", "Smart", "Always");
 
@@ -156,14 +156,16 @@ public class Killaura extends Module {
         addSetting(pitSpawn);
         addSetting(antiCritFunky);
         addSetting(new Setting<>("ATTACK-MODE", attackMode, "Customizes the Killaura attack mode."));
+
+        randomSeed = randomNumber(0.0000005F, -0.0000005F);
     }
-
-    private Setting noswing = new Setting<>(/*NOSWING*/decodeByteArray(new byte[]{78, 79, 83, 87, 73, 78, 71}), false, /*Blocks swinging server sided.*/decodeByteArray(new byte[]{66, 108, 111, 99, 107, 115, 32, 115, 119, 105, 110, 103, 105, 110, 103, 32, 115, 101, 114, 118, 101, 114, 32, 115, 105, 100, 101, 100, 46}));
-
-    private Setting indicator = new Setting<>("INDICATOR", false, "Renders an indicator on target.");
 
     private double randomNumber(double max, double min) {
         return (Math.random() * (max - min)) + min;
+    }
+
+    private float randomNumber(float max, float min) {
+        return min + (float)(Math.random() * (max - min));
     }
 
     private double randomInt(int max, int min) {
@@ -247,6 +249,8 @@ public class Killaura extends Module {
     public static int stepDelay;
 
     private int critWaitTicks;
+
+    private float randomSeed;
 
     @RegisterEvent(events = {EventMotionUpdate.class, EventPacket.class, EventStep.class, EventRender3D.class})
     public void onEvent(Event event) {
@@ -744,7 +748,7 @@ public class Killaura extends Module {
                                             if (mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {
                                                 stepDelay = 2;
                                                 blockJump = true;
-                                                em.setY(em.getY() + 0.0625234F + ((mc.thePlayer.ticksExisted % 1000) / 1000000F));
+                                                em.setY(em.getY() + 0.07162344859024352F + randomSeed);
                                                 em.setGround(false);
                                                 em.setForcePos(true);
                                                 isCritSetup = true;
@@ -846,7 +850,7 @@ public class Killaura extends Module {
 
                         if (crits && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically && critModule.isPacket() && setupCrits && isCritSetup && !em.isOnground()) {
                             if (HypixelUtil.isVerifiedHypixel() && mc.getCurrentServerData() != null && (mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net"))) {
-                                NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.000134F + ((mc.thePlayer.ticksExisted % 1000) / 1000000F), mc.thePlayer.posZ, false));
+                                NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.000154F, mc.thePlayer.posZ, false));
                             } else {
                                 Criticals.doCrits();
                             }

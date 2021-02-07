@@ -254,6 +254,10 @@ public class AntiBot extends Module {
 
                                     if (botNameFormat)
                                         DevNotifications.getManager().post("Suspicious Spawn " + ent.getName() + " " + ent.getDisplayName().getFormattedText() + " " + ent.ticksExisted + " " + Math.abs(distance));
+
+                                    if(Math.abs(distance) >= 300) {
+                                        Notifications.getManager().post("Suspicious Spawn", ent.getDisplayName().getFormattedText() + " \247fmay be a staff bot!", 2500, Notifications.Type.WARNING);
+                                    }
                                     //DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "------------------------------------------------------------------------");
                                     ent.illegalSpawn = true;
                                 }
@@ -299,7 +303,7 @@ public class AntiBot extends Module {
 
                             double distance = deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
 
-                            if (distance > 2 && distance < 400 && ent.illegalSpawn && (!mc.thePlayer.isInvisible() || mc.thePlayer.capabilities.allowFlying) && !ent.isRiding()) {
+                            if (distance > 2 && ent.illegalSpawn && (!mc.thePlayer.isInvisible() || mc.thePlayer.capabilities.allowFlying) && !ent.isRiding()) {
 //                                DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "------------------------------------------------------------------------");
 //                                DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "Illegal TP: " + ent.getDisplayName().getFormattedText() + " \247aDelta: " + MathUtils.roundToPlace(distance, 6) + " \247bDist: " + mc.thePlayer.getDistanceToEntity(ent) + " \247c" + ent.ticksExisted);
 //                                DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "Teleported player pos \247a" + MathUtils.roundToPlace(ent.posX, 6) + " \247b" +
@@ -317,7 +321,7 @@ public class AntiBot extends Module {
 //                                    DevNotifications.getManager().post("Is Bruh");
 //                                DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "------------------------------------------------------------------------");
 
-                                if (ent.flagged != 1 && !ent.isInvisible() && ent.getDisplayName().getFormattedText().contains("\247c" + ent.getName() + "\247r") && mc.thePlayer.getDistanceToEntity(ent) < 7.5) {
+                                if (ent.flagged != 1 && !ent.isInvisible() && ent.getDisplayName().getFormattedText().contains("\247c" + ent.getName() + "\247r") && mc.thePlayer.getDistanceToEntity(ent) < 10) {
                                     Notifications.getManager().post("Possible Staff Bot", ent.getDisplayName().getFormattedText() + " \247fmay be a staff bot!", 5000, Notifications.Type.WARNING);
                                     ent.flagged = 1;
                                 }

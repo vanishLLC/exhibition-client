@@ -5,8 +5,6 @@
 
 package exhibition.util.security;
 
-import exhibition.util.misc.ChatUtil;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;

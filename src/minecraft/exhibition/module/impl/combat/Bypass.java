@@ -217,7 +217,7 @@ public class Bypass extends Module {
                                     boolean canSend = !isFlying ? mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically : (longJump.isEnabled() ? (longJump.bruhTick % 6 == 3 || longJump.bruhTick % 6 == 4) : mc.thePlayer.ticksExisted % 7 != 0);
 
                                     if (isFlying && (bruh - 10) >= (10)) {
-                                        bruh = 20;
+                                        bruh = 25;
                                     }
 
                                     if ((bruh - 10) >= (45 + randomDelay) && (!isFlying || canSend)) {

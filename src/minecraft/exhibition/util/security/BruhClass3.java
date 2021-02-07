@@ -2,78 +2,78 @@ package exhibition.util.security;
 
 public class BruhClass3 {
 
-    public static String _47 = "Wu8b";
-    public static String _11 = "pG58";
-    public static String _119 = "TsFR";
-    public static String _161 = "BfZH";
-    public static String _172 = "fXLY";
-    public static String _174 = "gACh";
-    public static String _8 = "MIIC";
-    public static String _27 = "hAaK";
-    public static String _59 = "Jf1e";
-    public static String _2 = "Bgkq";
-    public static String _88 = "xWlo";
-    public static String _148 = "ag0B";
-    public static String _103 = "u86s";
-    public static String _177 = "wwwW";
-    public static String _55 = "L0BX";
-    public static String _12 = "QXcV";
-    public static String _15 = "M+O0";
-    public static String _93 = "HYgt";
-    public static String _176 = "MJZu";
-    public static String _128 = "HWBr";
-    public static String _154 = "wi3+";
-    public static String _175 = "d1de";
-    public static String _114 = "X32a";
-    public static String _179 = "kobS";
-    public static String _79 = "SQEV";
-    public static String _19 = "CIVe";
-    public static String _110 = "Czvk";
-    public static String _44 = "tXc7";
-    public static String _83 = "JXEi";
-    public static String _132 = "blVk";
-    public static String _41 = "gQzs";
-    public static String _72 = "swHf";
-    public static String _68 = "ZCUj";
-    public static String _81 = "EAqL";
-    public static String _117 = "ioOO";
-    public static String _121 = "Orbq";
-    public static String _178 = "dphs";
-    public static String _111 = "KYF2";
-    public static String _155 = "Q6y3";
-    public static String _131 = "5rzD";
-    public static String _84 = "nWil";
-    public static String _32 = "02Ar";
-    public static String _61 = "vTOD";
-    public static String _168 = "rH9u";
-    public static String _130 = "IGAh";
-    public static String _136 = "Clw5";
-    public static String _150 = "2TWt";
-    public static String _99 = "Pp6E";
-    public static String _45 = "OhRB";
-    public static String _96 = "olT0";
-    public static String _35 = "M5tY";
-    public static String _183 = "AQ==";
-    public static String _5 = "AQEF";
-    public static String _7 = "Ag8A";
-    public static String _151 = "FTDf";
-    public static String _48 = "GwhH";
-    public static String _53 = "qIGV";
-    public static String _95 = "TDTX";
-    public static String _43 = "wb5m";
-    public static String _78 = "qKm6";
-    public static String _98 = "RBp1";
-    public static String _141 = "xjKY";
-    public static String _82 = "hjJq";
-    public static String _181 = "MmkC";
-    public static String _92 = "BUL8";
-    public static String _156 = "Y1gX";
-    public static String _167 = "mFmf";
-    public static String _126 = "2Isr";
-    public static String _46 = "7VW0";
-    public static String _112 = "VUWB";
-    public static String _39 = "U/NW";
-    public static String _153 = "9FiZ";
-    public static String _67 = "OuRY";
+    public static String _47() { return "Wu8b"; }
+    public static String _11() { return "pG58"; }
+    public static String _119() { return "TsFR"; }
+    public static String _161() { return "BfZH"; }
+    public static String _172() { return "fXLY"; }
+    public static String _174() { return "gACh"; }
+    public static String _8() { return "MIIC"; }
+    public static String _27() { return "hAaK"; }
+    public static String _59() { return "Jf1e"; }
+    public static String _2() { return "Bgkq"; }
+    public static String _88() { return "xWlo"; }
+    public static String _148() { return "ag0B"; }
+    public static String _103() { return "u86s"; }
+    public static String _177() { return "wwwW"; }
+    public static String _55() { return "L0BX"; }
+    public static String _12() { return "QXcV"; }
+    public static String _15() { return "M+O0"; }
+    public static String _93() { return "HYgt"; }
+    public static String _176() { return "MJZu"; }
+    public static String _128() { return "HWBr"; }
+    public static String _154() { return "wi3+"; }
+    public static String _175() { return "d1de"; }
+    public static String _114() { return "X32a"; }
+    public static String _179() { return "kobS"; }
+    public static String _79() { return "SQEV"; }
+    public static String _19() { return "CIVe"; }
+    public static String _110() { return "Czvk"; }
+    public static String _44() { return "tXc7"; }
+    public static String _83() { return "JXEi"; }
+    public static String _132() { return "blVk"; }
+    public static String _41() { return "gQzs"; }
+    public static String _72() { return "swHf"; }
+    public static String _68() { return "ZCUj"; }
+    public static String _81() { return "EAqL"; }
+    public static String _117() { return "ioOO"; }
+    public static String _121() { return "Orbq"; }
+    public static String _178() { return "dphs"; }
+    public static String _111() { return "KYF2"; }
+    public static String _155() { return "Q6y3"; }
+    public static String _131() { return "5rzD"; }
+    public static String _84() { return "nWil"; }
+    public static String _32() { return "02Ar"; }
+    public static String _61() { return "vTOD"; }
+    public static String _168() { return "rH9u"; }
+    public static String _130() { return "IGAh"; }
+    public static String _136() { return "Clw5"; }
+    public static String _150() { return "2TWt"; }
+    public static String _99() { return "Pp6E"; }
+    public static String _45() { return "OhRB"; }
+    public static String _96() { return "olT0"; }
+    public static String _35() { return "M5tY"; }
+    public static String _183() { return "AQ=="; }
+    public static String _5() { return "AQEF"; }
+    public static String _7() { return "Ag8A"; }
+    public static String _151() { return "FTDf"; }
+    public static String _48() { return "GwhH"; }
+    public static String _53() { return "qIGV"; }
+    public static String _95() { return "TDTX"; }
+    public static String _43() { return "wb5m"; }
+    public static String _78() { return "qKm6"; }
+    public static String _98() { return "RBp1"; }
+    public static String _141() { return "xjKY"; }
+    public static String _82() { return "hjJq"; }
+    public static String _181() { return "MmkC"; }
+    public static String _92() { return "BUL8"; }
+    public static String _156() { return "Y1gX"; }
+    public static String _167() { return "mFmf"; }
+    public static String _126() { return "2Isr"; }
+    public static String _46() { return "7VW0"; }
+    public static String _112() { return "VUWB"; }
+    public static String _39() { return "U/NW"; }
+    public static String _153() { return "9FiZ"; }
+    public static String _67() { return "OuRY"; }
 
 }
