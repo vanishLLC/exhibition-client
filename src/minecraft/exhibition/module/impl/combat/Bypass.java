@@ -331,7 +331,9 @@ public class Bypass extends Module {
                                         DevNotifications.getManager().post("\247e\247lBurst detected \247c" + packet.getUid() + " \2476" + mc.thePlayer.ticksExisted);
                                     c13Timer.reset();
                                     if (lastSentUid == 1) {
-                                        Notifications.getManager().post("Bypass Error", "Possible WD ban. Please rejoin or finish your match quickly.", 7500, Notifications.Type.WARNING);
+
+                                        // TODO: Figure out how to prevent or circumvent this? Auto Dong mode when detected?
+                                        Notifications.getManager().post("Bypass Error", "Possible WD ban. Please rejoin or finish your match quickly.", 10000, Notifications.Type.WARNING);
                                         if (debug)
                                             DevNotifications.getManager().post("\247aWatchdog has handshaked " + mc.thePlayer.ticksExisted);
                                         sendPackets();
@@ -428,6 +430,18 @@ public class Bypass extends Module {
                 float strWidth = Client.verdana16.getWidth(str);
                 float width = strWidth + 10;
 
+                RenderingUtil.rectangleBordered(centerX - width / 2, centerY - 70, centerX + width / 2, centerY - 50, 1, Colors.getColor(0, 150), Colors.getColor(0, 100));
+                Client.verdana16.drawString(str, centerX - strWidth / 2F, centerY - 60 - Client.verdana16.getHeight(str) / 2F, -1);
+                GlStateManager.popMatrix();
+            }
+
+            // Because people are retards.
+            if(lastSentUid == 1 && option.getSelected().equals("Watchdog Off")) {
+                GlStateManager.pushMatrix();
+                float centerX = (float) res.getScaledWidth_double() / 2F, centerY = (float) res.getScaledHeight_double() / 2F;
+                String str = "\247c\247lWARNING \247c| Bypass Error";
+                float strWidth = Client.verdana16.getWidth(str);
+                float width = strWidth + 10;
                 RenderingUtil.rectangleBordered(centerX - width / 2, centerY - 70, centerX + width / 2, centerY - 50, 1, Colors.getColor(0, 150), Colors.getColor(0, 100));
                 Client.verdana16.drawString(str, centerX - strWidth / 2F, centerY - 60 - Client.verdana16.getHeight(str) / 2F, -1);
                 GlStateManager.popMatrix();
