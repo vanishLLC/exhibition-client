@@ -117,7 +117,7 @@ public class Bypass extends Module {
                         this.bruh = 0;
                         this.lastUid = 0;
                         this.lastSentUid = -1;
-                        this.resetPackets();
+                        this.sendPackets();
                         return;
                     }
 
