@@ -109,14 +109,24 @@ public class Bypass extends Module {
         if (mc.getIntegratedServer() != null)
             return;
 
-        // If bruh is not set or they're in a lobby and it's set, let them change it
-        if (lastMode != null && bruh > 0 && allowBypassing()) {
-            if (!option.getSelected().equals(lastMode)) {
-                option.setSelected(lastMode);
-                Notifications.getManager().post("Bypass Warning", "Please change the method before a match.", 3_000, Notifications.Type.WARNING);
+        if(event instanceof EventTick) {
+            // If bruh is not set or they're in a lobby and it's set, let them change it
+            if (lastMode != null && bruh > 0 && allowBypassing()) {
+                if (!option.getSelected().equals(lastMode)) {
+                    if (lastMode.equals("Watchdog Off") && lastSentUid >= 1) {
+                        this.bruh = 0;
+                        this.lastUid = 0;
+                        this.lastSentUid = -1;
+                        this.resetPackets();
+                        return;
+                    }
+
+                    option.setSelected(lastMode);
+                    Notifications.getManager().post("Bypass Warning", "Please change the method before a match.", 3_000, Notifications.Type.WARNING);
+                }
             }
+            lastMode = option.getSelected();
         }
-        lastMode = option.getSelected();
 
         Fly fly = Client.getModuleManager().get(Fly.class).cast();
         LongJump longJump = Client.getModuleManager().get(LongJump.class);
@@ -436,7 +446,7 @@ public class Bypass extends Module {
             }
 
             // Because people are retards.
-            if(lastSentUid == 1 && option.getSelected().equals("Watchdog Off")) {
+            if (lastSentUid >= 1 && option.getSelected().equals("Watchdog Off")) {
                 GlStateManager.pushMatrix();
                 float centerX = (float) res.getScaledWidth_double() / 2F, centerY = (float) res.getScaledHeight_double() / 2F;
                 String str = "\247c\247lWARNING \247c| Bypass Error";
