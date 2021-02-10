@@ -116,7 +116,7 @@ public class Killaura extends Module {
 
         settings.put(MIN, new Setting<>(MIN, 5, /*Minimum APS.*/decodeByteArray(new byte[]{77, 105, 110, 105, 109, 117, 109, 32, 65, 80, 83, 46}), 1, 1, 20));
         settings.put(MAX, new Setting<>(MAX, 15, /*Maximum APS.*/decodeByteArray(new byte[]{77, 97, 120, 105, 109, 117, 109, 32, 65, 80, 83, 46}), 1, 1, 20));
-        settings.put(ANGLESTEP, new Setting<>(ANGLESTEP, 180, "The amount of degrees KillAura can step per tick.", 5, 0, 180));
+        settings.put(ANGLESTEP, new Setting<>(ANGLESTEP, 180, "The amount of degrees KillAura can step per tick. -1 = Your real yaw", 5, -1, 180));
         settings.put(DEATH, new Setting<>(DEATH, true, /*Disables killaura when you die.*/decodeByteArray(new byte[]{68, 105, 115, 97, 98, 108, 101, 115, 32, 107, 105, 108, 108, 97, 117, 114, 97, 32, 119, 104, 101, 110, 32, 121, 111, 117, 32, 100, 105, 101, 46})));
         settings.put(RAYTRACE, new Setting<>(RAYTRACE, true, /*Visible check for target.*/decodeByteArray(new byte[]{86, 105, 115, 105, 98, 108, 101, 32, 99, 104, 101, 99, 107, 32, 102, 111, 114, 32, 116, 97, 114, 103, 101, 116, 46})));
         settings.put(TARGETMODE, new Setting<>(TARGETMODE, new Options(/*Priority*/decodeByteArray(new byte[]{80, 114, 105, 111, 114, 105, 116, 121}),
@@ -165,7 +165,7 @@ public class Killaura extends Module {
     }
 
     private float randomNumber(float max, float min) {
-        return min + (float)(Math.random() * (max - min));
+        return min + (float) (Math.random() * (max - min));
     }
 
     private double randomInt(int max, int min) {
@@ -616,7 +616,7 @@ public class Killaura extends Module {
                                 // Allow reduced to still have your heads backwards
                                 if (reduce.getValue() && allowInvalidAngles) {
                                     float pitch = (float) -(Math.atan2(yDiff, dist) * 180.0D / 3.141592653589793D);
-                                    em.setPitch(MathHelper.clamp_float(pitch / 1.1F, -90, 90));
+                                    em.setPitch(MathHelper.clamp_float(pitch / 1.1F, -89.5F, 89.5F));
 
                                     float normalDiff = Math.abs(targetYaw);
                                     float backwardsDiff = Math.abs(MathHelper.wrapAngleTo180_float(targetYaw + 180));
@@ -647,8 +647,8 @@ public class Killaura extends Module {
                                 } else {
                                     float pitch = (float) -(Math.atan2(yDiff, dist) * 180.0D / 3.141592653589793D);
 
-                                    em.setYaw((lastAngles.x += targetYaw / 1.1F) + (float) randomNumber(2, -2));
-                                    em.setPitch(MathHelper.clamp_float(pitch / 1.1F + (float) randomNumber(2, -2), -90, 90));
+                                    em.setYaw((lastAngles.x += targetYaw / 1.1F));
+                                    em.setPitch(MathHelper.clamp_float(pitch / 1.1F, -89.5F, 89.5F));
                                 }
                             }
 
@@ -658,13 +658,12 @@ public class Killaura extends Module {
 
                             boolean dontCrit = allowInvalidAngles && antiCritFunky.getValue() && hasEnchant(target, "Crit", "Funk");
 
-                            if (target instanceof EntityPlayer && antiCritFunky.getValue() && hasEnchant(target, "Retro")) {
+                            if (target instanceof EntityPlayer && allowInvalidAngles && antiCritFunky.getValue() && hasEnchant(target, "Retro")) {
                                 int criticalHits = ((EntityPlayer) target).criticalHits;
                                 if (criticalHits == 0 || criticalHits > 3 || target.waitTicks > 0) {
                                     if (criticalHits == 0) {
                                         ((EntityPlayer) target).criticalHits++;
                                     }
-                                    em.setGround(true);
                                     crits = false;
                                     dontCrit = true;
                                 }
@@ -762,7 +761,7 @@ public class Killaura extends Module {
                                 isCritSetup = true;
                             }
 
-                            if (antiCritFunky.getValue() && hasEnchant(target, "Crit", "Funky") && !em.isOnground() && !mc.thePlayer.onGround && allowInvalidAngles) {
+                            if (allowInvalidAngles && antiCritFunky.getValue() && hasEnchant(target, "Crit", "Funky") && !em.isOnground() && !mc.thePlayer.onGround) {
                                 boolean isAttacking = mc.thePlayer.getDistanceToEntity(target) <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && delay.roundDelay(50 * nextRandom);
                                 boolean canAttackRightNow = attack.equals("Always") || (attack.equals("Precise") ? target.waitTicks <= 0 : target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
 
@@ -785,6 +784,13 @@ public class Killaura extends Module {
                             }*/
                         }
                     }
+
+                    int maxAngleStep = ((Number) settings.get(ANGLESTEP).getValue()).intValue();
+                    if (maxAngleStep == -1) {
+                        em.setYaw(lastAngles.x = mc.thePlayer.rotationYaw);
+                        em.setPitch(lastAngles.y = mc.thePlayer.rotationPitch);
+                    }
+
                 } else {
                     if (!isBlocking)
                         blockTimer.reset();
@@ -834,7 +840,7 @@ public class Killaura extends Module {
 
                 boolean canAttackRightNow = attack.equals("Always") || (attack.equals("Precise") ? target.waitTicks <= 0 : target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
 
-                if (isAttacking && shouldAttack && (isBlocking) && canAttackRightNow && !AutoSoup.isHealing) {
+                if (mc.thePlayer.isBlocking() && isAttacking && shouldAttack && isBlocking && canAttackRightNow && !AutoSoup.isHealing) {
                     isBlocking = false;
                     NetUtil.sendPacket(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
                     blockTimer.reset();
@@ -888,19 +894,18 @@ public class Killaura extends Module {
                                 }
                             }
 
-                            if (target != null)
-                                if (target.waitTicks <= 0) {
-                                    if (target instanceof EntityPlayer) {
-                                        if ((!em.isOnground() && isCritSetup) || !mc.thePlayer.onGround) {
-                                            ((EntityPlayer) target).criticalHits++;
-                                        } else {
-                                            ((EntityPlayer) target).criticalHits = 0;
-                                        }
+                            if (target != null && target.waitTicks <= 0) {
+                                if (target instanceof EntityPlayer) {
+                                    if ((!em.isOnground() && isCritSetup) || !mc.thePlayer.onGround) {
+                                        ((EntityPlayer) target).criticalHits++;
+                                    } else {
+                                        ((EntityPlayer) target).criticalHits = 0;
                                     }
-
-                                    boolean b = Angle.INSTANCE.check(new Location(mc.thePlayer.posX, em.getY(), mc.thePlayer.posZ, em.getYaw(), 0), target);
-                                    target.waitTicks = 10;
                                 }
+
+                                boolean b = Angle.INSTANCE.check(new Location(mc.thePlayer.posX, em.getY(), mc.thePlayer.posZ, em.getYaw(), 0), target);
+                                target.waitTicks = 10;
+                            }
 
                             delay.reset();
                             nextRandom = (int) Math.round((20 / randomInt(min, max)));

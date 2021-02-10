@@ -44,6 +44,7 @@ public class Bypass extends Module {
 
     public Setting<Number> DELAY = new Setting<>("DELAY", 300, "Spoof offset. This should be 500 - (your ping).", 5, 0, 1000);
     public Setting<Boolean> AUTOBYPASS = new Setting<>("AUTOBYPASS", false, "Automatically detects optimal delay value.");
+    public Setting<Boolean> AUTODONG = new Setting<>("AUTO DONG", false, "If Watchdog Off is bugged, Dong mode will be used.");
     public Options option = new Options("Mode", "Watchdog Off", "Watchdog Off", "Dong", "Old");
 
     private long startMS = -1;
@@ -342,12 +343,24 @@ public class Bypass extends Module {
                                     c13Timer.reset();
                                     if (lastSentUid == 1) {
 
-                                        // TODO: Figure out how to prevent or circumvent this? Auto Dong mode when detected?
-                                        Notifications.getManager().post("Bypass Error", "Possible WD ban. Please rejoin or finish your match quickly.", 10000, Notifications.Type.WARNING);
                                         if (debug)
-                                            DevNotifications.getManager().post("\247aWatchdog has handshaked " + mc.thePlayer.ticksExisted);
+                                            DevNotifications.getManager().post("\247aWatchdog handshake success " + mc.thePlayer.ticksExisted);
                                         sendPackets();
                                         resetPackets();
+
+                                        if(AUTODONG.getValue()) {
+                                            Notifications.getManager().post("Bypass Error", "Automatically swapped to Dong mode.", 5000, Notifications.Type.WARNING);
+                                            Notifications.getManager().post("Dong Warning", "Flying too much may result in a ban.", 5000, Notifications.Type.NOTIFY);
+                                            this.bruh = 5;
+                                            this.lastUid = 0;
+                                            this.lastSentUid = -1;
+                                            String newMode = "Dong";
+                                            this.option.setSelected(newMode);
+                                            this.lastMode = newMode;
+                                        } else {
+                                            Notifications.getManager().post("Bypass Error", "Possible WD ban. Please rejoin or finish your match quickly.", 10000, Notifications.Type.WARNING);
+                                        }
+
                                     }
                                     lastSentUid++;
                                 }
