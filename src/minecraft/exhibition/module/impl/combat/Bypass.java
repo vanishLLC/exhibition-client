@@ -61,6 +61,7 @@ public class Bypass extends Module {
         super(data);
         addSetting(DELAY);
         addSetting(AUTOBYPASS);
+        addSetting(AUTODONG);
         addSetting(new Setting<>("MODE", option, "Which bypass method should be used. (Experimental may WD ban)"));
     }
 
@@ -459,7 +460,7 @@ public class Bypass extends Module {
             }
 
             // Because people are retards.
-            if (lastSentUid >= 1 && option.getSelected().equals("Watchdog Off")) {
+            if (lastSentUid > 1 && option.getSelected().equals("Watchdog Off")) {
                 GlStateManager.pushMatrix();
                 float centerX = (float) res.getScaledWidth_double() / 2F, centerY = (float) res.getScaledHeight_double() / 2F;
                 String str = "\247c\247lWARNING \247c| Bypass Error";
