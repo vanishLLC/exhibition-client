@@ -270,23 +270,24 @@ public class TargetHUD extends Module {
 
                             int enchantOffsetY = 0;
 
-                            for (String enchant : enchants) {
-                                boolean strongEnchant = enchant.contains("Retro") || enchant.contains("Stun") || enchant.contains("Funky") ||
-                                        enchant.contains("Wrath I") || enchant.contains("Duelist I") || enchant.contains("David") ||
-                                        enchant.contains("Billionaire I") || enchant.contains("Hemorrhage") || enchant.contains("Mirror") ||
-                                        enchant.contains("Venom") || enchant.contains("Gamble") || enchant.contains("Crush") || enchant.contains("Solitude");
+                            for (String e : enchants) {
+                                boolean strongEnchant = e.contains("Retro") || e.contains("Stun") || e.contains("Funky") || e.contains("Protection III") ||
+                                        e.contains("Wrath I") || e.contains("Duelist I") || e.contains("Bruiser") || e.contains("David") || e.contains("Somber") ||
+                                        e.contains("Billionaire I") || e.contains("Hemorrhage") || e.contains("Mirror") || e.contains("Evil Within") ||
+                                        e.contains("Venom") || e.contains("Gamble") || e.contains("Crush") || e.contains("Solitude") || e.contains("Peroxide") ||
+                                        e.contains("Diamond Allergy") || e.contains("Hunt the Hunter");
 
                                 int level = 1;
 
-                                if (enchant.length() > 1) {
+                                if (e.length() > 1) {
                                     StringBuilder temp = new StringBuilder();
-                                    for (String s : StringUtils.stripHypixelControlCodes(enchant)
+                                    for (String s : StringUtils.stripHypixelControlCodes(e)
                                             .replace("\247f\2477\2479", "")
                                             .replace("“", "")
                                             .replace("”","")
                                             .replace("\"","")
                                             .replace("(", "").split(" ")) {
-                                        if (s.contains("RARE")) {
+                                        if (s.contains("RARE") || s.length() < 1) {
                                             continue;
                                         }
 

@@ -246,17 +246,17 @@ public class Nametags extends Module {
                     double difference = strWidth + 4;
                     double healthLocation = left + (strWidth + 4) * progress;
 
-                    RenderingUtil.rectangle(left, 0, healthLocation, 1, Colors.getColorOpacity(customColor.getRGB(), (int) (percentage * 255)));
-                    RenderingUtil.rectangle(healthLocation, 0, left + difference, 1, Colors.getColorOpacity(customColor.darker().darker().getRGB(), (int) (percentage * 255)));
+                    RenderingUtil.rectangle(left, 0, healthLocation, 1.5, Colors.getColorOpacity(customColor.getRGB(), (int) (percentage * 255)));
+                    RenderingUtil.rectangle(healthLocation, 0, left + difference, 1.5, Colors.getColor(160,0,0, (int) (percentage * 255)));
 
 
                     if (absorption > 0) {
                         double absorptionDifferent = difference * (absorption / (ent.getMaxHealth() + absorption));
 
-                        RenderingUtil.rectangle(healthLocation, 0, absorptionDifferent + healthLocation, 1, Colors.getColorOpacity(0xFFFFAA00, (int) (percentage * 255)));
+                        RenderingUtil.rectangle(healthLocation, 0, absorptionDifferent + healthLocation, 1.5, Colors.getColorOpacity(0xFFFFAA00, (int) (percentage * 255)));
                     }
 
-                    RenderingUtil.rectangle(left, 0.5, left + difference, 1, Colors.getColor(0, (int) (percentage * 110)));
+                    RenderingUtil.rectangle(left, 1, left + difference, 1.5, Colors.getColor(0, (int) (percentage * 110)));
                 }
 
                 String selectHealth = this.health.getSelected();
@@ -327,23 +327,24 @@ public class Nametags extends Module {
 
                             int enchantOffsetY = 0;
 
-                            for (String enchant : enchants) {
-                                boolean strongEnchant = enchant.contains("Retro") || enchant.contains("Stun") || enchant.contains("Funky") ||
-                                        enchant.contains("Wrath I") || enchant.contains("Duelist I") || enchant.contains("Bruiser") || enchant.contains("David") ||
-                                        enchant.contains("Billionaire I") || enchant.contains("Hemorrhage") || enchant.contains("Mirror") ||
-                                        enchant.contains("Venom") || enchant.contains("Gamble") || enchant.contains("Crush") || enchant.contains("Solitude");
+                            for (String e : enchants) {
+                                boolean strongEnchant = e.contains("Retro") || e.contains("Stun") || e.contains("Funky") || e.contains("Protection III") ||
+                                        e.contains("Wrath I") || e.contains("Duelist I") || e.contains("Bruiser") || e.contains("David") || e.contains("Somber") ||
+                                        e.contains("Billionaire I") || e.contains("Hemorrhage") || e.contains("Mirror") || e.contains("Evil Within") ||
+                                        e.contains("Venom") || e.contains("Gamble") || e.contains("Crush") || e.contains("Solitude") || e.contains("Peroxide") ||
+                                        e.contains("Diamond Allergy") || e.contains("Hunt the Hunter");
 
                                 int level = 1;
 
-                                if (enchant.length() > 1) {
+                                if (e.length() > 1) {
                                     StringBuilder temp = new StringBuilder();
-                                    for (String s : StringUtils.stripHypixelControlCodes(enchant)
+                                    for (String s : StringUtils.stripHypixelControlCodes(e)
                                             .replace("\247f\2477\2479", "")
                                             .replace("“", "")
                                             .replace("”","")
                                             .replace("\"","")
                                             .replace("(", "").split(" ")) {
-                                        if (s.contains("RARE")) {
+                                        if (s.contains("RARE") || s.length() < 1) {
                                             continue;
                                         }
 

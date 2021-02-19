@@ -80,6 +80,7 @@ public class Scaffold extends Module {
     private float targetYaw;
 
     private int lastSlot = -1;
+    private int lastHeldSlot = -1;
 
     public Scaffold(ModuleData data) {
         super(data);
@@ -108,6 +109,10 @@ public class Scaffold extends Module {
         lastAngles = new Vector2f(-1337, -1337);
         towerTimer.reset();
 
+        if(mc.thePlayer != null) {
+            lastHeldSlot = mc.thePlayer.inventory.currentItem;
+        }
+
         if (fastTower.getValue()) {
             mc.timer.timerSpeed = 1F;
         }
@@ -121,6 +126,12 @@ public class Scaffold extends Module {
                 mc.thePlayer.isSwingInProgress = false;
             }
             NetUtil.sendPacket(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.STOP_SNEAKING));
+
+            if(lastHeldSlot != -1) {
+                mc.thePlayer.inventory.currentItem = lastHeldSlot;
+                mc.playerController.updateController();
+                lastHeldSlot = -1;
+            }
         }
         if (fastTower.getValue()) {
             mc.timer.timerSpeed = 1F;
@@ -342,7 +353,10 @@ public class Scaffold extends Module {
 
                 double height = (mc.thePlayer.posY - (int) mc.thePlayer.posY);
 
-                double y = mc.thePlayer.posY - (mc.gameSettings.keyBindSneak.getIsKeyPressed() && mc.thePlayer.onGround ? 1.2 : (Client.getModuleManager().isEnabled(Speed.class) && PlayerUtil.isMoving()) ? ((((height < 0.24919 && (height > 0.105 || MathUtils.roundToPlace(height, 4) == 0.0993)) || MathUtils.roundToPlace(height, 4) == 0.0013 || MathUtils.roundToPlace(height, 4) == 0.0156) && Math.abs(mc.thePlayer.motionY) < 0.45) ? 1.25 : 1) : 0.8);
+                double y = mc.thePlayer.posY - (mc.gameSettings.keyBindSneak.getIsKeyPressed() && mc.thePlayer.onGround ? 1.2 : (Client.getModuleManager().isEnabled(Speed.class) && PlayerUtil.isMoving()) ?
+                        ((((height < 0.24919 && (height > 0.105 || MathUtils.roundToPlace(height, 4) == 0.0993)) || MathUtils.roundToPlace(height, 4) == 0.0013 ||
+                                MathUtils.roundToPlace(height, 4) == 0.0156 || MathUtils.roundToPlace(height, 4) == 0.0479 ||
+                                MathUtils.roundToPlace(height, 4) == 0.01553 || MathUtils.roundToPlace(height, 4) == 0.0902) && Math.abs(mc.thePlayer.motionY) < 0.45) ? 1.25 : 1) : 0.8);
 
                 if (!mc.gameSettings.keyBindJump.getIsKeyPressed()) {
                     towerTimer.reset();
@@ -503,7 +517,6 @@ public class Scaffold extends Module {
                         towerTimer.reset();
                     }
 
-                    int var2 = mc.thePlayer.inventory.currentItem;
                     mc.thePlayer.inventory.currentItem = var1;
                     mc.playerController.updateController();
 
@@ -520,8 +533,7 @@ public class Scaffold extends Module {
                                                         if (!place(pos.add(1, 0, 1))) ;
 
 
-                    mc.thePlayer.inventory.currentItem = var2;
-                    mc.playerController.updateController();
+
 
                 }
 

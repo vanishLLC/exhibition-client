@@ -27,7 +27,6 @@ public class CommandManager {
     public static final HashMap<String, Command> commandMap = new HashMap<>();
 
     public void setup() {
-        new Unknown().unknown();
         new ColorCommand(new String[]{"Color", "c"}, "Saves colors and shit.").register(this);
         //new Insult(new String[]{"Insult", "i"}, "Insult those nodus users.").register(this);
         new Damage(new String[]{"Damage", "d", "dmg", "kys", "suicide", "amandatodd"}, "Damages the player").register(this);
@@ -53,6 +52,7 @@ public class CommandManager {
         new FixEvents(new String[]{"FixEvents", "fix", "events"}, "Resets Event Registry to fix bugged modules.");
         new Teleport(new String[]{"Teleport", "tp", "tpto"}, "Teleports you to a certain player/position.").register(this);
         new Name(new String[]{"Name", "username", "copy"}, "Copies your name to your clipboard.").register(this);
+        new View(new String[]{"View", "inspect", "v"}, "Lets you view information on a players armor/held item.").register(this);
     }
 
 }

@@ -165,7 +165,7 @@ public class FreecamTP extends Module {
             if (stage == 0) {
                 setSuffix("");
                 if (!tpBack.getValue()) {
-                    double[] list = {0.41999998688697815, 0.7531999805212024, 0.1040803780930446};
+                    double[] list = {0.41999998688697815, 0.7531999805212024, 1.0013359791121417};
 
                     for (double v : list) {
                         NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + v, mc.thePlayer.posZ, false));
@@ -187,6 +187,8 @@ public class FreecamTP extends Module {
                     positions.add(vec3);
                 }
                 em.setCancelled(true);
+
+                NetUtil.sendPacketNoEvents(new C03PacketPlayer(false));
                 return;
             }
 
@@ -202,6 +204,11 @@ public class FreecamTP extends Module {
                 setSuffix("Waiting " + positions.size());
                 if (!tpBack.getValue()) {
                     em.setCancelled(true);
+                    if(ticks % 20 == 0) {
+                        NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 1.0013359791121417, mc.thePlayer.posZ, false));
+                    } else {
+                        NetUtil.sendPacketNoEvents(new C03PacketPlayer(false));
+                    }
                     if (ticks < 0) {
                         Notifications.getManager().post("Canceled Teleport", "Took too long to find a path.", 1000, Notifications.Type.NOTIFY);
                         stage = -1;
@@ -214,6 +221,7 @@ public class FreecamTP extends Module {
             if (stage == 3) {
                 if (!tpBack.getValue()) {
                     em.setCancelled(true);
+                    NetUtil.sendPacketNoEvents(new C03PacketPlayer(false));
                     int counter = 0;
 
                     double posX = mc.thePlayer.posX, posY = mc.thePlayer.posY, posZ = mc.thePlayer.posZ;

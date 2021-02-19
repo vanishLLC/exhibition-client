@@ -74,7 +74,7 @@ public class Client extends Castable implements EventListener {
     public static boolean isNewUser;
 
     // Client data
-    public static String version = "020421";
+    public static String version = "021621";
     public static String parsedVersion;
     public static String clientName = "ArthimoWare";
     public static ColorManager cm = new ColorManager();
@@ -554,7 +554,7 @@ public class Client extends Castable implements EventListener {
             }
         }
         if (event instanceof EventTick) {
-            if(mc.thePlayer.isAllowEdit()) {
+            if(mc.thePlayer.isAllowEdit() && !HypixelUtil.isGameStarting()) {
                 ticksInGame++;
             }
 

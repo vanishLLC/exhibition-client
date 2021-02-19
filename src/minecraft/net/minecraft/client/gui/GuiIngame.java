@@ -648,7 +648,7 @@ public class GuiIngame extends Gui {
                     int i1 = p_180475_2_.getScaledWidth() - b0 + 2;
                     drawRect(j - 2, l, i1, l + this.getFontRenderer().FONT_HEIGHT, 1342177280);
 
-                    this.getFontRenderer().drawString("Total: " + (sinceConnected >= 25 ? "\247c" : sinceConnected == 0 ? "\247a" : sinceConnected > 5 ? "\2476" : "\247e") + sinceConnected, j, l, 553648127);
+                    this.getFontRenderer().drawString("Total: " + (sinceConnected >= 75 ? "\247a" : sinceConnected >= 50 ? "\247e" : sinceConnected >= 25 ? "\2476" : "\247c") + sinceConnected, j, l, 553648127);
                 }
                 {
                     long lastMinuteBans = banStats.bansLastMinute;

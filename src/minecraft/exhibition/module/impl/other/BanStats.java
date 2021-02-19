@@ -10,9 +10,11 @@ import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
+import exhibition.util.MathUtils;
 import exhibition.util.Timer;
 import exhibition.util.security.Connection;
 import exhibition.util.security.Connector;
+import net.minecraft.util.StringUtils;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -95,7 +97,7 @@ public class BanStats extends Module {
         @Override
         public void run() {
             while (Client.instance != null && banStats.isEnabled() && isRunning) {
-                while (banStats.mc.thePlayer == null || banStats.mc.theWorld == null || Client.instance.hypixelApiKey == null || Client.instance.hypixelApiKey.equals("")) {
+                while (mc.getIntegratedServer() != null || banStats.mc.thePlayer == null || banStats.mc.theWorld == null || Client.instance.hypixelApiKey == null || Client.instance.hypixelApiKey.equals("")) {
                     if (!isRunning)
                         return;
                     Thread.yield();
@@ -126,7 +128,11 @@ public class BanStats extends Module {
                             }
 
                             if (staffTotalBans != 0 && diff > 0 && banStats.alertBans.getValue() && banStats.banTimer.getDifference() >= 120_000) {
-                                Notifications.getManager().post("Staff Activity", "Staff are now active.", 3000, Notifications.Type.WARNING);
+
+                                long roundedTime = (long) MathUtils.getIncremental(banStats.banTimer.getDifference(), 50);
+                                String time = "(" + StringUtils.ticksToElapsedTime((int) roundedTime / 50) + ")";
+
+                                Notifications.getManager().post("Staff Activity", "Staff are now active. " + time, 3000, Notifications.Type.WARNING);
                             }
 
                             if (staffTotalBans != 0)

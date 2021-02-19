@@ -380,6 +380,12 @@ public class Killaura extends Module {
         boolean block = (Boolean) settings.get(AUTOBLOCK).getValue();
         EventMotionUpdate em = event.cast();
         if (em.isPre()) {
+
+//            double offsetY = mc.thePlayer.posY - (int) mc.thePlayer.posY;
+//
+//            if (offsetY != 0)
+//                ChatUtil.debug(offsetY + " " + mc.thePlayer.posY);
+
             if (shouldToggle) {
                 if (isBlocking) {
                     isBlocking = false;
@@ -747,7 +753,7 @@ public class Killaura extends Module {
                                             if (mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {
                                                 stepDelay = 2;
                                                 blockJump = true;
-                                                em.setY(em.getY() + 0.07162344859024352F + randomSeed);
+                                                em.setY(em.getY() + 0.125);
                                                 em.setGround(false);
                                                 em.setForcePos(true);
                                                 isCritSetup = true;
@@ -856,7 +862,7 @@ public class Killaura extends Module {
 
                         if (crits && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically && critModule.isPacket() && setupCrits && isCritSetup && !em.isOnground()) {
                             if (HypixelUtil.isVerifiedHypixel() && mc.getCurrentServerData() != null && (mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net"))) {
-                                NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.000154F, mc.thePlayer.posZ, false));
+                                NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.046599998474120774, mc.thePlayer.posZ, false));
                             } else {
                                 Criticals.doCrits();
                             }
@@ -1037,7 +1043,7 @@ public class Killaura extends Module {
     private final double[] ZERO = new double[]{0, 0, 0};
 
     private double[] getPrediction(EntityLivingBase player, int ticks, double scale) {
-        if (!prediction.getValue() || !deltaHashMap.containsKey(player)) {
+        if (!prediction.getValue() || !deltaHashMap.containsKey(player) || deltaHashMap.isEmpty()) {
             return ZERO;
         }
 
@@ -1097,6 +1103,15 @@ public class Killaura extends Module {
         }
 
         private EntityDelta logDeltas(double deltaX, double deltaY, int currentTick) {
+
+            double distance = MathHelper.sqrt_double(deltaX * deltaX + deltaY * deltaY);
+
+            if(distance >= 2) {
+                deltas.clear();
+                deltas.add(new double[]{0, 0});
+                return this;
+            }
+
             if (currentTick - lastUpdatedTick > 5) {
                 deltas.clear();
             }

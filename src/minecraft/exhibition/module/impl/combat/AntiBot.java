@@ -255,11 +255,12 @@ public class AntiBot extends Module {
                                     if (botNameFormat)
                                         DevNotifications.getManager().post("Suspicious Spawn " + ent.getName() + " " + ent.getDisplayName().getFormattedText() + " " + ent.ticksExisted + " " + Math.abs(distance));
 
-                                    if(Math.abs(distance) >= 300) {
-                                        Notifications.getManager().post("Suspicious Spawn", ent.getDisplayName().getFormattedText() + " \247fmay be a staff bot!", 2500, Notifications.Type.WARNING);
+                                    if (botNameFormat && Math.abs(distance) >= 300) {
+                                        ticksOnGroundMap.put(ent.getName(), -300);
                                     }
                                     //DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "------------------------------------------------------------------------");
-                                    ent.illegalSpawn = true;
+                                    if (botNameFormat)
+                                        ent.illegalSpawn = true;
                                 }
                             }
                         }

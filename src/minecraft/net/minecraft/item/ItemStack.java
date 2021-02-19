@@ -742,6 +742,19 @@ public final class ItemStack
                     }
                 }
             }
+
+            if (this.stackTagCompound.hasKey("ExtraAttributes", 10))
+            {
+                NBTTagCompound nbttagcompound = this.stackTagCompound.getCompoundTag("ExtraAttributes");
+
+                if (nbttagcompound.hasKey("Nonce", 3))
+                {
+                    list.add("");
+                    list.add("Nonce: " + nbttagcompound.getLong("Nonce"));
+                    list.add("\247aShift Click to copy!");
+                    list.add("");
+                }
+            }
         }
 
         Multimap<String, AttributeModifier> multimap = this.getAttributeModifiers();

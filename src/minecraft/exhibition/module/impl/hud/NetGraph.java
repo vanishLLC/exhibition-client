@@ -112,7 +112,7 @@ public class NetGraph extends Module {
                 GlStateManager.popMatrix();
 
                 float width = Client.hudFont.getWidth("\247lLag Detected");
-                Client.hudFont.drawBorderedString("\247lLag Detected", (float) (e.getResolution().getScaledWidth_double() / 2) - width / 2, (float) (e.getResolution().getScaledHeight_double() / 2 - 30), Colors.getColor(255, 127, 0), Colors.getColor(0, 0, 0, 150));
+                Client.hudFont.drawBorderedString("\247lLag Detected", (float) (e.getResolution().getScaledWidth_double() / 2) - width / 2, (float) (e.getResolution().getScaledHeight_double() / 2 - 28), Colors.getColor(255, 127, 0), Colors.getColor(0, 0, 0, 150));
             }
 
             if (!showGraph.getValue())

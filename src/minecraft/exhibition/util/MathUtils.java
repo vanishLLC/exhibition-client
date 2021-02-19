@@ -10,7 +10,7 @@ public final class MathUtils {
 	}
 
 	public static double roundToPlace(double value, int places) {
-		if (places < 0) {
+		if (Double.isInfinite(value) || Double.isNaN(value) || places < 0) {
 			return value;
 		}
 		BigDecimal bd = new BigDecimal(value);

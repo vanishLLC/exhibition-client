@@ -4,9 +4,11 @@ import com.google.common.collect.Sets;
 
 import java.io.IOException;
 import java.util.Set;
+import java.util.UUID;
 
-import exhibition.util.RenderingUtil;
-import exhibition.util.render.Colors;
+import com.mojang.authlib.GameProfile;
+import exhibition.management.notifications.usernotification.Notifications;
+import exhibition.util.HypixelUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.*;
@@ -17,9 +19,12 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.StringUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
@@ -127,10 +132,10 @@ public abstract class GuiContainer extends GuiScreen {
             Tessellator tessellator = Tessellator.getInstance();
             WorldRenderer worldrenderer = tessellator.getWorldRenderer();
             worldrenderer.begin(7, DefaultVertexFormats.POSITION_COLOR);
-            worldrenderer.pos((double)0, (double)0, (double)this.zLevel).color(255, 255, 255, 1).endVertex();
-            worldrenderer.pos((double)0, (double)0, (double)this.zLevel).color(255, 255, 255, 1).endVertex();
-            worldrenderer.pos((double)0, (double)0, (double)this.zLevel).color(255, 255, 255, 1).endVertex();
-            worldrenderer.pos((double)0, (double)0, (double)this.zLevel).color(255, 255, 255, 1).endVertex();
+            worldrenderer.pos((double) 0, (double) 0, (double) this.zLevel).color(255, 255, 255, 1).endVertex();
+            worldrenderer.pos((double) 0, (double) 0, (double) this.zLevel).color(255, 255, 255, 1).endVertex();
+            worldrenderer.pos((double) 0, (double) 0, (double) this.zLevel).color(255, 255, 255, 1).endVertex();
+            worldrenderer.pos((double) 0, (double) 0, (double) this.zLevel).color(255, 255, 255, 1).endVertex();
             tessellator.draw();
             GlStateManager.shadeModel(GL11.GL_FLAT);
             GlStateManager.disableBlend();
@@ -416,6 +421,40 @@ public abstract class GuiContainer extends GuiScreen {
                             } else if (l == -999) {
                                 i1 = 4;
                             }
+
+                            if (isCtrlKeyDown())
+                                if (HypixelUtil.isInGame("PIT") && !(this instanceof GuiInventory)) {
+                                    if (slot != null && slot.getHasStack()) {
+                                        ItemStack stack = slot.getStack();
+
+                                        if (stack.hasTagCompound() && stack.getTagCompound().hasKey("ExtraAttributes", 10)) {
+                                            NBTTagCompound nbttagcompound = stack.getTagCompound().getCompoundTag("ExtraAttributes");
+
+                                            if (nbttagcompound.hasKey("Nonce", 3)) {
+                                                GuiScreen.setClipboardString(String.valueOf(nbttagcompound.getLong("Nonce")));
+                                                Notifications.getManager().post("Nonce Copied", "Copied item Nonce to Clipboard!", 2500, Notifications.Type.OKAY);
+                                            }
+                                        }
+
+                                        if (stack.getMetadata() == 3) {
+                                            GameProfile gameprofile = null;
+
+                                            if (stack.hasTagCompound()) {
+                                                NBTTagCompound nbttagcompound = stack.getTagCompound();
+
+                                                if (nbttagcompound.hasKey("SkullOwner", 10)) {
+                                                    gameprofile = NBTUtil.readGameProfileFromNBT(nbttagcompound.getCompoundTag("SkullOwner"));
+                                                } else if (nbttagcompound.hasKey("SkullOwner", 8) && nbttagcompound.getString("SkullOwner").length() > 0) {
+                                                    gameprofile = new GameProfile((UUID) null, nbttagcompound.getString("SkullOwner"));
+                                                }
+                                            }
+
+                                            if (gameprofile != null && gameprofile.getId() != null) {
+                                                GuiScreen.setClipboardString(String.valueOf(gameprofile.getId()));
+                                            }
+                                        }
+                                    }
+                                }
 
                             this.handleMouseClick(slot, l, mouseButton, i1);
                         }

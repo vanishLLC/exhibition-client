@@ -30,8 +30,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Fly extends Module {
 
-    private static String SPEED = "SPEED";
-    private static String MODE = "MODE";
+    private String SPEED = "SPEED";
+    private String MODE = "MODE";
     private String BYPASS = "BLORP";
     private String BOOST = "BOOST";
 
@@ -226,7 +226,7 @@ public class Fly extends Module {
                     packetList.add(packet);
                 }
                 event.setCancelled(true);
-                ((LongJump) Client.getModuleManager().get(LongJump.class)).resetTimer();
+                Client.getModuleManager().get(LongJump.class).resetTimer();
             }
         }
 
@@ -310,14 +310,8 @@ public class Fly extends Module {
                         break;
                     }
                     case "Motion": {
-                        if (mc.thePlayer.movementInput.jump) {
-                            mc.thePlayer.motionY = 0.42F;
-                        } else if (mc.thePlayer.movementInput.sneak) {
-                            mc.thePlayer.motionY = -0.42F;
-                        } else {
-                            mc.thePlayer.motionY = 0;
-                        }
-                        em.setGround(HypixelUtil.isVerifiedHypixel() && mc.thePlayer.ticksExisted % 7 == 0);
+                        if (PlayerUtil.isMoving())
+                            em.setGround(HypixelUtil.isVerifiedHypixel() && mc.thePlayer.ticksExisted % 7 == 0);
                         break;
                     }
 //                    case "AntiKick": {
@@ -348,8 +342,16 @@ public class Fly extends Module {
                 if (hypickle) {
                     speed = getBaseMoveSpeed();
                 }
-                if (HypixelUtil.isVerifiedHypixel())
-                em.setY(mc.thePlayer.motionY = 0);
+                if (HypixelUtil.isVerifiedHypixel()) {
+                    if (mc.thePlayer.movementInput.jump) {
+                        mc.thePlayer.motionY = 0.42F;
+                    } else if (mc.thePlayer.movementInput.sneak) {
+                        mc.thePlayer.motionY = -0.42F;
+                    } else {
+                        mc.thePlayer.motionY = 0;
+                    }
+                    em.setY(mc.thePlayer.motionY);
+                }
                 if (boostDelay.delay(10000)) {
                     boostDelay.reset();
                 }

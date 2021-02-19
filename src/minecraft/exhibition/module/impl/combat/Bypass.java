@@ -252,7 +252,7 @@ public class Bypass extends Module {
                                         lastSentUid = packet.getUid();
                                         if (debug)
                                             DevNotifications.getManager().post("\247eSent from \247c" + (lastbruh) + "\247e to \247a" + (lastSentUid + 1) + " " + mc.thePlayer.ticksExisted);
-                                        randomDelay = random.nextInt(65);
+                                        randomDelay = 10 + (int)(random.nextInt(65) * 2);
                                         bruh = 10;
                                     } else {
                                         chokePackets.add(packet);

@@ -27,13 +27,15 @@ import static net.minecraft.client.gui.GuiPlayerTabOverlay.playerInfoMap;
 public class NickDetector extends Module {
 
     private final Setting<Boolean> disconnect = new Setting<>("DISCONNECT", false, "Notifies you if a nicked player disconnects. \247e(May help identify Staff)");
+    public final Setting<Boolean> denick = new Setting<>("DENICK", true, "Attempts to reveal the name of nicked players.");
 
     public NickDetector(ModuleData data) {
         super(data);
         addSetting(disconnect);
+        addSetting(denick);
     }
 
-    private Timer timer = new Timer();
+    private final Timer timer = new Timer();
 
     @RegisterEvent(events = {EventTick.class, EventPacket.class})
     public void onEvent(Event event) {
@@ -45,7 +47,9 @@ public class NickDetector extends Module {
                 for (S38PacketPlayerListItem.AddPlayerData addPlayerData : packetPlayerListItem.getPlayerList()) {
                     if (packetPlayerListItem.getAction() == S38PacketPlayerListItem.Action.REMOVE_PLAYER) {
                         if (UUIDResolver.instance.isInvalidUUID(addPlayerData.getProfile().getId())) {
-                            Notifications.getManager().post("Nick Detector", mc.getNetHandler().getPlayerInfo(addPlayerData.getProfile().getId()).getGameProfile().getName() + " has left your game.", Notifications.Type.INFO);
+                            try {
+                                Notifications.getManager().post("Nick Detector", mc.getNetHandler().getPlayerInfo(addPlayerData.getProfile().getId()).getGameProfile().getName() + " has left your game.", Notifications.Type.INFO);
+                            } catch (Exception ignored) {}
                         }
                     }
                 }

@@ -9,6 +9,7 @@ import exhibition.event.Event;
 import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventRenderGui;
 import exhibition.event.impl.EventRenderGuiLast;
+import exhibition.gui.screen.GuiView;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.util.MathUtils;
@@ -37,7 +38,7 @@ public class HealthDisplay extends Module {
 
         if (event instanceof EventRenderGuiLast) {
 
-            int guiOffset = mc.currentScreen instanceof GuiInventory ? 75 : mc.thePlayer.openContainer != mc.thePlayer.inventoryContainer ? 100 : 0;
+            int guiOffset = (mc.currentScreen instanceof GuiInventory || mc.currentScreen instanceof GuiView) ? 75 : mc.thePlayer.openContainer != mc.thePlayer.inventoryContainer ? 100 : 0;
             EventRenderGuiLast er = (EventRenderGuiLast) event;
 
             boolean isLighting = GL11.glIsEnabled(GL11.GL_LIGHTING);

@@ -48,7 +48,8 @@ public class HypixelUtil {
                     if (tagList.tagCount() > 0) {
                         for (int i = 0; i < tagList.tagCount(); ++i) {
                             String tag = tagList.getStringTagAt(i);
-                            if (!tag.equals("\247f\2477") && (tag.startsWith("\247f\2477\2479") || (tag.contains("RARE"))) && !tag.replace("\247f\2477", "").contains("\2477") &&
+                            if ((!tag.equals("\247f\2477") && !tag.equals("\2477")) && ((tag.startsWith("\247f\2477\2479") || tag.startsWith("\2479")) || tag.contains("RARE")) &&
+                                    !tag.replaceFirst("\2477", "").contains("\2477") &&
                                     !tag.endsWith("Attack Damage") && !tag.endsWith("Unbreakable") && !tag.toLowerCase().contains("fashion") && !tag.toLowerCase().contains("mystic") &&
                                     !tag.contains("As strong") && !tag.contains("Gotta go") && !tag.contains("Purple Gold")) {
                                 list.add(tag);
@@ -67,6 +68,10 @@ public class HypixelUtil {
             return false;
 
         Scoreboard scoreboard = Minecraft.getMinecraft().theWorld.getScoreboard();
+
+        if(scoreboard == null)
+            return false;
+
         ScoreObjective scoreobjective = null;
         ScorePlayerTeam scoreboardPlayersTeam = scoreboard.getPlayersTeam(Minecraft.getMinecraft().thePlayer.getName());
 
@@ -105,6 +110,10 @@ public class HypixelUtil {
             return null;
 
         Scoreboard scoreboard = Minecraft.getMinecraft().theWorld.getScoreboard();
+
+        if(scoreboard == null)
+            return null;
+
         ScoreObjective scoreobjective = null;
         ScorePlayerTeam scoreboardPlayersTeam = scoreboard.getPlayersTeam(Minecraft.getMinecraft().thePlayer.getName());
 
@@ -158,6 +167,10 @@ public class HypixelUtil {
             return false;
 
         Scoreboard scoreboard = Minecraft.getMinecraft().theWorld.getScoreboard();
+
+        if(scoreboard == null)
+            return false;
+
         ScoreObjective scoreobjective = null;
         ScorePlayerTeam scoreboardPlayersTeam = scoreboard.getPlayersTeam(Minecraft.getMinecraft().thePlayer.getName());
 

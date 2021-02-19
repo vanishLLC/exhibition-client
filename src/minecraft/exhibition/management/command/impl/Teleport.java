@@ -145,7 +145,7 @@ public class Teleport extends Command implements EventListener {
 
             if (stage == 0) {
                 Notifications.getManager().post("Teleporting", "Please wait {s} s", 5100);
-                double[] list = {0.41999998688697815, 0.7531999805212024, 0.1040803780930446};
+                double[] list = {0.41999998688697815, 0.7531999805212024, 1.0013359791121417};
 
                 for (double v : list) {
                     NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + v, mc.thePlayer.posZ, false));
@@ -158,6 +158,15 @@ public class Teleport extends Command implements EventListener {
             }
             if (stage == 1) {
                 ticks--;
+
+                em.setCancelled(true);
+
+                if(ticks % 20 == 0) {
+                    NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 1.0013359791121417, mc.thePlayer.posZ, false));
+                } else {
+                    NetUtil.sendPacketNoEvents(new C03PacketPlayer(false));
+                }
+
                 if (ticks < 0) {
                     Notifications.getManager().post("Canceled Teleport", "Took too long to teleport.", 1000, Notifications.Type.INFO);
                     EventSystem.unregister(this);
@@ -166,8 +175,6 @@ public class Teleport extends Command implements EventListener {
                     stage = 0;
                     return;
                 }
-
-                em.setCancelled(true);
             }
 
             if (stage == 2) {
@@ -220,7 +227,7 @@ public class Teleport extends Command implements EventListener {
 
                 mc.thePlayer.setPositionAndUpdate(currentX, mc.thePlayer.posY + dist, currentZ);
                 stage = 3;
-                ticks = 60;
+                ticks = 5;
                 return;
             }
 
@@ -230,7 +237,6 @@ public class Teleport extends Command implements EventListener {
                     EventSystem.unregister(this);
                     isTeleporting = false;
                     stage = 0;
-                    mc.thePlayer.motionY -= 1.6;
                     return;
                 }
             }
