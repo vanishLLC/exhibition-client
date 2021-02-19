@@ -214,7 +214,12 @@ public class Speed extends Module {
             case "HypixelHop": {
                 if (event instanceof EventMove) {
                     EventMove em = (EventMove) event;
-
+                    if (stage < 0) {
+                        stage++;
+                        lastDist = 0;
+                        velocityBoost = 0;
+                        break;
+                    }
                     double baseSpeed = 0.2873D;
                     if (mc.thePlayer.isPotionActive(Potion.moveSpeed) && mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getDuration() > 10) {
                         int amplifier = mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getAmplifier();
@@ -223,6 +228,7 @@ public class Speed extends Module {
 
                     if (mc.thePlayer.moveForward == 0.0f && mc.thePlayer.moveStrafing == 0.0f) {
                         speed = baseSpeed;
+                        velocityBoost = 0;
                     }
 
                     if (AutoPot.wantsToPot) {
@@ -243,7 +249,6 @@ public class Speed extends Module {
                     } else if (stage == 3) {
                         double bruh = 0.825;
 
-
                         if (mc.thePlayer.isPotionActive(Potion.moveSpeed)) {
                             if (mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getAmplifier() == 0) {
                                 bruh = 0.79D;
@@ -258,10 +263,21 @@ public class Speed extends Module {
                     } else {
                         final List collidingList = mc.theWorld.getCollidingBlockBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(0.0, mc.thePlayer.motionY, 0.0));
                         if ((collidingList.size() > 0 || mc.thePlayer.isCollidedVertically) && stage > 0) {
-                            stage = ((mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f) ? 1 : 0);
+                            stage = (mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f) ? 1 : 0;
                         }
+
                         speed = lastDist - lastDist / 159.0;
                     }
+
+                    if (velocityBoost != 0 && velocityBoost <= 0.05) {
+                        velocityBoost = 0;
+                    }
+                    if(velocityBoost != 0) {
+                        speed += velocityBoost;
+                    }
+                    if (stage > 2)
+                        velocityBoost *= 0.66;
+
                     speed = Math.max(speed, moveSpeed);
 
                     //Stage checks if you're greater than 0 as step sets you -6 stage to make sure the player wont flag.
@@ -281,7 +297,7 @@ public class Speed extends Module {
                         double zDist = mc.thePlayer.posZ - mc.thePlayer.prevPosZ;
                         lastDist = Math.sqrt(xDist * xDist + zDist * zDist);
 
-                        if(stage > 0) {
+                        if (stage > 0) {
                             if (em.getY() % 0.015625 == 0) {
                                 em.setY(em.getY() + 0.00053424);
                                 em.setGround(false);
@@ -330,7 +346,8 @@ public class Speed extends Module {
                         return;
                     }
 
-                    double moveSpeed = speed = (defaultSpeed()) * ((mc.thePlayer.isInsideOfMaterial(Material.vine)) ? 0.5 : (mc.thePlayer.isSneaking()) ? 0.8 : (PlayerUtil.isInLiquid() ? 0.6 : (reset) ? 0.53 : ((mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.1, mc.thePlayer.posZ)).getBlock().slipperiness == 0.98f) ? 2.4 : 1.0)));;
+                    double moveSpeed = speed = (defaultSpeed()) * ((mc.thePlayer.isInsideOfMaterial(Material.vine)) ? 0.5 : (mc.thePlayer.isSneaking()) ? 0.8 : (PlayerUtil.isInLiquid() ? 0.6 : (reset) ? 0.53 : ((mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.1, mc.thePlayer.posZ)).getBlock().slipperiness == 0.98f) ? 2.4 : 1.0)));
+                    ;
 
                     if (stage == 1 && mc.thePlayer.isCollidedVertically && (mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f)) {
                         stage = 2;

@@ -79,10 +79,11 @@ public class Phase extends Module {
                     NetUtil.sendPacket(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX + (x), mc.thePlayer.posY + (0.0000194385093485943 * Math.random()), mc.thePlayer.posZ + (z), false));
                     NetUtil.sendPacket(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY - (0.48209538902354 + (0.00000000000094385093485943 * Math.random())), mc.thePlayer.posZ, false));
                 }
-            } else if (event instanceof EventPushBlock) {
-                event.setCancelled(true);
             }
             return;
+        }
+        if (event instanceof EventPushBlock) {
+            event.setCancelled(true);
         }
         if (event instanceof EventStep){
             EventStep step = event.cast();
@@ -119,7 +120,7 @@ public class Phase extends Module {
                 return;
             }
             try {
-                if ((ebb.getBounds() != null && mc.thePlayer.boundingBox != null) && (ebb.getBounds().maxY > mc.thePlayer.boundingBox.minY) && (mc.thePlayer.isSneaking())) {
+                if ((ebb.getBounds() != null && mc.thePlayer.boundingBox != null) && (ebb.getBounds().maxY > mc.thePlayer.boundingBox.minY) && (mc.thePlayer.isSneaking() || isInsideBlock())) {
                     ebb.setBounds(null);
                     return;
                 } else if (currentPhase.equalsIgnoreCase("HCF")) {

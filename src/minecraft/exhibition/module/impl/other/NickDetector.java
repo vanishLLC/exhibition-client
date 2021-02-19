@@ -37,6 +37,13 @@ public class NickDetector extends Module {
 
     private final Timer timer = new Timer();
 
+    @Override
+    public void toggle() {
+        UUIDResolver.instance.checkedUsernames.clear();
+        UUIDResolver.instance.resolvedMap.clear();
+        UUIDResolver.instance.validMap.clear();
+    }
+
     @RegisterEvent(events = {EventTick.class, EventPacket.class})
     public void onEvent(Event event) {
         if (event instanceof EventPacket && disconnect.getValue()) {
@@ -77,10 +84,7 @@ public class NickDetector extends Module {
                     if (displayName.equals("\247r" + name) || displayName.equals(name) || displayName.equals("\247r" + name + "\247r") || displayName.equals(name + "\247r")) {
                         continue;
                     }
-                    if (UUIDResolver.instance.isInvalidName(name)) {
-                        continue;
-                    }
-                    if (UUIDResolver.instance.checkedUsernames.containsKey(name)) {
+                    if (UUIDResolver.instance.checkedUsernames.containsKey(name) && (!denick.getValue() || !UUIDResolver.instance.isInvalidName(name))) {
                         continue;
                     }
                     usernameList.put(name, playerInfo.getGameProfile().getId());

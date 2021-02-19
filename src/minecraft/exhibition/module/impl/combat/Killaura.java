@@ -664,9 +664,9 @@ public class Killaura extends Module {
 
                             boolean dontCrit = allowInvalidAngles && antiCritFunky.getValue() && hasEnchant(target, "Crit", "Funk");
 
-                            if (target instanceof EntityPlayer && allowInvalidAngles && antiCritFunky.getValue() && hasEnchant(target, "Retro")) {
+                            if (target instanceof EntityPlayer && antiCritFunky.getValue() && hasEnchant(target, "Retro")) {
                                 int criticalHits = ((EntityPlayer) target).criticalHits;
-                                if (criticalHits == 0 || criticalHits > 3 || target.waitTicks > 0) {
+                                if (criticalHits == 0 || criticalHits >= 3 || target.waitTicks > 0) {
                                     if (criticalHits == 0) {
                                         ((EntityPlayer) target).criticalHits++;
                                     }
@@ -902,10 +902,12 @@ public class Killaura extends Module {
 
                             if (target != null && target.waitTicks <= 0) {
                                 if (target instanceof EntityPlayer) {
-                                    if ((!em.isOnground() && isCritSetup) || !mc.thePlayer.onGround) {
-                                        ((EntityPlayer) target).criticalHits++;
+                                    EntityPlayer player = (EntityPlayer) target;
+                                    if (!em.isOnground()) {
+                                        player.criticalHits++;
                                     } else {
-                                        ((EntityPlayer) target).criticalHits = 0;
+                                        if (player.criticalHits != 1)
+                                            player.criticalHits = 0;
                                     }
                                 }
 
@@ -1106,7 +1108,7 @@ public class Killaura extends Module {
 
             double distance = MathHelper.sqrt_double(deltaX * deltaX + deltaY * deltaY);
 
-            if(distance >= 2) {
+            if (distance >= 2) {
                 deltas.clear();
                 deltas.add(new double[]{0, 0});
                 return this;

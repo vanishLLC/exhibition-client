@@ -132,10 +132,10 @@ public class UUIDResolver {
             responseMap.put(resultStr, current);
 
             for (Map.Entry<String, UUID> entry : names.entrySet()) {
-                checkedUsernames.put(entry.getKey(), entry.getValue());
-                if (!validMap.containsKey(entry.getKey())) {
+                if (!validMap.containsKey(entry.getKey()) && !checkedUsernames.containsKey(entry.getKey())) {
                     Notifications.getManager().post("Nick Detector", entry.getKey() + " is not a real player name!", 2500, Notifications.Type.NOTIFY);
                 }
+                checkedUsernames.put(entry.getKey(), entry.getValue());
             }
         } catch (Exception ignored) {
 
@@ -154,12 +154,95 @@ public class UUIDResolver {
         public void run() {
             isChecking = true;
             try {
+                try {
+                    NickDetector nickDetector = Client.getModuleManager().get(NickDetector.class);
+                    if (isChecking && HypixelUtil.isInGame("PIT") && nickDetector.denick.getValue()) {
+                        for (String username : usernameList.keySet()) {
+                            if (!validMap.containsKey(username) && checkedUsernames.containsKey(username)) {
+                                if (!isChecking || !nickDetector.denick.getValue() || Minecraft.getMinecraft().thePlayer == null || Minecraft.getMinecraft().theWorld == null)
+                                    continue;
+                                Minecraft mc = Minecraft.getMinecraft();
+
+                                System.out.println("Attempting to resolve " + username);
+
+                                EntityPlayer player = mc.theWorld.getPlayerEntityByName(username);
+                                if (player == null)
+                                    continue;
+
+                                for (int i = 0; i < 45; i++) {
+                                    ItemStack stack = player.inventoryContainer.getSlot(i).getStack();
+                                    if (stack != null && stack.hasTagCompound()) {
+                                        if (stack.getTagCompound().hasKey("ExtraAttributes", 10)) {
+                                            NBTTagCompound nbttagcompound = stack.getTagCompound().getCompoundTag("ExtraAttributes");
+
+                                            if (nbttagcompound.hasKey("Nonce", 3)) {
+                                                try {
+
+                                                    long nonceLong = nbttagcompound.getLong("Nonce");
+
+                                                    if (nonceLong <= 100)
+                                                        continue;
+
+                                                    System.out.println("Resolving " + username + "'s " + stack.getDisplayName() + " NONCE: " + nonceLong);
+
+                                                    String nonce = String.valueOf(nonceLong);
+
+                                                    Connection pitPandaSearch = new Connection("https://pitpanda.rocks/api/itemsearch/nonce" + nonce);
+
+                                                    String response = Connector.get(pitPandaSearch);
+                                                    JsonObject jsonObject = (JsonObject) JsonParser.parseString(response);
+                                                    boolean success = jsonObject.get("success").getAsBoolean();
+                                                    if (success) {
+                                                        boolean itemsNull = jsonObject.get("items").isJsonNull();
+                                                        if (!itemsNull) {
+                                                            JsonArray test = jsonObject.get("items").getAsJsonArray();
+                                                            if (test.size() > 0) {
+                                                                JsonObject element = test.get(0).getAsJsonObject();
+                                                                if (element.has("owner")) {
+                                                                    String uuid = element.get("owner").getAsString();
+                                                                    Connection profileConnection = new Connection("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid);
+                                                                    String profileResponse = Connector.get(profileConnection);
+                                                                    JsonObject profileJsonObject = (JsonObject) JsonParser.parseString(profileResponse);
+                                                                    responseMap.put(profileResponse, System.currentTimeMillis());
+
+                                                                    if (profileJsonObject.has("name")) {
+                                                                        String resolvedName = profileJsonObject.get("name").getAsString();
+                                                                        if (resolvedName != null) {
+                                                                            resolvedMap.put(username, resolvedName);
+                                                                            Notifications.getManager().post("Nick Detector", username + " may be " + resolvedName + "!", 2500, Notifications.Type.NOTIFY);
+                                                                            break;
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                } catch (Exception e) {
+
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                List<String> recentlyResolved = new ArrayList<>();
+
                 HashMap<String, UUID> tempList = new HashMap<>();
 
                 for (Map.Entry<String, UUID> entry : usernameList.entrySet()) {
                     if (!isChecking || Minecraft.getMinecraft().thePlayer == null)
                         return;
+                    if (validMap.containsKey(entry.getKey()))
+                        continue;
                     tempList.put(entry.getKey(), entry.getValue());
+                    recentlyResolved.add(entry.getKey());
                     if (tempList.size() == 10) {
                         resolveNames(tempList);
                         tempList.clear();
@@ -175,7 +258,7 @@ public class UUIDResolver {
                         for (String username : usernameList.keySet()) {
                             if (!isChecking || Minecraft.getMinecraft().thePlayer == null)
                                 return;
-                            if (validMap.containsKey(username) && checkedUsernames.containsKey(username)) {
+                            if (validMap.containsKey(username) && checkedUsernames.containsKey(username) && recentlyResolved.contains(username)) {
                                 Connection hypixelApiConnection = new Connection("https://api.hypixel.net/player");
 
                                 hypixelApiConnection.setParameters("key", Client.instance.hypixelApiKey);
@@ -203,81 +286,10 @@ public class UUIDResolver {
 
                 }
 
-                try {
-                    NickDetector nickDetector = Client.getModuleManager().get(NickDetector.class);
-                    if (isChecking && nickDetector.denick.getValue() && HypixelUtil.isInGame("PIT")) {
-                        for (String username : usernameList.keySet()) {
-                            if (!isChecking || !nickDetector.denick.getValue() || Minecraft.getMinecraft().thePlayer == null || Minecraft.getMinecraft().theWorld == null)
-                                return;
-
-                            if (!validMap.containsKey(username) && checkedUsernames.containsKey(username)) {
-                                Minecraft mc = Minecraft.getMinecraft();
-
-                                EntityPlayer player = mc.theWorld.getPlayerEntityByName(username);
-                                if (player == null)
-                                    continue;
-
-                                for (int i = 9; i < 45; i++) {
-                                    ItemStack stack = player.inventoryContainer.getSlot(i).getStack();
-                                    if (stack != null && stack.hasTagCompound()) {
-                                        if (stack.getTagCompound().hasKey("ExtraAttributes", 10)) {
-                                            NBTTagCompound nbttagcompound = stack.getTagCompound().getCompoundTag("ExtraAttributes");
-
-                                            if (nbttagcompound.hasKey("Nonce", 3)) {
-                                                long nonceLong = nbttagcompound.getLong("Nonce");
-
-                                                if (nonceLong <= 100)
-                                                    continue;
-
-                                                String nonce = String.valueOf(nonceLong);
-
-                                                Connection pitPandaSearch = new Connection("https://pitpanda.rocks/api/itemsearch/nonce" + nonce);
-
-                                                String response = Connector.get(pitPandaSearch);
-                                                JsonObject jsonObject = (JsonObject) JsonParser.parseString(response);
-                                                boolean success = jsonObject.get("success").getAsBoolean();
-                                                if (success) {
-                                                    boolean itemsNull = jsonObject.get("items").isJsonNull();
-                                                    if (!itemsNull) {
-                                                        JsonArray test = jsonObject.get("items").getAsJsonArray();
-                                                        if (test.size() > 0) {
-                                                            JsonObject element = test.get(0).getAsJsonObject();
-                                                            if (element.has("owner")) {
-                                                                String uuid = element.get("owner").getAsString();
-                                                                Connection profileConnection = new Connection("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid);
-                                                                String profileResponse = Connector.get(profileConnection);
-                                                                JsonObject profileJsonObject = (JsonObject) JsonParser.parseString(profileResponse);
-                                                                responseMap.put(profileResponse, System.currentTimeMillis());
-
-                                                                if (profileJsonObject.has("name")) {
-                                                                    String resolvedName = profileJsonObject.get("name").getAsString();
-                                                                    if (resolvedName != null) {
-                                                                        resolvedMap.put(username, resolvedName);
-                                                                        Notifications.getManager().post("Nick Detector", username + " may be " + resolvedName + "!", 2500, Notifications.Type.NOTIFY);
-                                                                        break;
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-
-                            }
-                        }
-                    }
-                } catch (Exception e) {
-
-                }
-
             } catch (
                     Exception e) {
                 isChecking = false;
             }
-
             isChecking = false;
         }
     }
