@@ -204,9 +204,8 @@ public class HypixelUtil {
 
                 for (Score score : arraylist1) {
                     ScorePlayerTeam scoreplayerteam1 = scoreboard.getPlayersTeam(score.getPlayerName());
-                    String s1 = ScorePlayerTeam.formatPlayerName(scoreplayerteam1, score.getPlayerName()).replace("\uD83D\uDC7D", "").replace("\uD83C\uDF82", "");
-
-                    if (StringUtils.stripHypixelControlCodes(s1).toLowerCase().contains(str.toLowerCase())) {
+                    String s1 = StringUtils.stripHypixelControlCodes(ScorePlayerTeam.formatPlayerName(scoreplayerteam1, score.getPlayerName()).replace("\uD83D\uDC7D", "").replace("\uD83C\uDF82", ""));
+                    if (s1.toLowerCase().contains(str.toLowerCase())) {
                         return true;
                     }
                 }

@@ -39,6 +39,7 @@ public class NickDetector extends Module {
 
     @Override
     public void toggle() {
+        super.toggle();
         UUIDResolver.instance.checkedUsernames.clear();
         UUIDResolver.instance.resolvedMap.clear();
         UUIDResolver.instance.validMap.clear();
@@ -84,7 +85,7 @@ public class NickDetector extends Module {
                     if (displayName.equals("\247r" + name) || displayName.equals(name) || displayName.equals("\247r" + name + "\247r") || displayName.equals(name + "\247r")) {
                         continue;
                     }
-                    if (UUIDResolver.instance.checkedUsernames.containsKey(name) && (!denick.getValue() || !UUIDResolver.instance.isInvalidName(name))) {
+                    if (UUIDResolver.instance.checkedUsernames.containsKey(name) && (!denick.getValue() || (!UUIDResolver.instance.isInvalidName(name)) && !UUIDResolver.instance.resolvedMap.containsKey(name))) {
                         continue;
                     }
                     usernameList.put(name, playerInfo.getGameProfile().getId());

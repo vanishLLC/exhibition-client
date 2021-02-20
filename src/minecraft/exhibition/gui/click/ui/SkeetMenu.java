@@ -2267,7 +2267,7 @@ public class SkeetMenu extends UI {
             RenderingUtil.rectangle(slider.x + xOff - 0.3, slider.y + yOff - 0.3, slider.x + xOff + 38 + 0.3, slider.y + yOff + 2.5 + 0.3, Colors.getColor(10, (int) opacity.getOpacity()));
             RenderingUtil.drawGradient(slider.x + xOff, slider.y + yOff, slider.x + xOff + 38, slider.y + yOff + 2.5, Colors.getColor(46, (int) opacity.getOpacity()), Colors.getColor(27, (int) opacity.getOpacity()));
 
-            if (slider.setting.getMin() < 0 && slider.setting.getMax() > 0) {
+            if (slider.setting.getMin() < 0 && slider.setting.getMax() > 0 && slider.setting.getMax() == -slider.setting.getMin()) {
                 if (sliderX >= 19) {
                     RenderingUtil.drawGradient(slider.x + xOff + 19, slider.y + yOff, slider.x + xOff + sliderX, slider.y + yOff + 2.5, Colors.getColor(ColorManager.hudColor.red, ColorManager.hudColor.green, ColorManager.hudColor.blue, (int) opacity.getOpacity()), Colors.getColor(ColorManager.hudColor.red, ColorManager.hudColor.green, ColorManager.hudColor.blue, (int) (120 * (opacity.getOpacity() / 255F))));
                 } else {

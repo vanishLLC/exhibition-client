@@ -154,16 +154,68 @@ public class UUIDResolver {
         public void run() {
             isChecking = true;
             try {
+                List<String> recentlyResolved = new ArrayList<>();
+
+                HashMap<String, UUID> tempList = new HashMap<>();
+
+                for (Map.Entry<String, UUID> entry : usernameList.entrySet()) {
+                    if (!isChecking || Minecraft.getMinecraft().thePlayer == null)
+                        return;
+                    if (validMap.containsKey(entry.getKey()))
+                        continue;
+                    tempList.put(entry.getKey(), entry.getValue());
+                    recentlyResolved.add(entry.getKey());
+                    if (tempList.size() == 10) {
+                        resolveNames(tempList);
+                        tempList.clear();
+                    }
+                }
+
+                if (!tempList.isEmpty() && tempList.size() <= 10) {
+                    resolveNames(tempList);
+                }
+
+                try {
+                    if (isChecking && Client.instance.hypixelApiKey != null && !Client.instance.hypixelApiKey.equals("") && hypixelResponseMap.size() < 120) {
+                        for (String username : usernameList.keySet()) {
+                            if (!isChecking || Minecraft.getMinecraft().thePlayer == null)
+                                return;
+                            if (validMap.containsKey(username) && recentlyResolved.contains(username)) {
+                                Connection hypixelApiConnection = new Connection("https://api.hypixel.net/player");
+
+                                hypixelApiConnection.setParameters("key", Client.instance.hypixelApiKey);
+                                hypixelApiConnection.setParameters("uuid", usernameList.get(username).toString());
+
+                                String response = Connector.get(hypixelApiConnection);
+
+                                JsonObject jsonObject = (JsonObject) JsonParser.parseString(response);
+
+                                boolean success = jsonObject.get("success").getAsBoolean();
+                                boolean playerNull = jsonObject.get("player").isJsonNull();
+
+                                if (success) {
+                                    if (playerNull) {
+                                        Notifications.getManager().post("Nick Detector", username + " is in /nick! (Valid Name)", 2500, Notifications.Type.NOTIFY);
+                                        validMap.remove(username);
+                                    }
+                                }
+
+                                hypixelResponseMap.put(response, System.currentTimeMillis());
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+
+                }
+
                 try {
                     NickDetector nickDetector = Client.getModuleManager().get(NickDetector.class);
                     if (isChecking && HypixelUtil.isInGame("PIT") && nickDetector.denick.getValue()) {
                         for (String username : usernameList.keySet()) {
-                            if (!validMap.containsKey(username) && checkedUsernames.containsKey(username)) {
+                            if (!validMap.containsKey(username) && recentlyResolved.contains(username) && !resolvedMap.containsKey(username)) {
                                 if (!isChecking || !nickDetector.denick.getValue() || Minecraft.getMinecraft().thePlayer == null || Minecraft.getMinecraft().theWorld == null)
                                     continue;
                                 Minecraft mc = Minecraft.getMinecraft();
-
-                                System.out.println("Attempting to resolve " + username);
 
                                 EntityPlayer player = mc.theWorld.getPlayerEntityByName(username);
                                 if (player == null)
@@ -182,8 +234,6 @@ public class UUIDResolver {
 
                                                     if (nonceLong <= 100)
                                                         continue;
-
-                                                    System.out.println("Resolving " + username + "'s " + stack.getDisplayName() + " NONCE: " + nonceLong);
 
                                                     String nonce = String.valueOf(nonceLong);
 
@@ -230,60 +280,6 @@ public class UUIDResolver {
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
-                }
-
-                List<String> recentlyResolved = new ArrayList<>();
-
-                HashMap<String, UUID> tempList = new HashMap<>();
-
-                for (Map.Entry<String, UUID> entry : usernameList.entrySet()) {
-                    if (!isChecking || Minecraft.getMinecraft().thePlayer == null)
-                        return;
-                    if (validMap.containsKey(entry.getKey()))
-                        continue;
-                    tempList.put(entry.getKey(), entry.getValue());
-                    recentlyResolved.add(entry.getKey());
-                    if (tempList.size() == 10) {
-                        resolveNames(tempList);
-                        tempList.clear();
-                    }
-                }
-
-                if (!tempList.isEmpty() && tempList.size() <= 10) {
-                    resolveNames(tempList);
-                }
-
-                try {
-                    if (isChecking && Client.instance.hypixelApiKey != null && !Client.instance.hypixelApiKey.equals("") && hypixelResponseMap.size() < 120) {
-                        for (String username : usernameList.keySet()) {
-                            if (!isChecking || Minecraft.getMinecraft().thePlayer == null)
-                                return;
-                            if (validMap.containsKey(username) && checkedUsernames.containsKey(username) && recentlyResolved.contains(username)) {
-                                Connection hypixelApiConnection = new Connection("https://api.hypixel.net/player");
-
-                                hypixelApiConnection.setParameters("key", Client.instance.hypixelApiKey);
-                                hypixelApiConnection.setParameters("uuid", usernameList.get(username).toString());
-
-                                String response = Connector.get(hypixelApiConnection);
-
-                                JsonObject jsonObject = (JsonObject) JsonParser.parseString(response);
-
-                                boolean success = jsonObject.get("success").getAsBoolean();
-                                boolean playerNull = jsonObject.get("player").isJsonNull();
-
-                                if (success) {
-                                    if (playerNull) {
-                                        Notifications.getManager().post("Nick Detector", username + " is in /nick! (Valid Name)", 2500, Notifications.Type.NOTIFY);
-                                        validMap.remove(username);
-                                    }
-                                }
-
-                                hypixelResponseMap.put(response, System.currentTimeMillis());
-                            }
-                        }
-                    }
-                } catch (Exception e) {
-
                 }
 
             } catch (

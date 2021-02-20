@@ -56,6 +56,10 @@ public class FreecamTP extends Module {
         }
 
         if (stage == 2) {
+            if(!tpBack.getValue()) {
+                mc.thePlayer.setPositionAndUpdate(mc.thePlayer.posX, mc.thePlayer.posY + 1.0013359791121417, mc.thePlayer.posZ);
+                mc.thePlayer.onGround = false;
+            }
             Notifications.getManager().post("Stopped Teleporting.", "Re-enable to teleport again.", Notifications.Type.OKAY);
             positions.clear();
             stage = -1;

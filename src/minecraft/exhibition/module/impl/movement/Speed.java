@@ -244,7 +244,7 @@ public class Speed extends Module {
 
                     if (stage == 2 && mc.thePlayer.isCollidedVertically && mc.thePlayer.onGround && (mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f)) {
                         em.setY(mc.thePlayer.motionY = 0.400453F);
-                        mc.thePlayer.isAirBorne = true;
+                        velocityBoost /= 2;
                         speed = moveSpeed * 2.1475;
                     } else if (stage == 3) {
                         double bruh = 0.825;
@@ -272,7 +272,7 @@ public class Speed extends Module {
                     if (velocityBoost != 0 && velocityBoost <= 0.05) {
                         velocityBoost = 0;
                     }
-                    if(velocityBoost != 0) {
+                    if(velocityBoost != 0 && stage > 2) {
                         speed += velocityBoost;
                     }
                     if (stage > 2)
@@ -347,7 +347,6 @@ public class Speed extends Module {
                     }
 
                     double moveSpeed = speed = (defaultSpeed()) * ((mc.thePlayer.isInsideOfMaterial(Material.vine)) ? 0.5 : (mc.thePlayer.isSneaking()) ? 0.8 : (PlayerUtil.isInLiquid() ? 0.6 : (reset) ? 0.53 : ((mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.1, mc.thePlayer.posZ)).getBlock().slipperiness == 0.98f) ? 2.4 : 1.0)));
-                    ;
 
                     if (stage == 1 && mc.thePlayer.isCollidedVertically && (mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f)) {
                         stage = 2;

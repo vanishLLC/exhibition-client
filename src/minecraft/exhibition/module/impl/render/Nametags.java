@@ -118,7 +118,7 @@ public class Nametags extends Module {
             for (EntityPlayer ent : entList) {
                 int dist = (int) mc.thePlayer.getDistanceToEntity(ent);
 
-                boolean prioritized = PriorityManager.isPriority(ent) || ent == (((Killaura)Client.getModuleManager().get(Killaura.class)).vip);
+                boolean prioritized = PriorityManager.isPriority(ent) || ent == Client.getModuleManager().get(Killaura.class).vip;
 
                 boolean isPriority = prioritized || TargetESP.isPriority(ent) || FriendManager.isFriend(ent.getName());
 
@@ -131,10 +131,9 @@ public class Nametags extends Module {
                     }
                 }
 
-                String playerName = isPriority ? ent.getDisplayName().getFormattedText() : ent.getDisplayName().getFormattedText();
+                String playerName = ent.getDisplayName().getFormattedText();
 
                 String str = ((boolean) distance.getValue() ? "\247a" + dist + "m\247r " : "") + playerName;
-                // System.out.println(str);
                 str = str.replace(playerName, FriendManager.isFriend(ent.getName()) ? FriendManager.getAlias(ent.getName()) : "\247f\247l" + playerName);
 
                 if ((boolean) settings.get(BOTS).getValue() && AntiBot.isBot(ent)) {
