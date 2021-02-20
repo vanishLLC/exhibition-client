@@ -8,7 +8,6 @@ import exhibition.util.HypixelUtil;
 import exhibition.util.security.Connection;
 import exhibition.util.security.Connector;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
