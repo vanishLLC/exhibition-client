@@ -207,7 +207,7 @@ public class Speed extends Module {
                     Speed.stage = -1;
             }
         }
-        if (((boolean) water.getValue() && PlayerUtil.isInLiquid()) || (Killaura.blockJump && Client.getModuleManager().isEnabled(Killaura.class))) {
+        if ((water.getValue() && PlayerUtil.isInLiquid()) || (Killaura.blockJump && Client.getModuleManager().isEnabled(Killaura.class))) {
             return;
         }
         switch (currentMode) {
@@ -243,7 +243,11 @@ public class Speed extends Module {
                     }
 
                     if (stage == 2 && mc.thePlayer.isCollidedVertically && mc.thePlayer.onGround && (mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f)) {
-                        em.setY(mc.thePlayer.motionY = 0.400453F);
+                        double gay = 0.400453F;
+                        if (mc.thePlayer.isPotionActive(Potion.jump)) {
+                            gay = 0.42F + (mc.thePlayer.getActivePotionEffect(Potion.jump).getAmplifier() + 1) * 0.1F;
+                        }
+                        em.setY(mc.thePlayer.motionY = gay);
                         velocityBoost /= 2;
                         speed = moveSpeed * 2.1475;
                     } else if (stage == 3) {
