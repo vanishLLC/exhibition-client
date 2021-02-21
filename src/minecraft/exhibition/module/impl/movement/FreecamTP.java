@@ -337,6 +337,13 @@ public class FreecamTP extends Module {
         }
         if (event instanceof EventMove) {
             EventMove em = event.cast();
+            if(stage == 0) {
+                em.setX(mc.thePlayer.motionX = 0);
+                em.setY(mc.thePlayer.motionY = 0);
+                em.setZ(mc.thePlayer.motionZ = 0);
+                return;
+            }
+
             if (stage < 2) {
                 double speed = tpBack.getValue() ? 4 : 5.0;
                 if (mc.thePlayer.movementInput.jump) {

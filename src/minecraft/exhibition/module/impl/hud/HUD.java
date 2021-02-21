@@ -20,6 +20,7 @@ import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.combat.Bypass;
 import exhibition.module.impl.other.AutoSkin;
 import exhibition.module.impl.other.ChatCommands;
+import exhibition.util.HypixelUtil;
 import exhibition.util.MathUtils;
 import exhibition.util.RenderingUtil;
 import exhibition.util.render.Colors;
@@ -35,7 +36,9 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.boss.BossStatus;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.IChatComponent;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
@@ -60,6 +63,7 @@ public class HUD extends Module {
 
     private final Setting<Boolean> showUID = new Setting<>("SHOW-UID", false, "Shows your UID instead of your username.");
 
+    private final Setting<Boolean> showPlayerWarning = new Setting<>("WARNING LIST", false);
     private final Setting<Boolean> showSessionTime = new Setting<>("SESSION TIME", false);
     private final Setting<Boolean> showProtocol = new Setting<>("PROTOCOL", true);
     private final Setting<Boolean> drawTicksPerSecond = new Setting<>("TPS", true);
@@ -74,6 +78,7 @@ public class HUD extends Module {
         settings.put(UGLYGOD, new Setting<>(UGLYGOD, "Exhibition", "Oh look mom, I can rename a client!"));
         settings.put("ARRAYPOS", new Setting<>("ARRAY", arrayPos, "Array list positioning."));
         Setting[] ents = new Setting[]{
+                showPlayerWarning,
                 showSessionTime,
                 new Setting<>("NOSTALGIA", false),
                 new Setting<>("ARRAYLIST", true),
@@ -330,6 +335,51 @@ public class HUD extends Module {
         boolean suf = (options.getValue("SUFFIX"));
         boolean array = (options.getValue("ARRAYLIST"));
         drawPotionStatus(e.getResolution());
+
+        if (showPlayerWarning.getValue() && HypixelUtil.isInGame("PIT") && !HypixelUtil.scoreboardContains("Event")) {
+            NetHandlerPlayClient nethandlerplayclient = this.mc.thePlayer.sendQueue;
+            List<NetworkPlayerInfo> list = GuiPlayerTabOverlay.playerInfoMap.<NetworkPlayerInfo>sortedCopy(nethandlerplayclient.getPlayerInfoMap());
+
+            double width = e.getResolution().getScaledWidth();
+            double height = e.getResolution().getScaledHeight();
+
+            boolean hasDrawn = false;
+
+            List<String> strings = new ArrayList<>();
+
+            for (NetworkPlayerInfo networkPlayerInfo : list) {
+                String displayName = ScorePlayerTeam.formatPlayerName(networkPlayerInfo.getPlayerTeam(), networkPlayerInfo.getGameProfile().getName());
+                String name = networkPlayerInfo.getGameProfile().getName();
+
+                if (displayName.equals("\247r" + name) || displayName.equals(name) || displayName.equals("\247r" + name + "\247r") || displayName.equals(name + "\247r")) {
+                    continue;
+                }
+
+                String[] prefixes = new String[]{"\2472", "\2479", "\247c"};
+                for (String prefix : prefixes) {
+                    if (displayName.contains(prefix + " " + name)) {
+                        if (!hasDrawn) {
+                            hasDrawn = true;
+                        }
+                        strings.add(prefix + name);
+                        break;
+                    }
+                }
+            }
+
+            if (!strings.isEmpty()) {
+                int totalOffset = 65 + strings.size() * 10;
+                int offset = 0;
+                mc.fontRendererObj.drawStringWithShadow("\247nPossible Staff", width - 2 - mc.fontRendererObj.getStringWidth("\247nPossible Staff"), height - totalOffset + offset, -1);
+                offset += 12;
+
+                for (String string : strings.stream().sorted().collect(Collectors.toList())) {
+                    mc.fontRendererObj.drawStringWithShadow(string, width - 2 - mc.fontRendererObj.getStringWidth(string), height - totalOffset + offset, -1);
+                    offset += 10;
+                }
+            }
+
+        }
 
         if (isVirtue && clientName.equals("Virtue 6")) {
             RenderingUtil.rectangleBordered(2.0D, 2.0D, 60.0D, 34.0D, 1.0D, -1603704471, -16777216);

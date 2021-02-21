@@ -599,7 +599,7 @@ public class Killaura extends Module {
                                             float normalDiff = Math.abs(newYaw);
                                             float backwardsDiff = Math.abs(MathHelper.wrapAngleTo180_float(newYaw + 180));
 
-                                            Vec3 vecReverse = getDirection((float) MathUtils.getIncremental(lastAngles.x + MathHelper.wrapAngleTo180_float((newYaw + 180)), 30), 180 - em.getPitch());
+                                            Vec3 vecReverse = getDirection((float) MathUtils.getIncremental(lastAngles.x + MathHelper.wrapAngleTo180_float((newYaw + 180)), 20), 180 - em.getPitch());
                                             double newOffReverse = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), vecReverse,
                                                     target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height,
                                                     HypixelUtil.isInGame("DUEL") ? 1.2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1);
@@ -627,7 +627,7 @@ public class Killaura extends Module {
                                     float normalDiff = Math.abs(targetYaw);
                                     float backwardsDiff = Math.abs(MathHelper.wrapAngleTo180_float(targetYaw + 180));
 
-                                    Vec3 vecReverse = getDirection((float) MathUtils.getIncremental(lastAngles.x + MathHelper.wrapAngleTo180_float((targetYaw + 180)), 30), 180 - em.getPitch());
+                                    Vec3 vecReverse = getDirection((float) MathUtils.getIncremental(lastAngles.x + MathHelper.wrapAngleTo180_float((targetYaw + 180)), 20), 180 - em.getPitch());
                                     double newOffReverse = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), vecReverse,
                                             target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height,
                                             HypixelUtil.isInGame("DUEL") ? 1.2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1);
@@ -662,7 +662,7 @@ public class Killaura extends Module {
 
                             boolean setupCrits = critModule.isOldCrits() || target.hurtTime <= 1 || (target.waitTicks <= 1);
 
-                            boolean dontCrit = allowInvalidAngles && antiCritFunky.getValue() && hasEnchant(target, "Crit", "Funk");
+                            boolean dontCrit = antiCritFunky.getValue() && hasEnchant(target, "Crit", "Funk");
 
                             if (target instanceof EntityPlayer && antiCritFunky.getValue() && hasEnchant(target, "Retro")) {
                                 int criticalHits = ((EntityPlayer) target).criticalHits;
@@ -719,9 +719,9 @@ public class Killaura extends Module {
                                                 (attack.equals("Precise") ? target.waitTicks <= 1 :
                                                         target.waitTicks <= 1 || (target.hurtResistantTime <= 11 && target.hurtResistantTime >= 6) || target.hurtTime > 6);
 
-                                        if (canAttackRightNow && isNextTickGround() && !Client.instance.isLagging()) {
+                                        if (isNextTickGround() && !Client.instance.isLagging()) {
                                             if (setupCrits && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {
-                                                if (setupTick == 0) {
+                                                if (canAttackRightNow && setupTick == 0) {
                                                     stepDelay = 2;
                                                     blockJump = true;
                                                     em.setY(em.getY() + 0.07234F + (0.0000023F) * Math.random());
@@ -1325,8 +1325,13 @@ public class Killaura extends Module {
 
             float estimatedYawChange;
 
+            Bypass bypass = Client.getModuleManager().get(Bypass.class);
+            int bypassTicks = bypass.bruh - 10;
+            boolean allowInvalidAngles = bypass.allowBypassing() && (bypass.option.getSelected().equals("Watchdog Off") || (bypass.option.getSelected().equals("Dong") ?
+                    bypassTicks > 5 && bypassTicks <= (40 + bypass.randomDelay) : bypass.bruh > 10 && bypass.bruh % 100 > 10 && bypass.bruh % 100 < 99)) && HypixelUtil.isVerifiedHypixel();
+
             float forwardYawDiff = Math.abs(MathHelper.clamp_float(RotationUtils.getYawChangeGiven(entityLivingBase.posX, entityLivingBase.posZ, lastAngles.x), -180, 180));
-            if (forwardYawDiff > 90) {
+            if (forwardYawDiff > 90 && allowInvalidAngles) {
                 estimatedYawChange = Math.abs(MathHelper.clamp_float(RotationUtils.getYawChangeGiven(entityLivingBase.posX, entityLivingBase.posZ, lastAngles.x + 180), -180, 180));
             } else {
                 estimatedYawChange = forwardYawDiff;

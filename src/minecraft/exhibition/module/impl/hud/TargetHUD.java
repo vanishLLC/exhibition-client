@@ -275,7 +275,7 @@ public class TargetHUD extends Module {
                                         e.contains("Wrath I") || e.contains("Duelist I") || e.contains("Bruiser") || e.contains("David") || e.contains("Somber") ||
                                         e.contains("Billionaire I") || e.contains("Hemorrhage") || e.contains("Mirror") || e.contains("Evil Within") ||
                                         e.contains("Venom") || e.contains("Gamble") || e.contains("Crush") || e.contains("Solitude") || e.contains("Peroxide") ||
-                                        e.contains("Diamond Allergy") || e.contains("Hunt the Hunter");
+                                        e.contains("Diamond Allergy") || e.contains("Hunt the Hunter") || e.contains("Regularity");
 
                                 int level = 1;
 

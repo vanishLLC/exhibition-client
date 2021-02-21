@@ -194,9 +194,9 @@ public class AutoSoup extends Module {
 
                 boolean shouldMutton = mutton.getValue() && item == Items.mutton && shouldResistance && !mc.thePlayer.isPotionActive(Potion.resistance);
 
-                boolean shouldApple = heads.getValue() && needsRegenOrAbsorption && (item == Items.skull || item == Items.baked_potato || item == Items.magma_cream);
+                boolean shouldInstantHead = heads.getValue() && needsRegenOrAbsorption && (item == Items.skull || item == Items.baked_potato || item == Items.magma_cream);
 
-                if (priority < 1 && shouldApple) {
+                if (priority < 1 && shouldInstantHead) {
                     slot = i;
                     priority = 1;
                     continue;
@@ -209,36 +209,36 @@ public class AutoSoup extends Module {
 
                 if (Client.instance.is1_9orGreater() && (item == Items.golden_apple || item == Items.cooked_beef || item == Items.bread)) {
                     if (isInPit) {
-                        if (priority < 3 && needsRegenOrAbsorption && item == Items.golden_apple) {
+                        if (gapples.getValue() && priority < 3 && needsRegenOrAbsorption && item == Items.golden_apple) {
                             slot = i;
                             priority = 3;
                             continue;
                         }
-                        if (priority < 2 && item == Items.bread) {
+                        if (bread.getValue() && priority < 2 && item == Items.bread) {
                             if (!mc.thePlayer.isPotionActive(Potion.regeneration) || (mc.thePlayer.isPotionActive(Potion.regeneration) && mc.thePlayer.getActivePotionEffect(Potion.regeneration).getAmplifier() < 2)) {
                                 slot = i;
                                 priority = 2;
                                 continue;
                             }
                         }
-                        if (priority < 2 && needsRegenOrAbsorption) {
+                        if (steak.getValue() && priority < 2 && needsRegenOrAbsorption  && item == Items.cooked_beef) {
                             slot = i;
                             priority = 2;
                             continue;
                         }
                     } else {
-                        if (priority < 3 && needsRegenOrAbsorption && item == Items.golden_apple) {
+                        if (gapples.getValue() && priority < 3 && needsRegenOrAbsorption && item == Items.golden_apple) {
                             slot = i;
                             priority = 3;
                             continue;
                         }
 
-                        if (priority < 1 && mc.thePlayer.getFoodStats().needFood() && item == Items.cooked_beef) {
+                        if (steak.getValue() && priority < 1 && mc.thePlayer.getFoodStats().needFood() && item == Items.cooked_beef) {
                             slot = i;
                             priority = 1;
                             continue;
                         }
-                        if (priority < 1 && mc.thePlayer.getFoodStats().needFood() && item == Items.bread) {
+                        if (bread.getValue() && priority < 1 && mc.thePlayer.getFoodStats().needFood() && item == Items.bread) {
                             slot = i;
                             priority = 1;
                             continue;

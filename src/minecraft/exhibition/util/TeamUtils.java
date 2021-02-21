@@ -13,7 +13,7 @@ public class TeamUtils {
     public static boolean isTeam(final EntityLivingBase e, final EntityLivingBase e2) {
         // ChatUtil.printChat(e2.getDisplayName().getFormattedText().contains("§" + isTeam(e)) + " " + isTeam(e));
         boolean pitMode = HypixelUtil.isInGame("THE HYPIXEL PIT");
-        if (pitMode && (!HypixelUtil.scoreboardContains("event:") || HypixelUtil.scoreboardContains("SPIRE"))) {
+        if (pitMode && (!HypixelUtil.scoreboardContains("event:") || HypixelUtil.scoreboardContains("SPIRE") || HypixelUtil.scoreboardContains("BLOCKHEAD"))) {
             return e == e2;
         }
 

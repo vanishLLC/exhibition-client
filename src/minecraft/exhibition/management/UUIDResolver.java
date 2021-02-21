@@ -160,7 +160,7 @@ public class UUIDResolver {
                 for (Map.Entry<String, UUID> entry : usernameList.entrySet()) {
                     if (!isChecking || Minecraft.getMinecraft().thePlayer == null)
                         return;
-                    if (validMap.containsKey(entry.getKey()))
+                    if (checkedUsernames.containsKey(entry.getKey()))
                         continue;
                     tempList.put(entry.getKey(), entry.getValue());
                     recentlyResolved.add(entry.getKey());
@@ -173,6 +173,82 @@ public class UUIDResolver {
                 if (!tempList.isEmpty() && tempList.size() <= 10) {
                     resolveNames(tempList);
                 }
+
+                try {
+                    NickDetector nickDetector = Client.getModuleManager().get(NickDetector.class);
+                    if (isChecking && HypixelUtil.isInGame("PIT") && nickDetector.denick.getValue()) {
+                        for (String username : usernameList.keySet()) {
+                            if (!validMap.containsKey(username) && recentlyResolved.contains(username) && !resolvedMap.containsKey(username)) {
+                                if (!isChecking || !nickDetector.denick.getValue() || Minecraft.getMinecraft().thePlayer == null || Minecraft.getMinecraft().theWorld == null)
+                                    continue;
+                                Minecraft mc = Minecraft.getMinecraft();
+
+                                EntityPlayer player = mc.theWorld.getPlayerEntityByName(username);
+                                if (player == null)
+                                    continue;
+
+                                for (int i = 0; i < 45; i++) {
+                                    ItemStack stack = player.inventoryContainer.getSlot(i).getStack();
+                                    if (stack != null && stack.hasTagCompound()) {
+                                        if (stack.getTagCompound().hasKey("ExtraAttributes", 10)) {
+                                            NBTTagCompound nbttagcompound = stack.getTagCompound().getCompoundTag("ExtraAttributes");
+
+                                            if (nbttagcompound.hasKey("Nonce", 3)) {
+                                                try {
+
+                                                    long nonceLong = nbttagcompound.getLong("Nonce");
+
+                                                    if (nonceLong <= 100)
+                                                        continue;
+
+                                                    String nonce = String.valueOf(nonceLong);
+
+                                                    Connection pitPandaSearch = new Connection("https://pitpanda.rocks/api/itemsearch/nonce" + nonce);
+
+                                                    String response = Connector.get(pitPandaSearch);
+                                                    JsonObject jsonObject = (JsonObject) JsonParser.parseString(response);
+                                                    boolean success = jsonObject.get("success").getAsBoolean();
+                                                    if (success) {
+                                                        boolean itemsNull = jsonObject.get("items").isJsonNull();
+                                                        if (!itemsNull) {
+                                                            JsonArray test = jsonObject.get("items").getAsJsonArray();
+                                                            if (test.size() > 0) {
+                                                                JsonObject element = test.get(0).getAsJsonObject();
+                                                                if (element.has("owner")) {
+                                                                    String uuid = element.get("owner").getAsString();
+                                                                    Connection profileConnection = new Connection("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid);
+                                                                    String profileResponse = Connector.get(profileConnection);
+                                                                    JsonObject profileJsonObject = (JsonObject) JsonParser.parseString(profileResponse);
+                                                                    responseMap.put(profileResponse, System.currentTimeMillis());
+
+                                                                    if (profileJsonObject.has("name")) {
+                                                                        String resolvedName = profileJsonObject.get("name").getAsString();
+                                                                        if (resolvedName != null) {
+                                                                            resolvedMap.put(username, resolvedName);
+                                                                            Notifications.getManager().post("Nick Detector", username + " may be " + resolvedName + "!", 2500, Notifications.Type.NOTIFY);
+                                                                            break;
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                } catch (Exception e) {
+
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                List<String> nickedUsers = new ArrayList<>();
 
                 try {
                     if (isChecking && Client.instance.hypixelApiKey != null && !Client.instance.hypixelApiKey.equals("") && hypixelResponseMap.size() < 120) {
@@ -196,6 +272,7 @@ public class UUIDResolver {
                                     if (playerNull) {
                                         Notifications.getManager().post("Nick Detector", username + " is in /nick! (Valid Name)", 2500, Notifications.Type.NOTIFY);
                                         validMap.remove(username);
+                                        nickedUsers.add(username);
                                     }
                                 }
 
@@ -210,8 +287,8 @@ public class UUIDResolver {
                 try {
                     NickDetector nickDetector = Client.getModuleManager().get(NickDetector.class);
                     if (isChecking && HypixelUtil.isInGame("PIT") && nickDetector.denick.getValue()) {
-                        for (String username : usernameList.keySet()) {
-                            if (!validMap.containsKey(username) && recentlyResolved.contains(username) && !resolvedMap.containsKey(username)) {
+                        for (String username : nickedUsers) {
+                            if (!validMap.containsKey(username) && !resolvedMap.containsKey(username)) {
                                 if (!isChecking || !nickDetector.denick.getValue() || Minecraft.getMinecraft().thePlayer == null || Minecraft.getMinecraft().theWorld == null)
                                     continue;
                                 Minecraft mc = Minecraft.getMinecraft();

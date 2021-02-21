@@ -287,7 +287,7 @@ public class Client extends Castable implements EventListener {
 
         }
 
-        return ViaFabric.config.getClientSideVersion() >= 107 && Minecraft.getMinecraft().getIntegratedServer() == null;
+        return false;
     }
 
     public void killSwitch() {

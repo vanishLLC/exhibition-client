@@ -4,6 +4,7 @@ import exhibition.Client;
 import exhibition.management.command.Command;
 import exhibition.module.Module;
 import exhibition.module.ModuleManager;
+import exhibition.module.data.ModuleData;
 import exhibition.util.misc.ChatUtil;
 
 public class Hide extends Command {
@@ -20,6 +21,14 @@ public class Hide extends Command {
         }
         Module module = null;
         if (args.length > 0) {
+            if(args[0].equalsIgnoreCase("clear")) {
+                for (Module mod : Client.getModuleManager().getArray()) {
+                    if(mod.getType() != ModuleData.Type.Visuals) {
+                        mod.setHidden(false);
+                    }
+                }
+            }
+
             module = Client.getModuleManager().get(args[0]);
         }
         if (module == null) {
