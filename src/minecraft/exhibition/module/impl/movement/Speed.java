@@ -20,6 +20,7 @@ import exhibition.module.impl.combat.Killaura;
 import exhibition.module.impl.player.Scaffold;
 import exhibition.util.MathUtils;
 import exhibition.util.PlayerUtil;
+import exhibition.util.misc.ChatUtil;
 import exhibition.util.render.Colors;
 import exhibition.util.render.Depth;
 import net.minecraft.block.Block;
@@ -273,19 +274,7 @@ public class Speed extends Module {
                             stage = (mc.thePlayer.moveForward != 0.0F || mc.thePlayer.moveStrafing != 0.0F) ? 1 : 0;
                         }
 
-                        List<Double> list = new ArrayList<>();
-
-                        double a = lastDist - lastDist / 160D;
-                        double b = lastDist - (lastDist - moveSpeed) / 33.3D;
-                        double c = lastDist - (lastDist - moveSpeed) * 0.020000000000000018D;
-
-                        list.add(a);
-                        list.add(b);
-                        list.add(c);
-
-                        list.sort(Double::compare);
-
-                        this.speed = list.get(2) - 0.0000125F;
+                        speed = lastDist - lastDist / 160D;
                     }
 
                     speed = Math.max(speed, moveSpeed);

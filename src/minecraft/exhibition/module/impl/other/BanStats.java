@@ -112,10 +112,10 @@ public class BanStats extends Module {
                         String response = Connector.get(hypixelApiConnection);
                         JsonObject jsonObject = (JsonObject) JsonParser.parseString(response);
 
-                        boolean success = jsonObject.get("success").getAsBoolean();
-                        long staff_total = jsonObject.get("staff_total").getAsLong();
+                        boolean success = jsonObject.has("success") && jsonObject.get("success").getAsBoolean();
 
                         if (success) {
+                            long staff_total = jsonObject.get("staff_total").getAsLong();
                             if(staffTotalBans != 0 && banStats.bansSinceConnect == 0 && banStats.banTimer.getDifference() >= 40_000) {
                                 staffTotalBans = 0;
                                 banStats.banTimer.reset();
