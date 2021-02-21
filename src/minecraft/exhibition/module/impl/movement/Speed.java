@@ -10,7 +10,6 @@ import exhibition.event.Event;
 import exhibition.event.RegisterEvent;
 import exhibition.event.impl.*;
 import exhibition.management.notifications.usernotification.Notifications;
-import exhibition.module.UselessBypassClass;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.Options;

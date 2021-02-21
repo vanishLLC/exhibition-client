@@ -1,5 +1,8 @@
 package exhibition.module.impl.other;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.mojang.authlib.GameProfile;
 import exhibition.event.Event;
 import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventPacket;
@@ -10,13 +13,21 @@ import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
 import exhibition.util.Timer;
+import exhibition.util.security.Connection;
+import exhibition.util.security.Connector;
+import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.network.NetworkPlayerInfo;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTUtil;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S38PacketPlayerListItem;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
+import net.minecraft.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -57,7 +68,8 @@ public class NickDetector extends Module {
                         if (UUIDResolver.instance.isInvalidUUID(addPlayerData.getProfile().getId())) {
                             try {
                                 Notifications.getManager().post("Nick Detector", mc.getNetHandler().getPlayerInfo(addPlayerData.getProfile().getId()).getGameProfile().getName() + " has left your game.", Notifications.Type.INFO);
-                            } catch (Exception ignored) {}
+                            } catch (Exception ignored) {
+                            }
                         }
                     }
                 }
@@ -69,6 +81,55 @@ public class NickDetector extends Module {
             return;
 
         if (!timer.delay(10_000)) {
+            if (mc.currentScreen instanceof GuiChest) {
+                GuiChest guiChest = ((GuiChest) mc.currentScreen);
+                String name = guiChest.lowerChestInventory.getDisplayName().getUnformattedText();
+                if (guiChest.lowerChestInventory.hasCustomName() && name.contains("Profile Viewer")) {
+                    ItemStack stack = guiChest.lowerChestInventory.getStackInSlot(11);
+                    if (stack != null) {
+                        if (stack.getItem() == Items.skull) {
+                            if (stack.getMetadata() == 3) {
+                                String headName = stack.getDisplayName();
+
+                                if (headName.contains(" ") && headName.endsWith("\247f")) {
+                                    headName = headName.split(" ")[1];
+                                }
+
+                                if (UUIDResolver.instance.isInvalidName(headName) && !UUIDResolver.instance.resolvedMap.containsKey(StringUtils.stripControlCodes(headName))) {
+                                    GameProfile gameprofile = null;
+
+                                    if (stack.hasTagCompound()) {
+                                        NBTTagCompound nbttagcompound = stack.getTagCompound();
+
+                                        if (nbttagcompound.hasKey("SkullOwner", 10)) {
+                                            gameprofile = NBTUtil.readGameProfileFromNBT(nbttagcompound.getCompoundTag("SkullOwner"));
+                                        } else if (nbttagcompound.hasKey("SkullOwner", 8) && nbttagcompound.getString("SkullOwner").length() > 0) {
+                                            gameprofile = new GameProfile((UUID) null, nbttagcompound.getString("SkullOwner"));
+                                        }
+                                    }
+
+                                    if (gameprofile != null && gameprofile.getId() != null) {
+                                        String uuid = String.valueOf(gameprofile.getId());
+
+                                        Connection profileConnection = new Connection("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid);
+                                        String profileResponse = Connector.get(profileConnection);
+                                        JsonObject profileJsonObject = (JsonObject) JsonParser.parseString(profileResponse);
+
+                                        if (profileJsonObject.has("name")) {
+                                            String resolvedName = profileJsonObject.get("name").getAsString();
+                                            if (resolvedName != null) {
+                                                UUIDResolver.instance.resolvedMap.put(headName, resolvedName);
+                                                Notifications.getManager().post("Nick Detector", headName + " may be " + resolvedName + "!", 2500, Notifications.Type.NOTIFY);
+                                            }
+                                        }
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
             return;
         }
 
@@ -85,14 +146,14 @@ public class NickDetector extends Module {
                     if (displayName.equals("\247r" + name) || displayName.equals(name) || displayName.equals("\247r" + name + "\247r") || displayName.equals(name + "\247r")) {
                         continue;
                     }
-                    if (UUIDResolver.instance.checkedUsernames.containsKey(name) && (!denick.getValue() || (!UUIDResolver.instance.isInvalidName(name)) && !UUIDResolver.instance.resolvedMap.containsKey(name))) {
+                    if (UUIDResolver.instance.checkedUsernames.containsKey(name) && (!denick.getValue() || (!UUIDResolver.instance.isInvalidName(name)) && (!UUIDResolver.instance.resolvedMap.containsKey(name)))) {
                         continue;
                     }
                     usernameList.put(name, playerInfo.getGameProfile().getId());
                 }
             }
         } catch (Exception e) {
-            
+
         }
 
         if (!usernameList.isEmpty()) {

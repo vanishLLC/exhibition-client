@@ -241,7 +241,7 @@ public class Bypass extends Module {
                                             Packet chokedPacket = chokePackets.poll();
                                             if (chokedPacket != null) {
                                                 sent++;
-                                                this.packetList.add(new BruhPacket(chokedPacket, DELAY.getValue().longValue()));
+                                                NetUtil.sendPacketNoEvents(chokedPacket);
                                             }
                                         }
 
@@ -410,7 +410,7 @@ public class Bypass extends Module {
                                             chokePackets.add(confirmTransaction);
                                         } else {
                                             c13Timer.reset();
-                                            this.packetList.add(new BruhPacket(confirmTransaction, DELAY.getValue().longValue()));
+                                            NetUtil.sendPacketNoEvents(confirmTransaction);
                                         }
 
                                         // We've reset the counter to -1, break the loop.
@@ -502,7 +502,7 @@ public class Bypass extends Module {
             Packet packet = chokePackets.poll();
             if (packet != null) {
                 sent++;
-                this.packetList.add(new BruhPacket(packet, DELAY.getValue().longValue()));
+                NetUtil.sendPacketNoEvents(packet);
             }
         }
 

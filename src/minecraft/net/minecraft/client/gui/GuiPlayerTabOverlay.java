@@ -1,3 +1,4 @@
+
 package net.minecraft.client.gui;
 
 import com.google.common.collect.ComparisonChain;
