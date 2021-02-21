@@ -144,10 +144,12 @@ public class BanStats extends Module {
                             }
 
                             staffTotalBans = staff_total;
+                            Thread.sleep(10_000);
+                        } else {
+                            Thread.sleep(2_500);
                         }
-                        Thread.sleep(10_000);
                     } catch (Exception e) {
-                        Thread.sleep(5_000);
+                        Thread.sleep(1_000);
                         e.printStackTrace();
                     }
                 } catch (Exception e) {
