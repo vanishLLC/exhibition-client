@@ -550,7 +550,7 @@ public class Killaura extends Module {
                             int bypassTicks = bypass.bruh - 10;
 
                             boolean allowInvalidAngles = bypass.allowBypassing() && (bypass.option.getSelected().equals("Watchdog Off") || (bypass.option.getSelected().equals("Dong") ?
-                                    bypassTicks > 5 && bypassTicks <= (40 + bypass.randomDelay) : bypass.bruh > 10 && bypass.bruh % 100 > 10 && bypass.bruh % 100 < 99)) && HypixelUtil.isVerifiedHypixel();
+                                    bypassTicks > 20 && bypassTicks <= (30 + bypass.randomDelay) : bypass.bruh > 10 && bypass.bruh % 100 > 10 && bypass.bruh % 100 < 99)) && HypixelUtil.isVerifiedHypixel();
 
                             if (shouldReduce) {
                                 float pitch = (float) -(Math.atan2(yDiff - (distance > 2.1 ? 1.25 : 1.5), dist) * 180.0D / 3.141592653589793D);
@@ -666,19 +666,9 @@ public class Killaura extends Module {
 
                             if (target instanceof EntityPlayer && antiCritFunky.getValue() && hasEnchant(target, "Retro")) {
                                 int criticalHits = ((EntityPlayer) target).criticalHits;
-                                if (criticalHits == 0 || criticalHits >= 3 || target.waitTicks > 0) {
-                                    if (criticalHits == 0) {
-                                        ((EntityPlayer) target).criticalHits++;
-                                    }
+                                if (criticalHits >= 3 || target.waitTicks > 2) {
                                     crits = false;
                                     dontCrit = true;
-
-                                    if (em.getY() != mc.thePlayer.posY) {
-                                        em.setY(mc.thePlayer.posY);
-                                    }
-                                    if (em.isOnground() != mc.thePlayer.onGround) {
-                                        em.setGround(mc.thePlayer.onGround);
-                                    }
                                 }
                             }
 
@@ -728,30 +718,21 @@ public class Killaura extends Module {
 
                                         if (isNextTickGround() && !Client.instance.isLagging()) {
                                             if (setupCrits && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {
-                                                boolean pit = !HypixelUtil.isInGame("HYPIXEL PIT");
-                                                if (setupTick == 0) {
+                                                if (canAttackRightNow && setupTick == 0) {
                                                     stepDelay = 2;
                                                     blockJump = true;
-                                                    em.setY(em.getY() + 0.125);
-                                                    em.setGround(false);
-                                                    em.setForcePos(true);
-                                                    isCritSetup = true;
-                                                    setupTick = 300;
-                                                } else if (canAttackRightNow && setupTick == 1) {
-                                                    stepDelay = 2;
-                                                    blockJump = true;
-                                                    em.setY(em.getY() + (pit ? 0.0751 + 0.00053424 : 0.07577F) + MathUtils.roundToPlace((0.0000023F) * Math.random(), 7));
+                                                    em.setY(em.getY() + 0.07234F + (0.0000023F) * Math.random());
                                                     em.setGround(false);
                                                     em.setForcePos(true);
                                                     isCritSetup = false;
-                                                    setupTick = 2;
-                                                } else if (setupTick == 2) {
+                                                    setupTick = 1;
+                                                } else if (setupTick == 1) {
                                                     isCritSetup = true;
-                                                    if (pit)
-                                                        em.setY(em.getY() + 0.00053424 +  MathUtils.roundToPlace((0.00000024F) * Math.random(), 8));
+                                                    if (HypixelUtil.isInGame("HYPIXEL PIT"))
+                                                        em.setY(em.getY() + 0.0076092939542 - (0.0000000002475776F) * Math.random());
                                                     em.setGround(false);
                                                     em.setForcePos(true);
-                                                    setupTick = 1;
+                                                    setupTick = 0;
                                                 } else {
                                                     setupTick = 0;
                                                 }
@@ -876,7 +857,7 @@ public class Killaura extends Module {
 
                     if (((Number) settings.get(ANGLESTEP).getValue()).intValue() == 0 || (off <= 0.11 || (off <= 1 && off >= 0.22 && MathUtils.getIncremental(angleTimer.getDifference(), 50) <= 100))) {
 
-                        if (crits && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically && (((critModule.isPacket() && setupCrits) || setupTick == 300)  && isCritSetup) && !em.isOnground()) {
+                        if (crits && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically && (((critModule.isPacket() && setupCrits))  && isCritSetup) && !em.isOnground()) {
                             if (HypixelUtil.isVerifiedHypixel()) {
                                 NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.046599998474120774, mc.thePlayer.posZ, false));
                             } else {
@@ -919,11 +900,15 @@ public class Killaura extends Module {
                             if (target != null && target.waitTicks <= 0) {
                                 if (target instanceof EntityPlayer) {
                                     EntityPlayer player = (EntityPlayer) target;
-                                    if (!em.isOnground()) {
+                                    if ((!em.isOnground() && isCritSetup) || mc.thePlayer.fallDistance > 0) {
                                         player.criticalHits++;
                                     } else {
-                                        if (player.criticalHits != 1)
-                                            player.criticalHits = 0;
+                                        if (player.criticalHits >= 3) {
+                                            if(antiCritFunky.getValue() && hasEnchant(target, "Retro")) {
+                                                ChatUtil.printChat("Reset");
+                                                player.criticalHits = 0;
+                                            }
+                                        }
                                     }
                                 }
 
@@ -935,10 +920,7 @@ public class Killaura extends Module {
                             nextRandom = (int) Math.round((20 / randomInt(min, max)));
 
 
-                            if (crits && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically && (critModule.isPacket2() || setupTick == 300) && isCritSetup) {
-                                if(setupTick == 300) {
-                                    setupTick = 1;
-                                }
+                            if (crits && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically && (critModule.isPacket2()) && isCritSetup) {
                                 NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, true));
                             }
                         } else {
@@ -1352,7 +1334,7 @@ public class Killaura extends Module {
             Bypass bypass = Client.getModuleManager().get(Bypass.class);
             int bypassTicks = bypass.bruh - 10;
             boolean allowInvalidAngles = bypass.allowBypassing() && (bypass.option.getSelected().equals("Watchdog Off") || (bypass.option.getSelected().equals("Dong") ?
-                    bypassTicks > 10 && bypassTicks <= (35 + bypass.randomDelay) : bypass.bruh > 10 && bypass.bruh % 100 > 10 && bypass.bruh % 100 < 99)) && HypixelUtil.isVerifiedHypixel();
+                    bypassTicks > 20 && bypassTicks <= (30 + bypass.randomDelay) : bypass.bruh > 10 && bypass.bruh % 100 > 10 && bypass.bruh % 100 < 99)) && HypixelUtil.isVerifiedHypixel();
 
             float forwardYawDiff = Math.abs(yawDiff);
             if (forwardYawDiff > 90 && allowInvalidAngles) {

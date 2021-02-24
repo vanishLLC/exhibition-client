@@ -146,15 +146,11 @@ public class Teleport extends Command implements EventListener {
             if (stage == 0) {
                 Notifications.getManager().post("Teleporting", "Please wait {s} s", 5100);
 
-                boolean didBruh = false;
                 if (mc.thePlayer.posY % 0.015625 == 0) {
-                    didBruh = true;
-                    NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.00053424, mc.thePlayer.posZ, false));
+                    NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.00053424, mc.thePlayer.posZ, true));
                 }
-                NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.41999998688697815, mc.thePlayer.posZ, didBruh));
 
-                double[] list = {0.7531999805212024, 1.0013359791121417};
-
+                double[] list = {0.41999998688697815, 0.7531999805212024, 1.0013359791121417};
                 for (double v : list) {
                     NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + v, mc.thePlayer.posZ, false));
                 }

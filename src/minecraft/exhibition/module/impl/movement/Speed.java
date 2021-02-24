@@ -20,13 +20,16 @@ import exhibition.module.impl.combat.Killaura;
 import exhibition.module.impl.player.Scaffold;
 import exhibition.util.MathUtils;
 import exhibition.util.PlayerUtil;
+import exhibition.util.misc.ChatUtil;
 import exhibition.util.render.Colors;
 import exhibition.util.render.Depth;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockAir;
+import net.minecraft.block.BlockLilyPad;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.init.Blocks;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.network.play.server.S12PacketEntityVelocity;
@@ -429,7 +432,7 @@ public class Speed extends Module {
 
                         if (mc.thePlayer.isPotionActive(Potion.moveSpeed)) {
                             if (mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getAmplifier() == 0) {
-                                bruh = 0.745;
+                                bruh = 0.71193D;
                             } else {
                                 bruh = 0.678D;
                             }
@@ -469,7 +472,7 @@ public class Speed extends Module {
                     if (velocityBoost != 0 && velocityBoost <= 0.05) {
                         velocityBoost = 0;
                     }
-                    if(velocityBoost != 0 && stage > 2) {
+                    if (velocityBoost != 0 && stage > 2) {
                         speed += velocityBoost;
                     }
                     if (stage > 2)
@@ -545,12 +548,14 @@ public class Speed extends Module {
                         if (PlayerUtil.isMoving() && stage > 0) {
                             BlockPos blockPos = new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ);
 
-                            if (em.getY() % 0.015625 == 0) {
-                                em.setY(em.getY() + (0.015625 * Math.random()));
+                            Block standingBlock = mc.theWorld.getBlock(MathHelper.floor_double(mc.thePlayer.posX), MathHelper.floor_double(mc.thePlayer.posY - 0.01), MathHelper.floor_double(mc.thePlayer.posZ));
+
+                            if (em.isOnground()) {
+                                em.setY(em.getY() + MathUtils.roundToPlace(0.00053424 + ((0.015625 - 0.00053424) * Math.random()), 7));
                             }
 
                             if (mc.thePlayer.motionY > 0.3) {
-                                em.setGround(true);
+                                //em.setGround(true);
                             }
                         }
                     }
