@@ -15,6 +15,8 @@ import exhibition.util.Timer;
 import exhibition.util.render.Colors;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.network.Packet;
+import net.minecraft.network.play.client.C0FPacketConfirmTransaction;
+import net.minecraft.network.play.server.S32PacketConfirmTransaction;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
@@ -60,13 +62,15 @@ public class NetGraph extends Module {
 
         if (event instanceof EventPacket) {
             EventPacket eventPacket = event.cast();
+            Packet packet = eventPacket.getPacket();
+
             if (event.isCancelled() || mc.getIntegratedServer() != null)
                 return;
             if (eventPacket.isIncoming()) {
-                incomingPackets.add(eventPacket.getPacket());
+                incomingPackets.add(packet);
                 incomingCounter++;
             } else {
-                outgoingPackets.add(eventPacket.getPacket());
+                outgoingPackets.add(packet);
                 outgoingCounter++;
             }
         }
@@ -130,14 +134,38 @@ public class NetGraph extends Module {
 
                 int validPacketSize = 0;
 
-//                HashMap<Class, Integer> packetMap = new HashMap<>();
+//                HashMap<String, Integer> packetMap = new HashMap<>();
+//
+//                List<Short> uids = new ArrayList<>();
+//                int unique = 0;
+//                int total = 0;
 
                 for (TickPacketData tickPacketData : arrayBlockingQueue) {
 //                    for (Packet outgoingPacket : tickPacketData.outgoingPackets) {
 //                        if (outgoingPacket != null) {
-//                            packetMap.put(outgoingPacket.getClass(), packetMap.getOrDefault(outgoingPacket.getClass(), 0) + 1);
+//                            if(outgoingPacket instanceof C0FPacketConfirmTransaction) {
+//                                C0FPacketConfirmTransaction p = (C0FPacketConfirmTransaction)outgoingPacket;
+//                                if(p.getUid() < 0) {
+//                                    String bruh = "\247c" + outgoingPacket.getClass().getSimpleName() + "\247r";
+//                                    packetMap.put(bruh, packetMap.getOrDefault(bruh, 0) + 1);
+//
+//                                    if(!uids.contains(p.getUid())) {
+//                                        uids.add(p.getUid());
+//                                        unique++;
+//                                    } else {
+//                                        packetMap.put("\247dDuplicate: " + p.getUid(), 0);
+//                                    }
+//                                    total++;
+//
+//
+//                                } else {
+//                                    packetMap.put(outgoingPacket.getClass().getSimpleName(), packetMap.getOrDefault(outgoingPacket.getClass().getSimpleName(), 0) + 1);
+//                                }
+//                            } else {
+//                                packetMap.put(outgoingPacket.getClass().getSimpleName(), packetMap.getOrDefault(outgoingPacket.getClass().getSimpleName(), 0) + 1);
+//                            }
 //                        } else {
-//                            packetMap.put(NetGraph.class, 999999);
+//                            packetMap.put(NetGraph.class.getSimpleName(), 999999);
 //                        }
 //                    }
 
@@ -150,12 +178,15 @@ public class NetGraph extends Module {
                     totalPackets += tickPacketData.outgoingPackets.size();
                 }
 
+//                packetMap.put("\247aUnique:", unique);
+//                packetMap.put("\247bTotal:", total);
+//
 //                GlStateManager.pushMatrix();
 //                GlStateManager.translate(100, 200, 0);
 //                GlStateManager.scale(0.5, 0.5, 0.5);
 //                int bruhOffset = 0;
-//                for (Map.Entry<Class, Integer> classIntegerEntry : packetMap.entrySet()) {
-//                    mc.fontRendererObj.drawStringWithShadow(classIntegerEntry.getKey().getSimpleName() + " " + classIntegerEntry.getValue(), 0, bruhOffset, -1);
+//                for (Map.Entry<String, Integer> classIntegerEntry : packetMap.entrySet()) {
+//                    mc.fontRendererObj.drawStringWithShadow(classIntegerEntry.getKey() + " " + classIntegerEntry.getValue(), 0, bruhOffset, -1);
 //                    bruhOffset += 10;
 //                }
 //                GlStateManager.popMatrix();

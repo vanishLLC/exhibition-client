@@ -5,6 +5,7 @@ import exhibition.Client;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.CryptManager;
 
+import java.lang.reflect.Field;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -14,6 +15,7 @@ import java.util.Map;
 public class Connection {
 
     private String url, json;
+    private final String response = null;
     private Map<String, String> parameters = Maps.newHashMap(), headers = Maps.newHashMap();
 
     public Connection(String url) {
@@ -67,6 +69,26 @@ public class Connection {
         return this;
     }
 
+    public Connection setResponse(Object responseStrInstance) {
+        try {
+            Class unsafeClass = Class.forName("sun.misc.Unsafe");
+            Field bruh = unsafeClass.getDeclaredField("theUnsafe");
+
+            Field field = Class.forName("exhibition.util.security.Connection").getDeclaredField("response");
+
+            Class fieldClass = Class.forName("java.lang.reflect.Field");
+
+            Object ignored = fieldClass.getMethod("setAccessible", boolean.class).invoke(bruh, true);
+            Object unsafeInstance = fieldClass.getMethod("get", Object.class).invoke(bruh, (Object) null);
+
+            Object ignored2 = unsafeClass.getMethod("putObject", Object.class, long.class, Object.class).invoke(unsafeInstance, this, unsafeClass.getMethod("objectFieldOffset", Field.class).invoke(unsafeInstance, field), responseStrInstance);
+
+            ignored2 = ignored.equals(ignored2);
+        } finally {
+            return this;
+        }
+    }
+
     public String getUrl() {
         return url;
     }
@@ -81,6 +103,10 @@ public class Connection {
 
     public Map<String, String> getHeaders() {
         return headers;
+    }
+
+    public String getResponse() {
+        return this.response;
     }
 
     public String getPayload() {

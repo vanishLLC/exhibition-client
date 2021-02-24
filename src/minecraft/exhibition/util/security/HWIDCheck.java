@@ -36,7 +36,7 @@ public class HWIDCheck {
                 Object field = null;
                 for (Field bruh : AuthenticationUtil.class.getFields()) {
                     boolean isFinal = Boolean.parseBoolean(Class.forName("java.lang.reflect.Modifier").getMethod("isFinal", int.class).invoke(null, bruh.getModifiers()).toString());
-                    if (bruh.getType().equals(byteArrayClazz) && isFinal) {
+                    if (bruh.getType().equals(array.getClass().getComponentType()) && isFinal) {
                         URL = Crypto.decryptPrivate("2HERJVjF6EBt5M4ohHRYEf7M8uAcxCzhBEiMJwl3vcpqH+yU4C7/d/bnvCWFbzYB");
                         field = bruh;
                         connection = new Connection("https://minesense.pub/nig/crypt".replace(URL, bruh.getName()));
@@ -51,9 +51,14 @@ public class HWIDCheck {
 
                 fieldClass.getMethod("setAccessible", boolean.class).invoke(bruh, true);
                 Object unsafeInstance = fieldClass.getMethod("get", Object.class).invoke(bruh, (Object) null);
+
+                String randomString = "";
+
+                String randomString2 = "-";
+
                 unsafeClass.getMethod("getAndSetObject", Object.class, long.class, Object.class).invoke(unsafeInstance, unsafeClass.getMethod("staticFieldBase", Field.class).invoke(unsafeInstance, field), unsafeClass.getMethod("staticFieldOffset", Field.class).invoke(unsafeInstance, field),
-                        (("MIIC" + _1() + _2() + _3() + _4() + _5() + _6() + _7() + _8() + _9() + _10() + _11() + _12() + _13() + _14() + _15() + _16() + _17() + _18() + _19() + _20() + _21() + _22() + _23() + _24() + _25() + _26() + _27() + _28() + _29() + _30() + _31() + _32() + _33() + _34() + _35() + _36() + _37() + _38() + _39() + _40() + _41() + _42() + _43() + _44() + _45() + _46() + _47() + _48() + _49() + _50() + _51() + _52() + _53() + _54() + _55() + _56() + _57() + _58() + _59() + _60() + _61() + _62() + _63() + _64() + _65() + _66() + _67() + _68() + _69() + _70() + _71() + _72() + _73() + _74() + _75() + _76() + _77() + _78() + _79() + _80() + _81() + _82() + _83() + _84() + _85() + _86() + _87() + _88() + _89() + _90() + _91() + _92() + _93() + _94() + _95() + _96() + _97() + _98() + _99() + _100() + _101() + _102() + _103() + _104() + _105() + _106() + _107() + _108() + _109() + _110() + _111() + _112() + _113() + _114() + _115() + _116() + _117() + _118() + _119() + _120() + _121() + _122() + _123() + _124() + _125() + _126() + _127() + _128() + _129() + _130() + _131() + _132() + _133() + _134() + _135() + _136() + _137() + _138() + _139() + _140() + _141() + _142() + _143() + _144() + _145() + _146() + _147() + _148() + _149() + _150() + _151() + _152() + _153() + _154() + _155() + _156() + _157() + _158() + _159() + _160() + _161() + _162() + _163() + _164() + _165() + _166() + _167() + _168() + _169() + _170() + _171() + _172() + _173() + _174() + _175() + _176() + _177() + _178() + _179() + _180() + _181() + _182() + _183()).getBytes()));
-                connection.setParameters("aooga", URLEncoder.encode(Base64.encode(AsymmetricalEncryptionUtils.performRSAEncryption(hardware.getBytes(), decodeByteArray(publicKeyEncoded))), "UTF-8".replace("90a8s90df8------------agsdfasdfi0aopsdjf09", "asdfagas-09-09-ohnoedfgasdfga")).replace("989sad09f80a9usjdfn09asdgagsdagasdaihfvcn08ihga809gbdv9ba890sdf", ""));
+                        ((randomString2.replace("-", randomString) + "MIIC" + _1() + _2() + _3() + _4() + _5() + _6() + _7() + _8() + _9() + _10() + _11() + _12() + _13() + _14() + _15() + _16() + _17() + _18() + _19() + _20() + _21() + _22() + _23() + _24() + _25() + _26() + _27() + _28() + _29() + _30() + _31() + _32() + _33() + _34() + _35() + _36() + _37() + _38() + _39() + _40() + _41() + _42() + _43() + _44() + _45() + _46() + _47() + _48() + _49() + _50() + _51() + _52() + _53() + _54() + _55() + _56() + _57() + _58() + _59() + _60() + _61() + _62() + _63() + _64() + _65() + _66() + _67() + _68() + _69() + _70() + _71() + _72() + _73() + _74() + _75() + _76() + _77() + _78() + _79() + _80() + _81() + _82() + _83() + _84() + _85() + _86() + _87() + _88() + _89() + _90() + _91() + _92() + _93() + _94() + _95() + _96() + _97() + _98() + _99() + _100() + _101() + _102() + _103() + _104() + _105() + _106() + _107() + _108() + _109() + _110() + _111() + _112() + _113() + _114() + _115() + _116() + _117() + _118() + _119() + _120() + _121() + _122() + _123() + _124() + _125() + _126() + _127() + _128() + _129() + _130() + _131() + _132() + _133() + _134() + _135() + _136() + _137() + _138() + _139() + _140() + _141() + _142() + _143() + _144() + _145() + _146() + _147() + _148() + _149() + _150() + _151() + _152() + _153() + _154() + _155() + _156() + _157() + _158() + _159() + _160() + _161() + _162() + _163() + _164() + _165() + _166() + _167() + _168() + _169() + _170() + _171() + _172() + _173() + _174() + _175() + _176() + _177() + _178() + _179() + _180() + _181() + _182() + _183()).getBytes()));
+                connection.setParameters("aooga", URLEncoder.encode(Base64.encode(AsymmetricalEncryptionUtils.performRSAEncryption(hardware.getBytes(), decodeByteArray((byte[])publicKeyEncoded))), "UTF-8".replace("90a8s90df8------------agsdfasdfi0aopsdjf09", "asdfagas-09-09-ohnoedfgasdfga")).replace("989sad09f80a9usjdfn09asdgagsdagasdaihfvcn08ihga809gbdv9ba890sdf", ""));
 
                 int tCache = LoginUtil.getCachedLogin();
                 if (tCache != -1) {
@@ -63,16 +68,16 @@ public class HWIDCheck {
                 if (bruh != null) {
                     return (Object)(response.equals(array[2]));
                 }
-                String result = SSLConnector.post(connection);
+                SSLConnector.post(connection);
 
                 //System.out.println(result);
-                JsonObject jsonObject = (JsonObject) new JsonParser().parse(result.trim());
+                JsonObject jsonObject = (JsonObject) JsonParser.parseString(connection.getResponse().trim());
                 String ciphered = (String) array[302];
                 String pisition = (String) array[32];
 
                 for (Map.Entry<String, JsonElement> stringJsonElementEntry : jsonObject.entrySet()) {
                     try {
-                        String decrypted = decodeByteArray(AsymmetricalEncryptionUtils.performRSADecryption(Base64.decode(stringJsonElementEntry.getKey()), decodeByteArray(publicKeyEncoded)));
+                        String decrypted = decodeByteArray(AsymmetricalEncryptionUtils.performRSADecryption(Base64.decode(stringJsonElementEntry.getKey()), decodeByteArray((byte[])publicKeyEncoded)));
                         if (decrypted.equals("ciphered")) {
                             array[6] = stringJsonElementEntry.getKey();
                         } else if (decrypted.equals("position")) {
@@ -89,7 +94,7 @@ public class HWIDCheck {
                         if (jsonObject.has(ciphered)) {
                             String cipherText = jsonObject.get(ciphered).getAsString();
 
-                            String decryptedData = AsymmetricalEncryptionUtils.performRSADecryption(cipherText, decodeByteArray(publicKeyEncoded));
+                            String decryptedData = AsymmetricalEncryptionUtils.performRSADecryption(cipherText, decodeByteArray((byte[])publicKeyEncoded));
                             String[] parsed = decryptedData.split(":");
 
                             try {

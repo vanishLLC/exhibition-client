@@ -423,7 +423,7 @@ public abstract class GuiContainer extends GuiScreen {
                             }
 
                             if (isCtrlKeyDown())
-                                if (HypixelUtil.isInGame("PIT") && !(this instanceof GuiInventory)) {
+                                if (HypixelUtil.isInGame("PIT")) {
                                     if (slot != null && slot.getHasStack()) {
                                         ItemStack stack = slot.getStack();
 

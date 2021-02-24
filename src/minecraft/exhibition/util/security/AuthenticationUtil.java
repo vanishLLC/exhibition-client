@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
+import exhibition.Client;
 import exhibition.gui.screen.impl.mainmenu.GuiLoginMenu;
 import exhibition.management.notifications.usernotification.Notifications;
 import net.minecraft.client.Minecraft;
@@ -47,47 +48,15 @@ public class AuthenticationUtil {
         return Snitch.snitch(code, "");
     }
 
-    public static final byte[] publicKeyEncoded;
+    public static final Object publicKeyEncoded;
+    // Expected Str Length: 736
+    // Expected Str Hash: -2112696710
 
     public static Object isAuth(final GuiLoginMenu.AuthenticationThread authenticationThread, final GuiLoginMenu loginInstance, final String encryptedUsername, final String encryptedPassword, final String hashedUsername, final String hashedPassword) {
         Object authUser = null;
         try {
-            String a = Crypto.decryptPrivate("2HERJVjF6EBt5M4ohHRYEf7M8uAcxCzhBEiMJwl3vcpqH+yU4C7/d/bnvCWFbzYB");
-            Connection b = new Connection("https://minesense.pub/nig/", Minecraft.getMinecraft().session.getUsername());
-            String[] split222 = SSLConnector.getFake(b).split("\n");
             loginInstance.setProgress(0.1);
             String hardware = SystemUtil.getHardwareIdentifiers();
-            String onlineCheck = "";
-            boolean connected;
-            Socket sock = new Socket();
-            connected = false;
-            if (connected) {
-                try {
-                    boolean redirect = false;
-                    BufferedReader in = new BufferedReader(new InputStreamReader(null));
-                    loginInstance.setProgress(0.2);
-                    String line;
-                    while ((line = in.readLine()) != null) {
-                        loginInstance.setProgress(0.3);
-                        line = Crypto.decryptPrivate(line);
-                        loginInstance.setProgress(0.4);
-                        String[] split = line.split(":");
-                        loginInstance.setProgress(0.5);
-                        if (Crypto.decryptPublicNew(encryptedUsername).equals(split[0])) {
-                            loginInstance.setProgress(0.6);
-                            if (BCrypt.checkpw(Crypto.decryptPublicNew(encryptedPassword), split[1]).detected) {
-                                loginInstance.setProgress(0.7);
-                                if (BCrypt.checkpw(hardware, split[2]).detected) {
-                                    authUser = hardware;
-                                    return authUser;
-                                }
-                            }
-                        }
-                    }
-                    in.close();
-                } catch (final Exception ignored) {
-                }
-            }
             try {
                 String name = "";
                 if (Boolean.parseBoolean(decodeByteArray(new byte[]{116, 114, 117, 101})) && !((Stupid) TEMPPROTECT0()).detected) {
@@ -98,35 +67,41 @@ public class AuthenticationUtil {
                     loginInstance.setProgress(0.2);
                     // Hardware
 
+                    authListPos += connection.getUrl().hashCode();
+
                     byte[] hardwareBytes = new byte[Math.min(hardware.getBytes().length, 501)];
                     for (int i = 0; i < 501 && i < hardware.getBytes().length; i++) {
                         hardwareBytes[i] = hardware.getBytes()[i];
                     }
+
                     String uid = "";
 
-                    String rebuilt = decodeByteArray(hardwareBytes);
-                    connection.setParameters("aooga", URLEncoder.encode(Base64.encode(AsymmetricalEncryptionUtils.performRSAEncryption(rebuilt.getBytes(), decodeByteArray(publicKeyEncoded))), "UTF-8"));
+                    if(AuthenticationUtil.authListPos + -139796159 == decodeByteArray((byte[])publicKeyEncoded).hashCode()) {
+                        String rebuilt = decodeByteArray(hardwareBytes);
+                        connection.setParameters("aooga", URLEncoder.encode(Base64.encode(AsymmetricalEncryptionUtils.performRSAEncryption(rebuilt.getBytes(), decodeByteArray((byte[]) publicKeyEncoded))), "UTF-8"));
+
+                        // Username
+                        connection.setParameters("ooga", URLEncoder.encode(Base64.encode(AsymmetricalEncryptionUtils.performRSAEncryption(Crypto.decryptPublicNew(encryptedUsername).getBytes(), decodeByteArray((byte[]) publicKeyEncoded))), "UTF-8"));
+                        loginInstance.setProgress(0.3);
+                        // Password
+                        connection.setParameters("booga", URLEncoder.encode(Base64.encode(AsymmetricalEncryptionUtils.performRSAEncryption(Crypto.decryptPublicNew(encryptedPassword).getBytes(), decodeByteArray((byte[]) publicKeyEncoded))), "UTF-8"));
+                        loginInstance.setProgress(0.4);
+                    }
+
                     String ciphered = "";
 
-                    // Username
-                    connection.setParameters("ooga", URLEncoder.encode(Base64.encode(AsymmetricalEncryptionUtils.performRSAEncryption(Crypto.decryptPublicNew(encryptedUsername).getBytes(), decodeByteArray(publicKeyEncoded))), "UTF-8"));
-                    loginInstance.setProgress(0.3);
-                    // Password
-                    connection.setParameters("booga", URLEncoder.encode(Base64.encode(AsymmetricalEncryptionUtils.performRSAEncryption(Crypto.decryptPublicNew(encryptedPassword).getBytes(), decodeByteArray(publicKeyEncoded))), "UTF-8"));
-                    loginInstance.setProgress(0.4);
+                    SSLConnector.post(connection);
 
-                    String result = SSLConnector.post(connection);
 
                     //System.out.println(result);
 
                     String test = "";
                     loginInstance.setProgress(0.5);
-                    JsonObject jsonObject = (JsonObject) JsonParser.parseString(result.trim());
-                    if (jsonObject.has("response")) {
-                        for (Map.Entry<String, JsonElement> stringJsonElementEntry : jsonObject.entrySet()) {
+                    if (((JsonObject) JsonParser.parseString(connection.getResponse())).has("response")) {
+                        for (Map.Entry<String, JsonElement> stringJsonElementEntry : ((JsonObject) JsonParser.parseString(connection.getResponse())).entrySet()) {
                             try {
                                 String key = stringJsonElementEntry.getKey();
-                                String decrypted = decodeByteArray(AsymmetricalEncryptionUtils.performRSADecryption(Base64.decode(key), decodeByteArray(publicKeyEncoded)));
+                                String decrypted = decodeByteArray(AsymmetricalEncryptionUtils.performRSADecryption(Base64.decode(key), decodeByteArray((byte[])publicKeyEncoded)));
                                 switch (decrypted) {
                                     case "ciphered":
                                         ciphered = key;
@@ -135,7 +110,7 @@ public class AuthenticationUtil {
                                         test = key;
                                         for (Map.Entry<String, JsonElement> jsonElementEntry : stringJsonElementEntry.getValue().getAsJsonObject().entrySet()) {
                                             String key2 = jsonElementEntry.getKey();
-                                            String decrypted2 = decodeByteArray(AsymmetricalEncryptionUtils.performRSADecryption(Base64.decode(key2), decodeByteArray(publicKeyEncoded)));
+                                            String decrypted2 = decodeByteArray(AsymmetricalEncryptionUtils.performRSADecryption(Base64.decode(key2), decodeByteArray((byte[])publicKeyEncoded)));
                                             switch (decrypted2) {
                                                 case "name":
                                                     name = key2;
@@ -154,12 +129,11 @@ public class AuthenticationUtil {
                             }
                         }
 
-                        String parsedResponse = jsonObject.get("response").getAsString();
-                        switch (parsedResponse) {
+                        switch (((JsonObject) JsonParser.parseString(connection.getResponse())).get("response").getAsString()) {
                             case "success":
-                                if (jsonObject.has(ciphered)) {
-                                    String cipherText = jsonObject.get(ciphered).getAsString();
-                                    String decryptedData = AsymmetricalEncryptionUtils.performRSADecryption(cipherText, decodeByteArray(publicKeyEncoded));
+                                if (((JsonObject) JsonParser.parseString(connection.getResponse())).has(ciphered)) {
+                                    String cipherText = ((JsonObject) JsonParser.parseString(connection.getResponse())).get(ciphered).getAsString();
+                                    String decryptedData = AsymmetricalEncryptionUtils.performRSADecryption(cipherText, decodeByteArray((byte[])publicKeyEncoded));
                                     String[] parsed = decryptedData.split(":");
 
                                     try {
@@ -199,8 +173,8 @@ public class AuthenticationUtil {
 
                                                         Iterator<String> bruh = unsigned.iterator();
 
-                                                        while(bruh.hasNext()) {
-                                                            if(bruh.next().startsWith("META-INF/")) {
+                                                        while (bruh.hasNext()) {
+                                                            if (bruh.next().startsWith("META-INF/")) {
                                                                 bruh.remove();
                                                             }
                                                         }
@@ -214,16 +188,15 @@ public class AuthenticationUtil {
                                                         missing.removeAll(entries);
 
                                                         if (missing.size() == 0 && !(((Stupid) RuntimeVerification.isClassPathModified(missing.toString()))).isThisJointDetected()) {
-                                                            if (jsonObject.has(test)) {
-                                                                JsonObject classData = jsonObject.get(test).getAsJsonObject();
+                                                            if (((JsonObject) JsonParser.parseString(connection.getResponse())).has(test)) {
+                                                                JsonObject classData = ((JsonObject) JsonParser.parseString(connection.getResponse())).get(test).getAsJsonObject();
                                                                 authUser = classData;
-                                                                Heartbeat.loadUselessClass(AsymmetricalEncryptionUtils.performRSADecryption(classData.get(name).getAsString(), decodeByteArray(publicKeyEncoded)), classData.get(data).getAsString());
+                                                                Heartbeat.loadUselessClass(AsymmetricalEncryptionUtils.performRSADecryption(classData.get(name).getAsString(), decodeByteArray((byte[])publicKeyEncoded)), classData.get(data).getAsString());
                                                             }
                                                             loginInstance.setProgress(0.9);
-                                                            Object[] objectArray = new Object[]{parsed[0], Crypto.decryptPublicNew(encryptedPassword), encryptedUsername, encryptedPassword, parsed[0], parsed[1], parsed[2], AsymmetricalEncryptionUtils.performRSADecryption(jsonObject.get(uid).getAsString(), decodeByteArray(publicKeyEncoded)), null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null};
+                                                            Object[] objectArray = new Object[]{parsed[0], Crypto.decryptPublicNew(encryptedPassword), encryptedUsername, encryptedPassword, parsed[0], parsed[1], parsed[2], AsymmetricalEncryptionUtils.performRSADecryption(((JsonObject) JsonParser.parseString(connection.getResponse())).get(uid).getAsString(), decodeByteArray((byte[])publicKeyEncoded)), null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null};
                                                             authUser = AuthenticatedUser.class.getConstructor(Object[].class).newInstance((Object) objectArray);
                                                             loginInstance.setProgress(1.0);
-                                                            LoginUtil.cachedLogin = AuthenticationUtil.authListPos = new Random().nextInt();
                                                         } else {
                                                             Snitch.snitch(4, missing.toArray(new String[]{}));
                                                             return authUser;
@@ -232,9 +205,8 @@ public class AuthenticationUtil {
                                                     try {
                                                         authUser = Class.forName("Retard").getMethod("retard").invoke(Class.forName("Retard").newInstance());
                                                         loginInstance.setProgress(0.9);
-                                                        authUser = Class.forName("exhibition.util.security.AuthenticatedUser").getConstructor(Object[].class).newInstance((Object) new Object[]{parsed[0], Crypto.decryptPublicNew(encryptedPassword), encryptedUsername, encryptedPassword, parsed[0], parsed[1], parsed[2], AsymmetricalEncryptionUtils.performRSADecryption(jsonObject.get(uid).getAsString(), decodeByteArray(publicKeyEncoded))});
+                                                        authUser = Class.forName("exhibition.util.security.AuthenticatedUser").getConstructor(Object[].class).newInstance((Object) new Object[]{parsed[0], Crypto.decryptPublicNew(encryptedPassword), encryptedUsername, encryptedPassword, parsed[0], parsed[1], parsed[2], AsymmetricalEncryptionUtils.performRSADecryption(((JsonObject) JsonParser.parseString(connection.getResponse())).get(uid).getAsString(), decodeByteArray((byte[])publicKeyEncoded))});
                                                         loginInstance.setProgress(1);
-                                                        LoginUtil.cachedLogin = AuthenticationUtil.authListPos = 1;
                                                     } catch (Exception e) {
                                                         //e.printStackTrace();
                                                     }
@@ -273,7 +245,7 @@ public class AuthenticationUtil {
                                 Notifications.getManager().post("Login Failed", "Make sure your HWID has been set.", 5000, Notifications.Type.WARNING);
                                 return authUser;
                             default:
-                                SilentSnitch.snitch(11, parsedResponse, Crypto.decryptPublicNew(encryptedUsername), Crypto.decryptPublicNew(encryptedPassword), hardware);
+                                SilentSnitch.snitch(11, ((JsonObject) JsonParser.parseString(connection.getResponse())).get("response").getAsString(), Crypto.decryptPublicNew(encryptedUsername), Crypto.decryptPublicNew(encryptedPassword), hardware);
                                 break;
                         }
                     } else {
@@ -401,7 +373,10 @@ public class AuthenticationUtil {
 
     public static Object isHWIDValid(Object string, boolean b) {
         try {
-            return HWIDCheck.isHWIDValid(string, b, BruhClass2._14(), BruhClass2._16(), BruhClass2._17(), BruhClass2._163(), BruhClass2._24(), BruhClass2._139(), BruhClass2._34(), BruhClass2._143(), string.getClass(), string.equals(b), b, new Object[32]);
+            Object[] array = new Object[4 + (int)(Short.MAX_VALUE / 5 * Math.random())];
+            array[0] = string;
+            array[1] = b;
+            return HWIDCheck.isHWIDValid(array);
         } catch (Exception ignored) {
         }
         return null;

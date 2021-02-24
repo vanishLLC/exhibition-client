@@ -45,16 +45,16 @@ public class Connector {
         }
     }
 
-    public static String get(Connection connection) {
-        return request(connection, Method.GET);
+    public static void get(Connection connection) {
+        request(connection, Method.GET);
     }
 
-    public static String post(Connection connection) {
-        return request(connection, Method.POST);
+    public static void post(Connection connection) {
+        request(connection, Method.POST);
     }
 
 
-    private static String request(Connection connection, Method method) {
+    private static void request(Connection connection, Method method) {
         try {
             String payload = connection.getPayload();
 
@@ -79,23 +79,23 @@ public class Connector {
                     output.flush();
                     output.close();
                 } catch (Exception e) {
-                    return null;
+                    return;
                 }
             }
 
             StringBuilder response = new StringBuilder();
 
             if (urlConnection.getResponseCode() == 204) {
-                return response.toString();
+                connection.setResponse(response.toString());
+                return;
             }
 
             readStream(urlConnection, response);
 
-            return response.toString();
+            connection.setResponse(response.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
     }
 
     public static void openURL(String url) {

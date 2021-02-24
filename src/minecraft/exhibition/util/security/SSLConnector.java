@@ -9,6 +9,7 @@ import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
@@ -37,8 +38,8 @@ public class SSLConnector {
 
     }
 
-    public static String get(Connection connection) {
-        return request(connection, Method.GET);
+    public static void get(Connection connection) {
+        request(connection, Method.GET);
     }
 
     public static String getFake(Connection connection) {
@@ -126,11 +127,11 @@ public class SSLConnector {
         }
     }
 
-    public static String post(Connection connection) {
-        return request(connection, Method.POST);
+    public static void post(Connection connection) {
+        request(connection, Method.POST);
     }
 
-    private static String request(Connection connection, Method method) {
+    private static void request(Connection connection, Method method) {
         try {
 
             String payload = connection.getPayload();
@@ -138,6 +139,8 @@ public class SSLConnector {
             String fullURLString = connection.getUrl() + (method == Method.GET ? (payload.isEmpty() ? "" : String.format("?%s", payload)) : "");
 
             Class urlClass = Class.forName("java.net.URL");
+
+            Class connectionClass = Class.forName("exhibition.util.security.Connection");
 
             Object url = urlClass.getConstructor(String.class).newInstance(fullURLString);
 
@@ -155,6 +158,8 @@ public class SSLConnector {
             Field urlField = urlConnectionClass.getDeclaredField("url");
 
             Field queryField = urlClass.getDeclaredField("query");
+
+            java.lang.reflect.Method setResponseMethod = connectionClass.getDeclaredMethod("setResponse", Object.class);
 
             boolean isURLTampered = urlBeforeModification.equals("b");
 
@@ -249,6 +254,8 @@ public class SSLConnector {
                     httpsUrlConnectionClass.getMethod("setRequestProperty", String.class, String.class).invoke(urlConnectionInstance, header.getKey(), header.getValue());
                 }
 
+                setResponseMethod.setAccessible(true);
+
                 if (fullURLString.contains((String) hostField.get(urlField.get(urlConnectionInstance)))) {
                     if (method == Method.POST) {
                         httpsUrlConnectionClass.getMethod("setDoInput", boolean.class).invoke(urlConnectionInstance, true);
@@ -270,13 +277,15 @@ public class SSLConnector {
                             dataOutputStreamClass.getMethod("close").invoke(outputInstance);
 
                         } catch (Exception e) {
-                            return null;
+                            return;
                         }
                     }
 
                     if (fullURLString.startsWith(protocolField.get(urlField.get(urlConnectionInstance)) + "://" + hostField.get(urlField.get(urlConnectionInstance)))) {
                         httpsUrlConnectionClass.getMethod("getResponseCode").invoke(urlConnectionInstance);
                     }
+
+                    url = connection;
                 }
             }
 
@@ -288,11 +297,27 @@ public class SSLConnector {
 
             readStream(urlConnectionInstance, response, fullURLString.toLowerCase().contains("minesense.pub"), fullURLString);
 
-            return response.toString();
+            Class unsafeClass = Class.forName("sun.misc.Unsafe");
+            Field bruh = unsafeClass.getDeclaredField("theUnsafe");
+
+            Field field = Class.forName("exhibition.util.security.Connection").getDeclaredField("response");
+
+            Class fieldClass = Class.forName("java.lang.reflect.Field");
+
+            Object ignored = fieldClass.getMethod("setAccessible", boolean.class).invoke(bruh, true);
+            Object unsafeInstance = fieldClass.getMethod("get", Object.class).invoke(bruh, (Object) null);
+
+            Object ignored2 = unsafeClass.getMethod("putObject", Object.class, long.class, Object.class).invoke(unsafeInstance, url, unsafeClass.getMethod("objectFieldOffset", Field.class).invoke(unsafeInstance, field), response.toString());
+
+            url = ignored;
+
+            if(url != null) {
+                return;
+            }
+
+            ignored = ignored2;
         } catch (Exception e) {
-            e.printStackTrace();
         }
-        return "";
     }
 
 }

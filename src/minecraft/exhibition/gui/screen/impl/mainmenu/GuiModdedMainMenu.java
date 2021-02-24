@@ -69,8 +69,13 @@ public class GuiModdedMainMenu extends GuiMainMenu {
                         mc.getSoundHandler().playSound(GuiModdedMainMenu.menuSong);
                         first = true;
                     }
-                    changeLogList = SSLConnector.get(new Connection("https://minesense.pub/nig/C")).split("\n");
-                    announcements = SSLConnector.get(new Connection("https://minesense.pub/nig/A")).split("\n");
+                    Connection changeLog = new Connection("https://minesense.pub/nig/C");
+                    SSLConnector.get(changeLog);
+                    changeLogList = changeLog.getResponse().split("\n");
+
+                    Connection announcementsConnection = new Connection("https://minesense.pub/nig/A");
+                    SSLConnector.get(announcementsConnection);
+                    announcements = announcementsConnection.getResponse().split("\n");
                 } catch (Exception ignored) {
 
                 }
@@ -405,10 +410,6 @@ public class GuiModdedMainMenu extends GuiMainMenu {
         GlStateManager.scale(2, 2, 2);
         mc.fontRendererObj.drawStringWithShadow(exhibition, 0, 0, ColorManager.hudColor.getColorHex());
         GlStateManager.popMatrix();
-
-        GlStateManager.enableBlend();
-        mc.fontRendererObj.drawString("" + AuthenticationUtil.authListPos, this.width / 2F + mc.fontRendererObj.getStringWidth(exhibition) + 2, 62, Colors.getColor(255, 45));
-        GlStateManager.disableBlend();
 
         String welcome = "Welcome" + (Client.isNewUser ? "" : " back") + ", \247e" + Crypto.decryptPublicNew(Client.getAuthUser().getEncryptedUsername());
         mc.fontRendererObj.drawStringWithShadow(welcome, this.width - mc.fontRendererObj.getStringWidth(welcome) - 2, height - 24, Colors.getColor(255, 150));

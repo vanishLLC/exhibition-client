@@ -43,10 +43,11 @@ public class GuiChangelog extends PanoramaScreen {
     public void initGui() {
         super.initGui();
 
-
         new Thread(() -> {
             try {
-                changeLogList = SSLConnector.get(new Connection("https://minesense.pub/nig/" + "C")).split("\n");
+                Connection changeLog = new Connection("https://minesense.pub/nig/C");
+                SSLConnector.get(changeLog);
+                changeLogList = changeLog.getResponse().split("\n");
             } catch (Exception ignored) {
 
             }

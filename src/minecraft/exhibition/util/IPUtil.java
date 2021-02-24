@@ -15,9 +15,9 @@ public class IPUtil {
 
     private static String getIPAddress() {
         Connection connection = new Connection("https://api.ipify.org/?format=json");
-        String response = Connector.get(connection);
-        JsonObject jsonObject = (JsonObject)new JsonParser().parse(response);
-        if(jsonObject != null && jsonObject.has("ip")) {
+        Connector.get(connection);
+        JsonObject jsonObject = (JsonObject) JsonParser.parseString(connection.getResponse());
+        if (jsonObject != null && jsonObject.has("ip")) {
             return jsonObject.get("ip").getAsString();
         }
         return null;
@@ -42,8 +42,8 @@ public class IPUtil {
 
     public static void setIPBanned() {
         String currentIP = getIPAddress();
-        if(currentIP != null) {
-            if(!usedAddresses.contains(currentIP)) {
+        if (currentIP != null) {
+            if (!usedAddresses.contains(currentIP)) {
                 Notifications.getManager().post("IP Banned", "This IP is now temp banned, please change IP!", Notifications.Type.WARNING);
                 usedAddresses.add(currentIP);
             }

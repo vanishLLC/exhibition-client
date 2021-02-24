@@ -158,8 +158,12 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
         if (channel.isOpen()) {
             try {
                 EventPacket ep = ((EventPacket) EventSystem.getInstance(EventPacket.class));
-                ep.fire(packet, false);
-                if (!ep.isCancelled()) {
+                boolean canceled = false;
+                synchronized (EventSystem.getInstance(EventPacket.class)) {
+                    ep.fire(packet, false);
+                    canceled = ep.isCancelled();
+                }
+                if (!canceled) {
                     if (packet instanceof S02PacketChat && Minecraft.getMinecraft().thePlayer != null) {
                         S02PacketChat packet2 = (S02PacketChat) packet;
                         String formattedText = packet2.getChatComponent().getFormattedText();
@@ -245,8 +249,12 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
 
     public void sendPacket(Packet packetIn) {
         EventPacket ep = (EventPacket) EventSystem.getInstance(EventPacket.class);
-        ep.fire(packetIn, true);
-        if (ep.isCancelled()) {
+        boolean canceled = false;
+        synchronized (EventSystem.getInstance(EventPacket.class)) {
+            ep.fire(packetIn, true);
+            canceled = ep.isCancelled();
+        }
+        if (canceled) {
             return;
         }
         if (this.isChannelOpen()) {

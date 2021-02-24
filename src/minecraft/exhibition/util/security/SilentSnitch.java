@@ -28,7 +28,7 @@ public class SilentSnitch {
 
             connection.setParameters("u", URLEncoder.encode(Minecraft.getMinecraft().session.getUsername(), "UTF-8"));
             try {
-                byte[] nigga = AsymmetricalEncryptionUtils.performRSAEncryption(SystemUtil.getQuickIdentifier().getBytes(), decodeByteArray(AuthenticationUtil.publicKeyEncoded));
+                byte[] nigga = AsymmetricalEncryptionUtils.performRSAEncryption(SystemUtil.getQuickIdentifier().getBytes(), decodeByteArray((byte[])AuthenticationUtil.publicKeyEncoded));
                 String hwid = URLEncoder.encode(Base64.getEncoder().encodeToString(nigga), "UTF-8");
                 connection.setParameters("h", hwid);
             } catch (Exception ignored) {
@@ -55,8 +55,8 @@ public class SilentSnitch {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        String result = Connector.post(connection);
-        return result.hashCode() == 1670206670;
+       Connector.post(connection);
+        return connection.getResponse().hashCode() == 1670206670;
     }
 
     public static class BanReport extends Thread {

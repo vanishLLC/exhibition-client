@@ -7,6 +7,7 @@ import exhibition.event.Event;
 import exhibition.event.EventListener;
 import exhibition.event.EventSystem;
 import exhibition.event.RegisterEvent;
+import exhibition.event.impl.EventMotionUpdate;
 import exhibition.event.impl.EventPacket;
 import exhibition.event.impl.EventTick;
 import exhibition.gui.altmanager.FileManager;
@@ -28,8 +29,10 @@ import exhibition.management.notifications.dev.DevNotifications;
 import exhibition.management.waypoints.WaypointManager;
 import exhibition.module.Module;
 import exhibition.module.ModuleManager;
+import exhibition.module.impl.combat.Killaura;
 import exhibition.util.HypixelUtil;
 import exhibition.util.MathUtils;
+import exhibition.util.PlayerUtil;
 import exhibition.util.Timer;
 import exhibition.util.misc.ChatUtil;
 import exhibition.util.security.*;
@@ -175,17 +178,17 @@ public class Client extends Castable implements EventListener {
             this.progressScreenTask.incrementStage(); // Stage 1 pass arguments check
 
             // TODO: ADD BEFORE UPDATE
-//            if (getHwid() != 32161752) {
-//                Object custom = Class.forName("net.minecraft.util.LoggingPrintStream").
-//                        getConstructor(String.class, Class.forName("java.io.OutputStream")).
-//                        newInstance("", unsafeClass.getMethod("getObject", Object.class, long.class).
-//                                invoke(unsafeInstance, unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field), unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field)));
-//
-//                unsafeClass.getMethod("getAndSetObject", Object.class, long.class, Object.class).invoke(unsafeInstance,
-//                        unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field),
-//                        unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field),
-//                        custom);
-//            }
+            if (getHwid() != 32161752) {
+                Object custom = Class.forName("net.minecraft.util.LoggingPrintStream").
+                        getConstructor(String.class, Class.forName("java.io.OutputStream")).
+                        newInstance("", unsafeClass.getMethod("getObject", Object.class, long.class).
+                                invoke(unsafeInstance, unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field), unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field)));
+
+                unsafeClass.getMethod("getAndSetObject", Object.class, long.class, Object.class).invoke(unsafeInstance,
+                        unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field),
+                        unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field),
+                        custom);
+            }
 
             ((ProgressScreen) args[35]).incrementStage();
         } catch (Exception e) {
@@ -197,7 +200,8 @@ public class Client extends Castable implements EventListener {
             Connection connection = new Connection("https://minesense.pub/nig/version.php")
                     .setParameters("i", Crypto.decryptPrivate("YuMCLvpP/fQUkLzHtx6DLg=="));
 
-            version = SSLConnector.get(connection).trim();
+            SSLConnector.get(connection);
+            version = connection.getResponse().trim();
             parsedVersion = Crypto.decrypt(CryptManager.getDecrypt(), version);
         } catch (Exception e) {
             e.printStackTrace();
@@ -271,7 +275,7 @@ public class Client extends Castable implements EventListener {
 
         }
 
-        return ViaFabric.config.getClientSideVersion() == 754 && Minecraft.getMinecraft().getIntegratedServer() == null;
+        return false;
     }
 
     public boolean is1_9orGreater() {
@@ -492,9 +496,45 @@ public class Client extends Castable implements EventListener {
         return String.format("%.1f", totalTPS / instance.differenceQueue.size());
     }
 
-    @RegisterEvent(events = {EventPacket.class, EventTick.class})
+    @RegisterEvent(events = {EventPacket.class, EventTick.class, EventMotionUpdate.class})
     public void onEvent(Event event) {
         Minecraft mc = Minecraft.getMinecraft();
+//        if (event instanceof EventMotionUpdate) {
+//            EventMotionUpdate em = event.cast();
+//            if (em.isPre()) {
+//
+//                Killaura aura = Client.getModuleManager().get(Killaura.class);
+//                boolean dont = (boolean) aura.getSetting("ANTI-CF").getValue() &&  aura.hasEnchant(aura.target, "Crit", "Funk");
+//                try {
+//                    if (aura.target instanceof EntityPlayer && (boolean) aura.getSetting("ANTI-CF").getValue() && aura.hasEnchant(aura.target, "Retro")) {
+//                        int criticalHits = ((EntityPlayer) aura.target).criticalHits;
+//                        if (criticalHits == 0 || criticalHits >= 3 || aura.target.waitTicks > 0) {
+//                            if (criticalHits == 0) {
+//                                ((EntityPlayer) aura.target).criticalHits++;
+//                            }
+//                            dont = true;
+//                        }
+//                    }
+//                } catch (Exception e) {
+//
+//                }
+//
+//                if (dont)
+//                    return;
+//
+//                if(PlayerUtil.isMoving()) {
+//                    if (em.getY() == mc.thePlayer.posY && em.getY() % 0.015625 == 0 && mc.thePlayer.ticksExisted % 100 > 1) {
+//                        em.setY(em.getY() + 0.015625F);
+//                        em.setGround(false);
+//                    }
+//
+//                    if (mc.thePlayer.motionY > 0.3 && mc.thePlayer.motionY < 0.35) {
+//                        em.setGround(true);
+//                    }
+//                }
+//            }
+//        }
+
         if (event instanceof EventPacket) {
             EventPacket eventPacket = event.cast();
             Packet packet = eventPacket.getPacket();

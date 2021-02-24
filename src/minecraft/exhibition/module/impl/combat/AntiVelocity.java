@@ -6,6 +6,8 @@ import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventPacket;
 import exhibition.event.impl.EventTick;
 import exhibition.management.friend.FriendManager;
+import exhibition.management.notifications.dev.DevNotification;
+import exhibition.management.notifications.dev.DevNotifications;
 import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
@@ -151,7 +153,6 @@ public class AntiVelocity extends Module {
                         }
 
 
-
                     if (!((LongJump) Client.getModuleManager().get(LongJump.class)).noShake() && ignore.delay(500) && x != 0 && y != 0 && z != 0) {
                         velocity = new Vec3((double) packet.getMotionX() / 8000.0D, (double) packet.getMotionY() / 8000.0D, (double) packet.getMotionZ() / 8000.0D);
                         checkDamage = true;
@@ -190,19 +191,6 @@ public class AntiVelocity extends Module {
                         }
                         return;
                     }
-                }
-
-                if (packet.yMotion < -0.5) {
-                    boolean foundBlock = false;
-                    for (int i = (int) (mc.thePlayer.posY); i >= 0; i--) {
-                        BlockPos pos = new BlockPos(mc.thePlayer.posX, i, mc.thePlayer.posZ);
-                        if (!(mc.theWorld.getBlockState(pos).getBlock() instanceof BlockAir)) { // Found non air block
-                            foundBlock = true;
-                            break;
-                        }
-                    }
-                    if (!foundBlock)
-                        return;
                 }
 
                 double vertical = ((Number) settings.get(VERTICAL).getValue()).doubleValue();

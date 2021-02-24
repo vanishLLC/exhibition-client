@@ -3,10 +3,7 @@ package exhibition.module.impl.combat;
 import exhibition.Client;
 import exhibition.event.Event;
 import exhibition.event.RegisterEvent;
-import exhibition.event.impl.EventPacket;
-import exhibition.event.impl.EventRenderGui;
-import exhibition.event.impl.EventScreenDisplay;
-import exhibition.event.impl.EventTick;
+import exhibition.event.impl.*;
 import exhibition.management.notifications.dev.DevNotifications;
 import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.Module;
@@ -17,6 +14,7 @@ import exhibition.module.impl.movement.Fly;
 import exhibition.module.impl.movement.LongJump;
 import exhibition.util.*;
 import exhibition.util.Timer;
+import exhibition.util.misc.ChatUtil;
 import exhibition.util.render.Colors;
 import net.minecraft.client.gui.GuiDisconnected;
 import net.minecraft.client.gui.GuiDownloadTerrain;
@@ -24,6 +22,8 @@ import net.minecraft.client.gui.GuiMultiplayer;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.multiplayer.GuiConnecting;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
@@ -33,6 +33,7 @@ import net.minecraft.network.play.client.C0FPacketConfirmTransaction;
 import net.minecraft.network.play.server.S2DPacketOpenWindow;
 import net.minecraft.network.play.server.S30PacketWindowItems;
 
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -106,12 +107,45 @@ public class Bypass extends Module {
 
     private String lastMode = null;
 
-    @RegisterEvent(events = {EventPacket.class, EventTick.class, EventScreenDisplay.class, EventRenderGui.class})
+    @RegisterEvent(events = {EventPacket.class, EventMotionUpdate.class, EventTick.class, EventScreenDisplay.class, EventRenderGui.class})
     public void onEvent(Event event) {
         if (mc.getIntegratedServer() != null)
             return;
 
-        if(event instanceof EventTick) {
+/*        if (event instanceof EventMotionUpdate) {
+            EventMotionUpdate em = event.cast();
+            if (em.isPre()) {
+
+                boolean dont = false;
+                Killaura aura = Client.getModuleManager().get(Killaura.class);
+                try {
+                    if (aura.target instanceof EntityPlayer && (boolean)aura.getSetting("ANTI-CF").getValue() && aura.hasEnchant(aura.target, "Retro")) {
+                        int criticalHits = ((EntityPlayer) aura.target).criticalHits;
+                        if (criticalHits == 0 || criticalHits >= 3 || aura.target.waitTicks > 0) {
+                            if (criticalHits == 0) {
+                                ((EntityPlayer) aura.target).criticalHits++;
+                            }
+                            dont = true;
+                        }
+                    }
+                } catch (Exception e) {
+
+                }
+
+                if(dont)
+                    return;
+
+                if (em.getY() == mc.thePlayer.posY && em.getY() % 0.015625 == 0) {
+                    em.setY(em.getY() + 0.00053424);
+                    em.setGround(false);
+                }
+
+                if (mc.thePlayer.motionY > 0.3 && mc.thePlayer.motionY < 0.35) {
+                    em.setGround(true);
+                }
+            }
+        }*/
+        if (event instanceof EventTick) {
             // If bruh is not set or they're in a lobby and it's set, let them change it
             if (lastMode != null && bruh > 0 && allowBypassing()) {
                 if (!option.getSelected().equals(lastMode)) {
@@ -338,18 +372,17 @@ public class Bypass extends Module {
                                 }
                             } else {
                                 event.setCancelled(true);
+                                chokePackets.add(packet);
                                 if (c13Timer.delay(1000) && lastSentUid != 2) {
                                     if (debug)
                                         DevNotifications.getManager().post("\247e\247lBurst detected \247c" + packet.getUid() + " \2476" + mc.thePlayer.ticksExisted);
                                     c13Timer.reset();
                                     if (lastSentUid == 1) {
-
                                         if (debug)
                                             DevNotifications.getManager().post("\247aWatchdog handshake success " + mc.thePlayer.ticksExisted);
                                         sendPackets();
                                         resetPackets();
-
-                                        if(AUTODONG.getValue()) {
+                                        if (AUTODONG.getValue()) {
                                             Notifications.getManager().post("Bypass Error", "Automatically swapped to Dong mode.", 5000, Notifications.Type.WARNING);
                                             Notifications.getManager().post("Dong Warning", "Flying too much may result in a ban.", 5000, Notifications.Type.NOTIFY);
                                             this.bruh = 5;

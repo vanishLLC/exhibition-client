@@ -70,20 +70,22 @@ public class AltGenHandler {
     }
 
     public boolean setupUser() {
-        String response = SSLConnector.get(connectApi("user"));
-        if (response.contains("error"))
+        Connection connection = connectApi("user");
+        SSLConnector.get(connection);
+        if (connection.getResponse().contains("error"))
             return false;
-        JsonObject jo = JsonParser.parseString(response).getAsJsonObject();
+        JsonObject jo = JsonParser.parseString(connection.getResponse()).getAsJsonObject();
         this.user = new AltGenUser(jo.get("username").getAsString(), jo.get("avatar").getAsString(), jo.get("active_plan").getAsString());
         return true;
     }
 
     public String getAlt() {
-        String response = SSLConnector.get(connectApi("generate"));
-        if (response.contains("error"))
+        Connection connection = connectApi("generate");
+        SSLConnector.get(connection);
+        if (connection.getResponse().contains("error"))
             return "Error while generating alt!";
-        if(response.contains("email")) {
-            JsonObject jo = JsonParser.parseString(response).getAsJsonObject();
+        if(connection.getResponse().contains("email")) {
+            JsonObject jo = JsonParser.parseString(connection.getResponse()).getAsJsonObject();
             return jo.get("email").getAsString() + ":" + jo.get("password").getAsString();
         }
         return "Could not generate alt!";

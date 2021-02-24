@@ -112,8 +112,8 @@ public class NickDetector extends Module {
                                         String uuid = String.valueOf(gameprofile.getId());
 
                                         Connection profileConnection = new Connection("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid);
-                                        String profileResponse = Connector.get(profileConnection);
-                                        JsonObject profileJsonObject = (JsonObject) JsonParser.parseString(profileResponse);
+                                        Connector.get(profileConnection);
+                                        JsonObject profileJsonObject = (JsonObject) JsonParser.parseString(profileConnection.getResponse());
 
                                         if (profileJsonObject.has("name")) {
                                             String resolvedName = profileJsonObject.get("name").getAsString();
