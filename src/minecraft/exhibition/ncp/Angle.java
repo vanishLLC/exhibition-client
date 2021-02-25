@@ -300,11 +300,11 @@ public class Angle {
         // Is the violation is superior to the threshold defined in the configuration?
         if (violation > 50) {
             if (GlobalValues.showFlags.getValue())
-                ChatUtil.printChat("\2474[\247cExhi NCP\2474] \247fFIGHT_ANGLE VL: " + MathUtils.roundToPlace(angleVL, 1) + "(+" + MathUtils.roundToPlace(violation, 1) + ")" +
-                        " \2478|\247f M: \2477" + MathUtils.roundToPlace(moveFlag, 1) +
-                        " \2478|\247f T: \2477" + MathUtils.roundToPlace(timeFlag, 1) +
-                        " \2478|\247f Y: \2477" + MathUtils.roundToPlace(yawFlag, 1) +
-                        " \2478|\247f S: \2477" + MathUtils.roundToPlace(switchFlag, 1));
+                ChatUtil.printChat("\2474[\247cExhi NCP\2474] \247ffight.angle vl: " + MathUtils.roundToPlace(angleVL, 1) + "(+" + MathUtils.roundToPlace(violation, 1) + ") " +
+                        "\247fm:\2477" + MathUtils.roundToPlace(moveFlag, 1) +
+                        "\2478|\247ft:\2477" + MathUtils.roundToPlace(timeFlag, 1) +
+                        "\2478|\247fy:\2477" + MathUtils.roundToPlace(yawFlag, 1) +
+                        "\2478|\247fs:\2477" + MathUtils.roundToPlace(switchFlag, 1));
 
             angleVL += violation;
 
