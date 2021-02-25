@@ -13,8 +13,14 @@ public class TeamUtils {
     public static boolean isTeam(final EntityLivingBase e, final EntityLivingBase e2) {
         // ChatUtil.printChat(e2.getDisplayName().getFormattedText().contains("§" + isTeam(e)) + " " + isTeam(e));
         boolean pitMode = HypixelUtil.isInGame("THE HYPIXEL PIT");
-        if (pitMode && (!HypixelUtil.scoreboardContains("event:") || HypixelUtil.scoreboardContains("SPIRE") || HypixelUtil.scoreboardContains("BLOCKHEAD") || HypixelUtil.scoreboardContains("RAFFLE"))) {
-            return e == e2;
+        if (pitMode) {
+            if ((!HypixelUtil.scoreboardContains("event:") || HypixelUtil.scoreboardContains("SPIRE") || HypixelUtil.scoreboardContains("BLOCKHEAD") || HypixelUtil.scoreboardContains("RAFFLE")))
+                return e == e2;
+            if(HypixelUtil.scoreboardContains("event:") && HypixelUtil.scoreboardContains("SQUAD")) {
+                String first = e.getDisplayName().getFormattedText();
+                String second = e2.getDisplayName().getFormattedText();
+                return e == e2 || (first.substring(0, Math.min(first.length(), 6)).equals(second.substring(0, Math.min(second.length(), 6))));
+            }
         }
 
         return e == e2 || (e.getDisplayName().getFormattedText().contains("§" + isTeam(e)) && e2.getDisplayName().getFormattedText().contains("§" + isTeam(e)));

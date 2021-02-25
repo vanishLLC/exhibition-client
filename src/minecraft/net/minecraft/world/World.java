@@ -2923,6 +2923,10 @@ public abstract class World implements IBlockAccess {
         return this.loadedEntityList;
     }
 
+    public List<EntityPlayer> getPlayerEntities() {
+        return Lists.newCopyOnWriteArrayList(playerEntities);
+    }
+
     public void markChunkDirty(BlockPos pos, TileEntity unusedTileEntity) {
         if (this.isBlockLoaded(pos)) {
             this.getChunkFromBlockCoords(pos).setChunkModified();

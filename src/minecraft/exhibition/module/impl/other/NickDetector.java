@@ -18,11 +18,13 @@ import exhibition.util.security.Connector;
 import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.network.NetworkPlayerInfo;
+import net.minecraft.entity.Entity;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.network.Packet;
+import net.minecraft.network.play.server.S04PacketEntityEquipment;
 import net.minecraft.network.play.server.S38PacketPlayerListItem;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.util.ChatComponentText;
@@ -32,6 +34,7 @@ import net.minecraft.util.StringUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static net.minecraft.client.gui.GuiPlayerTabOverlay.playerInfoMap;
 
@@ -39,6 +42,8 @@ public class NickDetector extends Module {
 
     private final Setting<Boolean> disconnect = new Setting<>("DISCONNECT", false, "Notifies you if a nicked player disconnects. \247e(May help identify Staff)");
     public final Setting<Boolean> denick = new Setting<>("DENICK", true, "Attempts to reveal the name of nicked players.");
+
+    public final List<ResolvePair> resolvePairList = new CopyOnWriteArrayList<>();
 
     public NickDetector(ModuleData data) {
         super(data);
@@ -69,6 +74,32 @@ public class NickDetector extends Module {
                             try {
                                 Notifications.getManager().post("Nick Detector", mc.getNetHandler().getPlayerInfo(addPlayerData.getProfile().getId()).getGameProfile().getName() + " has left your game.", Notifications.Type.INFO);
                             } catch (Exception ignored) {
+                            }
+                        }
+                    }
+                }
+            }
+            if (packet instanceof S04PacketEntityEquipment) {
+                S04PacketEntityEquipment packetIn = (S04PacketEntityEquipment) packet;
+                Entity entity = mc.theWorld.getEntityByID(packetIn.getEntityID());
+
+                if (entity != null && UUIDResolver.instance.isInvalidName(entity.getName())) {
+                    ItemStack stack = packetIn.getItemStack();
+                    if (stack != null && stack.hasTagCompound()) {
+                        if (stack.getTagCompound().hasKey("ExtraAttributes", 10)) {
+                            NBTTagCompound nbttagcompound = stack.getTagCompound().getCompoundTag("ExtraAttributes");
+
+                            if (nbttagcompound.hasKey("Nonce", 3)) {
+                                try {
+                                    long nonceLong = nbttagcompound.getLong("Nonce");
+
+                                    if (nonceLong <= 100)
+                                        return;
+
+                                    resolvePairList.add(new ResolvePair(entity.getName(), stack));
+                                } catch (Exception e) {
+
+                                }
                             }
                         }
                     }
@@ -161,4 +192,25 @@ public class NickDetector extends Module {
             UUIDResolver.instance.checkNames(usernameList);
         }
     }
+
+    public class ResolvePair {
+
+        String username;
+        ItemStack item;
+
+        public ResolvePair(String username, ItemStack item) {
+            this.username = username;
+            this.item = item;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public ItemStack getStack() {
+            return item;
+        }
+
+    }
+
 }

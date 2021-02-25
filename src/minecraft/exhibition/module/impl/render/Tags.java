@@ -45,7 +45,7 @@ public class Tags extends Module {
     public void onEvent(Event event) {
         if (event instanceof EventRender3D) {
             EventRender3D er = (EventRender3D)event;
-            for (Object o : mc.theWorld.playerEntities) {
+            for (Object o : mc.theWorld.getPlayerEntities()) {
                 final EntityPlayer player = (EntityPlayer)o;
                 if (!player.isInvisible() && !(player instanceof EntityPlayerSP)) {
                     final double x = player.lastTickPosX + (player.posX - player.lastTickPosX) * er.renderPartialTicks - RenderManager.renderPosX;

@@ -133,7 +133,7 @@ public class BanStats extends Module {
                                 long roundedTime = (long) MathUtils.getIncremental(banStats.banTimer.getDifference(), 50);
                                 String time = "(" + StringUtils.ticksToElapsedTime((int) roundedTime / 50) + ")";
 
-                                Notifications.getManager().post("Staff Activity", "Staff are now active. " + time, 3000, Notifications.Type.WARNING);
+                                Notifications.getManager().post("Staff Activity", "Staff are now active after " + time + " (+" + diff + ")", 3000, Notifications.Type.WARNING);
                             }
 
                             if (staffTotalBans != 0)

@@ -21,6 +21,7 @@ import exhibition.util.MathUtils;
 import exhibition.util.RenderingUtil;
 import exhibition.util.render.Colors;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
@@ -485,13 +486,10 @@ public class Nametags extends Module {
 
         boolean ignorePit = HypixelUtil.isInGame("THE HYPIXEL PIT") && IGNORESPAWN.getValue();
 
-        for (Entity entity : mc.theWorld.getLoadedEntityList()) {
-            if (entity instanceof EntityPlayer) {
-                EntityPlayer ent = (EntityPlayer) entity;
+        for (EntityPlayer ent : mc.theWorld.playerEntities) {
+            if (!(ent instanceof EntityPlayerSP)) {
 
-                boolean prioritized = PriorityManager.isPriority(ent);
-
-                boolean isPriority = prioritized || TargetESP.isPriority(ent) || FriendManager.isFriend(ent.getName());
+                boolean isPriority = TargetESP.isPriority(ent) || FriendManager.isFriend(ent.getName());
 
                 if (!isPriority) {
                     if (UUIDResolver.instance.isInvalidName(ent.getName())) {
@@ -508,12 +506,12 @@ public class Nametags extends Module {
                     double y = ent.posY;
                     double z = ent.posZ;
                     if (y > Client.instance.spawnY && x < 30 && x > -30 && z < 30 && z > -30) {
-                        entityPositions.remove(entity);
+                        entityPositions.remove(ent);
                         continue;
                     }
                 }
 
-                if (ent != mc.thePlayer && (((Boolean) settings.get(INVISIBLES).getValue()) || !ent.isInvisible())) {
+                if ((Boolean) settings.get(INVISIBLES).getValue() || !ent.isInvisible()) {
                     double x = ent.lastTickPosX + (ent.posX - ent.lastTickPosX) * pTicks - mc.getRenderManager().viewerPosX;
                     double y = ent.lastTickPosY + (ent.posY - ent.lastTickPosY) * pTicks - mc.getRenderManager().viewerPosY;
                     double z = ent.lastTickPosZ + (ent.posZ - ent.lastTickPosZ) * pTicks - mc.getRenderManager().viewerPosZ;

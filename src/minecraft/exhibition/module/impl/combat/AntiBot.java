@@ -28,6 +28,7 @@ import exhibition.util.misc.ChatUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSlab;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.entity.Entity;
@@ -139,8 +140,6 @@ public class AntiBot extends Module {
             EventMotionUpdate em = (EventMotionUpdate) event;
             setSuffix(currentSetting);
             if (em.isPre()) {
-
-
                 if (mc.thePlayer.isAllowEdit()) {
                     if (HypixelUtil.isGameStarting()) {
                         waitTimer.reset();
@@ -148,7 +147,6 @@ public class AntiBot extends Module {
                 } else {
                     waitTimer.reset();
                 }
-
 
                 spawnedList.clear();
                 if (mc.getIntegratedServer() == null && mc.getCurrentServerData() != null) {
@@ -161,10 +159,9 @@ public class AntiBot extends Module {
                     }
                 }
                 if (((Boolean) settings.get(DEAD).getValue()))
-                    for (Object o : mc.theWorld.loadedEntityList) {
-                        if (o instanceof EntityPlayer) {
+                    for (Object o : mc.theWorld.getPlayerEntities()) {
+                        if (!(o instanceof EntityPlayerSP)) {
                             EntityPlayer ent = (EntityPlayer) o;
-                            assert ent != mc.thePlayer;
                             if (ent.isPlayerSleeping() || ent.isDead) {
                                 DevNotifications.getManager().post("Dead player cleared: " + ent.getName() + " " + (ent.isPlayerSleeping() ? "1" : 0) + " " + (ent.isDead ? "1" : 0));
                                 mc.theWorld.removeEntity(ent);
@@ -199,9 +196,10 @@ public class AntiBot extends Module {
                     }
                 }
 
-                for (Entity o : mc.theWorld.getLoadedEntityList()) {
-                    if (o instanceof EntityPlayer) {
-                        EntityPlayer ent = (EntityPlayer) o;
+                List<EntityPlayer> playersToRemove = new ArrayList<>();
+
+                for (EntityPlayer ent : mc.theWorld.playerEntities) {
+                    if (!(ent instanceof EntityPlayerSP)) {
                         if (FriendManager.isFriend(ent.getName())) continue;
 
                         if (HypixelUtil.isInGame("SKYWARS") && HypixelUtil.isGameActive()) {
@@ -215,20 +213,19 @@ public class AntiBot extends Module {
                         }
 
                         if (waitTimer.delay(1250) && ent.ticksExisted <= 2 && !ent.illegalSpawn) {
-                            if (ent != mc.thePlayer) {
-                                spawnedList.add(ent);
+                            spawnedList.add(ent);
 
-                                double posX = mc.thePlayer.posX;
-                                double posY = mc.thePlayer.posY;
-                                double posZ = mc.thePlayer.posZ;
-                                double var7 = posX - ent.posX;
-                                double var9 = posY - ent.posY;
-                                double var11 = posZ - ent.posZ;
-                                double distance = MathHelper.sqrt_double(var7 * var7 + var9 * var9 + var11 * var11);
+                            double posX = mc.thePlayer.posX;
+                            double posY = mc.thePlayer.posY;
+                            double posZ = mc.thePlayer.posZ;
+                            double var7 = posX - ent.posX;
+                            double var9 = posY - ent.posY;
+                            double var11 = posZ - ent.posZ;
+                            double distance = MathHelper.sqrt_double(var7 * var7 + var9 * var9 + var11 * var11);
 
 //                                double roundedY = MathUtils.roundToPlace(ent.posY, 6);
 
-                                if (Math.abs(distance) > 3 && mc.thePlayer.ticksExisted > 260 && spawnedSinceUpdate <= 12) {
+                            if (Math.abs(distance) > 3 && mc.thePlayer.ticksExisted > 260 && spawnedSinceUpdate <= 12) {
 //                        DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "------------------------------------------------------------------------");
 //                        DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "Illegal Spawn: " + player.getDisplayName().getFormattedText() + " \247a Distance: " + MathUtils.roundToPlace(distance, 3) +
 //                                " \247bDX: " + MathUtils.roundToPlace(var7, 3) +
@@ -247,53 +244,20 @@ public class AntiBot extends Module {
 //                                    if ((roundedY == -200 || roundedY == 400)) {
 //                                        //DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " \247e" + "Weird bot spawn pos?");
 //                                    }
-                                    //Get formatted name
-                                    String str = ent.getDisplayName().getFormattedText();
-                                    // if the formatted name is equal to a default name "name + \247r" or the name contains "NPC" or they're not in the tab list, remove the entity.
-                                    boolean botNameFormat = str.endsWith("\247c" + ent.getName() + "\247r");
+                                //Get formatted name
+                                String str = ent.getDisplayName().getFormattedText();
+                                // if the formatted name is equal to a default name "name + \247r" or the name contains "NPC" or they're not in the tab list, remove the entity.
+                                boolean botNameFormat = str.endsWith("\247c" + ent.getName() + "\247r");
 
-                                    if (botNameFormat)
-                                        DevNotifications.getManager().post("Suspicious Spawn " + ent.getName() + " " + ent.getDisplayName().getFormattedText() + " " + ent.ticksExisted + " " + Math.abs(distance));
+                                if (botNameFormat)
+                                    DevNotifications.getManager().post("Suspicious Spawn " + ent.getName() + " " + ent.getDisplayName().getFormattedText() + " " + ent.ticksExisted + " " + Math.abs(distance));
 
-                                    if (botNameFormat && Math.abs(distance) >= 300) {
-                                        ticksOnGroundMap.put(ent.getName(), -300);
-                                    }
-                                    //DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "------------------------------------------------------------------------");
-                                    if (botNameFormat)
-                                        ent.illegalSpawn = true;
+                                if (botNameFormat && Math.abs(distance) >= 300) {
+                                    ticksOnGroundMap.put(ent.getName(), -300);
                                 }
-                            }
-                        }
-
-
-                        ent.lastTickInvisible = ent.isInvisible();
-
-                        double motionYNormal = ent.lastTickPosY - ent.posY;
-                        double motionY = Math.abs(ent.lastTickPosY - ent.posY);
-
-                        /*
-                        *  boolean onGround = motionY < 1 && ((
-                                (mc.theWorld.getBlockState(new BlockPos(ent.posX, ent.posY - (motionYNormal < 0.05 ? 0.45 : 0.9), ent.posZ)).getBlock().getMaterial() != Material.air &&
-                                mc.theWorld.getBlockState(new BlockPos(ent.lastTickPosX, ent.lastTickPosY - (motionYNormal < 0.05 ? 0.45 : 0.9), ent.lastTickPosZ)).getBlock().getMaterial() != Material.air)
-                                        ||
-                                (mc.theWorld.getBlockState(new BlockPos(ent.posX, ent.posY - (motionYNormal < 0.05 ? 0.85 : 1.3), ent.posZ)).getBlock().getMaterial() != Material.air &&
-                                        mc.theWorld.getBlockState(new BlockPos(ent.lastTickPosX, ent.lastTickPosY - (motionYNormal < 0.05 ? 0.85 : 1.3), ent.lastTickPosZ)).getBlock().getMaterial() != Material.air)) ||
-                                isTouchingGround(ent)) && !mc.theWorld.getBlockState(new BlockPos(ent.posX, ent.posY + ent.getEyeHeight(), ent.posZ)).getBlock().isBlockNormalCube();
-                        * */
-
-                        boolean onGround = motionY < 1 && (((mc.theWorld.getBlockState(new BlockPos(ent.posX, ent.posY - (motionYNormal < 0.05 ? 0.45 : 0.9), ent.posZ)).getBlock().getMaterial() != Material.air &&
-                                mc.theWorld.getBlockState(new BlockPos(ent.lastTickPosX, ent.lastTickPosY - (motionYNormal < 0.05 ? 0.45 : 0.9), ent.lastTickPosZ)).getBlock().getMaterial() != Material.air)
-                                || (mc.theWorld.getBlockState(new BlockPos(ent.posX, ent.posY - (motionYNormal < 0.1 ? 0.65 : 1.255), ent.posZ)).getBlock().getMaterial() != Material.air &&
-                                mc.theWorld.getBlockState(new BlockPos(ent.lastTickPosX, ent.lastTickPosY - (motionYNormal < 0.1 ? 0.65 : 1.255), ent.lastTickPosZ)).getBlock().getMaterial() != Material.air)) ||
-                                isTouchingGround(ent)) && !mc.theWorld.getBlockState(new BlockPos(ent.posX, ent.posY + ent.getEyeHeight(), ent.posZ)).getBlock().isBlockNormalCube();
-
-                        if (Killaura.getTarget() != ent) {
-                            if (onGround) {
-                                int ticksOnGround = ticksOnGroundMap.getOrDefault(ent.getName(), 0);
-                                ticksOnGroundMap.put(ent.getName(), ticksOnGround + (motionY < 0.05 ? ent.isInvisible() ? 1 : ent.flagged == 1 ? 1 : 3 : 1));
-                            } else if (ent.hurtTime <= 0 && !ent.isSneaking() && !ent.isRiding() && motionY > 0.1 || (ent.isInvisible() && (motionY == 0 || motionY > 0.5))) {
-                                int ticksOnGround = ticksOnGroundMap.getOrDefault(ent.getName(), 0);
-                                ticksOnGroundMap.put(ent.getName(), ticksOnGround - (ent.isInvisible() ? 10 : 1));
+                                //DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + "------------------------------------------------------------------------");
+                                if (botNameFormat)
+                                    ent.illegalSpawn = true;
                             }
                         }
 
@@ -334,6 +298,26 @@ public class AntiBot extends Module {
                             }
                         }
 
+                        ent.lastTickInvisible = ent.isInvisible();
+
+                        double motionYNormal = ent.lastTickPosY - ent.posY;
+                        double motionY = Math.abs(ent.lastTickPosY - ent.posY);
+
+                        /*
+                        *  boolean onGround = motionY < 1 && ((
+                                (mc.theWorld.getBlockState(new BlockPos(ent.posX, ent.posY - (motionYNormal < 0.05 ? 0.45 : 0.9), ent.posZ)).getBlock().getMaterial() != Material.air &&
+                                mc.theWorld.getBlockState(new BlockPos(ent.lastTickPosX, ent.lastTickPosY - (motionYNormal < 0.05 ? 0.45 : 0.9), ent.lastTickPosZ)).getBlock().getMaterial() != Material.air)
+                                        ||
+                                (mc.theWorld.getBlockState(new BlockPos(ent.posX, ent.posY - (motionYNormal < 0.05 ? 0.85 : 1.3), ent.posZ)).getBlock().getMaterial() != Material.air &&
+                                        mc.theWorld.getBlockState(new BlockPos(ent.lastTickPosX, ent.lastTickPosY - (motionYNormal < 0.05 ? 0.85 : 1.3), ent.lastTickPosZ)).getBlock().getMaterial() != Material.air)) ||
+                                isTouchingGround(ent)) && !mc.theWorld.getBlockState(new BlockPos(ent.posX, ent.posY + ent.getEyeHeight(), ent.posZ)).getBlock().isBlockNormalCube();
+                        * */
+
+
+
+
+                        boolean shouldUpdateTOG = true;
+
                         if (!invalid.contains(ent)) {
                             switch (currentSetting) {
                                 case "Hypixel": {
@@ -347,6 +331,7 @@ public class AntiBot extends Module {
                                     if (doPingCheck) {
                                         if (ticksOnGroundMap.getOrDefault(ent.getName(), 0) < 15 && isInTabList && ESP2D.getPlayerPing(ent) > 1) {
                                             invalid.add(ent);
+                                            shouldUpdateTOG = false;
                                         }
                                     }
 
@@ -361,7 +346,7 @@ public class AntiBot extends Module {
                                                 invalid.add(ent);
                                                 ticksOnGroundMap.put(ent.getName(), -69420);
                                                 Notifications.getManager().post("Illegal Player", "An Illegal player has spawned in.", 6000, Notifications.Type.WARNING);
-                                                // mc.theWorld.removeEntity(ent);
+                                                shouldUpdateTOG = false;
                                             }
                                         }
                                     }
@@ -370,7 +355,7 @@ public class AntiBot extends Module {
                                         if (botNameFormat && !str.contains("[")) {
                                             invalid.add(ent);
                                             ticksOnGroundMap.put(ent.getName(), -300);
-                                            // mc.theWorld.removeEntity(ent);
+                                            shouldUpdateTOG = false;
                                         }
                                     }
 
@@ -382,8 +367,9 @@ public class AntiBot extends Module {
                                         if (botNameFormat && !isInTabList && isOnHypixel) {
                                             if (ticksOnGroundMap.getOrDefault(ent.getName(), 0) < 15) {
                                                 invalid.add(ent);
+                                                shouldUpdateTOG = false;
                                                 if (remove && (ticksOnGroundMap.getOrDefault(ent.getName(), 0) < -20 && ent.isInvisible()) && mc.thePlayer.getDistanceToEntity(ent) < 10) {
-                                                    mc.theWorld.removeEntity(ent);
+                                                    playersToRemove.add(ent);
                                                     DevNotifications.getManager().post("Removed " + ent.getName() + " A");
                                                     continue;
                                                 }
@@ -393,8 +379,9 @@ public class AntiBot extends Module {
 
                                     if (ent.isInvisible() && ticksOnGroundMap.getOrDefault(ent.getName(), 0) < 15 && botNameFormat) {
                                         invalid.add(ent);
+                                        shouldUpdateTOG = false;
                                         if (remove && ticksOnGroundMap.getOrDefault(ent.getName(), 0) < -20 && !isInTabList) {
-                                            mc.theWorld.removeEntity(ent);
+                                            playersToRemove.add(ent);
                                             DevNotifications.getManager().post("Removed " + ent.getName() + " B");
                                             continue;
                                         }
@@ -403,8 +390,9 @@ public class AntiBot extends Module {
                                     if (botNameFormat || str.equalsIgnoreCase(ent.getName()) || str.contains("[NPC]")) {
                                         if (!isInTabList && isOnHypixel && (ticksOnGroundMap.getOrDefault(ent.getName(), 0) < 15)) {
                                             invalid.add(ent);
+                                            shouldUpdateTOG = false;
                                             if (remove && ent.isInvisible() && mc.thePlayer.getDistanceToEntity(ent) < 10 && ticksOnGroundMap.getOrDefault(ent.getName(), 0) < -20) {
-                                                mc.theWorld.removeEntity(ent);
+                                                playersToRemove.add(ent);
                                                 DevNotifications.getManager().post("Removed " + ent.getName() + " C");
                                                 continue;
                                             }
@@ -413,8 +401,9 @@ public class AntiBot extends Module {
 
                                     if (((str.equals(ent.getName() + "\247r") || str.equals("\247r" + ent.getName()) || str.equals("\247r" + ent.getName() + "\247r")) && !isInTabList) || str.contains("[NPC]")) {
                                         invalid.add(ent);
+                                        shouldUpdateTOG = false;
                                         if (remove && ent.isInvisible() && ticksOnGroundMap.getOrDefault(ent.getName(), 0) < -20) {
-                                            mc.theWorld.removeEntity(ent);
+                                            playersToRemove.add(ent);
                                             DevNotifications.getManager().post("Removed " + ent.getName() + " D");
                                             continue;
                                         }
@@ -428,7 +417,29 @@ public class AntiBot extends Module {
                                 }
                             }
                         }
+
+                        if(shouldUpdateTOG) {
+                            boolean onGround = motionY < 1 && (((mc.theWorld.getBlockState(new BlockPos(ent.posX, ent.posY - (motionYNormal < 0.05 ? 0.45 : 0.9), ent.posZ)).getBlock().getMaterial() != Material.air &&
+                                    mc.theWorld.getBlockState(new BlockPos(ent.lastTickPosX, ent.lastTickPosY - (motionYNormal < 0.05 ? 0.45 : 0.9), ent.lastTickPosZ)).getBlock().getMaterial() != Material.air)
+                                    || (mc.theWorld.getBlockState(new BlockPos(ent.posX, ent.posY - (motionYNormal < 0.1 ? 0.65 : 1.255), ent.posZ)).getBlock().getMaterial() != Material.air &&
+                                    mc.theWorld.getBlockState(new BlockPos(ent.lastTickPosX, ent.lastTickPosY - (motionYNormal < 0.1 ? 0.65 : 1.255), ent.lastTickPosZ)).getBlock().getMaterial() != Material.air)) ||
+                                    isTouchingGround(ent)) && !mc.theWorld.getBlockState(new BlockPos(ent.posX, ent.posY + ent.getEyeHeight(), ent.posZ)).getBlock().isBlockNormalCube();
+
+                            if (Killaura.getTarget() != ent) {
+                                if (onGround) {
+                                    int ticksOnGround = ticksOnGroundMap.getOrDefault(ent.getName(), 0);
+                                    ticksOnGroundMap.put(ent.getName(), ticksOnGround + (motionY < 0.05 ? ent.isInvisible() ? 1 : ent.flagged == 1 ? 1 : 3 : 1));
+                                } else if (ent.hurtTime <= 0 && !ent.isSneaking() && !ent.isRiding() && motionY > 0.1 || (ent.isInvisible() && (motionY == 0 || motionY > 0.5))) {
+                                    int ticksOnGround = ticksOnGroundMap.getOrDefault(ent.getName(), 0);
+                                    ticksOnGroundMap.put(ent.getName(), ticksOnGround - (ent.isInvisible() ? 10 : 1));
+                                }
+                            }
+                        }
                     }
+                }
+
+                for (EntityPlayer entityPlayer : playersToRemove) {
+                    mc.theWorld.removeEntity(entityPlayer);
                 }
 
                 spawnedSinceUpdate = 0;

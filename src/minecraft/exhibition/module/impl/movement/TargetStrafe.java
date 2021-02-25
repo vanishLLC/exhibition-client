@@ -100,8 +100,8 @@ public class TargetStrafe extends Module {
                 setSuffix(pathMode.getSelected());
                 target = null;
                 target = Killaura.getTarget();
-                if (target == null)
-                    for (Entity entity : mc.theWorld.getLoadedEntityList().stream().filter(Entity::isPlayerMP).sorted(Comparator.comparingDouble(o -> -o.getDistanceToEntity(mc.thePlayer))).collect(Collectors.toList())) {
+                if (target == null && !targetMode.getSelected().equals("Aura Only")) {
+                    for (Entity entity : mc.theWorld.getPlayerEntities().stream().filter(Entity::isPlayerMP).sorted(Comparator.comparingDouble(o -> -o.getDistanceToEntity(mc.thePlayer))).collect(Collectors.toList())) {
                         if (entity instanceof EntityPlayer && entity != mc.thePlayer && !AntiBot.isBot(entity) && !FriendManager.isFriend(entity.getName())) {
                             EntityPlayer ent = (EntityPlayer) entity;
                             boolean nearest = targetMode.getSelected().equalsIgnoreCase("Nearby");
@@ -113,6 +113,7 @@ public class TargetStrafe extends Module {
                             }
                         }
                     }
+                }
 
                 if ((boolean) flip.getValue() && mc.thePlayer.isCollidedHorizontally && !collidedLast && delay.delay(450)) {
                     reverse = !reverse;

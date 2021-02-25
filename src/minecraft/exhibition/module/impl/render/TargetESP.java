@@ -99,9 +99,7 @@ public class TargetESP extends Module {
     private static final Pattern bountyPattern = Pattern.compile("\247l[\\d]+g");
 
     public static boolean isPriority(EntityPlayer player) {
-        if (player.equals(Client.getModuleManager().get(Killaura.class).vip))
-            return true;
-        if (PriorityManager.isPriority(player))
+        if (player.equals(Client.getModuleManager().get(Killaura.class).vip) || PriorityManager.isPriority(player))
             return true;
 
         String formatted = player.getDisplayName().getFormattedText();

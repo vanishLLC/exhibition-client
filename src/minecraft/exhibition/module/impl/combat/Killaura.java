@@ -550,7 +550,7 @@ public class Killaura extends Module {
                             int bypassTicks = bypass.bruh - 10;
 
                             boolean allowInvalidAngles = bypass.allowBypassing() && (bypass.option.getSelected().equals("Watchdog Off") || (bypass.option.getSelected().equals("Dong") ?
-                                    bypassTicks > 20 && bypassTicks <= (30 + bypass.randomDelay) : bypass.bruh > 10 && bypass.bruh % 100 > 10 && bypass.bruh % 100 < 99)) && HypixelUtil.isVerifiedHypixel();
+                                    bypassTicks > 25 && bypassTicks <= (27 + bypass.randomDelay) : bypass.bruh > 10 && bypass.bruh % 100 > 10 && bypass.bruh % 100 < 99)) && HypixelUtil.isVerifiedHypixel();
 
                             if (shouldReduce) {
                                 float pitch = (float) -(Math.atan2(yDiff - (distance > 2.1 ? 1.25 : 1.5), dist) * 180.0D / 3.141592653589793D);
@@ -666,7 +666,10 @@ public class Killaura extends Module {
 
                             if (target instanceof EntityPlayer && antiCritFunky.getValue() && hasEnchant(target, "Retro")) {
                                 int criticalHits = ((EntityPlayer) target).criticalHits;
-                                if (criticalHits >= 3 || target.waitTicks > 2) {
+                                if ((criticalHits == 0 || criticalHits > 3) || target.waitTicks > 0) {
+                                    if(criticalHits == 0) {
+                                        ((EntityPlayer) target).criticalHits++;
+                                    }
                                     crits = false;
                                     dontCrit = true;
                                 }
@@ -903,7 +906,7 @@ public class Killaura extends Module {
                                     if ((!em.isOnground() && isCritSetup) || mc.thePlayer.fallDistance > 0) {
                                         player.criticalHits++;
                                     } else {
-                                        if (player.criticalHits >= 3) {
+                                        if (player.criticalHits > 1) {
                                             if(antiCritFunky.getValue() && hasEnchant(target, "Retro")) {
                                                 ChatUtil.printChat("Reset");
                                                 player.criticalHits = 0;
@@ -1334,19 +1337,19 @@ public class Killaura extends Module {
             Bypass bypass = Client.getModuleManager().get(Bypass.class);
             int bypassTicks = bypass.bruh - 10;
             boolean allowInvalidAngles = bypass.allowBypassing() && (bypass.option.getSelected().equals("Watchdog Off") || (bypass.option.getSelected().equals("Dong") ?
-                    bypassTicks > 20 && bypassTicks <= (30 + bypass.randomDelay) : bypass.bruh > 10 && bypass.bruh % 100 > 10 && bypass.bruh % 100 < 99)) && HypixelUtil.isVerifiedHypixel();
+                    bypassTicks > 25 && bypassTicks <= (27 + bypass.randomDelay) : bypass.bruh > 10 && bypass.bruh % 100 > 10 && bypass.bruh % 100 < 99)) && HypixelUtil.isVerifiedHypixel();
 
             float forwardYawDiff = Math.abs(yawDiff);
             if (forwardYawDiff > 90 && allowInvalidAngles) {
                 boolean willViolate = entityLivingBase.waitTicks <= 0 && Angle.INSTANCE.willViolateYaw(new Location(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, lastAngles.x + MathHelper.clamp_float(yawDiff + 180, -180, 180), 0), entityLivingBase);
                 if (willViolate) {
-                    weight += 10;
+                    weight += 5;
                 }
                 estimatedYawChange = Math.abs(MathHelper.clamp_float(yawDiff + 180, -180, 180));
             } else {
                 boolean willViolate = entityLivingBase.waitTicks <= 0 && Angle.INSTANCE.willViolateYaw(new Location(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, lastAngles.x + yawDiff, 0), entityLivingBase);
                 if (willViolate) {
-                    weight += 10;
+                    weight += 5;
                 }
                 estimatedYawChange = forwardYawDiff;
             }

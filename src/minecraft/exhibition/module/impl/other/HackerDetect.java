@@ -269,19 +269,31 @@ public class HackerDetect extends Module {
             if (!em.isPre())
                 return;
 
-            List<Entity> validPlayers = mc.theWorld.getLoadedEntityList().stream().filter(o -> o instanceof EntityPlayer && o != mc.thePlayer &&
+            Setting<Boolean>[] checksList = new Setting[]{killaura, autoBlock, speed, cleaner, fastfly, scaffold};
+
+            boolean allow = false;
+            for (Setting<Boolean> setting : checksList) {
+                if (setting.getValue()) {
+                    allow = true;
+                    break;
+                }
+            }
+
+            if (!allow)
+                return;
+
+            List<Entity> validPlayers = mc.theWorld.getPlayerEntities().stream().filter(o -> o != mc.thePlayer &&
                     !AntiBot.isBot(o) && !o.isInvisible() && !FriendManager.isFriend(o.getName())).collect(Collectors.toList());
             for (Entity entityPlayer : validPlayers) {
                 EntityPlayer ent = (EntityPlayer) entityPlayer;
                 if ((teams.getValue() && TeamUtils.isTeam(mc.thePlayer, ent)))
                     continue;
 
-                {
+                if (cleaner.getValue()) {
                     if ((ent.ticksExisted - ent.lastDroppedTick) > 40) {
                         ent.lastDroppedTick = -1;
                     }
                 }
-
 
                 //
                 if (autoBlock.getValue() && !ent.isRiding()) {
@@ -524,83 +536,77 @@ public class HackerDetect extends Module {
             }
         }
         if (event instanceof EventTick) {
-            if (phase.getValue()) {
+            if (!phase.getValue())
+                return;
+
                     /*
                     Initial y value
                      */
-                if (mc.thePlayer.ticksExisted == 30) {
-                    if (HypixelUtil.scoreboardContains("hypixel")) {
-                        //ChatUtil.printChat("Phase pos A " + (int) mc.thePlayer.posY);
-                        ignore = false;
-                        phasePosY = mc.thePlayer.posY;
-                        hypixelLag = false;
-                    } else {
-                        hypixelLag = true;
-                    }
+            if (mc.thePlayer.ticksExisted == 30) {
+                if (HypixelUtil.scoreboardContains("hypixel")) {
+                    //ChatUtil.printChat("Phase pos A " + (int) mc.thePlayer.posY);
+                    ignore = false;
+                    phasePosY = mc.thePlayer.posY;
+                    hypixelLag = false;
+                } else {
+                    hypixelLag = true;
                 }
+            }
 
                     /*
                     Lag check
                      */
-                if (hypixelLag) {
-                    if (HypixelUtil.isGameStarting() && HypixelUtil.isInGame("SKYWARS")) {
-                        //ChatUtil.printChat("Phase pos B " + (int) mc.thePlayer.posY);
-                        ignore = false;
-                        phasePosY = mc.thePlayer.posY;
-                        hypixelLag = false;
-                    } else {
-                        hypixelLag = true;
-                    }
-                }
-
-                if (!HypixelUtil.isGameStarting() && HypixelUtil.isInGame("SKYWARS") && phasePosY != -1 && !ignore) {
-                    //ChatUtil.printChat("Reset phase pos");
-                    phasePosY = -1;
+            if (hypixelLag) {
+                if (HypixelUtil.isGameStarting() && HypixelUtil.isInGame("SKYWARS")) {
+                    //ChatUtil.printChat("Phase pos B " + (int) mc.thePlayer.posY);
+                    ignore = false;
+                    phasePosY = mc.thePlayer.posY;
                     hypixelLag = false;
+                } else {
+                    hypixelLag = true;
                 }
+            }
+
+            if (!HypixelUtil.isGameStarting() && HypixelUtil.isInGame("SKYWARS") && phasePosY != -1 && !ignore) {
+                //ChatUtil.printChat("Reset phase pos");
+                phasePosY = -1;
+                hypixelLag = false;
+            }
 
                     /*
                     Team skywars cage check
                      */
-                if ((HypixelUtil.scoreboardContains("start 0:0") && HypixelUtil.isInGame("SKYWARS") && HypixelUtil.scoreboardContains("teams left")) && phasePosY == -1) {
-                    //ChatUtil.printChat("Phase pos C " + (int) mc.thePlayer.posY);
-                    phasePosY = mc.thePlayer.posY;
-                    ignore = true;
-                }
+            if ((HypixelUtil.scoreboardContains("start 0:0") && HypixelUtil.isInGame("SKYWARS") && HypixelUtil.scoreboardContains("teams left")) && phasePosY == -1) {
+                //ChatUtil.printChat("Phase pos C " + (int) mc.thePlayer.posY);
+                phasePosY = mc.thePlayer.posY;
+                ignore = true;
             }
 
-            List<Entity> validPlayers = mc.theWorld.getLoadedEntityList().stream().filter(o -> o instanceof EntityPlayer && o != mc.thePlayer && !AntiBot.isBot(o)).collect(Collectors.toList());
+            List<Entity> validPlayers = mc.theWorld.getPlayerEntities().stream().filter(o -> o != mc.thePlayer && !AntiBot.isBot(o)).collect(Collectors.toList());
             for (Entity entityPlayer : validPlayers) {
                 EntityPlayer ent = (EntityPlayer) entityPlayer;
                 if (ent.isInvisible() || FriendManager.isFriend(ent.getName()) || (((boolean) settings.get("TEAMS").getValue()) && TeamUtils.isTeam(mc.thePlayer, ent)))
                     continue;
-                {
-                    if ((ent.ticksExisted - ent.lastDroppedTick) > 40) {
-                        ent.lastDroppedTick = -1;
-                    }
-                }
                 /*
                 Phase check
                  */
-                if (phase.getValue()) {
                     /*
                     Team skywars cage check
                      */
-                    if (!PriorityManager.isPriority(ent) && ent.ticksExisted > 40 && HypixelUtil.scoreboardContains("start") && HypixelUtil.isInGame("SKYWARS") && HypixelUtil.scoreboardContains("teams left")) {
-                        if (phasePosY - ent.posY > 4.5) {
-                            Notifications.getManager().post("Hacker Detected", ent.getName() + " has phased out of their cage!", 7500, Notifications.Type.WARNING);
-                            PriorityManager.setAsPriority(ent);
-                        }
+                if (!PriorityManager.isPriority(ent) && ent.ticksExisted > 40 && HypixelUtil.scoreboardContains("start") && HypixelUtil.isInGame("SKYWARS") && HypixelUtil.scoreboardContains("teams left")) {
+                    if (phasePosY - ent.posY > 4.5) {
+                        Notifications.getManager().post("Hacker Detected", ent.getName() + " has phased out of their cage!", 7500, Notifications.Type.WARNING);
+                        PriorityManager.setAsPriority(ent);
                     }
+                }
 
                     /*
                     Check for phase
                      */
-                    if (!PriorityManager.isPriority(ent) && ent.ticksExisted > 40 && HypixelUtil.isInGame("SKYWARS") && !HypixelUtil.isGameActive() && HypixelUtil.isGameStarting()) {
-                        if (phasePosY - ent.posY > 4.5) {
-                            Notifications.getManager().post("Hacker Detected", ent.getName() + " has phased out of their cage!", 7500, Notifications.Type.WARNING);
-                            PriorityManager.setAsPriority(ent);
-                        }
+                if (!PriorityManager.isPriority(ent) && ent.ticksExisted > 40 && HypixelUtil.isInGame("SKYWARS") && !HypixelUtil.isGameActive() && HypixelUtil.isGameStarting()) {
+                    if (phasePosY - ent.posY > 4.5) {
+                        Notifications.getManager().post("Hacker Detected", ent.getName() + " has phased out of their cage!", 7500, Notifications.Type.WARNING);
+                        PriorityManager.setAsPriority(ent);
                     }
                 }
                 /*
