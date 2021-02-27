@@ -20,15 +20,17 @@ import java.util.PriorityQueue;
 
 public class AutoMath extends Module {
 
-    private PriorityQueue<String> chatQueue = new PriorityQueue();
-    private exhibition.util.Timer chatDelay = new exhibition.util.Timer();
-    private exhibition.util.Timer messageDelay = new Timer();
+    private final PriorityQueue<String> chatQueue = new PriorityQueue();
+    private final exhibition.util.Timer chatDelay = new exhibition.util.Timer();
+    private final exhibition.util.Timer messageDelay = new Timer();
 
-    private boolean listen = false;
+    private final ScriptEngine engine;
 
     public AutoMath(ModuleData data) {
         super(data);
         settings.put("DELAY", new Setting<>("DELAY", 0, "Delay before sending your message.", 50, 0, 5000));
+        ScriptEngineManager mgr = new ScriptEngineManager();
+        engine = mgr.getEngineByName("JavaScript");
     }
 
     @RegisterEvent(events = {EventPacket.class})
@@ -50,8 +52,6 @@ public class AutoMath extends Module {
                 try {
                     String cleanedUnformatted = StringUtils.stripHypixelControlCodes(StringUtils.stripControlCodes(formatted));
                     String calculate = cleanedUnformatted.split("Solve: ")[1].replace("x", "*").replace("÷", "/");
-                    ScriptEngineManager mgr = new ScriptEngineManager();
-                    ScriptEngine engine = mgr.getEngineByName("JavaScript");
                     String result = String.valueOf(engine.eval(calculate.trim()));
                     ChatUtil.printChat(Command.chatPrefix + "\247e" + result);
                     chatQueue.add("/achat " + result);
