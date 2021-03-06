@@ -33,6 +33,7 @@ import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -118,7 +119,6 @@ public class GuiModdedMainMenu extends GuiMainMenu {
         if (AuthenticationUtil.getHwid() == 32161752 && mc.displayWidth < 1920 && mc.displayHeight < 1080) {
             this.buttonList.add(new GuiMenuButton(6, 2, height - 30, objWidth, objHeight, "Resize 1080p"));
         }
-        Client.getAuthUser().justMakingSure();
 
     }
 
@@ -140,7 +140,8 @@ public class GuiModdedMainMenu extends GuiMainMenu {
         if (button.id == 0) {
             mc.displayGuiScreen(new GuiSelectWorld(this));
         } else if (button.id == 1) {
-            mc.displayGuiScreen(new GuiMultiplayer(this));
+            if (!Client.getAuthUser().hashCheck())
+                mc.displayGuiScreen(new GuiMultiplayer(this));
         } else if (button.id == 2) {
             mc.displayGuiScreen(new GuiOptions(this, mc.gameSettings));
         } else if (button.id == 3) {
@@ -172,13 +173,6 @@ public class GuiModdedMainMenu extends GuiMainMenu {
         GlStateManager.enableAlpha();
 
         ScaledResolution sr = new ScaledResolution(Minecraft.getMinecraft());
-
-        try {
-            Crypto.decryptPublicNew(Client.getAuthUser().getEncryptedUsername());
-        } catch (Exception e) {
-            Client.instance.killInstance();
-        }
-
 
         //String retardedShit = "----------";
 
@@ -225,14 +219,14 @@ public class GuiModdedMainMenu extends GuiMainMenu {
         particles.updateAndRender(sr.getScaledWidth_double() / 2F, sr.getScaledHeight(), mouseX, mouseY);
 
         GlStateManager.pushMatrix();
-        float rot = (lastRotX += 1)/2;
+        float rot = (lastRotX += 1) / 2;
         GlStateManager.translate(x, y22, z);
-        GlStateManager.rotate(translate.getX() * 3, 0,1, 0);
+        GlStateManager.rotate(translate.getX() * 3, 0, 1, 0);
         GlStateManager.rotate(translate.getY() * 5, 1, 0, 0);
         GlStateManager.rotate(rot, 0, 0, 1);
 
 
-        GlStateManager.scale(5,5,5);
+        GlStateManager.scale(5, 5, 5);
 
         GL11.glLineWidth(1.5F);
 
@@ -402,7 +396,9 @@ public class GuiModdedMainMenu extends GuiMainMenu {
         GlStateManager.popMatrix();
 
         GL11.glColor3f(1F, 1F, 1F);
-        this.buttonList.forEach(b -> b.drawButton(mc, mouseX, mouseY));
+        for (GuiButton b : this.buttonList) {
+            b.drawButton(mc, mouseX, mouseY);
+        }
         GL11.glColor3f(1F, 1F, 1F);
         GlStateManager.pushMatrix();
         String exhibition = new ChatComponentText(Client.getModuleManager().get(HUD.class).getSetting("CLIENT-NAME").getValue().toString().replace("&", "\247")).getFormattedText();
@@ -411,7 +407,7 @@ public class GuiModdedMainMenu extends GuiMainMenu {
         mc.fontRendererObj.drawStringWithShadow(exhibition, 0, 0, ColorManager.hudColor.getColorHex());
         GlStateManager.popMatrix();
 
-        String welcome = "Welcome" + (Client.isNewUser ? "" : " back") + ", \247e" + Crypto.decryptPublicNew(Client.getAuthUser().getEncryptedUsername());
+        String welcome = "Welcome" + (Client.isNewUser ? "" : " back") + ", \247e" + Client.getAuthUser().getDecryptedUsername();
         mc.fontRendererObj.drawStringWithShadow(welcome, this.width - mc.fontRendererObj.getStringWidth(welcome) - 2, height - 24, Colors.getColor(255, 150));
 
         String currentBuld = "Your current build is " + (Client.version.equals(Client.parsedVersion) ? "\247aLatest" : Client.isBeta() ? "\247bBeta" : "\247cOutdated") + "\247f!";
@@ -449,7 +445,7 @@ public class GuiModdedMainMenu extends GuiMainMenu {
             } else if (str.startsWith("-")) {
                 str = "\247c" + str;
             }
-            mc.fontRendererObj.drawString(str, 4, y, Colors.getColor(255,175));
+            mc.fontRendererObj.drawString(str, 4, y, Colors.getColor(255, 175));
             y += 12;
         }
 
@@ -460,7 +456,7 @@ public class GuiModdedMainMenu extends GuiMainMenu {
             Depth.mask();
             mc.fontRendererObj.drawString(str, (width * 2 - fontRendererObj.getStringWidth(str) - 4), y, Colors.getColor(255));
             Depth.render(GL_GEQUAL);
-            RenderingUtil.rectangle( (width * 2 - fontRendererObj.getStringWidth(str) - 4), y,  (width * 2 - 4), y + 10, Colors.getColor(255, 175));
+            RenderingUtil.rectangle((width * 2 - fontRendererObj.getStringWidth(str) - 4), y, (width * 2 - 4), y + 10, Colors.getColor(255, 175));
             Depth.render(GL_LESS);
             mc.fontRendererObj.drawString(str, (width * 2 - fontRendererObj.getStringWidth(str) - 4) - 1, y, Colors.getColor(5, 175));
             mc.fontRendererObj.drawString(str, (width * 2 - fontRendererObj.getStringWidth(str) - 4) + 1, y, Colors.getColor(5, 175));
@@ -471,7 +467,6 @@ public class GuiModdedMainMenu extends GuiMainMenu {
         }
         GlStateManager.scale(2, 2, 2);
         GlStateManager.disableBlend();
-
     }
 
     private void drawIcon(double x, double y, float u, float v, double width, double height, float textureWidth, float textureHeight) {

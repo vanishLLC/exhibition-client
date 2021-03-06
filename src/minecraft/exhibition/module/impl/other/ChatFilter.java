@@ -42,47 +42,47 @@ public class ChatFilter extends Module {
 
             String chatMessage = packetChat.getChatComponent().getFormattedText();
 
-            if(chatMessage.startsWith("\247r")) {
+            if(chatMessage.startsWith("\247r") && chatMessage.length() > 4) {
                 chatMessage = chatMessage.substring(2);
             }
 
             if (chatMessage.startsWith("\247a\247l")) {
                 String message = chatMessage.substring(4);
-                if ((message.contains("KILL!") || message.contains("PUNCH!")) && kills.getValue()) {
+                if (kills.getValue() && (message.contains("KILL!") || message.contains("PUNCH!") || message.contains("\247lPENTA"))) {
                     event.setCancelled(true);
                 }
-                if (message.contains("SHOWOFF") && showoff.getValue()) {
+                if (showoff.getValue() && message.contains("SHOWOFF")) {
                     event.setCancelled(true);
                 }
-                if (message.contains("ASSIST") && assists.getValue()) {
+                if (assists.getValue() && message.contains("ASSIST")) {
                     event.setCancelled(true);
                 }
             }
 
             if (chatMessage.startsWith("\247b\247l")) {
                 String message = chatMessage.substring(4);
-                if (message.contains("LEVEL") && levelUp.getValue()) {
+                if (levelUp.getValue() && message.contains("LEVEL")) {
                     event.setCancelled(true);
                 }
             }
 
             if (chatMessage.startsWith("\247c\247l")) {
                 String message = chatMessage.substring(4);
-                if (message.contains("STREAK") && streaks.getValue()) {
+                if (streaks.getValue() && message.contains("STREAK")) {
                     event.setCancelled(true);
                 }
             }
 
             if (chatMessage.startsWith("\247b\247l")) {
                 String message = chatMessage.substring(4);
-                if (message.contains("STREAK") && streaks.getValue()) {
+                if (streaks.getValue() && message.contains("STREAK")) {
                     event.setCancelled(true);
                 }
             }
 
             if (chatMessage.startsWith("\2476\247l")) {
                 String message = chatMessage.substring(4);
-                if (message.contains("BOUNTY") && bounty.getValue()) {
+                if (bounty.getValue() && message.contains("BOUNTY")) {
                     event.setCancelled(true);
                 }
             }

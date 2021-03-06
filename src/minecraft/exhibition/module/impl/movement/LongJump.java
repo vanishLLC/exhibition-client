@@ -49,10 +49,11 @@ public class LongJump extends Module {
     private String BOOST = "BOOST";
     private String AUTISM = "AUTISM";
     private String FAKELAG = "FAKELAG";
-    private String C13PACKET = "C13PACKET";
+    //private String C13PACKET = "C13PACKET";
     private String CHOKE = "CHOKE-TICKS";
     private String TIMER = "TIMER";
-    private Setting<Boolean> useBlink = new Setting<>("CHOKE", false, "Uses blink to bypass.");
+    //private Setting<Boolean> useBlink = new Setting<>("CHOKE", false, "Uses blink to bypass.");
+    private Setting<Boolean> bowOnly = new Setting<>("BOW", false, "Only LongJumps if you bow yourself/take damage.");
     private Setting<Boolean> targetStrafe = new Setting<>("TARGETSTRAFE", false, "Target Strafes around players.");
     private Setting<Number> boostScale = new Setting<>("VEL-BOOST", 0.5, "Boosts your speed when you take KB.", 0.01, 0, 1);
 
@@ -87,12 +88,12 @@ public class LongJump extends Module {
     public LongJump(ModuleData data) {
         super(data);
         settings.put(OFF, new Setting<>(OFF, true, "Toggles off on landing. (Not for Autism)"));
-        settings.put(BOOST, new Setting<>(BOOST, 4.5, "The speed boost multiplier.", 0.01, 2.5, 6));
+        settings.put(BOOST, new Setting<>(BOOST, 4.5, "The speed boost multiplier.", 0.01, 2.5, 10));
         settings.put(AUTISM, new Setting<>(AUTISM, true, "Fast Fly for Hypixel. (Experimental)"));
         settings.put(PROGRESS, new Setting<>(PROGRESS, false, "Renders your blink progress. Can be used to know when you may blink or flag."));
-        settings.put(C13PACKET, new Setting<>(C13PACKET, true, "Sends a C13 Flying packet on enable. (Experimental)"));
+        //settings.put(C13PACKET, new Setting<>(C13PACKET, true, "Sends a C13 Flying packet on enable. (Experimental)"));
         addSetting(targetStrafe);
-        addSetting(useBlink);
+        //addSetting(useBlink);
         addSetting(boostScale);
         settings.put(CHOKE, new Setting<>(CHOKE, 50, "The amount of ticks to choke by in between blinks.", 1, 2, 70));
         settings.put(TIMER, new Setting<>(TIMER, 0.0, "FastFly starting timer. (0 = 1x Timer, 1.0 = 2x Timer)", 0.01, 0, 2));
@@ -120,8 +121,8 @@ public class LongJump extends Module {
             sendPackets();
         }
 
-        if (useBlink.getValue())
-            auraTimer.reset();
+//        if (useBlink.getValue())
+//            auraTimer.reset();
     }
 
     public boolean allowTargetStrafe() {
@@ -155,7 +156,7 @@ public class LongJump extends Module {
 //            }
 //        }
 
-        boolean bowMode = HypixelUtil.isInGame("PIT") || HypixelUtil.isInGame("UHC");
+        boolean bowMode = bowOnly.getValue() || HypixelUtil.isInGame("PIT") || HypixelUtil.isInGame("UHC");
 
 
         long time = bowMode ? 1000 : 1500;
@@ -258,7 +259,7 @@ public class LongJump extends Module {
             mc.thePlayer.motionZ = 0;
         }
 
-        sendC13Packet();
+        //sendC13Packet();
 
         waitTimer.reset();
     }
@@ -270,7 +271,7 @@ public class LongJump extends Module {
     private Random random = new Random();
 
     public boolean noShake() {
-        return !timer.delay(1000) && autismEnabled() && !HypixelUtil.isInGame("PIT") && !HypixelUtil.isInGame("UHC");
+        return !timer.delay(1000) && autismEnabled() && !HypixelUtil.isInGame("PIT") && !HypixelUtil.isInGame("UHC") && !bowOnly.getValue();
     }
 
     public boolean autismEnabled() {
@@ -293,34 +294,34 @@ public class LongJump extends Module {
 
         boolean autism = (boolean) settings.get(AUTISM).getValue();
         if (event instanceof EventRenderGui && (boolean) settings.get(PROGRESS).getValue() && autism) {
-            if (useBlink.getValue()) {
-                int chokePackets = ((Number) settings.get(CHOKE).getValue()).intValue();
-                ScaledResolution res = new ScaledResolution(mc);
-
-                double centerX = res.getScaledWidth_double() / 2, centerY = res.getScaledHeight_double() / 2 - 30;
-
-                int barWidth = 80;
-                double barHalf = barWidth / 2D;
-
-                RenderingUtil.rectangleBordered(centerX - barHalf, centerY - 2, centerX + barHalf, centerY + 2, 1, Colors.getColor(0, 100), Colors.getColor(0, 150));
-
-                float lastHealth = blinkTicks;
-                float health = blinkTicks;
-                if (PlayerUtil.isMoving() && !mc.thePlayer.isCollidedVertically)
-                    lastHealth = (int) health - 1;
-
-                if (health == 0) {
-                    lastHealth = 0;
-                }
-                if (health == chokePackets) {
-                    lastHealth = health;
-                }
-                float healthProgress = health + (lastHealth - health) * mc.timer.renderPartialTicks;
-                double width = (barWidth - 2) * Math.max(Math.min((1 - (healthProgress / (double) chokePackets)), 1), 0);
-                RenderingUtil.rectangle(centerX - barHalf + 1, centerY - 1, centerX - barHalf + 1 + width, centerY + 1, ColorManager.hudColor.getColorHex());
-
-                return;
-            }
+//            if (useBlink.getValue()) {
+//                int chokePackets = ((Number) settings.get(CHOKE).getValue()).intValue();
+//                ScaledResolution res = new ScaledResolution(mc);
+//
+//                double centerX = res.getScaledWidth_double() / 2, centerY = res.getScaledHeight_double() / 2 - 30;
+//
+//                int barWidth = 80;
+//                double barHalf = barWidth / 2D;
+//
+//                RenderingUtil.rectangleBordered(centerX - barHalf, centerY - 2, centerX + barHalf, centerY + 2, 1, Colors.getColor(0, 100), Colors.getColor(0, 150));
+//
+//                float lastHealth = blinkTicks;
+//                float health = blinkTicks;
+//                if (PlayerUtil.isMoving() && !mc.thePlayer.isCollidedVertically)
+//                    lastHealth = (int) health - 1;
+//
+//                if (health == 0) {
+//                    lastHealth = 0;
+//                }
+//                if (health == chokePackets) {
+//                    lastHealth = health;
+//                }
+//                float healthProgress = health + (lastHealth - health) * mc.timer.renderPartialTicks;
+//                double width = (barWidth - 2) * Math.max(Math.min((1 - (healthProgress / (double) chokePackets)), 1), 0);
+//                RenderingUtil.rectangle(centerX - barHalf + 1, centerY - 1, centerX - barHalf + 1 + width, centerY + 1, ColorManager.hudColor.getColorHex());
+//
+//                return;
+//            }
             if (bowTicks > 0) {
                 int chokePackets = 20;
                 ScaledResolution res = new ScaledResolution(mc);
@@ -365,13 +366,13 @@ public class LongJump extends Module {
                 toggle();
             }
 
-            if (packet instanceof C03PacketPlayer && useBlink.getValue()) {
-                if (PlayerUtil.isMoving() && !mc.thePlayer.isCollidedVertically && blinkTicks > 0) {
-                    packetList.add(packet);
-                    event.setCancelled(true);
-                    auraTimer.reset();
-                }
-            }
+//            if (packet instanceof C03PacketPlayer && useBlink.getValue()) {
+//                if (PlayerUtil.isMoving() && !mc.thePlayer.isCollidedVertically && blinkTicks > 0) {
+//                    packetList.add(packet);
+//                    event.setCancelled(true);
+//                    auraTimer.reset();
+//                }
+//            }
 
             if (delay < 0) {
                 if (packet instanceof S12PacketEntityVelocity) {
@@ -430,7 +431,7 @@ public class LongJump extends Module {
                             int amplifier = mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getAmplifier();
                             baseSpeed *= (1.0D + 0.105D * (amplifier + 1));
                         }
-                        boolean bowMode = HypixelUtil.isInGame("PIT") || HypixelUtil.isInGame("UHC");
+                        boolean bowMode = bowOnly.getValue() || HypixelUtil.isInGame("PIT") || HypixelUtil.isInGame("UHC");
 
                         speed = ((boost * (bowMode ? 1 : 1)) + (0.0000000011324D * Math.random())) * baseSpeed;
                     }
@@ -575,11 +576,11 @@ public class LongJump extends Module {
 //                                }
                                 }
 
-                                if ((boolean) settings.get(C13PACKET).getValue() && bruhTick > 0 && (bruhTick % (20 * 6) == 0)) {
-                                    Bypass bypass = Client.getModuleManager().get(Bypass.class);
-                                    sendC13Packet();
-                                    distanceTraveled = 0;
-                                }
+//                                if ((boolean) settings.get(C13PACKET).getValue() && bruhTick > 0 && (bruhTick % (20 * 6) == 0)) {
+//                                    Bypass bypass = Client.getModuleManager().get(Bypass.class);
+//                                    sendC13Packet();
+//                                    distanceTraveled = 0;
+//                                }
                             }
                         }
 
@@ -643,23 +644,23 @@ public class LongJump extends Module {
         }
     }
 
-    private void sendC13Packet() {
-        if (mc.getIntegratedServer() == null && mc.getCurrentServerData() != null && (boolean) settings.get(C13PACKET).getValue()) {
-            if (mc.getCurrentServerData() != null && (mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net"))) {
-                PlayerCapabilities pc = mc.thePlayer.capabilities;
-                PlayerCapabilities spoofedCapabilities = new PlayerCapabilities();
-                spoofedCapabilities.isCreativeMode = pc.isCreativeMode;
-                spoofedCapabilities.disableDamage = pc.disableDamage;
-                spoofedCapabilities.allowEdit = pc.allowEdit;
-                spoofedCapabilities.allowFlying = true;
-                spoofedCapabilities.isFlying = true;
-                spoofedCapabilities.setFlySpeed(pc.getFlySpeed() * (float) (5 * Math.random()));
-                spoofedCapabilities.setPlayerWalkSpeed(pc.getWalkSpeed() * (float) (5 * Math.random()));
-
-                NetUtil.sendPacketNoEvents(new C13PacketPlayerAbilities(spoofedCapabilities));
-            }
-        }
-    }
+//    private void sendC13Packet() {
+//        if (mc.getIntegratedServer() == null && mc.getCurrentServerData() != null && (boolean) settings.get(C13PACKET).getValue()) {
+//            if (mc.getCurrentServerData() != null && (mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net"))) {
+//                PlayerCapabilities pc = mc.thePlayer.capabilities;
+//                PlayerCapabilities spoofedCapabilities = new PlayerCapabilities();
+//                spoofedCapabilities.isCreativeMode = pc.isCreativeMode;
+//                spoofedCapabilities.disableDamage = pc.disableDamage;
+//                spoofedCapabilities.allowEdit = pc.allowEdit;
+//                spoofedCapabilities.allowFlying = true;
+//                spoofedCapabilities.isFlying = true;
+//                spoofedCapabilities.setFlySpeed(pc.getFlySpeed() * (float) (5 * Math.random()));
+//                spoofedCapabilities.setPlayerWalkSpeed(pc.getWalkSpeed() * (float) (5 * Math.random()));
+//
+//                NetUtil.sendPacketNoEvents(new C13PacketPlayerAbilities(spoofedCapabilities));
+//            }
+//        }
+//    }
 
     public void sendPackets() {
         while (packetList.peek() != null) {

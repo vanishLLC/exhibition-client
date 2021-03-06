@@ -1113,18 +1113,17 @@ public class SkeetMenu extends UI {
                         if (module.getName().equalsIgnoreCase("Spotify")) {
                             yOff += 11;
                         }
+                        if(module.getName().equals("AutoMath")) {
+                            yOff -= 18.5;
+                        }
+                        if(module.getName().equals("BanStats")) {
+                            yOff -= 5.5;
+                        }
                         if (module.getName().equalsIgnoreCase("SilentView")) {
                             yOff += 7.5;
                         }
                         if (module.getName().equalsIgnoreCase("AutoOOF")) {
-                            yOff += 1.5;
-                        }
-                        if (module.getName().equalsIgnoreCase("ChatFilter")) {
-                            yOff -= 18.5;
-                        }
-                        if (module.getName().equalsIgnoreCase("NetInfo")) {
-                            //xOff = 50 + categoryButton.panel.x + 95;
-                            //yOff -= 38;
+                            yOff -= 11.5;
                         }
                         categoryPanel.buttons.add(new Button(categoryPanel, module.getName(), xOff + 0.5f, yOff + 10, module));
                         float x1 = 0.5f;

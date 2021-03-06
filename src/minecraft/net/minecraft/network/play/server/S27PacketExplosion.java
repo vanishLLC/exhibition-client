@@ -105,17 +105,17 @@ public class S27PacketExplosion implements Packet<INetHandlerPlayClient>
         handler.handleExplosion(this);
     }
 
-    public float func_149149_c()
+    public float getMotionX()
     {
         return this.xMotion;
     }
 
-    public float func_149144_d()
+    public float getMotionY()
     {
         return this.yMotion;
     }
 
-    public float func_149147_e()
+    public float getMotionZ()
     {
         return this.zMotion;
     }

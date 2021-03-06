@@ -11,13 +11,13 @@ public class LoginUtil {
 
     public static final File LOGIN = FileUtils.getConfigFile("Data");
 
-    public static int cachedLogin = -1;
+    public static int loginResponseHashCode = -1;
 
     public static void saveLogin(String encryptedUsername, String encryptedPassword) {
         List<String> fileContent = new ArrayList<>();
         fileContent.add(encryptedUsername);
         fileContent.add(encryptedPassword);
-        fileContent.add(String.valueOf(LoginUtil.cachedLogin));
+        fileContent.add(String.valueOf(LoginUtil.loginResponseHashCode));
         fileContent.add(Client.version);
         FileUtils.write(LOGIN, fileContent, true);
     }
@@ -26,7 +26,7 @@ public class LoginUtil {
         return FileUtils.read(LOGIN);
     }
 
-    public static int getCachedLogin() {
+    public static int getLoginResponseHashCode() {
         return getLoginInformation().isEmpty() ? -1 : Integer.parseInt(getLoginInformation().get(2));
     }
 

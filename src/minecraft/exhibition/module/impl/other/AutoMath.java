@@ -48,14 +48,14 @@ public class AutoMath extends Module {
         if (packet instanceof S02PacketChat) {
             S02PacketChat packetChat = (S02PacketChat) packet;
             String formatted = packetChat.getChatComponent().getFormattedText();
-            if (formatted.contains("Solve: ")) {
+            if (formatted.contains("Solve: ") && formatted.contains("\247d\247l") && formatted.contains("\247e") && StringUtils.stripControlCodes(formatted).contains("QUICK MATHS!")) {
                 try {
                     String cleanedUnformatted = StringUtils.stripHypixelControlCodes(StringUtils.stripControlCodes(formatted));
                     String calculate = cleanedUnformatted.split("Solve: ")[1].replace("x", "*").replace("÷", "/");
                     String result = String.valueOf(engine.eval(calculate.trim()));
-                    ChatUtil.printChat(Command.chatPrefix + "\247e" + result);
+                    ChatUtil.printChat(Command.chatPrefix + "Solving \247e" + calculate.trim() + "\2477 = \247e" + result);
                     chatQueue.add("/achat " + result);
-
+                    messageDelay.reset();
                 } catch (Exception ignored) {
                     ChatUtil.printChat(Command.chatPrefix + "\247cfailed to solve. " + ignored.getMessage());
                 }

@@ -14,7 +14,6 @@ import exhibition.module.impl.movement.Fly;
 import exhibition.module.impl.movement.LongJump;
 import exhibition.util.*;
 import exhibition.util.Timer;
-import exhibition.util.misc.ChatUtil;
 import exhibition.util.render.Colors;
 import net.minecraft.client.gui.GuiDisconnected;
 import net.minecraft.client.gui.GuiDownloadTerrain;
@@ -22,8 +21,6 @@ import net.minecraft.client.gui.GuiMultiplayer;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.multiplayer.GuiConnecting;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
@@ -33,7 +30,6 @@ import net.minecraft.network.play.client.C0FPacketConfirmTransaction;
 import net.minecraft.network.play.server.S2DPacketOpenWindow;
 import net.minecraft.network.play.server.S30PacketWindowItems;
 
-import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -79,7 +75,7 @@ public class Bypass extends Module {
     public boolean allowBypassing() {
         if (mc.thePlayer == null)
             return false;
-        return isEnabled() && (mc.thePlayer.isAllowEdit() || HypixelUtil.isInGame("HOUSING") || HypixelUtil.isInGame("ZOMBIE"));
+        return (isEnabled() || shouldSabotage()) && (mc.thePlayer.isAllowEdit() || HypixelUtil.isInGame("HOUSING") || HypixelUtil.isInGame("ZOMBIE"));
     }
 
     public void worldChange() {
@@ -107,44 +103,11 @@ public class Bypass extends Module {
 
     private String lastMode = null;
 
-    @RegisterEvent(events = {EventPacket.class, EventMotionUpdate.class, EventTick.class, EventScreenDisplay.class, EventRenderGui.class})
+    @RegisterEvent(events = {EventPacket.class, EventTick.class, EventScreenDisplay.class, EventRenderGui.class})
     public void onEvent(Event event) {
         if (mc.getIntegratedServer() != null)
             return;
 
-/*        if (event instanceof EventMotionUpdate) {
-            EventMotionUpdate em = event.cast();
-            if (em.isPre()) {
-
-                boolean dont = false;
-                Killaura aura = Client.getModuleManager().get(Killaura.class);
-                try {
-                    if (aura.target instanceof EntityPlayer && (boolean)aura.getSetting("ANTI-CF").getValue() && aura.hasEnchant(aura.target, "Retro")) {
-                        int criticalHits = ((EntityPlayer) aura.target).criticalHits;
-                        if (criticalHits == 0 || criticalHits >= 3 || aura.target.waitTicks > 0) {
-                            if (criticalHits == 0) {
-                                ((EntityPlayer) aura.target).criticalHits++;
-                            }
-                            dont = true;
-                        }
-                    }
-                } catch (Exception e) {
-
-                }
-
-                if(dont)
-                    return;
-
-                if (em.getY() == mc.thePlayer.posY && em.getY() % 0.015625 == 0) {
-                    em.setY(em.getY() + 0.00053424);
-                    em.setGround(false);
-                }
-
-                if (mc.thePlayer.motionY > 0.3 && mc.thePlayer.motionY < 0.35) {
-                    em.setGround(true);
-                }
-            }
-        }*/
         if (event instanceof EventTick) {
             // If bruh is not set or they're in a lobby and it's set, let them change it
             if (lastMode != null && bruh > 0 && allowBypassing()) {
@@ -162,6 +125,22 @@ public class Bypass extends Module {
                 }
             }
             lastMode = option.getSelected();
+
+            setSuffix(option.getSelected());
+            if (AUTOBYPASS.getValue()) {
+                if (mc.currentScreen == null && mc.thePlayer.ticksExisted > 25 && startMS == -1 && state == 0) {
+                    if (mc.thePlayer.inventory.getCurrentItem() != null && mc.thePlayer.inventory.getCurrentItem().getItem() != null) {
+                        Item item = mc.thePlayer.inventory.getCurrentItem().getItem();
+                        if (Item.getIdFromItem(item) == 345) {
+                            ItemStack itemstack1 = mc.thePlayer.inventory.getCurrentItem();
+                            startMS = System.currentTimeMillis();
+                            state = 1;
+                            mc.playerController.sendUseItem(mc.thePlayer, mc.theWorld, itemstack1);
+                        }
+                    }
+                }
+            }
+            return;
         }
 
         Fly fly = Client.getModuleManager().get(Fly.class).cast();
@@ -249,7 +228,7 @@ public class Bypass extends Module {
                                 this.bruh++;
 
                                 if (bruh > 5) {
-                                    event.setCancelled(true);
+                                    event.setCancelled(!shouldSabotage());
                                     if (Math.abs(packet.getUid() - lastUid) > 5 && packet.getUid() != -1) {
                                         chokePackets.add(packet);
                                         sendPackets();
@@ -296,7 +275,7 @@ public class Bypass extends Module {
                                         c13Timer.reset();
 
                                 } else {
-                                    event.setCancelled(true);
+                                    event.setCancelled(!shouldSabotage());
                                     C0FPacketConfirmTransaction confirmTransaction = new C0FPacketConfirmTransaction(packet.getWindowId(), packet.getUid(), packet.getAccepted());
                                     this.packetList.add(new BruhPacket(confirmTransaction, Math.max(250, DELAY.getValue().longValue())));
 
@@ -316,7 +295,7 @@ public class Bypass extends Module {
                                 }
                                 lastUid = packet.getUid();
                             } else {
-                                event.setCancelled(true);
+                                event.setCancelled(!shouldSabotage());
                                 this.packetList.add(new BruhPacket(packet, Math.max(250, DELAY.getValue().longValue())));
                             }
                         }
@@ -363,7 +342,7 @@ public class Bypass extends Module {
                                         DevNotifications.getManager().post("\247aSent last bruh B \247e" + mc.thePlayer.ticksExisted);
                                     sendPackets();
                                 }
-                                event.setCancelled(true);
+                                event.setCancelled(!shouldSabotage());
                                 chokePackets.add(packet);
                                 if (debug)
                                     DevNotifications.getManager().post("\247eChoking \247c" + packet.getUid() + " \247e" + mc.thePlayer.ticksExisted);
@@ -371,7 +350,7 @@ public class Bypass extends Module {
                                     bruh++;
                                 }
                             } else {
-                                event.setCancelled(true);
+                                event.setCancelled(!shouldSabotage());
                                 chokePackets.add(packet);
                                 if (c13Timer.delay(1000) && lastSentUid != 2) {
                                     if (debug)
@@ -413,7 +392,7 @@ public class Bypass extends Module {
                             this.bruh++;
 
                             if (bruh > 10) {
-                                event.setCancelled(true);
+                                event.setCancelled(!shouldSabotage());
 
                                 if (Math.abs(packet.getUid() - lastUid) > 5 && packet.getUid() != -1) {
                                     C0FPacketConfirmTransaction confirmTransaction = new C0FPacketConfirmTransaction(packet.getWindowId(), packet.getUid(), packet.getAccepted());
@@ -504,23 +483,6 @@ public class Bypass extends Module {
                 GlStateManager.popMatrix();
             }
         }
-
-        if (event instanceof EventTick) {
-            setSuffix(option.getSelected());
-            if (AUTOBYPASS.getValue()) {
-                if (mc.currentScreen == null && mc.thePlayer.ticksExisted > 25 && startMS == -1 && state == 0) {
-                    if (mc.thePlayer.inventory.getCurrentItem() != null && mc.thePlayer.inventory.getCurrentItem().getItem() != null) {
-                        Item item = mc.thePlayer.inventory.getCurrentItem().getItem();
-                        if (Item.getIdFromItem(item) == 345) {
-                            ItemStack itemstack1 = mc.thePlayer.inventory.getCurrentItem();
-                            startMS = System.currentTimeMillis();
-                            state = 1;
-                            mc.playerController.sendUseItem(mc.thePlayer, mc.theWorld, itemstack1);
-                        }
-                    }
-                }
-            }
-        }
         if (event instanceof EventScreenDisplay) {
             EventScreenDisplay esd = event.cast();
             if (esd.getGuiScreen() instanceof GuiConnecting || esd.getGuiScreen() instanceof GuiDownloadTerrain || esd.getGuiScreen() instanceof GuiMultiplayer || esd.getGuiScreen() instanceof GuiDisconnected) {
@@ -544,6 +506,10 @@ public class Bypass extends Module {
             DevNotifications.getManager().post("\247b\247lSent " + sent);
         }
         this.resetPackets();
+    }
+
+    public static boolean shouldSabotage() {
+        return HypixelUtil.sabotage;
     }
 
     public void resetPackets() {

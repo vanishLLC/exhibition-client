@@ -2,36 +2,18 @@ package exhibition.util.security;
 
 public class BruhClass2 {
 
-    public static String _17() { return "Cd/H"; }
-    public static String _116() { return "Fh+p"; }
-    public static String _143() { return "YWte"; }
-    public static String _127() { return "GEnV"; }
-    public static String _24() { return "EN4U"; }
-    public static String _102() { return "QxDJ"; }
-    public static String _42() { return "eBNT"; }
-    public static String _64() { return "4TTi"; }
-    public static String _104() { return "X2eq"; }
-    public static String _139() { return "4EGL"; }
-    public static String _113() { return "Rtio"; }
-    public static String _34() { return "J54Y"; }
-    public static String _38() { return "lXLf"; }
-    public static String _152() { return "nlVb"; }
-    public static String _26() { return "i4WW"; }
-    public static String _57() { return "/RhP"; }
-    public static String _16() { return "OTEe"; }
-    public static String _80() { return "2DLP"; }
-    public static String _74() { return "yPIl"; }
-    public static String _14() { return "123E"; }
-    public static String _122() { return "wQQj"; }
-    public static String _158() { return "ga8R"; }
-    public static String _157() { return "zIbQ"; }
-    public static String _23() { return "mjQH"; }
-    public static String _33() { return "2u51"; }
-    public static String _145() { return "7r7Y"; }
-    public static String _50() { return "n9EU"; }
-    public static String _60() { return "2cR3"; }
-    public static String _77() { return "DQqo"; }
-    public static String _163() { return "r5RN"; }
-    public static String _109() { return "7Nk+"; }
+    public static String _44() { return "1wuEn8Wzj3SGYTDv5H7X"; }
+    public static String _12() { return "QOxQIVkTQBvPfW7iunBo"; }
+    public static String _39() { return "N45hoeUDQnBWMpbMnOb8"; }
+    public static String _49() { return "KDlFO10Qw3Cco0gBSZx3"; }
+    public static String _25() { return "FCTGRsaV7L2mn1QtXhue"; }
+    public static String _32() { return "gr+fJ9h6DeDYL9sw4KRd"; }
+    public static String _33() { return "w5aWl4drMJU1hpFLFJgI"; }
+    public static String _29() { return "jf29sfz+YmIwRouSsElV"; }
+    public static String _3() { return "kT1k6W200ziak3qxnl6U"; }
+    public static String _15() { return "/r+kk2SNaeDmEQuQdx+Q"; }
+    public static String _6() { return "igiWl6dh1K2C8OQkkljX"; }
+    public static String _4() { return "QjqgQbCPmjA/03zzrhmY"; }
+    public static String _47() { return "7Z77+kOtoEjBqhKH77o6"; }
 
 }

@@ -929,9 +929,9 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
         PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
         Explosion explosion = new Explosion(this.gameController.theWorld, (Entity) null, packetIn.getX(), packetIn.getY(), packetIn.getZ(), packetIn.getStrength(), packetIn.getAffectedBlockPositions());
         explosion.doExplosionB(true);
-        this.gameController.thePlayer.motionX += (double) packetIn.func_149149_c();
-        this.gameController.thePlayer.motionY += (double) packetIn.func_149144_d();
-        this.gameController.thePlayer.motionZ += (double) packetIn.func_149147_e();
+        this.gameController.thePlayer.motionX += (double) packetIn.getMotionX();
+        this.gameController.thePlayer.motionY += (double) packetIn.getMotionY();
+        this.gameController.thePlayer.motionZ += (double) packetIn.getMotionZ();
     }
 
     /**

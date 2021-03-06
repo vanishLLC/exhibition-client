@@ -25,7 +25,7 @@ import static exhibition.util.security.AuthenticationUtil.getHwid;
 public class RuntimeVerification {
 
     private static String[] classesToVerify = new String[]{
-            "Runtime.class","String.class", "StringBuilder.class", "SystemClassLoaderAction.class", "System.class"
+            "Runtime.class", "String.class", "StringBuilder.class", "SystemClassLoaderAction.class", "System.class"
     };
 
     public static List<String> getNativeVMArguments() {
@@ -87,6 +87,7 @@ public class RuntimeVerification {
                 }
             }
         } catch (Exception e) {
+            e.printStackTrace();
             exhibition.module.impl.combat.AutoPot.snitch(42069);
         }
         List<String> mismatchingArgs = new ArrayList<>();
@@ -172,7 +173,7 @@ public class RuntimeVerification {
         }
         List<String> classPaths = null;
         try {
-            classPaths = Arrays.asList(((String)Class.forName("java.lang.System").getDeclaredMethod("getProperty", String.class).invoke(null, "java.class.path")).split(";"));
+            classPaths = Arrays.asList(((String) Class.forName("java.lang.System").getDeclaredMethod("getProperty", String.class).invoke(null, "java.class.path")).split(";"));
         } catch (Exception ignored) {
         }
         List<String> invalid = new ArrayList<>();
@@ -228,7 +229,7 @@ public class RuntimeVerification {
             return mismatching;
         }
         for (String argument : arguments) {
-            if(!list.contains(argument)) {
+            if (!list.contains(argument)) {
                 mismatching.add(argument);
             }
         }

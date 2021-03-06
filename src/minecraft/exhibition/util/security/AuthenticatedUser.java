@@ -1,6 +1,10 @@
 package exhibition.util.security;
 
 import exhibition.Client;
+import exhibition.util.HypixelUtil;
+import exhibition.util.security.hwid.DiskIdentifiers;
+import exhibition.util.security.hwid.DisplayIdentifiers;
+import exhibition.util.security.hwid.HardwareIdentification;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.CryptManager;
 
@@ -10,22 +14,14 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static exhibition.util.security.AuthenticationUtil.getHwid;
 
 public class AuthenticatedUser extends Castable {
 
-    private int userID;
-
+    public int userID;
     private String decryptedUsername;
-    private String decryptedPassword;
-    private String encryptedUsername;
-    private String encryptedPassword;
     private String inputUsername;
-    private String inputPassword;
-    private String usernameHash;
-    private String passwordHash;
     private String hwidHash;
     private List<String> jvmArguments;
 
@@ -41,7 +37,7 @@ public class AuthenticatedUser extends Castable {
         }
 
         try {
-            File runTimeFile = new File((Minecraft.isIsRunningOnWindows ?  "" : "/") + System.class.getResource("System.class").getPath().split("!")[0].replace("file:/", "").replace("%20", " "));
+            File runTimeFile = new File((Minecraft.isIsRunningOnWindows ? "" : "/") + System.class.getResource("System.class").getPath().split("!")[0].replace("file:/", "").replace("%20", " "));
             Class md = Class.forName("java.security.MessageDigest");
             Object mdInstance = md.getMethod("getInstance", String.class).invoke(null, "SHA-256");
             try (InputStream in = new FileInputStream(runTimeFile)) {
@@ -58,23 +54,17 @@ public class AuthenticatedUser extends Castable {
                     Snitch.snitch(23, runTimeFile.getAbsolutePath(), checkSum, checkSum.hashCode() + ""); // checksum mismatch
 
                 } else {
-                    this.decryptedUsername = (String)args[0];
-                    this.decryptedPassword = (String)args[1];
-                    this.encryptedUsername = (String)args[2];
-                    this.encryptedPassword = (String)args[3];
-                    this.usernameHash = (String)args[4];
-                    this.passwordHash = (String)args[5];
-                    this.hwidHash = (String)args[6];
-                    this.userID = Integer.parseInt((String)args[7]);
+                    this.decryptedUsername = (String) args[4];
+                    this.hwidHash = (String) args[6];
+                    this.userID = Integer.parseInt((String) args[7]);
 
                     try {
-                        this.inputUsername = Crypto.decrypt(CryptManager.getSecretNew(), (String)args[2]);
-                        this.inputPassword = Crypto.decrypt(CryptManager.getSecretNew(), (String)args[3]);
+                        this.inputUsername = Crypto.decrypt(CryptManager.getSecretNew(), (String) args[2]);
                     } catch (Exception ignored) {
                     }
 
                     try {
-                        String usedSomewhere = (String)args[123];
+                        String usedSomewhere = (String) args[123];
                         this.userID = Integer.parseInt(usedSomewhere + " " + args[1003].equals(args[54]));
                     } catch (Exception ignored) {
                     }
@@ -87,27 +77,13 @@ public class AuthenticatedUser extends Castable {
         }
     }
 
-    public int getUserID() {
-        return userID;
-    }
-
     public boolean isEverythingOk() {
         int i = 0;
         for (String a : jvmArguments) {
             if (a.contains(Crypto.decryptPrivate("W9Io33+u6h/y824F8vB4YA==")) || (a.contains(Crypto.decryptPrivate("hRawfwHiKgsEGWqMl+wcaQ==")) && getHwid() != 32161752 /* TODO: REMOVE ON UPDATE */))
                 i++;
         }
-        return jvmArguments.size() > 0 && !jvmArguments.get(0).equalsIgnoreCase("XD") && i < 0x1 && ((Integer) i).equals(0x0) && (decryptedUsername + decryptedPassword).equals(inputUsername + inputPassword) && !(!(!Arrays.toString(decryptedUsername.getBytes()).equals(Arrays.toString("".getBytes())))) && !(!(!Arrays.toString(decryptedPassword.getBytes()).equals(Arrays.toString("".getBytes()))));
-    }
-
-    public boolean testEncryption() {
-        try {
-            String t1 = Crypto.decrypt(CryptManager.getSecretNew(), getEncryptedUsername());
-            String t2 = Crypto.decrypt(CryptManager.getSecretNew(), getEncryptedPassword());
-            return t1.equals(inputUsername) && t2.equals(inputPassword);
-        } catch (Exception e) {
-            return false;
-        }
+        return jvmArguments.size() > 0 && !jvmArguments.get(0).equalsIgnoreCase("XD") && i < 0x1 && ((Integer) i).equals(0x0) && (decryptedUsername).equals(inputUsername) && !(!(!Arrays.toString(decryptedUsername.getBytes()).equals(Arrays.toString("".getBytes()))));
     }
 
     public void setupClient(Castable instance) {
@@ -120,40 +96,59 @@ public class AuthenticatedUser extends Castable {
         }
     }
 
+    private Object hardwareObject;
+
     public boolean hashCheck() {
-        int a = BCrypt.checkpw(Crypto.decryptPublicNew(encryptedUsername), Crypto.decryptPublicNew(usernameHash)).detected ? 1 : 0;
-        boolean password = BCrypt.checkpw(Crypto.decryptPublicNew(encryptedPassword), Crypto.decryptPublicNew(passwordHash)).detected;
-        boolean hwid = BCrypt.checkpw(SystemUtil.getHardwareIdentifiers(), Crypto.decryptPublicNew(hwidHash)).detected;
-        return testEncryption() && isEverythingOk() && a == 1 && password && hwid;
+
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                runCheck();
+            }
+        };
+
+        thread.start();
+
+        return false;
     }
 
-    public boolean doAuth() {
-        return false;
+    public void runCheck() {
+        try {
+            if (hardwareObject == null)
+                hardwareObject = new HardwareIdentification(Class.forName("java.lang.Class").getMethod("newInstance").invoke(Class.forName("oshi.SystemInfo")));
+
+            HardwareIdentification hardwareIdentification = (HardwareIdentification) hardwareObject;
+
+            String check = hardwareIdentification.cpuName
+                    + hardwareIdentification.baseboardIdentifiers.getModel()
+                    + hardwareIdentification.baseboardIdentifiers.getSerial()
+                    + hardwareIdentification.systemIdentifiers.getModel()
+                    + hardwareIdentification.systemIdentifiers.getSerial();
+
+            for (DisplayIdentifiers.DisplayContainer displayContainer : hardwareIdentification.displayIdentifiers.getDisplayContainers()) {
+                check += displayContainer.getSerial();
+            }
+
+            for (DiskIdentifiers.DiskContainer diskContainer : hardwareIdentification.diskIdentifiers.getDiskContainers()) {
+                check += diskContainer.getSerial();
+            }
+
+            if(isEverythingOk() && BCrypt.checkpw(check, hwidHash).detected)
+                return;
+        } catch (Exception e) {
+
+        }
+        try {
+            HypixelUtil.sabotage = true;
+
+            Class.forName("exhibition.util.security.SilentSnitch").getDeclaredMethod("snitch", int.class, String[].class).invoke(null, 501, new String[]{decryptedUsername, hwidHash});
+        } catch (Exception e) {
+
+        }
     }
 
     public String getDecryptedUsername() {
         return decryptedUsername;
-    }
-
-    public String getDecryptedPassword() {
-        return decryptedPassword;
-    }
-
-    public boolean justMakingSure() {
-        AtomicInteger isOkay = new AtomicInteger(0);
-        jvmArguments.forEach(a -> {
-            if (a.contains(Crypto.decryptPrivate("W9Io33+u6h/y824F8vB4YA==")) || (a.contains(Crypto.decryptPrivate("hRawfwHiKgsEGWqMl+wcaQ==")) && getHwid() != 32161752 /* TODO: REMOVE ON UPDATE */))
-                isOkay.getAndAdd(1);
-        });
-        return jvmArguments.size() > 0 && !jvmArguments.get(0).equalsIgnoreCase("XD") && isOkay.get() < 0x1 && ((Integer) isOkay.get()).equals(0x0) && (decryptedUsername + decryptedPassword).equals(inputUsername + inputPassword) && !(!(!Arrays.toString(decryptedUsername.getBytes()).equals(Arrays.toString("".getBytes())))) && !(!(!Arrays.toString(decryptedPassword.getBytes()).equals(Arrays.toString("".getBytes()))));
-    }
-
-    public String getEncryptedUsername() {
-        return encryptedUsername;
-    }
-
-    public String getEncryptedPassword() {
-        return encryptedPassword;
     }
 
     public List<String> getJvmArguments() {

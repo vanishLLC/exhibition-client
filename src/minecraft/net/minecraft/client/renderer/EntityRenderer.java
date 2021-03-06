@@ -880,7 +880,7 @@ public class EntityRenderer implements IResourceManagerReloadListener
 
         this.hurtCameraEffect(partialTicks);
 
-        if (this.mc.gameSettings.viewBobbing && ((Speed)Client.getModuleManager().get(Speed.class)).shouldBob())
+        if (this.mc.gameSettings.viewBobbing)
         {
             this.setupViewBobbing(partialTicks);
         }
@@ -975,7 +975,7 @@ public class EntityRenderer implements IResourceManagerReloadListener
                 GlStateManager.pushMatrix();
                 this.hurtCameraEffect(p_renderHand_1_);
 
-                if (this.mc.gameSettings.viewBobbing && ((Speed)Client.getModuleManager().get(Speed.class)).shouldBob())
+                if (this.mc.gameSettings.viewBobbing)
                 {
                     this.setupViewBobbing(p_renderHand_1_);
                 }
@@ -1015,7 +1015,7 @@ public class EntityRenderer implements IResourceManagerReloadListener
                 this.hurtCameraEffect(p_renderHand_1_);
             }
 
-            if (this.mc.gameSettings.viewBobbing && ((Speed)Client.getModuleManager().get(Speed.class)).shouldBob())
+            if (this.mc.gameSettings.viewBobbing)
             {
                 this.setupViewBobbing(p_renderHand_1_);
             }

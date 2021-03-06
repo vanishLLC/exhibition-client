@@ -214,8 +214,7 @@ public class AutoPot extends Module {
                             } else if (!mode.selected.equals("Jump Only")) {
                                 haltTicks = -1;
                                 swap(potionSlot, 6);
-                                if (splashPot)
-                                    e.setPitch(88.9F);
+                                e.setPitch(88.9F);
                                 potting = true;
                             }
                         }
@@ -271,17 +270,18 @@ public class AutoPot extends Module {
                 }
                 haltTicks--;
             } else {
-                if (potting && (timer.delay(delay)) && haltTicks <= 0) {
+                if (potting && (timer.delay(delay)) && haltTicks <= -1) {
                     if (splashPot && !mode.getSelected().equals("Jump Only")) {
                         if (mc.thePlayer.isBlocking()) {
                             NetUtil.sendPacketNoEvents(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
                         }
 
+                        int lastItem = mc.thePlayer.inventory.currentItem;
                         NetUtil.sendPacketNoEvents(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem = 6));
                         if (mc.playerController.sendUseItem(mc.thePlayer, mc.theWorld, mc.thePlayer.inventory.getCurrentItem())) {
                             mc.entityRenderer.itemRenderer.resetEquippedProgress2();
                         }
-                        NetUtil.sendPacketNoEvents(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem = 6));
+                        NetUtil.sendPacketNoEvents(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem = lastItem));
                         if (mc.thePlayer.isBlocking()) {
                             NetUtil.sendPacket(new C08PacketPlayerBlockPlacement(mc.thePlayer.getCurrentEquippedItem()));
                         }
@@ -363,17 +363,14 @@ public class AutoPot extends Module {
     }
 
     public boolean shouldPreSplash() {
-        for (Entity entity : mc.theWorld.getLoadedEntityList()) {
-            if (!(entity instanceof EntityPlayer) || entity instanceof EntityPlayerSP)
+        // Only check players
+        for (EntityPlayer player : mc.theWorld.playerEntities) {
+            if (player instanceof EntityPlayerSP)
                 continue;
 
-
-            EntityPlayer player = (EntityPlayer) entity;
-
-            if (PriorityManager.isPriority(player) && mc.thePlayer.getDistanceToEntity(player) <= 15) {
-
+            double currentDistance = mc.thePlayer.getDistance(player.posX, mc.thePlayer.posY, player.posZ);
+            if (PriorityManager.isPriority(player) && currentDistance <= 15) {
                 double previousDistance = mc.thePlayer.getDistance(player.lastTickPosX, mc.thePlayer.posY, player.lastTickPosZ);
-                double currentDistance = mc.thePlayer.getDistance(player.posX, mc.thePlayer.posY, player.posZ);
                 if (currentDistance != previousDistance && previousDistance > currentDistance && currentDistance <= 15) {
                     return true;
                 }
@@ -467,7 +464,7 @@ public class AutoPot extends Module {
                                         for (Entity entity : mc.theWorld.getLoadedEntityList()) {
                                             if (!(entity instanceof EntityPlayer) || entity instanceof EntityPlayerSP)
                                                 continue;
-                                            if (!AntiBot.isBot(entity) && !FriendManager.isFriend(entity.getName()) && mc.thePlayer.getDistanceToEntity(entity) <= 10) {
+                                            if (!AntiBot.isBot(entity) && !FriendManager.isFriend(entity.getName()) && mc.thePlayer.getDistanceToEntity(entity) <= 15) {
                                                 noPlayersNearby = false;
                                                 break;
                                             }
@@ -476,7 +473,7 @@ public class AutoPot extends Module {
 
                                     if (!mc.thePlayer.isPotionActive(Potion.damageBoost) && (shouldPreSplash || (dumbStrengthThing() && !noPlayersNearby))) {
                                         pot = i;
-                                        splashPot = true;
+                                        splashPot = false;
                                     }
                                 }
                             }

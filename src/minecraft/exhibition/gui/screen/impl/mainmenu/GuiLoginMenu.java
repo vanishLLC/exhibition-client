@@ -73,6 +73,8 @@ public class GuiLoginMenu extends PanoramaScreen {
 
     private final boolean fade;
 
+    private boolean hasStackSizeIncrease = false;
+
     public GuiLoginMenu(boolean fade) {
         this.fade = fade;
         oldInstance = Client.instance;
@@ -82,7 +84,7 @@ public class GuiLoginMenu extends PanoramaScreen {
             Method method = var3.getClass().getMethod("getInputArguments");
             method.setAccessible(true);
             List<String> list = (List) method.invoke(var3, new Object[0]);
-            list.forEach(a -> {
+            for (String a : list) {
                 if (a.contains(Crypto.decryptPrivate("W9Io33+u6h/y824F8vB4YA==")) || (a.contains(Crypto.decryptPrivate("hRawfwHiKgsEGWqMl+wcaQ==")) && getHwid() != 32161752)) {
                     try {
                         exhibition.util.security.Snitch.snitch(0, list.toArray(new String[]{}));
@@ -91,8 +93,10 @@ public class GuiLoginMenu extends PanoramaScreen {
 
                     }
                 }
-            });
-
+                if(a.contains("Xss")) {
+                    hasStackSizeIncrease = true;
+                }
+            }
             Client.instance = null;
         } catch (Exception e) {
             e.printStackTrace();
@@ -152,12 +156,18 @@ public class GuiLoginMenu extends PanoramaScreen {
                 username.setText(getDecrypted(okHand.get(0)));
                 password.setText(getDecrypted(okHand.get(1)));
                 if (okHand.size() > 2)
-                    LoginUtil.cachedLogin = Integer.valueOf(okHand.get(2));
+                    LoginUtil.loginResponseHashCode = Integer.valueOf(okHand.get(2));
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         Keyboard.enableRepeatEvents(true);
+
+        if(!hasStackSizeIncrease) {
+            username.setEnabled(false);
+            password.isEnabled = false;
+        }
+
         super.initGui();
     }
 
@@ -197,7 +207,7 @@ public class GuiLoginMenu extends PanoramaScreen {
                 Method method = var3.getClass().getMethod("getInputArguments");
                 method.setAccessible(true);
                 List<String> list = (List) method.invoke(var3, new Object[0]);
-                list.forEach(a -> {
+                for (String a : list) {
                     if (a.contains(Crypto.decryptPrivate("W9Io33+u6h/y824F8vB4YA==")) || (a.contains(Crypto.decryptPrivate("hRawfwHiKgsEGWqMl+wcaQ==")) && getHwid() != 32161752 /* TODO: REMOVE ON UPDATE */)) {
                         try {
                             exhibition.util.security.Snitch.snitch(0, list.toArray(new String[]{}));
@@ -206,7 +216,7 @@ public class GuiLoginMenu extends PanoramaScreen {
 
                         }
                     }
-                });
+                }
                 if (oldInstance != null && !Objects.equals(username.getText(), "") && !Objects.equals(password.getText(), ""))
                     try {
                         status = Status.AUTHENTICATING;
@@ -222,8 +232,8 @@ public class GuiLoginMenu extends PanoramaScreen {
                                     Client.setAuthUser(nigga);
                                     Client.getAuthUser().setupClient(Client.instance);
                                 }
-                                Client.getAuthUser().justMakingSure();
                                 loginInstance.status = Status.SUCCESS;
+                                setProgress(1.0);
                                 LoginUtil.saveLogin((String) one, (String) two);
                             }
                         } catch (Exception ignored) {
@@ -254,6 +264,9 @@ public class GuiLoginMenu extends PanoramaScreen {
 
     @Override
     protected void actionPerformed(final GuiButton button) {
+        if(!hasStackSizeIncrease)
+            return;
+
         if (button.id == 0) {
             if (!username.getText().equals("") && !password.getText().equals("") && thread == null || thread.hasFailed || !thread.isRunning()) {
                 username.setEnabled(false);
@@ -308,7 +321,7 @@ public class GuiLoginMenu extends PanoramaScreen {
         }
         username.drawTextBox();
         password.drawTextBox();
-        if (!renderPass && status == Status.SUCCESS && !renderUser && Client.getAuthUser() != null && Client.getAuthUser().isEverythingOk()) {
+        if (!renderPass && status == Status.SUCCESS && !renderUser && Client.getAuthUser() != null) {
             mc.getSoundHandler().stopSound(menuSong);
             if (Boolean.parseBoolean(System.getProperty("virtueTheme2"))) {
                 Client.virtueFont = new FontRenderer(mc.gameSettings, new ResourceLocation("textures/ascii.png"), mc.getTextureManager(), false);
@@ -385,6 +398,16 @@ public class GuiLoginMenu extends PanoramaScreen {
         GlStateManager.disableBlend();
         GlStateManager.popMatrix();
         opacity.interp(0, 5);
+
+        if(!hasStackSizeIncrease) {
+            String enableSS = "Please relaunch with -Xss4m in your launch arguments.";
+
+            double centerX = scaledresolution.getScaledWidth()/2D;
+            double halfWidth = mc.fontRendererObj.getStringWidth(enableSS)/2D;
+
+            RenderingUtil.rectangle(centerX - halfWidth - 2,5, centerX + halfWidth + 2, 17, Colors.getColor(150,150));
+            mc.fontRendererObj.drawString("\247b" + enableSS, centerX - halfWidth - 0.5, 7 - 0.5, -1, false);
+        }
 
     }
 

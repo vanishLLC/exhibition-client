@@ -31,13 +31,14 @@ public class Translate {
     }
 
     public void updatePos(double targetX, double targetY, double speed) {
+        long currentMS = System.currentTimeMillis();
+        long delta = currentMS - lastMS;//16.66666
+        lastMS = currentMS;
+
         if(this.x == targetX && this.y == targetY) {
             return;
         }
 
-        long currentMS = System.currentTimeMillis();
-        long delta = currentMS - lastMS;//16.66666
-        lastMS = currentMS;
         x = AnimationUtil.calculateCompensation(targetX, x, delta, speed);
         y = AnimationUtil.calculateCompensation(targetY, y, delta, speed);
     }

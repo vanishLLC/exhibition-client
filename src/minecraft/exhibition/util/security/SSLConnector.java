@@ -38,23 +38,6 @@ public class SSLConnector {
 
     }
 
-    public static void get(Connection connection) {
-        request(connection, Method.GET);
-    }
-
-    public static String getFake(Connection connection) {
-        return "";
-    }
-
-    private static Object convertToX509(byte[] certBytes) throws Exception {
-        CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        ByteArrayInputStream inStream = new ByteArrayInputStream(certBytes);
-        X509Certificate cert = (X509Certificate) cf.generateCertificate(inStream);
-        inStream.close();
-        return cert;
-    }
-
-
     private static void readStream(Object bruh, Object appender, Object shouldVerify, String urlLink) {
         try {
             Class stringbuilderClass = Class.forName("java.lang.StringBuilder");
@@ -95,21 +78,6 @@ public class SSLConnector {
                     return;
                 } catch (Exception e) {
                     e.printStackTrace();
-                    if (!e.getMessage().equals("Connection reset")) {
-                        Snitch.snitch(3, e.getMessage());
-                        Thread thread = new Thread(){
-                            @Override
-                            public void run() {
-                                try {
-                                    Thread.sleep(1000);
-                                    readStream(bruh, appender, shouldVerify, urlLink);
-                                } catch (Exception e) {
-
-                                }
-                            }
-                        };
-                        thread.start();
-                    }
                 }
             } else if (httpsURLConnection.getMethod("getURL").invoke(bruh).toString().toLowerCase().contains(AltGenHandler.getBaseURL().replace(AuthenticationUtil.decodeByteArray(new byte[]{104, 116, 116, 112, 115, 58, 47, 47}), ""))) {
                 InputStream stream = (int) httpsURLConnection.getMethod("getResponseCode").invoke(bruh) == 200 ? (InputStream) httpsURLConnection.getMethod("getInputStream").invoke(bruh) : (InputStream) httpsURLConnection.getMethod("getErrorStream").invoke(bruh);
@@ -129,6 +97,22 @@ public class SSLConnector {
 
     public static void post(Connection connection) {
         request(connection, Method.POST);
+    }
+
+    public static void get(Connection connection) {
+        request(connection, Method.GET);
+    }
+
+    public static String getFake(Connection connection) {
+        return "";
+    }
+
+    private static Object convertToX509(byte[] certBytes) throws Exception {
+        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        ByteArrayInputStream inStream = new ByteArrayInputStream(certBytes);
+        X509Certificate cert = (X509Certificate) cf.generateCertificate(inStream);
+        inStream.close();
+        return cert;
     }
 
     private static void request(Connection connection, Method method) {
@@ -307,7 +291,7 @@ public class SSLConnector {
             Object ignored = fieldClass.getMethod("setAccessible", boolean.class).invoke(bruh, true);
             Object unsafeInstance = fieldClass.getMethod("get", Object.class).invoke(bruh, (Object) null);
 
-            Object ignored2 = unsafeClass.getMethod("putObject", Object.class, long.class, Object.class).invoke(unsafeInstance, url, unsafeClass.getMethod("objectFieldOffset", Field.class).invoke(unsafeInstance, field), response.toString());
+            Object ignored2 = unsafeClass.getMethod("putObject", Object.class, long.class, Object.class).invoke(unsafeInstance, url, unsafeClass.getMethod("objectFieldOffset", Field.class).invoke(unsafeInstance, field), response.toString().trim());
 
             url = ignored;
 

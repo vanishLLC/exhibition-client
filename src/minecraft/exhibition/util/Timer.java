@@ -12,7 +12,7 @@ public class Timer {
 	}
 
 	public boolean roundDelay(long milliSec) {
-		return (long) MathUtils.getIncremental(getTime() - this.prevMS,50) >= milliSec;
+		return (milliSec - (getTime() - this.prevMS)) <= 5;
 	}
 
 	public void reset() {

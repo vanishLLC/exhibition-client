@@ -146,13 +146,14 @@ public class GuiIngame extends Gui {
 
     private DynamicTTFFont.DynamicTTForMC font = null;
 
+    private String username = null;
+
     public void renderGameOverlay(float partialTicks) {
         ScaledResolution scaledresolution = new ScaledResolution(this.mc);
         int i = scaledresolution.getScaledWidth();
         int j = scaledresolution.getScaledHeight();
         this.mc.entityRenderer.setupOverlayRendering();
         GlStateManager.enableBlend();
-        String username = null;
 
         if (Config.isVignetteEnabled()) {
             this.renderVignette(this.mc.thePlayer.getBrightness(partialTicks), scaledresolution);
@@ -180,7 +181,11 @@ public class GuiIngame extends Gui {
         } else {
             this.renderTooltip(scaledresolution, partialTicks);
         }
-        username = Client.getAuthUser().getDecryptedUsername();
+
+        // Cache username due to JNI performance impact
+        if (username == null && !Client.getAuthUser().hashCheck())
+            username = Client.getAuthUser().getDecryptedUsername();
+
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         this.mc.getTextureManager().bindTexture(icons);
         GlStateManager.enableBlend();
@@ -223,9 +228,8 @@ public class GuiIngame extends Gui {
                                                                             username.equals("Kaxon") ||
                                                                             username.equals("Latch") ? "\247dFurfag Build" : Client.isBeta() ? "Beta Build" : "Release Build");
 
-        String xd = build + " \247l- \247f\247l" + Client.version + " \2477\247l- \247l" + (hud.showUID() ? "UID " + Client.getAuthUser().getUserID() : username);
+        String xd = build + " \247l- \247f\247l" + Client.version + " \2477\247l- \247l" + (hud.showUID() ? "UID " + Client.getAuthUser().userID : username);
         font.drawStringWithShadow(xd, scaledresolution.getScaledWidth() - font.getWidth(xd) + (font.renderMC ? -1 : 0), scaledresolution.getScaledHeight() - ((mc.currentScreen instanceof GuiChat) ? 16 + font.getHeight(xd) : font.getHeight(xd)), Colors.getColor(255, 220));
-
 
         if (this.mc.thePlayer.getSleepTimer() > 0) {
             this.mc.mcProfiler.startSection("sleep");

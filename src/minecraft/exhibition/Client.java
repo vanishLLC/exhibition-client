@@ -29,10 +29,8 @@ import exhibition.management.notifications.dev.DevNotifications;
 import exhibition.management.waypoints.WaypointManager;
 import exhibition.module.Module;
 import exhibition.module.ModuleManager;
-import exhibition.module.impl.combat.Killaura;
 import exhibition.util.HypixelUtil;
 import exhibition.util.MathUtils;
-import exhibition.util.PlayerUtil;
 import exhibition.util.Timer;
 import exhibition.util.misc.ChatUtil;
 import exhibition.util.security.*;
@@ -77,7 +75,7 @@ public class Client extends Castable implements EventListener {
     public static boolean isNewUser;
 
     // Client data
-    public static String version = "022121";
+    public static String version = "030221";
     public static String parsedVersion;
     public static String clientName = "ArthimoWare";
     public static ColorManager cm = new ColorManager();
@@ -90,7 +88,7 @@ public class Client extends Castable implements EventListener {
     public static SSLVerification sslVerification = new SSLVerification();
 
     // Managers
-    private final ModuleManager<Module> moduleManager;
+    private ModuleManager<Module> moduleManager;
 
     private static FileManager fileManager;
     private static ClickGui clickGui;
@@ -136,7 +134,26 @@ public class Client extends Castable implements EventListener {
     public String hypixelApiKey = null;
 
     public Client(Object[] args) {
+        init(args);
+        // Client.mojang.connect();
+    }
+
+    // ([Ljava/lang/Object;)[LJava/lang/Object;
+    public Object[] init(Object[] args) {
         try {
+            // TODO: ADD BEFORE UPDATE
+            if (getHwid() != 32161752) {
+//                Object custom = Class.forName("net.minecraft.util.LoggingPrintStream").
+//                        getConstructor(String.class, Class.forName("java.io.OutputStream")).
+//                        newInstance("", unsafeClass.getMethod("getObject", Object.class, long.class).
+//                                invoke(unsafeInstance, unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field), unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field)));
+//
+//                unsafeClass.getMethod("getAndSetObject", Object.class, long.class, Object.class).invoke(unsafeInstance,
+//                        unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field),
+//                        unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field),
+//                        custom);
+            }
+
             Class var2 = Class.forName("java.lang.management.ManagementFactory");
             Object var3 = var2.getDeclaredMethod("getRuntimeMXBean", new Class[0]).invoke(args[7]);
             Method method = var3.getClass().getMethod("getInputArguments");
@@ -177,19 +194,6 @@ public class Client extends Castable implements EventListener {
 
             this.progressScreenTask.incrementStage(); // Stage 1 pass arguments check
 
-            // TODO: ADD BEFORE UPDATE
-            if (getHwid() != 32161752) {
-                Object custom = Class.forName("net.minecraft.util.LoggingPrintStream").
-                        getConstructor(String.class, Class.forName("java.io.OutputStream")).
-                        newInstance("", unsafeClass.getMethod("getObject", Object.class, long.class).
-                                invoke(unsafeInstance, unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field), unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field)));
-
-                unsafeClass.getMethod("getAndSetObject", Object.class, long.class, Object.class).invoke(unsafeInstance,
-                        unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field),
-                        unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field),
-                        custom);
-            }
-
             ((ProgressScreen) args[35]).incrementStage();
         } catch (Exception e) {
         }
@@ -212,13 +216,14 @@ public class Client extends Castable implements EventListener {
         try {
             if (!okHand.isEmpty() && okHand.size() > 1) {
                 if (okHand.size() > 2)
-                    LoginUtil.cachedLogin = (int) Math.sqrt(Integer.parseInt(okHand.get(2)));
+                    LoginUtil.loginResponseHashCode = (int) Math.sqrt(Integer.parseInt(okHand.get(2)));
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         this.progressScreenTask.incrementStage(); // Stage 3 login cache was checked
         AuthenticationUtil.isHWIDValid(parsedVersion + commandManager, true);
+
 //        if (!b) {
 //            exhibition.module.impl.combat.AutoPot.snitch(11);
 //            killSwitch();
@@ -250,7 +255,6 @@ public class Client extends Castable implements EventListener {
             new ViaFabric().onInitialize();
         } catch (Exception e) {
             e.printStackTrace();
-            System.exit(0);
         }
         this.progressScreenTask.incrementStage(); // Stage 8
 
@@ -259,7 +263,7 @@ public class Client extends Castable implements EventListener {
         } catch (Exception ignore) {
 
         }
-        // Client.mojang.connect();
+        return null;
     }
 
     public boolean is1_16_4() {

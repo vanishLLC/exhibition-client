@@ -15,7 +15,6 @@ import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.combat.AntiVelocity;
 import exhibition.util.NetUtil;
-import exhibition.util.misc.ChatUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityOtherPlayerMP;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -196,9 +195,9 @@ public class Freecam extends Module {
                         packet.zMotion *= (horizontal / 100D);
                     }
                 }
-                freecamEntity.motionX += packet.func_149149_c();
-                freecamEntity.motionY += packet.func_149144_d();
-                freecamEntity.motionZ += packet.func_149147_e();
+                freecamEntity.motionX += packet.getMotionX();
+                freecamEntity.motionY += packet.getMotionY();
+                freecamEntity.motionZ += packet.getMotionZ();
             }
 
             if (getPacket instanceof C03PacketPlayer || getPacket.getClass().isAssignableFrom(C03PacketPlayer.class) || getPacket.getClass().isAssignableFrom(C03PacketPlayer.C04PacketPlayerPosition.class) ||

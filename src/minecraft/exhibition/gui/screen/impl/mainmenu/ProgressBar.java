@@ -34,12 +34,11 @@ public class ProgressBar {
     }
 
     public void draw() {
-        this.translate.updatePos((width - 2) * getPercent(), 0, 2);
+        this.translate.updatePos((width - 2) * getPercent(), 0, 3);
         RenderingUtil.rectangleBordered(x, y, x + width, y + height, 1, Colors.getColor(22, 100), Colors.getColor(0, 125));
         RenderingUtil.rectangle(x + 1, y + 1, x + 1 + translate.getX(), y + height - 1, Colors.getColor(60,255,60, 200));
         String percent = (int)(MathUtils.roundToPlace(getPercent(), 2) * 100) + "%";
         Client.nametagsFontscaled.drawStringWithShadow(percent, (float)(x + width) + 2, (float)(y) - 0.5F, Colors.getColor(255));
-
     }
 
     public void setPercent(double percent) {

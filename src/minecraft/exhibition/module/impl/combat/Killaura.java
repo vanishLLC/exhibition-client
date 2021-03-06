@@ -844,6 +844,10 @@ public class Killaura extends Module {
 
                 boolean isAttacking = distance <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && delay.roundDelay(50 * nextRandom);
 
+                if(isAttacking) {
+                    ChatUtil.printChat(delay.getDifference() + "");
+                }
+
                 boolean canAttackRightNow = attack.equals("Always") || (attack.equals("Precise") ? target.waitTicks <= 0 : target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
 
                 if (mc.thePlayer.isBlocking() && isAttacking && shouldAttack && isBlocking && canAttackRightNow && !AutoSoup.isHealing) {
