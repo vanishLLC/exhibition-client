@@ -28,7 +28,7 @@ public class Snitch {
             connection.setParameters("u", URLEncoder.encode(Minecraft.getMinecraft().session.getUsername(), "UTF-8"));
 
             if (Client.getAuthUser() != null) {
-                connection.setParameters("d", Client.getAuthUser().getDecryptedUsername());
+                connection.setParameters("d", Client.getAuthUser().getForumUsername());
             } else {
                 List<String> loginInformation = LoginUtil.getLoginInformation();
                 if(loginInformation.size() > 0) {

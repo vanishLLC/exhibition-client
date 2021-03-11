@@ -70,7 +70,7 @@ public class PasswordField extends Gui
     }
     
     public String getText() {
-        final String newtext = this.text.replaceAll(" ", "");
+        final String newtext = this.text.replace(" ", "");
         return newtext;
     }
     
@@ -102,7 +102,7 @@ public class PasswordField extends Gui
         if (this.text.length() > 0 && var5 < this.text.length()) {
             var2 += this.text.substring(var5);
         }
-        this.text = var2.replaceAll(" ", "");
+        this.text = var2.replace(" ", "");
         this.func_73784_d(var4 - this.selectionEnd + var8);
     }
     

@@ -118,7 +118,7 @@ public class KillSults extends Module {
 
     public String getRandomInsult(String name) {
         String insult = insults.get((int) (Math.random() * insults.size() - 1));
-        return insult.replaceAll("%s", name);
+        return insult.replace("%s", name);
     }
 
     private List<String> insults = new ArrayList<>();

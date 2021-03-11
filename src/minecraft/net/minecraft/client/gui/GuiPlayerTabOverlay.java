@@ -7,11 +7,11 @@ import com.mojang.authlib.GameProfile;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import exhibition.Client;
 import exhibition.management.PriorityManager;
 import exhibition.management.UUIDResolver;
-import exhibition.management.friend.Friend;
 import exhibition.management.friend.FriendManager;
 import exhibition.module.impl.other.StreamerMode;
 import exhibition.module.impl.render.TargetESP;
@@ -61,11 +61,13 @@ public class GuiPlayerTabOverlay extends Gui {
 
         if (Client.getModuleManager().isEnabled(StreamerMode.class) && (boolean) Client.getModuleManager().get(StreamerMode.class).getSetting("PROTECT").getValue() && mc.thePlayer != null)
             if (bruh.contains(Minecraft.getMinecraft().session.getProfile().getName())) {
-                bruh = bruh.replaceAll(Minecraft.getMinecraft().session.getProfile().getName(), "\247d\247l" + Client.getAuthUser().getDecryptedUsername() + "\247r");
+                bruh = bruh.replace(Minecraft.getMinecraft().session.getProfile().getName(), "\247d\247l" + Client.getAuthUser().getForumUsername() + "\247r");
             } else {
-                for (Friend friend : FriendManager.friendsList) {
-                    if (bruh.contains(friend.name) && friend.name.length() >= 3) {
-                        bruh = bruh.replaceAll(friend.name, "\247d\247l" + friend.alias + "\247r");
+                for (Map.Entry<String, String> friend : FriendManager.friendsMap.entrySet()) {
+                    String name = friend.getKey();
+                    String alias = friend.getValue();
+                    if (bruh.contains(name) && name.length() >= 3) {
+                        bruh = bruh.replace(name, "\247d\247l" + alias + "\247r");
                     }
                 }
             }

@@ -394,14 +394,10 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
                                 StringBuilder fixedString = new StringBuilder(settingValue);
 
                                 if (split.length > 3) {
-                                    System.out.println("Has more bruh??");
-
                                     for (int i = 3; i < split.length; i++) {
                                         fixedString.append(":");
                                         fixedString.append(split[i]);
                                     }
-
-                                    System.out.println("Fixed: " + fixedString);
                                 }
 
                                 String parsed = fixedString.toString();

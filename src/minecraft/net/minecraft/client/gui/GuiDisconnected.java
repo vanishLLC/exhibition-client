@@ -13,8 +13,8 @@ import exhibition.gui.generators.handlers.altening.AlteningGenHandler;
 import exhibition.gui.generators.handlers.altening.stupidaltserviceshit.AltService;
 import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.impl.other.BanStats;
-import exhibition.module.impl.other.StreamerMode;
 import exhibition.util.IPUtil;
+import exhibition.util.security.DiscordUtil;
 import exhibition.util.security.SilentSnitch;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
@@ -42,13 +42,15 @@ public class GuiDisconnected extends GuiScreen {
             this.timeDifference = -1;
         }
 
+        DiscordUtil.setDiscordPresence("Disconnect Screen","");
+
         String unformatted = this.message.getUnformattedText();
 
         String playTime = getTimeLength(timeDifference);
         String banLength = "Permanent";
         String banReason = unformatted.contains("WATCHDOG") ? "Watchdog" :
                 (unformatted.toLowerCase().contains("compromised") || unformatted.toLowerCase().contains("alert")) ? "Security Alert" : "Staff Ban";
-        String username = Client.getAuthUser().getDecryptedUsername();
+        String username = Client.getAuthUser().getForumUsername();
 
         if (unformatted.split("\n")[0].contains("temporarily banned for")) {
             for (Alt alt : AltManager.registry)

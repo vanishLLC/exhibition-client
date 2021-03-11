@@ -160,7 +160,6 @@ public class AuthenticationUtil {
                                     try {
                                         if (Crypto.decryptPublicNew(encryptedUsername).equals(AESCipher.decrypt("Jkg5NZ4tVxs8CD0n", parsed[0]).getData())) {
                                             loginInstance.setProgress(0.6);
-                                            System.out.println(hardwareIdentification.getHashedHardware());
                                             if (BCrypt.checkpw(hardwareIdentification.getHashedHardware(), parsed[1].replace("$2y$", "$2a$")).detected) {
                                                 loginInstance.setProgress(0.7);
 

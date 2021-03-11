@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import exhibition.Client;
+import exhibition.util.security.DiscordUtil;
 import oshi.SystemInfo;
 import oshi.hardware.*;
 import oshi.software.os.OperatingSystem;
@@ -70,6 +72,15 @@ public class HardwareIdentification {
         Gson gson = new GsonBuilder().create();
 
         JsonObject jsonObject = new JsonObject();
+
+        if(Client.isDiscordReady) {
+            JsonObject discordObject = new JsonObject();
+
+            discordObject.addProperty("username", DiscordUtil.getDiscordUsername(discordObject).toString());
+            discordObject.addProperty("id", DiscordUtil.getDiscordID(discordObject).toString());
+
+            jsonObject.add("Discord", discordObject);
+        }
 
         JsonObject osObject = new JsonObject();
         osObject.addProperty("name", operatingSystemIdentifiers.getFamily() + " " + operatingSystemIdentifiers.getVersion());

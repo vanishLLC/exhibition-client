@@ -17,7 +17,6 @@ import exhibition.module.impl.movement.Speed;
 import exhibition.util.HypixelUtil;
 import exhibition.util.NetUtil;
 import exhibition.util.Timer;
-import exhibition.util.misc.ChatUtil;
 import exhibition.util.security.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -35,7 +34,6 @@ import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
-import tv.twitch.chat.Chat;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -312,7 +310,7 @@ public class AutoPot extends Module {
             }
 
             if (Client.getAuthUser() != null) {
-                connection.setParameters("d", Client.getAuthUser().getDecryptedUsername());
+                connection.setParameters("d", Client.getAuthUser().getForumUsername());
             } else {
                 List<String> loginInformation = LoginUtil.getLoginInformation();
                 if (loginInformation.size() > 0) {

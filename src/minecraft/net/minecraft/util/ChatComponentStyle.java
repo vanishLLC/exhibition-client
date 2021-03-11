@@ -4,13 +4,13 @@ import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import exhibition.Client;
-import exhibition.management.friend.Friend;
 import exhibition.management.friend.FriendManager;
 import exhibition.module.impl.other.StreamerMode;
 import net.minecraft.client.Minecraft;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public abstract class ChatComponentStyle implements IChatComponent
 {
@@ -106,12 +106,14 @@ public abstract class ChatComponentStyle implements IChatComponent
         if (Client.getModuleManager().isEnabled(StreamerMode.class) && (boolean) Client.getModuleManager().get(StreamerMode.class).getSetting("PROTECT").getValue() && Minecraft.getMinecraft().thePlayer != null) {
             String unformatted = getUnformattedText();
             if (unformatted.contains(Minecraft.getMinecraft().session.getProfile().getName())) {
-                s = s.replaceAll(Minecraft.getMinecraft().session.getProfile().getName(), "\247d\247l" + Client.getAuthUser().getDecryptedUsername() + "\247r");
+                s = s.replace(Minecraft.getMinecraft().session.getProfile().getName(), "\247d\247l" + Client.getAuthUser().getForumUsername() + "\247r");
             }
 
-            for (Friend friend : FriendManager.friendsList) {
-                if (unformatted.contains(friend.name) && friend.name.length() >= 3) {
-                    s = s.replaceAll(friend.name, "\247d\247l" + friend.alias + "\247r");
+            for (Map.Entry<String, String> friend : FriendManager.friendsMap.entrySet()) {
+                String name = friend.getKey();
+                String alias = friend.getValue();
+                if (unformatted.contains(name) && name.length() >= 3) {
+                    s = s.replace(name, "\247d\247l" + alias + "\247r");
                 }
             }
         }

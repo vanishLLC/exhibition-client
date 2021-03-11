@@ -77,7 +77,7 @@ public class Settings extends Command {
                         }
                     } // If the multiBool is supposed to be a string
                     else if (setting.getValue().getClass().equals(String.class)) {
-                        String parsed = objText.toString().replaceAll("_", " ");
+                        String parsed = objText.toString().replace("_", " ");
                         ChatUtil.printChat(chatPrefix + module.getName() + "'s " + setting.getName().toLowerCase()
                                 + " has been changed to: " + EnumChatFormatting.DARK_RED + parsed);
                         setting.setValue(parsed);

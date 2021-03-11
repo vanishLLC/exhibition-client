@@ -265,7 +265,7 @@ public class ConfigManager {
                                     String parsed = fixedString.toString();
 
                                     if(!setting.getName().equalsIgnoreCase("URL")) {
-                                        parsed = parsed.replaceAll("_", " ");
+                                        parsed = parsed.replace("_", " ");
                                     }
 
                                     setting.setValue(parsed);

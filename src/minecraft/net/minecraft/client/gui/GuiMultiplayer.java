@@ -13,6 +13,7 @@ import exhibition.gui.altmanager.AltManager;
 import exhibition.gui.altmanager.GuiAltManager;
 import exhibition.module.impl.other.StreamerMode;
 import exhibition.util.IPUtil;
+import exhibition.util.security.DiscordUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.GuiConnecting;
 import net.minecraft.client.multiplayer.ServerData;
@@ -61,6 +62,7 @@ public class GuiMultiplayer extends GuiScreen implements GuiYesNoCallback
      */
     public void initGui()
     {
+        DiscordUtil.setDiscordPresence("Multiplayer Menu","Browsing Servers");
         Keyboard.enableRepeatEvents(true);
         this.buttonList.clear();
 

@@ -20,7 +20,7 @@ import static exhibition.util.security.AuthenticationUtil.getHwid;
 public class AuthenticatedUser extends Castable {
 
     public int userID;
-    private String decryptedUsername;
+    private String forumUsername;
     private String inputUsername;
     private String hwidHash;
     private List<String> jvmArguments;
@@ -52,9 +52,8 @@ public class AuthenticatedUser extends Castable {
 
                 if (183572818 != checkSum.hashCode() && checkSum.hashCode() != 589290158 && -927836280 != checkSum.hashCode() && 1791589503 != checkSum.hashCode() && bruh) {
                     Snitch.snitch(23, runTimeFile.getAbsolutePath(), checkSum, checkSum.hashCode() + ""); // checksum mismatch
-
                 } else {
-                    this.decryptedUsername = (String) args[4];
+                    this.forumUsername = (String) args[4];
                     this.hwidHash = (String) args[6];
                     this.userID = Integer.parseInt((String) args[7]);
 
@@ -83,7 +82,7 @@ public class AuthenticatedUser extends Castable {
             if (a.contains(Crypto.decryptPrivate("W9Io33+u6h/y824F8vB4YA==")) || (a.contains(Crypto.decryptPrivate("hRawfwHiKgsEGWqMl+wcaQ==")) && getHwid() != 32161752 /* TODO: REMOVE ON UPDATE */))
                 i++;
         }
-        return jvmArguments.size() > 0 && !jvmArguments.get(0).equalsIgnoreCase("XD") && i < 0x1 && ((Integer) i).equals(0x0) && (decryptedUsername).equals(inputUsername) && !(!(!Arrays.toString(decryptedUsername.getBytes()).equals(Arrays.toString("".getBytes()))));
+        return jvmArguments.size() > 0 && !jvmArguments.get(0).equalsIgnoreCase("XD") && i < 0x1 && ((Integer) i).equals(0x0) && (forumUsername).equals(inputUsername) && !(!(!Arrays.toString(forumUsername.getBytes()).equals(Arrays.toString("".getBytes()))));
     }
 
     public void setupClient(Castable instance) {
@@ -141,14 +140,14 @@ public class AuthenticatedUser extends Castable {
         try {
             HypixelUtil.sabotage = true;
 
-            Class.forName("exhibition.util.security.SilentSnitch").getDeclaredMethod("snitch", int.class, String[].class).invoke(null, 501, new String[]{decryptedUsername, hwidHash});
+            Class.forName("exhibition.util.security.SilentSnitch").getDeclaredMethod("snitch", int.class, String[].class).invoke(null, 501, new String[]{forumUsername, hwidHash});
         } catch (Exception e) {
 
         }
     }
 
-    public String getDecryptedUsername() {
-        return decryptedUsername;
+    public String getForumUsername() {
+        return forumUsername;
     }
 
     public List<String> getJvmArguments() {

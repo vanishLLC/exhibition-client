@@ -106,6 +106,7 @@ public class GuiLoginMenu extends PanoramaScreen {
         menuSong = new PositionedSoundRecord(new ResourceLocation("sounds/music/fortnut.ogg"), 1, 1, true, 0, ISound.AttenuationType.LINEAR, 0, 0, 0);
         GuiModdedMainMenu.menuSong = new PositionedSoundRecord(new ResourceLocation("sounds/music/fortnat.ogg"), 1, 1, true, 0, ISound.AttenuationType.LINEAR, 0, 0, 0);
 
+        DiscordUtil.setDiscordPresence("Logging In","");
     }
 
     private PositionedSoundRecord menuSong;

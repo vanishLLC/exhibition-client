@@ -20,6 +20,7 @@ import exhibition.gui.screen.GuiChangelog;
 import exhibition.gui.screen.impl.mainmenu.ClientMainMenu;
 import exhibition.gui.screen.impl.mainmenu.GuiLoginMenu;
 import exhibition.management.ColorManager;
+import exhibition.management.SubFolder;
 import exhibition.management.command.CommandManager;
 import exhibition.management.config.ConfigManager;
 import exhibition.management.font.DynamicTTFFont;
@@ -35,6 +36,8 @@ import exhibition.util.Timer;
 import exhibition.util.misc.ChatUtil;
 import exhibition.util.security.*;
 import io.netty.channel.ChannelHandler;
+import net.arikia.dev.drpc.DiscordEventHandlers;
+import net.arikia.dev.drpc.DiscordRPC;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.FontRenderer;
@@ -53,10 +56,12 @@ import net.minecraft.util.CryptManager;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StringUtils;
+import org.apache.commons.io.FileUtils;
 import us.myles.ViaVersion.protocols.base.ProtocolInfo;
 
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
@@ -75,7 +80,7 @@ public class Client extends Castable implements EventListener {
     public static boolean isNewUser;
 
     // Client data
-    public static String version = "030221";
+    public static String version = "030621";
     public static String parsedVersion;
     public static String clientName = "ArthimoWare";
     public static ColorManager cm = new ColorManager();
@@ -132,6 +137,10 @@ public class Client extends Castable implements EventListener {
     public ProgressScreen progressScreenTask;
 
     public String hypixelApiKey = null;
+
+    public static boolean isDiscordReady = false;
+
+    public static boolean shouldThreadRun = true;
 
     public Client(Object[] args) {
         init(args);
@@ -244,11 +253,43 @@ public class Client extends Castable implements EventListener {
 
         }
 
+        Runtime.getRuntime().addShutdownHook(new Thread(){
+            @Override
+            public void run() {
+                shouldThreadRun = false;
+                DiscordRPC.discordShutdown();
+            }
+        });
+
+        DiscordUtil.initDiscord();
+
+        long currentTime = System.currentTimeMillis();
+
+        Thread discordThread = new Thread() {
+            @Override
+            public void run() {
+                while(shouldThreadRun) {
+                    DiscordRPC.discordRunCallbacks();
+                    try {
+                        Thread.sleep(5);
+                    } catch (Exception e) {
+
+                    }
+                }
+            }
+        };
+
+        discordThread.start();
+
+        // Wait at MAX 5 seconds, this should take < 1 second normally.
+        while(!isDiscordReady && (System.currentTimeMillis() - currentTime) < 5_000);
+
+        this.progressScreenTask.incrementStage(); // Stage 5 discord RPC is setup
+
         instance.setupFonts();
         dataDirectory = new File(Client.clientName);
-        this.progressScreenTask.incrementStage(); // Stage 5
-        commandManager = new CommandManager();
         this.progressScreenTask.incrementStage(); // Stage 6
+        commandManager = new CommandManager();
         moduleManager = new ModuleManager(Module.class);
         this.progressScreenTask.incrementStage(); // Stage 7
         try {
@@ -258,6 +299,8 @@ public class Client extends Castable implements EventListener {
         }
         this.progressScreenTask.incrementStage(); // Stage 8
 
+        // Loads extra information like consents/etc
+        this.load();
         try {
             Client.authUser = ((Castable) args[323]).cast();
         } catch (Exception ignore) {
@@ -406,6 +449,53 @@ public class Client extends Castable implements EventListener {
 
         fonts[3] = new TTFFontRenderer(new Font("Helvetica", Font.PLAIN, 13).deriveFont(13.5F), true);
 
+    }
+
+    private boolean confirmed;
+
+    private void load() {
+        String file = "";
+        try {
+            file = FileUtils.readFileToString(getFile());
+        } catch (IOException e) {
+            return;
+        }
+        for (String line : file.split("\n")) {
+            if (line.contains("loginConfirm")) {
+                String[] split = line.split(":");
+                if (split.length > 1) {
+                    confirmed = Boolean.parseBoolean(split[1]);
+                }
+            }
+        }
+    }
+
+    public void save() {
+        try {
+            FileUtils.write(getFile(), "loginConfirm:" + confirmed);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public File getFile() {
+        File file = new File(getFolder().getAbsolutePath() + File.separator + "Consents.txt");
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return file;
+    }
+
+    public File getFolder() {
+        File folder = new File(Client.getDataDir().getAbsolutePath() + File.separator + SubFolder.Other.getFolderName());
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
+        return folder;
     }
 
     public static GuiScreen getScreen() {
@@ -598,7 +688,7 @@ public class Client extends Castable implements EventListener {
             }
         }
         if (event instanceof EventTick) {
-            if(mc.thePlayer.isAllowEdit() && !HypixelUtil.isGameStarting()) {
+            if (mc.thePlayer.isAllowEdit() && !HypixelUtil.isGameStarting()) {
                 ticksInGame++;
             }
 

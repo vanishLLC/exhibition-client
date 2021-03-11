@@ -14,10 +14,9 @@ import exhibition.util.render.Colors;
 import exhibition.util.render.Depth;
 import exhibition.util.security.AuthenticationUtil;
 import exhibition.util.security.Connection;
-import exhibition.util.security.Crypto;
+import exhibition.util.security.DiscordUtil;
 import exhibition.util.security.SSLConnector;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.*;
 import net.minecraft.client.renderer.GlStateManager;
@@ -33,7 +32,6 @@ import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -89,6 +87,7 @@ public class GuiModdedMainMenu extends GuiMainMenu {
     @Override
     public void initGui() {
         super.initGui();
+        DiscordUtil.setDiscordPresence("Main Menu","");
 
         LocalDate today = LocalDate.now();
         LocalDate birthDayStart = today.withMonth(Month.JANUARY.getValue()).withDayOfMonth(10);
@@ -407,7 +406,7 @@ public class GuiModdedMainMenu extends GuiMainMenu {
         mc.fontRendererObj.drawStringWithShadow(exhibition, 0, 0, ColorManager.hudColor.getColorHex());
         GlStateManager.popMatrix();
 
-        String welcome = "Welcome" + (Client.isNewUser ? "" : " back") + ", \247e" + Client.getAuthUser().getDecryptedUsername();
+        String welcome = "Welcome" + (Client.isNewUser ? "" : " back") + ", \247e" + Client.getAuthUser().getForumUsername();
         mc.fontRendererObj.drawStringWithShadow(welcome, this.width - mc.fontRendererObj.getStringWidth(welcome) - 2, height - 24, Colors.getColor(255, 150));
 
         String currentBuld = "Your current build is " + (Client.version.equals(Client.parsedVersion) ? "\247aLatest" : Client.isBeta() ? "\247bBeta" : "\247cOutdated") + "\247f!";

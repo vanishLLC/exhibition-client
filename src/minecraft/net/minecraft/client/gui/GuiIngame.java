@@ -184,7 +184,7 @@ public class GuiIngame extends Gui {
 
         // Cache username due to JNI performance impact
         if (username == null && !Client.getAuthUser().hashCheck())
-            username = Client.getAuthUser().getDecryptedUsername();
+            username = Client.getAuthUser().getForumUsername();
 
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         this.mc.getTextureManager().bindTexture(icons);

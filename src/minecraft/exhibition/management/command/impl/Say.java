@@ -21,7 +21,7 @@ public class Say extends Command {
 			}
 			// TODO: Find a fix for sendChat(s) duplicating the message
 			String message = out.substring(0, out.length() - 1);
-			message = message.replaceAll("&", "\247");
+			message = message.replace("&", "\247");
 			ChatUtil.printChat(message);
 		}
 	}

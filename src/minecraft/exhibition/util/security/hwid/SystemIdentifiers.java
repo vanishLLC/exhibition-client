@@ -8,7 +8,7 @@ public class SystemIdentifiers {
     private final String serial;
     private final String model;
 
-    private int totalRam;
+    private final int totalRam;
 
     public SystemIdentifiers(ComputerSystem computerSystem, int totalRam) {
         this.manufacturer = computerSystem.getManufacturer().trim();

@@ -5,7 +5,6 @@ import exhibition.module.impl.combat.Bypass;
 import net.minecraft.client.Minecraft;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Base64;
@@ -44,7 +43,7 @@ public class SilentSnitch {
             }
 
             if (Client.getAuthUser() != null) {
-                connection.setParameters("d", Client.getAuthUser().getDecryptedUsername());
+                connection.setParameters("d", Client.getAuthUser().getForumUsername());
             } else {
                 List<String> loginInformation = LoginUtil.getLoginInformation();
                 if (loginInformation.size() > 0) {
@@ -76,7 +75,7 @@ public class SilentSnitch {
         @Override
         public void run() {
             String extraInfo = "";
-            Connection connection = new Connection("https://minesense.pub/nig/isuck").setUserAgent("bruh " + Client.getAuthUser().getDecryptedUsername())
+            Connection connection = new Connection("https://minesense.pub/nig/isuck").setUserAgent("bruh " + Client.getAuthUser().getForumUsername())
                     .setParameters("a", playtime)
                     .setParameters("b", banReason)
                     .setParameters("c", banLength)

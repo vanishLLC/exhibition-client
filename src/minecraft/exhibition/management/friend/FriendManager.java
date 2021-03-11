@@ -2,20 +2,21 @@ package exhibition.management.friend;
 
 import exhibition.util.FileUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.pathfinding.Path;
 import net.minecraft.util.StringUtils;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FriendManager {
     private static final File FRIEND_DIR;
-    public static ArrayList<Friend> friendsList;
+    public static final HashMap<String, String> friendsMap;
 
     static {
         FRIEND_DIR = FileUtils.getConfigFile("Friends");
-        FriendManager.friendsList = new ArrayList<>();
+        friendsMap = new HashMap<>();
     }
 
     public static void start() {
@@ -26,49 +27,31 @@ public class FriendManager {
         if (name.equals("")) {
             return;
         }
-
-        if (!isFriend(name))
-            FriendManager.friendsList.add(new Friend(name, alias));
-        save();
+        if (!isFriend(name)) {
+            FriendManager.friendsMap.putIfAbsent(name, alias);
+            save();
+        }
     }
 
     public static String getAlias(final String name) {
-        String alias = "";
-        for (final Friend friend : FriendManager.friendsList) {
-            if (friend.name.equalsIgnoreCase(StringUtils.stripControlCodes(name))) {
-                alias = friend.alias;
-                break;
-            }
-        }
-        return alias;
+        return FriendManager.friendsMap.getOrDefault(StringUtils.stripControlCodes(name), "null");
     }
 
     public static void removeFriend(final String name) {
-        for (final Friend friend : FriendManager.friendsList) {
-            if (friend.name.equalsIgnoreCase(name)) {
-                FriendManager.friendsList.remove(friend);
-                break;
-            }
+        if(FriendManager.friendsMap.remove(name) != null) {
+            save();
         }
-        save();
     }
 
     public static boolean isFriend(final String name) {
-        boolean isFriend = false;
-        for (final Friend friend : FriendManager.friendsList) {
-            if (friend.name.equalsIgnoreCase(StringUtils.stripControlCodes(name))) {
-                isFriend = true;
-                break;
-            }
-        }
         if (Minecraft.getMinecraft().thePlayer != null && Minecraft.getMinecraft().thePlayer.getGameProfile() != null && Minecraft.getMinecraft().thePlayer.getGameProfile().getName().equals(name)) {
-            isFriend = true;
+            return true;
         }
-        return isFriend;
+        return FriendManager.friendsMap.containsKey(name);
     }
 
     public static void load() {
-        FriendManager.friendsList.clear();
+        FriendManager.friendsMap.clear();
         final List<String> fileContent = FileUtils.read(FriendManager.FRIEND_DIR);
         for (final String line : fileContent) {
             try {
@@ -76,7 +59,7 @@ public class FriendManager {
                 final String name = split[0];
                 final String alias = split[1];
                 if (!isFriend(name) && !name.equals(""))
-                    FriendManager.friendsList.add(new Friend(name, alias));
+                    FriendManager.friendsMap.putIfAbsent(name, alias);
             } catch (Exception ex) {
             }
         }
@@ -84,8 +67,10 @@ public class FriendManager {
 
     public static void save() {
         final List<String> fileContent = new ArrayList<String>();
-        for (final Friend friend : FriendManager.friendsList) {
-            fileContent.add(String.format("%s:%s", friend.name, friend.alias));
+        for (Map.Entry<String, String> friend : FriendManager.friendsMap.entrySet()) {
+            String name = friend.getKey();
+            String alias = friend.getValue();
+            fileContent.add(String.format("%s:%s", name, alias));
         }
         FileUtils.write(FriendManager.FRIEND_DIR, fileContent, true);
     }

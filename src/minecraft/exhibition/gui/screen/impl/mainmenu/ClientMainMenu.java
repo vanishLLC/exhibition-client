@@ -20,28 +20,8 @@ public class ClientMainMenu extends PanoramaScreen {
 	}
 
 	public void initGui() {
-		load();
 		if (getClass().equals(ClientMainMenu.class)) {
 			display();
-		}
-	}
-
-	private void load() {
-		String file = "";
-		try {
-			file = FileUtils.readFileToString(getFile());
-		} catch (IOException e) {
-			return;
-		}
-		for (String line : file.split("\n")) {
-			if (line.contains("key")) {
-				String[] split = line.split(":");
-				if (split.length > 1) {
-					try {
-						key = Integer.parseInt(split[1]);
-					} catch (NumberFormatException ignored) {}
-				}
-			}
 		}
 	}
 
@@ -68,34 +48,7 @@ public class ClientMainMenu extends PanoramaScreen {
 
 	public void toggleVanilla() {
 		Client.setHidden(!Client.isHidden());
-		save();
 	}
 
-	public void save() {
-		try {
-			FileUtils.write(getFile(), "Swap key (Toggles menus):" + key);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
 
-	public File getFile() {
-		File file = new File(getFolder().getAbsolutePath() + File.separator + "MainMenu.txt");
-		if (!file.exists()) {
-			try {
-				file.createNewFile();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		return file;
-	}
-
-	public File getFolder() {
-		File folder = new File(Client.getDataDir().getAbsolutePath() + File.separator + SubFolder.Other.getFolderName());
-		if (!folder.exists()) {
-			folder.mkdirs();
-		}
-		return folder;
-	}
 }

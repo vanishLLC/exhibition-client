@@ -19,7 +19,7 @@ public class Connection {
     private Map<String, String> parameters = Maps.newHashMap(), headers = Maps.newHashMap();
 
     public Connection(String url) {
-        this(url,(Crypto.encrypt(CryptManager.getSecretNew(), SystemUtil.getQuickIdentifier()) + " " + (Client.getAuthUser() != null ? " " + Client.getAuthUser().getDecryptedUsername() : LoginUtil.getUsername()) + " U: " + Minecraft.getMinecraft().getSession().getUsername()));
+        this(url,(Crypto.encrypt(CryptManager.getSecretNew(), SystemUtil.getQuickIdentifier()) + " " + (Client.getAuthUser() != null ? " " + Client.getAuthUser().getForumUsername() : LoginUtil.getUsername()) + " U: " + Minecraft.getMinecraft().getSession().getUsername()));
     }
 
     public Connection(String url, String userAgent) {

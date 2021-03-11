@@ -2187,7 +2187,7 @@ public class SkeetMenu extends UI {
                     String hex = copy().trim();
                     if (!Objects.equals(hex, "")) {
                         //Color.decode(hex);
-                        String s = hex.replace("#", "").replaceAll("0x", "").trim();
+                        String s = hex.replace("#", "").replace("0x", "").trim();
                         if (s.length() >= 6) {
                             String digits = "0123456789ABCDEF";
                             s = s.toUpperCase();

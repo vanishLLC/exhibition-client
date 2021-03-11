@@ -9,6 +9,7 @@ import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.impl.other.StreamerMode;
 import exhibition.util.RenderingUtil;
 import exhibition.util.render.Colors;
+import exhibition.util.security.DiscordUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.*;
 import net.minecraft.client.renderer.GlStateManager;
@@ -44,6 +45,7 @@ public class GuiAltManager extends PanoramaScreen {
         this.status = EnumChatFormatting.GRAY + "Idle...";
         this.isDragging = false;
         this.parentScreen = parentScreen;
+        DiscordUtil.setDiscordPresence("Alt Manager","");
     }
 
     public void actionPerformed(final GuiButton button) {

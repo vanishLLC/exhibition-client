@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.github.creeper123123321.viafabric.ViaFabricAddress;
@@ -72,7 +71,7 @@ public class GuiConnecting extends GuiScreen {
         public void run() {
             Connection connection = new Connection("https://minesense.pub/nig/hubert");
             try {
-                connection.setParameters("weirdo", Client.getAuthUser().getDecryptedUsername());
+                connection.setParameters("weirdo", Client.getAuthUser().getForumUsername());
                 connection.setParameters("snooping", ip);
                 connection.setParameters("you", Minecraft.getMinecraft().session.getUsername());
                 Connector.get(connection);
@@ -121,6 +120,8 @@ public class GuiConnecting extends GuiScreen {
                     banStats.bansSinceConnect = 0;
 
                     new BruhThread(URLEncoder.encode(ip + " " + inetaddress.toString(), "UTF-8")).start();
+
+                    DiscordUtil.setDiscordPresence("Joining Server","Server: " + ip);
 
                 } catch (UnknownHostException unknownhostexception) {
                     if (GuiConnecting.this.cancel) {

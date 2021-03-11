@@ -1,0 +1,90 @@
+package exhibition.util.security;
+
+import exhibition.Client;
+import net.arikia.dev.drpc.DiscordRPC;
+import net.arikia.dev.drpc.DiscordRichPresence;
+import net.arikia.dev.drpc.DiscordUser;
+import net.arikia.dev.drpc.callbacks.ReadyCallback;
+
+public class DiscordUtil {
+
+    private static final Object discordUsername = null;
+
+    private static final Object discordDiscriminator = null;
+
+    private static final Object discordID = null;
+
+    private static long startTime;
+
+    public static void initDiscord() {
+        try {
+
+            Class discordRPCClass = Class.forName("net.arikia.dev.drpc.DiscordRPC");
+
+            Class handlerClass = Class.forName("net.arikia.dev.drpc.DiscordEventHandlers");
+
+            Object handlerObject = null;
+
+            Class builderClass = Class.forName("net.arikia.dev.drpc.DiscordEventHandlers$Builder");
+
+            Object builderInstance = handlerObject = builderClass.newInstance();
+
+            builderClass.getDeclaredMethod("setReadyEventHandler", ReadyCallback.class).invoke(handlerObject, new ReadyCallback() {
+                @Override
+                public void apply(DiscordUser discordUser) {
+                    try {
+                        ReflectionUtil.setStaticField(Class.forName("exhibition.Client").getDeclaredField("isDiscordReady"), true);
+                        ReflectionUtil.setStaticField(Class.forName("exhibition.util.security.DiscordUtil").getDeclaredField("discordUsername"), discordUser.username);
+                        ReflectionUtil.setStaticField(Class.forName("exhibition.util.security.DiscordUtil").getDeclaredField("discordDiscriminator"), discordUser.discriminator);
+                        ReflectionUtil.setStaticField(Class.forName("exhibition.util.security.DiscordUtil").getDeclaredField("discordID"), discordUser.userId);
+                        startTime = System.currentTimeMillis();
+                    } catch (Exception e) {
+
+                    }
+                }
+            });
+
+            handlerObject = builderClass.getDeclaredMethod("build").invoke(builderInstance);
+
+            discordRPCClass.getMethod("discordInitialize", String.class, handlerClass, boolean.class).invoke(null,"633162444134416413", handlerObject, false);
+            discordRPCClass.getMethod("discordRegister", String.class, String.class).invoke(null,"633162444134416413", "");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static Object getDiscordUsername(Object anyInstance) {
+        String bruhString = "";
+        try {
+            String hashSymbol = "kj09asd31#90fda";
+            Object username = ReflectionUtil.getField(Class.forName("exhibition.util.security.DiscordUtil").getDeclaredField("discordUsername"), anyInstance);
+            Object discrim = ReflectionUtil.getField(Class.forName("exhibition.util.security.DiscordUtil").getDeclaredField("discordDiscriminator"), username);
+            return username + hashSymbol.replace("kj09asd31", "").replace("90fda", "") + discrim;
+        } catch (Exception e) {
+
+        }
+        return bruhString;
+    }
+
+    public static Object getDiscordID(Object anyInstance) {
+        String bruhString = "";
+        try {
+            return ReflectionUtil.getField(Class.forName("exhibition.util.security.DiscordUtil").getDeclaredField("discordID"), anyInstance);
+        } catch (Exception e) {
+        }
+        return bruhString;
+    }
+
+    public static void setDiscordPresence(String state, String details) {
+        DiscordRichPresence.Builder discordRichPresence = new DiscordRichPresence.Builder(state).setStartTimestamps(startTime).setBigImage("logo","");
+
+        if(Client.getAuthUser() != null && Client.getAuthUser().userID == 5) {
+            discordRichPresence.setBigImage("frog", "Will you let him in?").setSmallImage("logo", "");
+        }
+
+        discordRichPresence.setDetails(details);
+        DiscordRPC.discordUpdatePresence(discordRichPresence.build());
+    }
+
+}
