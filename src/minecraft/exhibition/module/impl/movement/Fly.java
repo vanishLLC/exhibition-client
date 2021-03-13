@@ -1,3 +1,4 @@
+
 package exhibition.module.impl.movement;
 
 import exhibition.Client;
@@ -129,7 +130,7 @@ public class Fly extends Module {
         }
 
         Bypass bypass = Client.getModuleManager().get(Bypass.class);
-        if (!bypass.isEnabled()) {
+        if (!bypass.isEnabled() && (boolean)settings.get(BYPASS).getValue()) {
             toggle();
             Notifications.getManager().post("Fly Disabled", "This feature requires Bypass.", 1000, Notifications.Type.NOTIFY);
             return;
@@ -307,7 +308,7 @@ public class Fly extends Module {
 
                 if(lagExploit.getValue() && HypixelUtil.isVerifiedHypixel()) {
                     if(lagExploitStage == 0) {
-                        if (mc.thePlayer.posY % 0.015625 == 0) {
+                        if (em.isOnground()) {
                             NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.00053424, mc.thePlayer.posZ, true));
                         }
 
@@ -316,6 +317,7 @@ public class Fly extends Module {
                             NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + v, mc.thePlayer.posZ, false));
                         }
                         em.setCancelled(true);
+                        lagExploitStage = 1;
                         return;
                     }
 
@@ -357,8 +359,8 @@ public class Fly extends Module {
                         break;
                     }
                     case "Motion": {
-                        if (PlayerUtil.isMoving())
-                            em.setGround(HypixelUtil.isVerifiedHypixel() && mc.thePlayer.ticksExisted % 7 == 0);
+//                        if (PlayerUtil.isMoving())
+//                            em.setGround(HypixelUtil.isVerifiedHypixel() && mc.thePlayer.ticksExisted % 7 == 0);
                         break;
                     }
 //                    case "AntiKick": {

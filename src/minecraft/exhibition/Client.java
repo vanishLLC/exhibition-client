@@ -528,9 +528,9 @@ public class Client extends Castable implements EventListener {
                 String e = parsedVersion.substring(0, 2) + "/" + parsedVersion.substring(2, 4) + "/20" + parsedVersion.substring(4, 6);
                 SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
                 isBeta = format.parse(currentVersion).after(format.parse(e));
+                first = true;
             } catch (Exception ignored) {
             }
-            first = true;
         }
         return isBeta;
     }

@@ -18,6 +18,7 @@ import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.combat.AutoPot;
 import exhibition.module.impl.combat.Bypass;
+import exhibition.module.impl.other.AutoPaper;
 import exhibition.module.impl.player.Scaffold;
 import exhibition.util.*;
 import exhibition.util.render.Colors;
@@ -38,6 +39,7 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -50,11 +52,12 @@ public class LongJump extends Module {
     private String AUTISM = "AUTISM";
     private String FAKELAG = "FAKELAG";
     //private String C13PACKET = "C13PACKET";
-    private String CHOKE = "CHOKE-TICKS";
+    //private String CHOKE = "CHOKE-TICKS";
     private String TIMER = "TIMER";
     //private Setting<Boolean> useBlink = new Setting<>("CHOKE", false, "Uses blink to bypass.");
     private Setting<Boolean> bowOnly = new Setting<>("BOW", false, "Only LongJumps if you bow yourself/take damage.");
     private Setting<Boolean> targetStrafe = new Setting<>("TARGETSTRAFE", false, "Target Strafes around players.");
+    private Setting<Number> jumpBoost = new Setting<>("JUMP-BOOST", 0, "Increases your jump velocity.", 0.01, 0, 4);
     private Setting<Number> boostScale = new Setting<>("VEL-BOOST", 0.5, "Boosts your speed when you take KB.", 0.01, 0, 1);
 
     private Timer waitTimer = new Timer();
@@ -65,11 +68,11 @@ public class LongJump extends Module {
 
     private boolean wasOnGround;
     private int zoom;
-    private int blinkTicks;
+    //private int blinkTicks;
 
     private int bowTicks = 0;
 
-    public boolean isBruhing() {
+    public boolean isUsingBow() {
         return bowTicks > 14;
     }
 
@@ -94,9 +97,11 @@ public class LongJump extends Module {
         //settings.put(C13PACKET, new Setting<>(C13PACKET, true, "Sends a C13 Flying packet on enable. (Experimental)"));
         addSetting(targetStrafe);
         //addSetting(useBlink);
+        addSetting(jumpBoost);
+        addSetting(bowOnly);
         addSetting(boostScale);
-        settings.put(CHOKE, new Setting<>(CHOKE, 50, "The amount of ticks to choke by in between blinks.", 1, 2, 70));
-        settings.put(TIMER, new Setting<>(TIMER, 0.0, "FastFly starting timer. (0 = 1x Timer, 1.0 = 2x Timer)", 0.01, 0, 2));
+        //settings.put(CHOKE, new Setting<>(CHOKE, 50, "The amount of ticks to choke by in between blinks.", 1, 2, 70));
+        settings.put(TIMER, new Setting<>(TIMER, 0.0, "FastFly timer. (-0.5 = 0.5x Timer, 0 = 1x Timer, 1.0 = 2x Timer)", 0.01, -0.9, 2));
 
         speed = 0.27999999999999997;
         onGroundLastTick = false;
@@ -174,7 +179,7 @@ public class LongJump extends Module {
         }
 
         Bypass bypass = Client.getModuleManager().get(Bypass.class);
-        if (!bypass.isEnabled()) {
+        if (!bypass.isEnabled() && (!bowMode && (boolean) settings.get(AUTISM).getValue())) {
             toggle();
             Notifications.getManager().post("LongJump Disabled", "This feature requires Bypass.", 1000, Notifications.Type.NOTIFY);
             return;
@@ -251,12 +256,42 @@ public class LongJump extends Module {
             timer.reset();
             this.zoom = 40;
 
-            this.blinkTicks = ((Number) settings.get(CHOKE).getValue()).intValue();
+            //this.blinkTicks = ((Number) settings.get(CHOKE).getValue()).intValue();
             this.delay = 7;
             boostDelay.reset();
 
             mc.thePlayer.motionX = 0;
             mc.thePlayer.motionZ = 0;
+        } else {
+            this.zoom = 40;
+            if (bowMode) {
+                boolean bowFound = false;
+                boolean arrowsFound = false;
+                for (int i = 9; i < 45; i++) {
+                    if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
+                        ItemStack is = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
+                        Item item = is.getItem();
+                        if (i >= 36 && item instanceof ItemBow) {
+                            bowFound = true;
+                        }
+                        if (item == Items.arrow) {
+                            arrowsFound = true;
+                        }
+                    }
+                }
+
+                if (!bowFound) {
+                    Notifications.getManager().post("Cannot LongJump", "Place a bow in your hotbar.");
+                    this.toggle();
+                    return;
+                }
+                if (!arrowsFound) {
+                    Notifications.getManager().post("Cannot LongJump", "You are out of Arrows.");
+                    this.toggle();
+                    return;
+                }
+                bowTicks = 20;
+            }
         }
 
         //sendC13Packet();
@@ -354,9 +389,6 @@ public class LongJump extends Module {
         }
 
         if (event instanceof EventPacket) {
-            if (!autism)
-                return;
-
             EventPacket ep = event.cast();
             Packet packet = ep.getPacket();
 
@@ -374,21 +406,23 @@ public class LongJump extends Module {
 //                }
 //            }
 
-            if (delay < 0) {
+            if (delay < 0 || bowOnly.getValue()) {
                 if (packet instanceof S12PacketEntityVelocity) {
                     S12PacketEntityVelocity velocity = (S12PacketEntityVelocity) packet;
                     if (velocity.getEntityID() == mc.thePlayer.getEntityId()) {
                         double x = (double) velocity.getMotionX() / 8000.0D;
                         double y = (double) velocity.getMotionY() / 8000.0D;
                         double z = (double) velocity.getMotionZ() / 8000.0D;
-                        if (x != 0 && y != 0 && z != 0)
+                        if (x != 0 || z != 0) {
                             velocityBoost = Math.sqrt(x * x + z * z) * boostScale.getValue().doubleValue();
+                        }
                     }
                 }
                 if (packet instanceof S27PacketExplosion) {
                     S27PacketExplosion velocity = (S27PacketExplosion) packet;
-                    if (velocity.xMotion != 0 && velocity.yMotion != 0 && velocity.zMotion != 0)
+                    if (velocity.xMotion != 0 || velocity.zMotion != 0) {
                         velocityBoost = Math.sqrt(velocity.xMotion * velocity.xMotion + velocity.zMotion * velocity.zMotion) * boostScale.getValue().doubleValue();
+                    }
                 }
             }
         }
@@ -423,6 +457,9 @@ public class LongJump extends Module {
                     if (onGroundLastTick) { // B
                         speed *= 1.83949644F;
                         double gay = (double) (0.42F) - (autism ? 0.07840000152587834 : 0);
+
+                        gay += jumpBoost.getValue().doubleValue();
+
                         em.setY(mc.thePlayer.motionY = gay);
 
                     } else { // A
@@ -433,7 +470,7 @@ public class LongJump extends Module {
                         }
                         boolean bowMode = bowOnly.getValue() || HypixelUtil.isInGame("PIT") || HypixelUtil.isInGame("UHC");
 
-                        speed = ((boost * (bowMode ? 1 : 1)) + (0.0000000011324D * Math.random())) * baseSpeed;
+                        speed = bowMode && Client.getModuleManager().isEnabled(AutoPaper.class) ? velocityBoost : (boost + (0.0000000011324D * Math.random())) * baseSpeed;
                     }
                 } else if (onGroundLastTick) { // C
                     if (distance < 1.73949644) {
@@ -454,24 +491,28 @@ public class LongJump extends Module {
 
                     double a = distance - distance / 160;
                     double b = distance - (distance - defaultSpeed()) / 33.3;
-                    double c = distance - (distance - defaultSpeed()) / 50;
+                    double c = distance - (distance - defaultSpeed()) * 0.020000000000000018;
 
-                    if (speed < c) {
-                        speed = (c - 0.0000125F);
-                    } else {
-                        speed = (distance - distance / 160D - 0.0000125F);
-                    }
+                    java.util.List<Double> list = new ArrayList<>();
+
+                    list.add(a);
+                    list.add(b);
+                    list.add(c);
+
+                    list.sort(Double::compare);
+
+                    this.speed = list.get(2) - 0.0000125F;
 
                     if (autism) {
                         if (delay <= 4)
                             if (zoom > 0 && !boostDelay.delay(5000)) {
-                                mc.timer.timerSpeed = 1 + (autBoost + (float) (0.05325F * Math.random()));
+                                mc.timer.timerSpeed = 1 + (autBoost + (float) (autBoost/10 * Math.random()));
                                 if (zoom < 10) {
                                     float percent = zoom / 10;
                                     if (percent > 0.5) {
                                         percent = 1;
                                     }
-                                    mc.timer.timerSpeed = 1 + ((autBoost + (float) (0.05325F * Math.random())) * percent);
+                                    mc.timer.timerSpeed = 1 + ((autBoost + (float) (autBoost/10 * Math.random())) * percent);
                                 }
                             } else {
                                 mc.timer.timerSpeed = 0.95F + (float) (0.3F * Math.random());
@@ -485,15 +526,17 @@ public class LongJump extends Module {
                         if (wasOnGround) {
                             wasOnGround = false;
                         }
+                    } else if(bowOnly.getValue()) {
+                        mc.timer.timerSpeed = 1 + (autBoost + (float) (autBoost/10 * Math.random()));
                     }
                 }
                 onGroundLastTick = mc.thePlayer.onGround;
                 speed = Math.max(speed, defaultSpeed());
 
-                if (velocityBoost != 0) {
-                    speed += velocityBoost;
-                    velocityBoost *= 0.66;
-                }
+//                if (velocityBoost != 0) {
+//                    speed += velocityBoost;
+//                    velocityBoost *= 0.66;
+//                }
 
                 TargetStrafe targetStrafe = (TargetStrafe) Client.getModuleManager().get(TargetStrafe.class);
                 float yaw = (allowTargetStrafe() && mc.thePlayer.movementInput.moveStrafe == 0 && mc.thePlayer.movementInput.moveForward > 0) ?
@@ -516,13 +559,14 @@ public class LongJump extends Module {
                 }
 
                 if (bowTicks <= 0) {
-                    if (!mc.thePlayer.isCollidedVertically)
-                        blinkTicks--;
-                    if (autism && packetList.size() > 0 && blinkTicks == 0) {
-                        this.sendPackets();
-                        this.resetPackets();
-                        blinkTicks = ((Number) settings.get(CHOKE).getValue()).intValue();
-                    }
+                    bowTicks--;
+//                    if (!mc.thePlayer.isCollidedVertically)
+//                        blinkTicks--;
+//                    if (autism && packetList.size() > 0 && blinkTicks == 0) {
+//                        this.sendPackets();
+//                        this.resetPackets();
+//                        //blinkTicks = ((Number) settings.get(CHOKE).getValue()).intValue();
+//                    }
                     boolean isHypixel = mc.getCurrentServerData() != null && HypixelUtil.isVerifiedHypixel() && (mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net"));
                     boolean up = false;
 
@@ -588,18 +632,11 @@ public class LongJump extends Module {
                         em.setGround(false);
                     }
 
-                    if (isHypixel && em.getY() % 0.015625 == 0 && delay == 6 & mc.thePlayer.onGround) {
-                        em.setForcePos(true);
-                        em.setY(em.getY() + 0.00053424);
-                        em.setGround(false);
+                    if (isHypixel && em.isOnground() && ((bowOnly.getValue() && bowTicks < 2)|| (delay == 6 & mc.thePlayer.onGround))) {
+                        em.setY(em.getY() + MathUtils.roundToPlace(0.00053424 + ((0.015625 - 0.00053424) * Math.random()), 7));
                     }
 
-                    if (isHypixel && mc.thePlayer.motionY > 0.23) {
-                        em.setGround(true);
-                        em.setY(em.getY() + (autism ? 0.07840000152587834 : 0));
-                    }
-
-                    if (delay < 3) {
+                    if (autism && delay < 3) {
                         em.setGround(bruhTick % 6 == 0 && HypixelUtil.isVerifiedHypixel());
                     }
                 } else {
@@ -634,7 +671,7 @@ public class LongJump extends Module {
                     bowTicks--;
             }
         }
-        if ((Boolean) settings.get(OFF).getValue() && !autism) {
+        if ((Boolean) settings.get(OFF).getValue() && !autism && bowTicks <= -4) {
             if (!onGroundLastTick && (mc.thePlayer.isCollidedVertically || mc.thePlayer.motionY < 0 && mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY + mc.thePlayer.motionY, mc.thePlayer.posZ)).getBlock() != Blocks.air) && wasOnGround && isEnabled()) {
                 toggle();
                 EventSystem.unregister(this);

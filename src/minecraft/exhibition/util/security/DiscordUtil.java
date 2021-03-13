@@ -33,7 +33,7 @@ public class DiscordUtil {
                 @Override
                 public void apply(DiscordUser discordUser) {
                     try {
-                        ReflectionUtil.setStaticField(Class.forName("exhibition.Client").getDeclaredField("isDiscordReady"), true);
+                        Client.isDiscordReady = true;
                         ReflectionUtil.setStaticField(Class.forName("exhibition.util.security.DiscordUtil").getDeclaredField("discordUsername"), discordUser.username);
                         ReflectionUtil.setStaticField(Class.forName("exhibition.util.security.DiscordUtil").getDeclaredField("discordDiscriminator"), discordUser.discriminator);
                         ReflectionUtil.setStaticField(Class.forName("exhibition.util.security.DiscordUtil").getDeclaredField("discordID"), discordUser.userId);

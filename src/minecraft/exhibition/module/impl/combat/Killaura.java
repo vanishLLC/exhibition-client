@@ -425,7 +425,7 @@ public class Killaura extends Module {
         Scaffold scaffold = Client.getModuleManager().get(Scaffold.class);
         LongJump longjump = Client.getModuleManager().get(LongJump.class);
         boolean disable = false;
-        if ((AutoPot.potting || AutoPot.haltTicks > 0) || scaffold.isEnabled() || scaffold.isPlacing() || longjump.allowAttack() || longjump.isBruhing() || (Client.getModuleManager().get(FreecamTP.class).stage == 1)) {
+        if ((AutoPot.potting || AutoPot.haltTicks > 0) || scaffold.isEnabled() || scaffold.isPlacing() || longjump.allowAttack() || longjump.isUsingBow() || (Client.getModuleManager().get(FreecamTP.class).stage == 1)) {
             disable = true;
         }
 
@@ -830,7 +830,7 @@ public class Killaura extends Module {
                 boolean twoTickCritsGood = !mc.thePlayer.onGround || (!PlayerUtil.isOnLiquid() && (attack.equals("Always") || (attack.equals("Precise") ? target.waitTicks <= 1 :
                         (target.waitTicks <= 1 || (target.hurtResistantTime <= 11 && target.hurtResistantTime >= 6) || target.hurtTime > 6))) && isCritSetup);
 
-                boolean threeTickCritsGood = !mc.thePlayer.onGround || (!PlayerUtil.isOnLiquid() && (isOptimalAttack || target.waitTicks <= 1) && (isCritSetup));
+                boolean threeTickCritsGood = !mc.thePlayer.onGround || (!PlayerUtil.isOnLiquid() && (isOptimalAttack || target.waitTicks <= 1) && isCritSetup);
 
                 boolean criticalsAreSet = !crits || ((critModule.isNewCrits() ? threeTickCritsGood : critModule.isOldCrits() ? twoTickCritsGood : critModule.isPacket()));
 
@@ -843,10 +843,6 @@ public class Killaura extends Module {
                 double distance = mc.thePlayer.getDistance(target.posX + p[0], target.posY + p[1], target.posZ + p[2]);
 
                 boolean isAttacking = distance <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && delay.roundDelay(50 * nextRandom);
-
-                if(isAttacking) {
-                    ChatUtil.printChat(delay.getDifference() + "");
-                }
 
                 boolean canAttackRightNow = attack.equals("Always") || (attack.equals("Precise") ? target.waitTicks <= 0 : target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
 
@@ -912,7 +908,6 @@ public class Killaura extends Module {
                                     } else {
                                         if (player.criticalHits > 1) {
                                             if(antiCritFunky.getValue() && hasEnchant(target, "Retro")) {
-                                                ChatUtil.printChat("Reset");
                                                 player.criticalHits = 0;
                                             }
                                         }

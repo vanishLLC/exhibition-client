@@ -250,21 +250,23 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
     public void sendPacket(Packet packetIn) {
         EventPacket ep = (EventPacket) EventSystem.getInstance(EventPacket.class);
         boolean canceled = false;
+        Packet packet = packetIn;
         synchronized (EventSystem.getInstance(EventPacket.class)) {
             ep.fire(packetIn, true);
             canceled = ep.isCancelled();
+            packet = ep.getPacket();
         }
         if (canceled) {
             return;
         }
         if (this.isChannelOpen()) {
             this.flushOutboundQueue();
-            this.dispatchPacket(packetIn, (GenericFutureListener<? extends Future<? super Void>>[]) null);
+            this.dispatchPacket(packet, (GenericFutureListener<? extends Future<? super Void>>[]) null);
         } else {
             this.field_181680_j.writeLock().lock();
 
             try {
-                this.outboundPacketsQueue.add(new NetworkManager.InboundHandlerTuplePacketListener(packetIn, (GenericFutureListener[]) null));
+                this.outboundPacketsQueue.add(new NetworkManager.InboundHandlerTuplePacketListener(packet, (GenericFutureListener[]) null));
             } finally {
                 this.field_181680_j.writeLock().unlock();
             }

@@ -17,6 +17,7 @@ import exhibition.module.impl.movement.Fly;
 import exhibition.module.impl.movement.LongJump;
 import exhibition.module.impl.movement.Phase;
 import exhibition.module.impl.movement.Speed;
+import exhibition.module.impl.other.AutoPaper;
 import exhibition.module.impl.other.HackerDetect;
 import exhibition.module.impl.player.AutoFish;
 import exhibition.module.impl.player.Scaffold;
@@ -79,9 +80,13 @@ public class GuiDownloadTerrain extends GuiScreen {
 
         AntiBot.clear();
 
-        ((Bypass) Client.getModuleManager().get(Bypass.class)).worldChange();
+        Client.getModuleManager().get(Bypass.class).worldChange();
+        Client.getModuleManager().get(AutoPaper.class).worldChange();
 
         Client.instance.differenceQueue.clear();
+
+        if (Client.instance.hypixelApiKey.equals(""))
+            Client.instance.hypixelApiKey = null;
 
         if (!GlobalValues.keepPriority.getValue())
             PriorityManager.clearPriorityList();
@@ -99,7 +104,7 @@ public class GuiDownloadTerrain extends GuiScreen {
                 }
             }
 
-            DiscordUtil.setDiscordPresence("In Game (" + serverProtocol + ")", "Server: " + mc.getCurrentServerData().serverIP);
+            DiscordUtil.setDiscordPresence("In Game (" + serverProtocol + ")", "IP: " + mc.getCurrentServerData().serverIP);
         }
         this.buttonList.clear();
     }

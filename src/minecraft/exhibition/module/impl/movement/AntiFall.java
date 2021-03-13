@@ -10,9 +10,17 @@ import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.player.NoFall;
 import exhibition.module.impl.render.Freecam;
+import exhibition.util.HypixelUtil;
 import exhibition.util.Timer;
+import exhibition.util.misc.ChatUtil;
 import net.minecraft.block.BlockAir;
+import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.network.Packet;
+import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.util.BlockPos;
 
@@ -59,25 +67,30 @@ public class AntiFall extends Module {
                     && !Client.getModuleManager().isEnabled(FreecamTP.class)
                     && mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.5, mc.thePlayer.posZ)).getBlock() == Blocks.air) {
                 if (!((Boolean) settings.get(VOID).getValue()) || !isBlockUnder()) {
-                    em.setX(mc.thePlayer.motionX *= -1);
+                    em.setX(mc.thePlayer.motionX = 0);
                     em.setY(mc.thePlayer.motionY = 0);
-                    em.setZ(mc.thePlayer.motionZ *= -1);
-
-                    mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY + (mc.thePlayer.fallDistance * 0.98) + (0.0629280134905892031 * Math.random()), mc.thePlayer.posZ);
-                    mc.thePlayer.fallDistance = 0;
+                    em.setZ(mc.thePlayer.motionZ = 0);
+                    saveMe = true;
                     timer.reset();
                 }
             }
         }
         if (event instanceof EventPacket) {
             EventPacket ep = (EventPacket) event;
-            if (ep.isIncoming()) {
-                if (ep.getPacket() instanceof S08PacketPlayerPosLook) {
-                    if (mc.thePlayer.fallDistance > 0)
-                        mc.thePlayer.fallDistance = 0;
-                    mc.thePlayer.motionX = mc.thePlayer.motionZ = 0;
-                    saveMe = false;
+            Packet packet = ep.getPacket();
+
+            if(saveMe) {
+                if (packet instanceof C03PacketPlayer) {
+                    ep.setPacket(new C03PacketPlayer(false));
+                    timer.reset();
                 }
+            }
+
+            if (packet instanceof S08PacketPlayerPosLook) {
+                if (mc.thePlayer.fallDistance > 0)
+                    mc.thePlayer.fallDistance = 0;
+                mc.thePlayer.motionX = mc.thePlayer.motionZ = 0;
+                saveMe = false;
             }
         }
     }
