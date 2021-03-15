@@ -2,13 +2,34 @@ package exhibition.event;
 
 public interface EventListener<E extends Event> {
 
-	enum Priority {
-		FIRST, LOWEST, LOW, NORMAL, MEDIUM, HIGH, HIGHEST, LAST
-	}
+    class Priority {
+        final int ordinal;
 
-	default Priority getPriority() {
-		return Priority.NORMAL;
-	}
+        public static Priority FIRST = c(0), LOWEST = c(1), LOW = c(2), NORMAL = c(3),
+                MEDIUM = c(4), HIGH = c(5), HIGHEST = c(6), LAST = c(7);
 
-	void onEvent(E event);
+        public Priority(int ordinal) {
+            this.ordinal = ordinal;
+        }
+
+        public int ordinal() {
+            return this.ordinal;
+        }
+
+        // Static constructor
+        static Priority c(int ordinal) {
+            return new Priority(ordinal);
+        }
+
+    }
+
+    default Priority getPriority() {
+        return Priority.NORMAL;
+    }
+
+    default int getPriorityOrdinal() {
+        return getPriority().ordinal();
+    }
+
+    void onEvent(E event);
 }

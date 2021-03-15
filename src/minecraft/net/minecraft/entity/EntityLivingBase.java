@@ -11,6 +11,7 @@ import java.util.Random;
 import java.util.UUID;
 
 import exhibition.Client;
+import exhibition.module.impl.movement.Fly;
 import exhibition.module.impl.movement.LongJump;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -1852,7 +1853,8 @@ public abstract class EntityLivingBase extends Entity
             f1 = this.rotationYaw;
         }
 
-        if (!this.onGround)
+        boolean forceWalk = Client.getModuleManager().isEnabled(Fly.class);
+        if (!this.onGround && !forceWalk)
         {
             f3 = 0.0F;
         }

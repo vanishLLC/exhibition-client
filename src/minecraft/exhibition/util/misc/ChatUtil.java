@@ -33,6 +33,10 @@ public class ChatUtil implements MinecraftUtil {
 	public static void sendChat(String text) {
 		if(text == null || text.equalsIgnoreCase("") || mc.thePlayer == null)
 			return;
+		if(text.startsWith("/")) {
+			DevNotifications.getManager().post("Sent cmd " + text);
+		}
+
 		mc.thePlayer.sendChatMessage(text);
 	}
 }

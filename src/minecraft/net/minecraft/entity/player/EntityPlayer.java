@@ -15,6 +15,7 @@ import exhibition.event.impl.EventTick;
 import exhibition.management.DebugRender;
 import exhibition.management.friend.FriendManager;
 import exhibition.module.impl.combat.Killaura;
+import exhibition.module.impl.movement.Fly;
 import exhibition.module.impl.render.TargetESP;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockBed;
@@ -682,12 +683,14 @@ public abstract class EntityPlayer extends EntityLivingBase
             f = 0.1F;
         }
 
-        if (!this.onGround || this.getHealth() <= 0.0F)
+        boolean forceWalk = Client.getModuleManager().isEnabled(Fly.class);
+
+        if ((!this.onGround && !forceWalk) || this.getHealth() <= 0.0F)
         {
             f = 0.0F;
         }
 
-        if (this.onGround || this.getHealth() <= 0.0F)
+        if (this.onGround || forceWalk || this.getHealth() <= 0.0F)
         {
             f1 = 0.0F;
         }

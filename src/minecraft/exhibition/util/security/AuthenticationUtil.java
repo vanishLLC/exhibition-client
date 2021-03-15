@@ -53,8 +53,14 @@ public class AuthenticationUtil {
     // Expected Str Length: 736
     // Expected Str Hash: -414791792
 
+    private static final int RELEASE_HASH = -1972900550;
+
     public static String encryptAES(String str) {
         return AESCipher.encrypt("Jkg5NZ4tVxs8CD0n", str).getData();
+    }
+
+    public static String getAESKey() {
+        return "";
     }
 
     public static Object isAuth(final GuiLoginMenu.AuthenticationThread authenticationThread, final GuiLoginMenu loginInstance, final String encryptedUsername, final String encryptedPassword, final String hashedUsername, final String hashedPassword) {
@@ -71,7 +77,7 @@ public class AuthenticationUtil {
                     HardwareIdentification hardwareIdentification = new HardwareIdentification(LibraryIntegrityChecker.checkOSHIIntegrity());
                     loginInstance.setProgress(0.2);
                     // Hardware
-                    hashCheckStub += connection.getUrl().hashCode();
+                    hashCheckStub += RELEASE_HASH; // (int) Class.forName("java.lang.String").getMethod("hashCode").invoke(connection.getUrl());
 
                     byte[] hardwareBytes = new byte[Math.min(hardware.getBytes().length, 501)];
                     for (int i = 0; i < 501 && i < hardware.getBytes().length; i++) {
@@ -83,7 +89,7 @@ public class AuthenticationUtil {
                     String username = "", password = "";
 
                     String rebuilt = decodeByteArray(hardwareBytes);
-                    connection.setParameters("aooga", URLEncoder.encode(encryptAES(Base64.encode(AsymmetricalEncryptionUtils.performRSAEncryption(rebuilt.getBytes(), decodeByteArray((byte[]) publicKeyEncoded)))), "UTF-8"));
+                    connection.setParameters("aooga", rebuilt = URLEncoder.encode(encryptAES(Base64.encode(AsymmetricalEncryptionUtils.performRSAEncryption(rebuilt.getBytes(), decodeByteArray((byte[]) publicKeyEncoded)))), "UTF-8"));
 
                     // Username
                     connection.setParameters("ooga", username = URLEncoder.encode(encryptAES(Base64.encode(AsymmetricalEncryptionUtils.performRSAEncryption(Crypto.decryptPublicNew(encryptedUsername).getBytes(), decodeByteArray((byte[]) publicKeyEncoded)))), "UTF-8"));
@@ -217,7 +223,7 @@ public class AuthenticationUtil {
                                                     }
 
                                                     if ((unsignedClasses = unsigned.size()) > 0) {
-                                                        Snitch.snitch(44, unsigned.toArray(new String[]{}));
+                                                        Snitch.snitch(44, unsigned.toArray(new String[10]));
                                                         return authUser;
                                                     }
 
@@ -232,7 +238,15 @@ public class AuthenticationUtil {
                                                             Heartbeat.loadUselessClass(AsymmetricalEncryptionUtils.performRSADecryption(classData.get(name).getAsString(), decodeByteArray((byte[]) publicKeyEncoded)), AESCipher.decrypt("Jkg5NZ4tVxs8CD0n", classData.get(data).getAsString()).getData());
                                                         }
                                                         loginInstance.setProgress(0.9);
-                                                        Object[] objectArray = new Object[]{parsed[0], Crypto.decryptPublicNew(encryptedPassword), encryptedUsername, encryptedPassword, AESCipher.decrypt("Jkg5NZ4tVxs8CD0n", parsed[0]).getData(), "", parsed[1].replace("$2y$", "$2a$"), AsymmetricalEncryptionUtils.performRSADecryption(((JsonObject) JsonConnection.toJsonObject(connection)).get(uid).getAsString(), decodeByteArray((byte[]) publicKeyEncoded)), null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null};
+                                                        Object[] objectArray = new Object[]{parsed[0],                                  // 0
+                                                                Crypto.decryptPublicNew(encryptedPassword),                             // 1
+                                                                encryptedUsername,                                                      // 2
+                                                                encryptedPassword,                                                      // 3
+                                                                AESCipher.decrypt("Jkg5NZ4tVxs8CD0n", parsed[0]).getData(),     // 4
+                                                                "",
+                                                                parsed[1].replace("$2y$", "$2a$"),                   // 6
+                                                                AsymmetricalEncryptionUtils.performRSADecryption(((JsonObject) JsonConnection.toJsonObject(connection)).get(uid).getAsString(), decodeByteArray((byte[]) publicKeyEncoded)),
+                                                                null, null, null, null, null, null, null, null, null, null, rebuilt};
                                                         authUser = AuthenticatedUser.class.getConstructor(Object[].class).newInstance((Object) objectArray);
                                                     } else {
                                                         Snitch.snitch(4, missing.toArray(new String[]{}));

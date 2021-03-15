@@ -133,6 +133,54 @@ public class AESCipher {
     }
 
     /**
+     * Decrypt encoded text by AES-128-CBC algorithm
+     *
+     * @param secretKey  16/24/32 -characters secret password
+     * @param cipherText Encrypted text
+     * @return Self object instance with data or error message
+     */
+    public static byte[] decryptToByteArray(String secretKey, String cipherText) {
+        try {
+            // Get raw encoded data
+            byte[] encrypted = Base64.getDecoder().decode(cipherText.getBytes());
+
+            // Slice initialization vector
+            IvParameterSpec ivParameterSpec = new IvParameterSpec(encrypted, 0, INIT_VECTOR_LENGTH);
+
+            byte[] decryptionKey = new byte[INIT_VECTOR_LENGTH];
+
+            // "ECCNygH68stZA84Q"
+
+            for(int i = 0; i < 16; i++) {
+                if(i == 0) {
+                    decryptionKey[i] = HWIDCheck._43().substring(0, 1).getBytes()[i];
+                } else if(i <= 2) {
+                    decryptionKey[i] = HWIDCheck._17().substring(0,1).getBytes()[0];
+                } else if(i == 3) {
+                    decryptionKey[i] = 0x4e;
+                } else if(i == 4) {
+                    decryptionKey[i] = 0x79;
+                } else {
+                    decryptionKey[i] = secretKey.getBytes()[i - 5];
+                }
+            }
+
+            // Set secret password
+            SecretKeySpec secretKeySpec = new SecretKeySpec(decryptionKey, "AES");
+
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, ivParameterSpec);
+
+            // Return successful decoded object
+            return cipher.doFinal(encrypted, INIT_VECTOR_LENGTH, encrypted.length - INIT_VECTOR_LENGTH);
+        } catch (Throwable t) {
+            t.printStackTrace();
+            // Operation failed
+            return null;
+        }
+    }
+
+    /**
      * Check that secret password length is valid
      *
      * @param key 16/24/32 -characters secret password

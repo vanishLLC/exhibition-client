@@ -861,7 +861,7 @@ public class Killaura extends Module {
                     if (((Number) settings.get(ANGLESTEP).getValue()).intValue() == 0 || (off <= 0.11 || (off <= 1 && off >= 0.22 && MathUtils.getIncremental(angleTimer.getDifference(), 50) <= 100))) {
 
                         if (crits && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically && (((critModule.isPacket() && setupCrits))  && isCritSetup) && !em.isOnground()) {
-                            if (HypixelUtil.isVerifiedHypixel()) {
+                            if (HypixelUtil.isVerifiedHypixel() && mc.getCurrentServerData() != null && (mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net"))) {
                                 NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.046599998474120774, mc.thePlayer.posZ, false));
                             } else {
                                 Criticals.doCrits();
@@ -920,9 +920,7 @@ public class Killaura extends Module {
 
                             delay.reset();
                             nextRandom = (int) Math.round((20 / randomInt(min, max)));
-
-
-                            if (crits && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically && (critModule.isPacket2()) && isCritSetup) {
+                            if (crits && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically && critModule.isPacket2() && isCritSetup) {
                                 NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, true));
                             }
                         } else {
@@ -1050,7 +1048,7 @@ public class Killaura extends Module {
     private final double[] ZERO = new double[]{0, 0, 0};
 
     private double[] getPrediction(EntityLivingBase player, int ticks, double scale) {
-        if (!prediction.getValue() || !deltaHashMap.containsKey(player) || deltaHashMap.size() < 1) {
+        if (!prediction.getValue() || !deltaHashMap.containsKey(player) || deltaHashMap.size() < 2) {
             return ZERO;
         }
 
@@ -1330,7 +1328,6 @@ public class Killaura extends Module {
 
             float yawDiff = MathHelper.clamp_float(RotationUtils.getYawChangeGiven(entityLivingBase.posX, entityLivingBase.posZ, lastAngles.x), -180, 180);
 
-
             float estimatedYawChange;
 
             Bypass bypass = Client.getModuleManager().get(Bypass.class);
@@ -1376,12 +1373,27 @@ public class Killaura extends Module {
                 weight += 10;
             }
 
+            float yawDiff = MathHelper.clamp_float(RotationUtils.getYawChangeGiven(entityLivingBase.posX, entityLivingBase.posZ, lastAngles.x), -180, 180);
+
             float estimatedYawChange;
 
-            float forwardYawDiff = Math.abs(MathHelper.clamp_float(RotationUtils.getYawChangeGiven(entityLivingBase.posX, entityLivingBase.posZ, lastAngles.x), -180, 180));
-            if (forwardYawDiff > 90) {
-                estimatedYawChange = Math.abs(MathHelper.clamp_float(RotationUtils.getYawChangeGiven(entityLivingBase.posX, entityLivingBase.posZ, lastAngles.x + 180), -180, 180));
+            Bypass bypass = Client.getModuleManager().get(Bypass.class);
+            int bypassTicks = bypass.bruh - 10;
+            boolean allowInvalidAngles = bypass.allowBypassing() && (bypass.option.getSelected().equals("Watchdog Off") || (bypass.option.getSelected().equals("Dong") ?
+                    bypassTicks > 25 && bypassTicks <= (27 + bypass.randomDelay) : bypass.bruh > 10 && bypass.bruh % 100 > 10 && bypass.bruh % 100 < 99)) && HypixelUtil.isVerifiedHypixel();
+
+            float forwardYawDiff = Math.abs(yawDiff);
+            if (forwardYawDiff > 90 && allowInvalidAngles) {
+                boolean willViolate = entityLivingBase.waitTicks <= 0 && Angle.INSTANCE.willViolateYaw(new Location(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, lastAngles.x + MathHelper.clamp_float(yawDiff + 180, -180, 180), 0), entityLivingBase);
+                if (willViolate) {
+                    weight += 5;
+                }
+                estimatedYawChange = Math.abs(MathHelper.clamp_float(yawDiff + 180, -180, 180));
             } else {
+                boolean willViolate = entityLivingBase.waitTicks <= 0 && Angle.INSTANCE.willViolateYaw(new Location(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, lastAngles.x + yawDiff, 0), entityLivingBase);
+                if (willViolate) {
+                    weight += 5;
+                }
                 estimatedYawChange = forwardYawDiff;
             }
 

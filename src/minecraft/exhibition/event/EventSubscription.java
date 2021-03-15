@@ -26,12 +26,14 @@ public class EventSubscription<T extends Event> {
         if (mc.thePlayer == null && !(event instanceof EventScreenDisplay) && !(event instanceof EventPacket)) {
             return;
         }
-        subscribed.forEach(listener -> listener.onEvent(event));
+        for (EventListener listener : subscribed) {
+            listener.onEvent(event);
+        }
     }
 
     public void add(EventListener listener) {
         subscribed.add(listener);
-        subscribed.sort(Comparator.comparing(EventListener::getPriority));
+        subscribed.sort(Comparator.comparing(EventListener::getPriorityOrdinal));
     }
 
     public void remove(EventListener listener) {

@@ -109,7 +109,7 @@ public class Scaffold extends Module {
         lastAngles = new Vector2f(-1337, -1337);
         towerTimer.reset();
 
-        if(mc.thePlayer != null) {
+        if (mc.thePlayer != null) {
             lastHeldSlot = mc.thePlayer.inventory.currentItem;
         }
 
@@ -127,7 +127,7 @@ public class Scaffold extends Module {
             }
             NetUtil.sendPacket(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.STOP_SNEAKING));
 
-            if(lastHeldSlot != -1) {
+            if (lastHeldSlot != -1) {
                 mc.thePlayer.inventory.currentItem = lastHeldSlot;
                 mc.playerController.updateController();
                 lastHeldSlot = -1;
@@ -365,29 +365,19 @@ public class Scaffold extends Module {
                     }
                 }
 
-                if (mc.thePlayer.motionY < -0.9) {
-                    boolean blockUnder = false;
-                    int bruh = (int) (mc.thePlayer.posY);
-                    for (int i = bruh; i > (int) (mc.thePlayer.posY + mc.thePlayer.motionY * 2); i--) {
-                        BlockPos pos = new BlockPos(mc.thePlayer.posX, i, mc.thePlayer.posZ);
-                        if (!(mc.theWorld.getBlockState(pos).getBlock() instanceof BlockAir)) {
-                            blockUnder = true;
-                        }
-                    }
-                    if (!blockUnder) {
-                        y += mc.thePlayer.motionY;
-                    }
+                if (mc.thePlayer.motionY <= -0.625) {
+                    y += mc.thePlayer.motionY + ((mc.thePlayer.motionY - 0.08D) * 0.9800000190734863D);
                 }
 
-                if (mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {
-                    double forward = mc.thePlayer.movementInput.moveForward;
-                    double strafe = mc.thePlayer.movementInput.moveStrafe;
-                    float yaw = mc.thePlayer.rotationYaw;
-
-                    double multiplier = 0;
-                    x += (forward * multiplier * Math.cos(Math.toRadians(yaw + 90.0f)) + strafe * multiplier * Math.sin(Math.toRadians(yaw + 90.0f))) * (stepDown ? -0.1 : 1);
-                    z += (forward * multiplier * Math.sin(Math.toRadians(yaw + 90.0f)) - strafe * multiplier * Math.cos(Math.toRadians(yaw + 90.0f))) * (stepDown ? -0.1 : 1);
-                }
+//                if (mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {
+//                    double forward = mc.thePlayer.movementInput.moveForward;
+//                    double strafe = mc.thePlayer.movementInput.moveStrafe;
+//                    float yaw = mc.thePlayer.rotationYaw;
+//
+//                    double multiplier = 0;
+//                    x += (forward * multiplier * Math.cos(Math.toRadians(yaw + 90.0f)) + strafe * multiplier * Math.sin(Math.toRadians(yaw + 90.0f))) * (stepDown ? -0.1 : 1);
+//                    z += (forward * multiplier * Math.sin(Math.toRadians(yaw + 90.0f)) - strafe * multiplier * Math.cos(Math.toRadians(yaw + 90.0f))) * (stepDown ? -0.1 : 1);
+//                }
                 BlockPos pos = new BlockPos(x, y, z);
 
                 if (AutoPot.potting || AutoPot.haltTicks > 0)
@@ -531,12 +521,7 @@ public class Scaffold extends Module {
                                                 if (!place(pos.add(1, 0, -1)))
                                                     if (!place(pos.add(-1, 0, 1)))
                                                         if (!place(pos.add(1, 0, 1))) ;
-
-
-
-
                 }
-
             }
         }
     }

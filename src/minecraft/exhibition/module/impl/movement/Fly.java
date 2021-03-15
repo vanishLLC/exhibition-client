@@ -9,17 +9,23 @@ import exhibition.management.ColorManager;
 import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
+import exhibition.module.data.MultiBool;
 import exhibition.module.data.Options;
 import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.combat.Bypass;
 import exhibition.module.impl.player.Scaffold;
 import exhibition.util.*;
+import exhibition.util.misc.ChatUtil;
 import exhibition.util.render.Colors;
 import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.entity.player.PlayerCapabilities;
+import net.minecraft.item.ItemEnderPearl;
+import net.minecraft.item.ItemFireball;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemSword;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C03PacketPlayer;
-import net.minecraft.network.play.client.C13PacketPlayerAbilities;
+import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
+import net.minecraft.network.play.client.C09PacketHeldItemChange;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.AxisAlignedBB;
@@ -32,11 +38,14 @@ public class Fly extends Module {
     private String SPEED = "SPEED";
     private String MODE = "MODE";
     private String BYPASS = "BLORP";
-    private String BOOST = "BOOST";
+    private String BOOST = "TIMER";
 
-    private Setting<Boolean> lagExploit = new Setting<>("LAG-EXPLOIT", true, "Silently lag exploits before flying.");
-    private Setting<Boolean> blink = new Setting<>("CHOKE", true, "Blinks your entire flight. (Non Blorp only)");
+    private Setting<Boolean> lagExploit = new Setting<>("LAG-EXPLOIT", false, "Silently lag exploits before flying. May be patched.");
+    private Setting<Boolean> blink = new Setting<>("CHOKE", false, "Blinks your entire flight. (Non Blorp only)");
     private Setting<Boolean> targetStrafe = new Setting<>("TARGETSTRAFE", false, "Target Strafes around players.");
+
+    private Setting<Boolean> pearl = new Setting<>("PEARL", true);
+    private Setting<Boolean> fireball = new Setting<>("FIREBALL", true);
 
     private Timer jumpDelay = new Timer();
     private Timer boostDelay = new Timer();
@@ -48,15 +57,19 @@ public class Fly extends Module {
 
     private Queue<Packet> packetList = new ConcurrentLinkedQueue<>();
 
+    private boolean waitForDamage = false;
+
     public Fly(ModuleData data) {
         super(data);
         settings.put(BYPASS, new Setting<>(BYPASS, true, "Blorps you in a zorp at blips and chitz. (Hypixel Fly)"));
-        settings.put(SPEED, new Setting<>(SPEED, 1.5F, "Movement speed.", 0.25, 1, 10));
-        settings.put(BOOST, new Setting<>(BOOST, 2.0f, "Boost speed. 0 = no boost.", 0.25, 0, 3));
+        settings.put(SPEED, new Setting<>(SPEED, 1.5, "Movement speed.", 0.25, 1, 10));
+        settings.put(BOOST, new Setting<>(BOOST, 0, "Additional timer speed. 0 = no boost.", 0.25, 0, 3));
         settings.put(MODE, new Setting<>(MODE, new Options("Fly Mode", "Motion", "Vanilla", "Glide", "Motion"), "Fly method."));
         addSetting(targetStrafe);
         addSetting(lagExploit);
         addSetting(blink);
+
+        addSetting(new Setting<>("EXPLOITS", new MultiBool("Exploits", pearl, fireball)));
     }
 
     public static double getBaseMoveSpeed() {
@@ -118,8 +131,8 @@ public class Fly extends Module {
         if (mc.thePlayer == null)
             return;
 
-        if(lagExploit.getValue() && HypixelUtil.isVerifiedHypixel()) {
-            if(mc.thePlayer.onGround) {
+        if (lagExploit.getValue() && HypixelUtil.isVerifiedHypixel()) {
+            if (mc.thePlayer.onGround) {
                 lagExploitTicks = 120;
                 lagExploitStage = 0;
             } else {
@@ -130,7 +143,7 @@ public class Fly extends Module {
         }
 
         Bypass bypass = Client.getModuleManager().get(Bypass.class);
-        if (!bypass.isEnabled() && (boolean)settings.get(BYPASS).getValue()) {
+        if (!bypass.isEnabled() && (boolean) settings.get(BYPASS).getValue()) {
             toggle();
             Notifications.getManager().post("Fly Disabled", "This feature requires Bypass.", 1000, Notifications.Type.NOTIFY);
             return;
@@ -157,6 +170,37 @@ public class Fly extends Module {
         }
 
         this.resetPackets();
+
+        if (pearl.getValue() || fireball.getValue()) {
+            int foundSlot = -1;
+
+            for (int i = 9; i < 45; i++) {
+                if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
+                    boolean shouldSwap = i < 36;
+
+                    ItemStack is = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
+                    if ((pearl.getValue() && is.getItem() instanceof ItemEnderPearl) || (pearl.getValue() && is.getItem() instanceof ItemFireball)) {
+                        if (shouldSwap) {
+                            mc.playerController.windowClick(mc.thePlayer.inventoryContainer.windowId, i, 5, 2, mc.thePlayer);
+                            foundSlot = 5;
+                        } else {
+                            foundSlot = i - 36;
+                        }
+                        break;
+                    }
+                }
+            }
+
+            if (foundSlot != -1) {
+                int currentItem = mc.thePlayer.inventory.currentItem;
+                NetUtil.sendPacketNoEvents(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem = foundSlot));
+                NetUtil.sendPacketNoEvents(new C03PacketPlayer.C05PacketPlayerLook(mc.thePlayer.rotationYaw, 89.4F, mc.thePlayer.onGround));
+                NetUtil.sendPacketNoEvents(new C08PacketPlayerBlockPlacement(mc.thePlayer.inventory.getCurrentItem()));
+                NetUtil.sendPacketNoEvents(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem = currentItem));
+
+                waitForDamage = true;
+            }
+        }
 
     }
 
@@ -210,7 +254,7 @@ public class Fly extends Module {
         if (mc.thePlayer == null || mc.theWorld == null)
             return;
 
-        if(event instanceof EventRenderGui) {
+        if (event instanceof EventRenderGui) {
             if (lagExploit.getValue() && HypixelUtil.isVerifiedHypixel() && lagExploitStage < 2) {
                 ScaledResolution res = new ScaledResolution(mc);
                 double centerX = res.getScaledWidth_double() / 2, centerY = res.getScaledHeight_double() / 2 - 30;
@@ -243,6 +287,10 @@ public class Fly extends Module {
 
             if (packet instanceof S08PacketPlayerPosLook) {
                 S08PacketPlayerPosLook s = (S08PacketPlayerPosLook) packet;
+                if (waitForDamage) {
+                    waitForDamage = false;
+                }
+
                 if (lagExploitStage == 1) {
                     Notifications.getManager().post("Teleporting", "Teleporting to position.", 1000, Notifications.Type.OKAY);
                     NetUtil.sendPacketNoEvents(new C03PacketPlayer.C06PacketPlayerPosLook(s.getX(), s.getY(), s.getZ(), s.getYaw(), s.getPitch(), false));
@@ -259,6 +307,9 @@ public class Fly extends Module {
         }
         if (event instanceof EventMotionUpdate) {
             EventMotionUpdate em = (EventMotionUpdate) event;
+            if (waitForDamage)
+                return;
+
             if (em.isPre()) {
                 double delta = mc.thePlayer.posY - mc.thePlayer.lastTickPosY;
                 if (hypickle && delta < 0 && bruhTick == 0) {
@@ -306,8 +357,8 @@ public class Fly extends Module {
                 if (hypickle && mc.thePlayer.isCollidedVertically)
                     return;
 
-                if(lagExploit.getValue() && HypixelUtil.isVerifiedHypixel()) {
-                    if(lagExploitStage == 0) {
+                if (lagExploit.getValue() && HypixelUtil.isVerifiedHypixel()) {
+                    if (lagExploitStage == 0) {
                         if (em.isOnground()) {
                             NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.00053424, mc.thePlayer.posZ, true));
                         }
@@ -321,10 +372,10 @@ public class Fly extends Module {
                         return;
                     }
 
-                    if(lagExploitStage == 1) {
+                    if (lagExploitStage == 1) {
                         lagExploitTicks--;
                         em.setCancelled(true);
-                        if(lagExploitTicks % 20 == 0) {
+                        if (lagExploitTicks % 20 == 0) {
                             NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 1.0013359791121417, mc.thePlayer.posZ, false));
                         } else {
                             NetUtil.sendPacketNoEvents(new C03PacketPlayer(false));
@@ -359,8 +410,8 @@ public class Fly extends Module {
                         break;
                     }
                     case "Motion": {
-//                        if (PlayerUtil.isMoving())
-//                            em.setGround(HypixelUtil.isVerifiedHypixel() && mc.thePlayer.ticksExisted % 7 == 0);
+                        if (!mc.thePlayer.isCollidedVertically)
+                            em.setGround(!HypixelUtil.isVerifiedHypixel());
                         break;
                     }
 //                    case "AntiKick": {
@@ -384,9 +435,16 @@ public class Fly extends Module {
             }
         }
         if (event instanceof EventMove) {
+            if (waitForDamage && mc.thePlayer.hurtTime == 10) {
+                waitForDamage = false;
+            }
+
+            if (waitForDamage)
+                return;
+
             EventMove em = (EventMove) event;
             String mode = ((Options) settings.get(MODE).getValue()).getSelected();
-            if(lagExploit.getValue() && HypixelUtil.isVerifiedHypixel() && lagExploitStage < 2) {
+            if (lagExploit.getValue() && HypixelUtil.isVerifiedHypixel() && lagExploitStage < 2) {
                 em.setX(mc.thePlayer.motionX = 0).setY(mc.thePlayer.motionY = 0).setZ(mc.thePlayer.motionZ = 0);
                 return;
             }
@@ -396,16 +454,14 @@ public class Fly extends Module {
                 if (hypickle) {
                     speed = getBaseMoveSpeed();
                 }
-                if (HypixelUtil.isVerifiedHypixel()) {
-                    if (mc.thePlayer.movementInput.jump) {
-                        mc.thePlayer.motionY = 0.42F;
-                    } else if (mc.thePlayer.movementInput.sneak) {
-                        mc.thePlayer.motionY = -0.42F;
-                    } else {
-                        mc.thePlayer.motionY = 0;
-                    }
-                    em.setY(mc.thePlayer.motionY);
+                if (mc.thePlayer.movementInput.jump) {
+                    mc.thePlayer.motionY = Math.max(0.42F, speed/2);
+                } else if (mc.thePlayer.movementInput.sneak) {
+                    mc.thePlayer.motionY = -Math.max(0.42F, speed/2);
+                } else {
+                    mc.thePlayer.motionY = 0;
                 }
+                em.setY(mc.thePlayer.motionY);
                 if (boostDelay.delay(10000)) {
                     boostDelay.reset();
                 }
@@ -428,7 +484,7 @@ public class Fly extends Module {
                 float yaw = (allowTargetStrafe() && mc.thePlayer.movementInput.moveStrafe == 0 && mc.thePlayer.movementInput.moveForward > 0) ?
                         targetStrafe.getTargetYaw(mc.thePlayer.rotationYaw, em.getY()) : mc.thePlayer.rotationYaw;
 
-                if ((mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f)) {
+                if (mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f) {
                     em.setX((float) (-(Math.sin(mc.thePlayer.getDirection(yaw)) * speed)));
                     em.setZ((float) (Math.cos(mc.thePlayer.getDirection(yaw)) * speed));
                 }

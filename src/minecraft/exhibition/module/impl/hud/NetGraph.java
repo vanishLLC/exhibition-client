@@ -15,8 +15,6 @@ import exhibition.util.Timer;
 import exhibition.util.render.Colors;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.client.C0FPacketConfirmTransaction;
-import net.minecraft.network.play.server.S32PacketConfirmTransaction;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 

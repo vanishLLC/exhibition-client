@@ -845,7 +845,7 @@ public abstract class Entity implements ICommandSender
             this.isCollidedHorizontally = (var10 != x || var12 != z);
             this.isCollidedVertically = (var11 != y);
             boolean forceWalk = Client.getModuleManager().isEnabled(Fly.class);
-            onGround = forceWalk || (this.isCollidedVertically && var11 < 0.0);
+            onGround = (this.isCollidedVertically && var11 < 0.0);
             this.isCollided = (this.isCollidedHorizontally || this.isCollidedVertically);
             final int var82 = MathHelper.floor_double(this.posX);
             final int var83 = MathHelper.floor_double(this.posY - 0.20000000298023224);
@@ -876,7 +876,7 @@ public abstract class Entity implements ICommandSender
                 if (var86 != Blocks.ladder) {
                     var89 = 0.0;
                 }
-                if (var86 != null && this.onGround) {
+                if (var86 != null && (this.onGround)) {
                     var86.onEntityCollidedWithBlock(this.worldObj, var85, this);
                 }
                 this.distanceWalkedModified += (float) (MathHelper.sqrt_double(var88 * var88 + var90 * var90) * 0.6);

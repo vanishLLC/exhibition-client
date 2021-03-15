@@ -47,4 +47,9 @@ public abstract class Command implements Fireable, MinecraftUtil {
 	public String getDescription() {
 		return description;
 	}
+
+	public void printChat(String text) {
+		ChatUtil.printChat(chatPrefix + text);
+	}
+
 }

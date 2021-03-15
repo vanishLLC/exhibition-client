@@ -101,7 +101,7 @@ public class LongJump extends Module {
         addSetting(bowOnly);
         addSetting(boostScale);
         //settings.put(CHOKE, new Setting<>(CHOKE, 50, "The amount of ticks to choke by in between blinks.", 1, 2, 70));
-        settings.put(TIMER, new Setting<>(TIMER, 0.0, "FastFly timer. (-0.5 = 0.5x Timer, 0 = 1x Timer, 1.0 = 2x Timer)", 0.01, -0.9, 2));
+        settings.put(TIMER, new Setting<>(TIMER, 0.0, "Adds to base Game Timer. (-0.5 = 0.5x Timer, 0 = 1x Timer, 1.0 = 2x Timer)", 0.01, -0.75, 2));
 
         speed = 0.27999999999999997;
         onGroundLastTick = false;
@@ -430,6 +430,10 @@ public class LongJump extends Module {
             EventMove em = (EventMove) event;
             double boost = ((Number) settings.get(BOOST).getValue()).doubleValue();
             float autBoost = ((Number) settings.get(TIMER).getValue()).floatValue();
+
+            if(bowOnly.getValue()) {
+                auraTimer.reset();
+            }
 
             if (bowTicks <= 0) {
                 //mc.timer.timerSpeed = (5F + (float) (1.005325F * Math.random()));

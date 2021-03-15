@@ -12,7 +12,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import static exhibition.util.security.AuthenticationUtil.getHwid;
@@ -24,6 +26,15 @@ public class AuthenticatedUser extends Castable {
     private String inputUsername;
     private String hwidHash;
     private List<String> jvmArguments;
+
+    // These are modules that are forcefully disabled
+    private List<String> disabledModules;
+
+    // These are modules that alert the user that they may not function
+    private List<String> alertModules;
+
+    // These are settings that should not be enabled
+    private HashMap<String, String> disabledSettings;
 
     public AuthenticatedUser(Object[] args) {
         try {
@@ -56,6 +67,10 @@ public class AuthenticatedUser extends Castable {
                     this.forumUsername = (String) args[4];
                     this.hwidHash = (String) args[6];
                     this.userID = Integer.parseInt((String) args[7]);
+
+//                    this.disabledModules = (List<String>) args[8];
+//                    this.alertModules = (List<String>) args[9];
+//                    this.disabledSettings = (HashMap<String, String>) args[10];
 
                     try {
                         this.inputUsername = Crypto.decrypt(CryptManager.getSecretNew(), (String) args[2]);

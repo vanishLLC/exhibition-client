@@ -65,7 +65,7 @@ public class EventSystem {
                 EventSubscription subscription = EventSystem.registry.get(event);
                 subscription.add(listener);
             } else {
-                EventSubscription subscription = new EventSubscription(event);
+                EventSubscription subscription = new EventSubscription<>(event);
                 subscription.add(listener);
                 EventSystem.registry.put(event, subscription);
             }
@@ -108,8 +108,8 @@ public class EventSystem {
      * @param eventClass
      * @return
      */
-    public static Event getInstance(Class eventClass) {
-        return EventSystem.instances.get(eventClass);
+    public static <T extends Event> T getInstance(Class<T> eventClass) {
+        return (T) EventSystem.instances.get(eventClass);
     }
 
     /**

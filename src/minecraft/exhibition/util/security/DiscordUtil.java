@@ -46,8 +46,8 @@ public class DiscordUtil {
 
             handlerObject = builderClass.getDeclaredMethod("build").invoke(builderInstance);
 
-            discordRPCClass.getMethod("discordInitialize", String.class, handlerClass, boolean.class).invoke(null,"633162444134416413", handlerObject, false);
-            discordRPCClass.getMethod("discordRegister", String.class, String.class).invoke(null,"633162444134416413", "");
+            discordRPCClass.getMethod("discordInitialize", String.class, handlerClass, boolean.class).invoke(null, "633162444134416413", handlerObject, false);
+            discordRPCClass.getMethod("discordRegister", String.class, String.class).invoke(null, "633162444134416413", "");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -77,10 +77,22 @@ public class DiscordUtil {
     }
 
     public static void setDiscordPresence(String state, String details) {
-        DiscordRichPresence.Builder discordRichPresence = new DiscordRichPresence.Builder(state).setStartTimestamps(startTime).setBigImage("logo","");
+        DiscordRichPresence.Builder discordRichPresence = new DiscordRichPresence.Builder(state).setStartTimestamps(startTime).setBigImage("logo", "");
 
-        if(Client.getAuthUser() != null && Client.getAuthUser().userID == 5) {
-            discordRichPresence.setBigImage("frog", "Will you let him in?").setSmallImage("logo", "");
+        if (Client.getAuthUser() != null) {
+            switch (Client.getAuthUser().userID) {
+                case 1: {
+                    discordRichPresence.setBigImage("logo", "").setSmallImage("money", "Money Money Money Money Money Money Money Money Money Money Money Money! (Only cares about Money)");
+                    break;
+                }
+                case 5: { // Frog
+                    discordRichPresence.setBigImage("frog", "Will you let him in?").setSmallImage("logo", "");
+                    break;
+                }
+                default:
+                    break;
+            }
+
         }
 
         discordRichPresence.setDetails(details);

@@ -12,7 +12,13 @@ import exhibition.management.notifications.dev.DevNotifications;
 import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.util.misc.ChatUtil;
 import exhibition.util.security.AuthenticationUtil;
+import net.minecraft.event.ClickEvent;
+import net.minecraft.event.HoverEvent;
 import net.minecraft.network.play.client.C03PacketPlayer;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.IChatComponent;
 
 import java.lang.reflect.Field;
 import java.util.Random;
@@ -96,6 +102,8 @@ public class NotificationTest extends Command {
 
         } else if (args[0].equalsIgnoreCase("virtue")) {
             VirtueClickGui.start();
+        } else if (args[0].equalsIgnoreCase("chat")) {
+
         } else {
             ChatUtil.printChat(chatPrefix + "???");
         }

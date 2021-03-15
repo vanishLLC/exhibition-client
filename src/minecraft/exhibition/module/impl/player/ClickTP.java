@@ -73,7 +73,10 @@ public class ClickTP extends Module {
                         if(!Teleport.isTeleporting) {
                             endPos = blinkPos.getBlockPos();
                             double diff = (endPos.getY() + 6) - mc.thePlayer.posY;
-                            Client.commandManager.getCommand("Teleport").fire(new String[]{String.valueOf(endPos.getX() + 0.5), String.valueOf(endPos.getZ() + 0.5), String.valueOf((diff))});
+                            //Client.commandManager.getCommand("Teleport").fire(new String[]{String.valueOf(endPos.getX() + 0.5), String.valueOf(endPos.getZ() + 0.5), String.valueOf((diff))});
+
+                            mc.thePlayer.setPositionAndUpdate(endPos.getX() + 0.5, endPos.getY() + 2, endPos.getZ() + 0.5);
+
                             delay = 20;
                         } else {
                             Teleport.cancel = true;

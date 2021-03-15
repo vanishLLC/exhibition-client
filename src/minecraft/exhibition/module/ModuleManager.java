@@ -300,6 +300,7 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
     public static void loadStatus() {
         try {
             boolean isNew = false;
+            boolean notEmpty = false;
             List<String> fileContent = FileUtils.read(MODULE_DIR);
             for (String line : fileContent) {
                 try {
@@ -314,7 +315,15 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
                                 if (enabled && !module.isEnabled()) {
                                     module.setEnabled(true);
                                     EventSystem.register(module);
-                                    module.onEnable();
+                                    try {
+                                        module.onEnable();
+                                    } catch (Exception e) {
+                                        System.out.println(module.getName() + " caused an Exception onEnable.");
+                                        e.printStackTrace();
+
+                                        module.setEnabled(false);
+                                        EventSystem.unregister(module);
+                                    }
                                 }
                                 module.setHidden(Boolean.parseBoolean(split[2]));
                                 // displayName, enabled, hidden, onHeld
@@ -322,6 +331,7 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
                                     module.setHeld(Boolean.parseBoolean(split[3]));
                                 }
                             }
+                            notEmpty = true;
                         }
                         isNew = true;
                     } else {
@@ -333,9 +343,18 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
                                 if (enabled && !module.isEnabled()) {
                                     module.setEnabled(true);
                                     EventSystem.register(module);
-                                    module.onEnable();
+                                    try {
+                                        module.onEnable();
+                                    } catch (Exception e) {
+                                        System.out.println(module.getName() + " caused an Exception onEnable.");
+                                        e.printStackTrace();
+
+                                        module.setEnabled(false);
+                                        EventSystem.unregister(module);
+                                    }
                                 }
                                 module.setHidden(Boolean.parseBoolean(split[3]));
+                                notEmpty = true;
                             }
                         }
                     }
@@ -344,7 +363,7 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
                     e.printStackTrace();
                 }
             }
-            if (!isNew) {
+            if (!isNew && notEmpty) {
                 Notifications.getManager().post("Updated Mods.txt", "Your Mods.txt has been updated successfully!", 5000, Notifications.Type.INFO);
                 Notifications.getManager().post("Updated Binds.txt", "Binds.txt has been created successfully!", 5000, Notifications.Type.INFO);
                 saveStatus();

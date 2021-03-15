@@ -92,7 +92,7 @@ public class TargetStrafe extends Module {
 
         boolean magnet = (boolean) autoPriority.getValue();
 
-        boolean isStrafing = (Client.getModuleManager().isEnabled(Speed.class) || ((LongJump) Client.getModuleManager().get(LongJump.class)).allowTargetStrafe() || ((Fly) Client.getModuleManager().get(Fly.class)).allowTargetStrafe());
+        boolean isStrafing = (Client.getModuleManager().isEnabled(Speed.class) || Client.getModuleManager().get(LongJump.class).allowTargetStrafe() || ((Fly) Client.getModuleManager().get(Fly.class)).allowTargetStrafe());
 
         if (event instanceof EventMotionUpdate) {
             EventMotionUpdate em = event.cast();
@@ -102,13 +102,13 @@ public class TargetStrafe extends Module {
                 target = Killaura.getTarget();
                 if (target == null && !targetMode.getSelected().equals("Aura Only")) {
                     for (Entity entity : mc.theWorld.getPlayerEntities().stream().filter(Entity::isPlayerMP).sorted(Comparator.comparingDouble(o -> -o.getDistanceToEntity(mc.thePlayer))).collect(Collectors.toList())) {
-                        if (entity instanceof EntityPlayer && entity != mc.thePlayer && !AntiBot.isBot(entity) && !FriendManager.isFriend(entity.getName())) {
+                        if (!AntiBot.isBot(entity) && !FriendManager.isFriend(entity.getName())) {
                             EntityPlayer ent = (EntityPlayer) entity;
                             boolean nearest = targetMode.getSelected().equalsIgnoreCase("Nearby");
                             if ((nearest || (targetMode.getSelected().equals("Priority") && TargetESP.isPriority(ent)) || (targetMode.getSelected().equals("Aura Only") && Killaura.getTarget() == ent)) && mc.thePlayer.getDistanceToEntity(ent) <= range && (!(boolean) teams.getValue() || !TeamUtils.isTeam(mc.thePlayer, ent))) {
                                 target = ent;
-                                if (ent != ((Killaura) Client.getModuleManager().get(Killaura.class)).vip && magnet) {
-                                    ((Killaura) Client.getModuleManager().get(Killaura.class)).vip = ent;
+                                if (ent != Client.getModuleManager().get(Killaura.class).vip && magnet) {
+                                    Client.getModuleManager().get(Killaura.class).vip = ent;
                                 }
                             }
                         }

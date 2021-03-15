@@ -6,8 +6,6 @@ import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventPacket;
 import exhibition.event.impl.EventTick;
 import exhibition.management.friend.FriendManager;
-import exhibition.management.notifications.dev.DevNotification;
-import exhibition.management.notifications.dev.DevNotifications;
 import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
@@ -15,7 +13,6 @@ import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.movement.LongJump;
 import exhibition.util.HypixelUtil;
 import exhibition.util.Timer;
-import net.minecraft.block.BlockAir;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.IProjectile;
@@ -24,7 +21,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S12PacketEntityVelocity;
 import net.minecraft.network.play.server.S27PacketExplosion;
 import net.minecraft.network.play.server.S45PacketTitle;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.Vec3;
 
 public class AntiVelocity extends Module {

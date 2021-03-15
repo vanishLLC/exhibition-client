@@ -10,15 +10,9 @@ import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.player.NoFall;
 import exhibition.module.impl.render.Freecam;
-import exhibition.util.HypixelUtil;
 import exhibition.util.Timer;
-import exhibition.util.misc.ChatUtil;
 import net.minecraft.block.BlockAir;
-import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
@@ -66,7 +60,7 @@ public class AntiFall extends Module {
             if (mc.thePlayer.fallDistance >= dist && !Client.getModuleManager().isEnabled(Fly.class) && !Client.getModuleManager().isEnabled(Freecam.class)
                     && !Client.getModuleManager().isEnabled(FreecamTP.class)
                     && mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.5, mc.thePlayer.posZ)).getBlock() == Blocks.air) {
-                if (!((Boolean) settings.get(VOID).getValue()) || !isBlockUnder()) {
+                if (!isBlockUnder()) {
                     em.setX(mc.thePlayer.motionX = 0);
                     em.setY(mc.thePlayer.motionY = 0);
                     em.setZ(mc.thePlayer.motionZ = 0);
@@ -96,6 +90,9 @@ public class AntiFall extends Module {
     }
 
     private boolean isBlockUnder() {
+        if(!((boolean) settings.get(VOID).getValue()))
+            return false;
+
         for (int i = (int) (mc.thePlayer.posY); i >= 0; i--) {
             double[][] offsets = new double[][]{new double[]{0, 0}, new double[]{-0.35, -0.35}, new double[]{-0.35, 0.35}, new double[]{0.35, 0.35}, new double[]{0.35, -0.35}};
             for (double[] offset : offsets) {

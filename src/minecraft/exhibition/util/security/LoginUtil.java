@@ -18,7 +18,7 @@ public class LoginUtil {
         fileContent.add(encryptedUsername);
         fileContent.add(encryptedPassword);
         fileContent.add(String.valueOf(LoginUtil.loginResponseHashCode));
-        fileContent.add(Client.version);
+        fileContent.add(Client.isBeta() ? getLastVersion() : Client.version);
         FileUtils.write(LOGIN, fileContent, true);
     }
 

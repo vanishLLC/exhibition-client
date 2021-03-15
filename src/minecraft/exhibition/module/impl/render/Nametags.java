@@ -28,7 +28,6 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.*;
 import net.minecraft.util.MathHelper;
@@ -487,7 +486,7 @@ public class Nametags extends Module {
         boolean ignorePit = HypixelUtil.isInGame("THE HYPIXEL PIT") && IGNORESPAWN.getValue();
 
         for (EntityPlayer ent : mc.theWorld.playerEntities) {
-            if (!(ent instanceof EntityPlayerSP)) {
+            if (ent != mc.thePlayer) {
 
                 boolean isPriority = TargetESP.isPriority(ent) || FriendManager.isFriend(ent.getName());
 

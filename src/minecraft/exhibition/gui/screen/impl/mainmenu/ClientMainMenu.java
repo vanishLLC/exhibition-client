@@ -2,14 +2,9 @@ package exhibition.gui.screen.impl.mainmenu;
 
 import exhibition.Client;
 import exhibition.gui.screen.PanoramaScreen;
-import exhibition.management.SubFolder;
-import exhibition.util.security.AuthenticatedUser;
-import exhibition.util.security.Crypto;
 import net.minecraft.client.Minecraft;
-import org.apache.commons.io.FileUtils;
 import org.lwjgl.input.Keyboard;
 
-import java.io.File;
 import java.io.IOException;
 
 public class ClientMainMenu extends PanoramaScreen {
