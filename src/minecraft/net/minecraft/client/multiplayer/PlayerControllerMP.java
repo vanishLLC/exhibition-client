@@ -584,14 +584,20 @@ public class PlayerControllerMP
      */
     public void attackEntity(EntityPlayer playerIn, Entity targetEntity) {
         this.syncCurrentPlayItem();
-        EventSystem.getInstance(EventAttack.class).fire(targetEntity, true);
+        EventAttack event = EventSystem.getInstance(EventAttack.class);
+        event.fire(targetEntity, true);
+
+        if(event.isCancelled()) {
+            return;
+        }
+
         if(targetEntity instanceof EntityItem || targetEntity instanceof EntityXPOrb || targetEntity instanceof EntityArrow || targetEntity == playerIn)
             return;
         this.netClientHandler.addToSendQueue(new C02PacketUseEntity(targetEntity, C02PacketUseEntity.Action.ATTACK));
         if (this.currentGameType != WorldSettings.GameType.SPECTATOR) {
             playerIn.attackTargetEntityWithCurrentItem(targetEntity);
         }
-        EventSystem.getInstance(EventAttack.class).fire(targetEntity, false);
+        event.fire(targetEntity, false);
     }
 
     /**
