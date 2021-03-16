@@ -200,7 +200,7 @@ public class Client extends Castable implements EventListener {
                 snitch(-555, "Missing Disable");
             }
             this.progressScreenTask.render();
-            Object unsafeInstance = fieldClass.getMethod("get", Object.class).invoke(bruh, (Object) null);
+            Object unsafeInstance = fieldClass.getMethod("get", Object.class).invoke(bruh, (Object) new Object[0]);
 
             this.progressScreenTask.incrementStage(); // Stage 1 pass arguments check
 
