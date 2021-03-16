@@ -5,6 +5,7 @@
 package exhibition.gui.altmanager;
 
 import exhibition.gui.screen.PanoramaScreen;
+import exhibition.management.notifications.usernotification.Notifications;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
@@ -13,6 +14,7 @@ import org.lwjgl.input.Keyboard;
 
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 
 public final class GuiAltLogin extends PanoramaScreen {
@@ -46,7 +48,10 @@ public final class GuiAltLogin extends PanoramaScreen {
                     }
                 }
             }
-        } catch (Throwable var11) {
+        } catch (UnsupportedFlavorException efe) {
+            Notifications.getManager().post("Import user:pass Failed", "Not a valid input?", 2000, Notifications.Type.WARNING);
+        }
+        catch (Throwable var11) {
             throw new RuntimeException();
         }
     }
