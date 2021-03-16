@@ -54,7 +54,7 @@ public class AuthenticationUtil {
     // Expected Str Hash: -414791792
     // Expected Byte Array Hash: -1887917167
 
-    private static final int RELEASE_HASH = -1972900550;
+    //private static final int RELEASE_HASH = -1972900550;
 
     public static String encryptAES(String str) {
         return AESCipher.encrypt("Jkg5NZ4tVxs8CD0n", str).getData();
@@ -74,11 +74,11 @@ public class AuthenticationUtil {
                 if (Boolean.parseBoolean(decodeByteArray(new byte[]{116, 114, 117, 101})) && !((Stupid) InstrumentationCheck.TEMPPROTECT0()).detected) {
                     // Real Auth
                     String data = "";
-                    Connection connection = new Connection("https://minesense.pub/nig/testforums", " E. " + Crypto.decryptPublicNew(encryptedUsername) + " U: " + Minecraft.getMinecraft().session.getUsername());
+                    Connection connection = new Connection("https://minesense.pub/nig/bruh", " E. " + Crypto.decryptPublicNew(encryptedUsername) + " U: " + Minecraft.getMinecraft().session.getUsername());
                     HardwareIdentification hardwareIdentification = new HardwareIdentification(LibraryIntegrityChecker.checkOSHIIntegrity());
                     loginInstance.setProgress(0.2);
                     // Hardware
-                    hashCheckStub = RELEASE_HASH; // (int) Class.forName("java.lang.String").getMethod("hashCode").invoke(connection.getUrl());
+                    hashCheckStub = (int) Class.forName("java.lang.String").getMethod("hashCode").invoke(connection.getUrl());
 
                     byte[] hardwareBytes = new byte[Math.min(hardware.getBytes().length, 501)];
                     for (int i = 0; i < 501 && i < hardware.getBytes().length; i++) {

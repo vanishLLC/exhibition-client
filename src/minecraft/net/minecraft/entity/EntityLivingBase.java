@@ -1853,8 +1853,7 @@ public abstract class EntityLivingBase extends Entity
             f1 = this.rotationYaw;
         }
 
-        boolean forceWalk = Client.getModuleManager().isEnabled(Fly.class);
-        if (!this.onGround && !forceWalk)
+        if (!this.onGround)
         {
             f3 = 0.0F;
         }

@@ -7,6 +7,7 @@ import exhibition.event.impl.EventTick;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
+import exhibition.module.impl.player.Scaffold;
 import exhibition.util.Timer;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.enchantment.Enchantment;
@@ -111,7 +112,7 @@ public class AutoSword extends Module {
                 }
             }
 
-            if ((boolean) settings.get(SWAP).getValue() && mc.thePlayer.inventory.currentItem != slot && !AutoSoup.isHealing && !AutoPot.potting) {
+            if ((boolean) settings.get(SWAP).getValue() && mc.thePlayer.inventory.currentItem != slot && !AutoSoup.isHealing && !AutoPot.potting && !Client.getModuleManager().isEnabled(Scaffold.class)) {
                 if (useSwap.getValue() || !mc.thePlayer.isUsingItem())
                     for (int i = 36; i < 45; i++)
                         if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
