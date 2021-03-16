@@ -51,7 +51,10 @@ public class NoFall extends Module {
                 }
             }
 
-            if (dist > mc.thePlayer.fallDistance) dist = 0;
+            if (dist > mc.thePlayer.fallDistance || mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {
+                mc.timer.timerSpeed = 1;
+                dist = 0;
+            }
 
             if (mc.thePlayer.motionY < 0 && mc.thePlayer.fallDistance > 2.124) {
                 double fallY = mc.thePlayer.motionY;
@@ -62,7 +65,6 @@ public class NoFall extends Module {
                     boolean allowVanilla = bypass.allowBypassing() && (bypass.option.getSelected().equals("Watchdog Off") || (bypass.bruh == 0 || bypass.bruh > 10));
                     if (em.isPre()) {
                         boolean sendPacket = false;
-
                         if (!HypixelUtil.isVerifiedHypixel() || (vanilla.getValue() && allowVanilla)) {
                             if (bypass.bruh > 10) {
                                 bypass.bruh -= 1;

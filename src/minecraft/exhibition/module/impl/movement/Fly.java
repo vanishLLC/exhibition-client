@@ -410,8 +410,6 @@ public class Fly extends Module {
                         break;
                     }
                     case "Motion": {
-                        if (!mc.thePlayer.isCollidedVertically)
-                            em.setGround(!HypixelUtil.isVerifiedHypixel());
                         break;
                     }
 //                    case "AntiKick": {

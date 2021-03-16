@@ -65,6 +65,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
+import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -80,7 +81,7 @@ public class Client extends Castable implements EventListener {
     public static boolean isNewUser;
 
     // Client data
-    public static String version = "030621";
+    public static String version = "031621";
     public static String parsedVersion;
     public static String clientName = "ArthimoWare";
     public static ColorManager cm = new ColorManager();
@@ -210,16 +211,17 @@ public class Client extends Castable implements EventListener {
 
         String version = "";
         try {
-            Connection connection = new Connection("https://minesense.pub/nig/version.php")
-                    .setParameters("i", Crypto.decryptPrivate("YuMCLvpP/fQUkLzHtx6DLg=="));
-
-            SSLConnector.get(connection);
+            Connection connection = new Connection("https://minesense.pub/nig/version");
+            connection.setJson(Base64.getEncoder().encodeToString(SystemUtil.getHardwareIdentifiers().getBytes()));
+            SSLConnector.post(connection);
             version = connection.getResponse().trim();
+            System.out.println(version);
             parsedVersion = Crypto.decrypt(CryptManager.getDecrypt(), version);
         } catch (Exception e) {
             e.printStackTrace();
             snitch(12, e.getMessage(), version);
         }
+
         this.progressScreenTask.incrementStage(); // Stage 2 version was fetched correctly
         List<String> okHand = LoginUtil.getLoginInformation();
         try {
@@ -230,6 +232,7 @@ public class Client extends Castable implements EventListener {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         this.progressScreenTask.incrementStage(); // Stage 3 login cache was checked
         AuthenticationUtil.isHWIDValid(parsedVersion + commandManager, true);
 

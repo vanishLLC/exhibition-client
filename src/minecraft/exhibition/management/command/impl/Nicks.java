@@ -48,14 +48,14 @@ public class Nicks extends Command {
             return;
         }
 
-        printChat("\247aNicked Players in Lobby [\247e" + list.size() + "\2477]");
+        printChat("\247aNicked Players in Lobby \2477[\247e" + list.size() + "\2477]");
 
         for (NetworkPlayerInfo playerInfo : list) {
             String username = playerInfo.getGameProfile().getName();
             if (UUIDResolver.instance.resolvedMap.containsKey(username)) {
-                printChat("\247e" + username + " \2477=> \247d" + UUIDResolver.instance.resolvedMap.get(username));
+                ChatUtil.printChat("\2477- \247e" + username + " \2477=> \247d" + UUIDResolver.instance.resolvedMap.get(username));
             } else {
-                printChat("\247e" + username + " \2477=> \247d" + UUIDResolver.instance.resolvedMap.get(username));
+                ChatUtil.printChat("\2477- \247e" + username);
             }
         }
 

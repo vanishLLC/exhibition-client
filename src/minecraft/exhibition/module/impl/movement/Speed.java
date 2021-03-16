@@ -353,6 +353,8 @@ public class Speed extends Module {
 
                     double moveSpeed = speed = (defaultSpeed()) * ((mc.thePlayer.isInsideOfMaterial(Material.vine)) ? 0.5 : (mc.thePlayer.isSneaking()) ? 0.8 : (PlayerUtil.isInLiquid() ? 0.54 : (reset) ? 0.45 : ((mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.1, mc.thePlayer.posZ)).getBlock().slipperiness == 0.98f) ? 2.4 : canSprint ? 1.0 : 0.765)));
 
+                    int current = stage;
+
                     if (stage == 1 && mc.thePlayer.isCollidedVertically && (mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f)) {
                         speed = moveSpeed;
                     } else if (stage == 2 && mc.thePlayer.isCollidedVertically && mc.thePlayer.onGround && (mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f)) {
@@ -466,7 +468,7 @@ public class Speed extends Module {
                         velocityBoost *= 0.66;
 
                     //Stage checks if you're greater than 0 as step sets you -6 stage to make sure the player wont flag.
-                    if (stage > 0) {
+                    if (current > 1 && stage > 0) {
                         double forward = mc.thePlayer.movementInput.moveForward;
                         double strafe = mc.thePlayer.movementInput.moveStrafe;
                         TargetStrafe targetStrafe = Client.getModuleManager().get(TargetStrafe.class);

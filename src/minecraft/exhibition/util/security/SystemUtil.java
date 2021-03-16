@@ -12,11 +12,11 @@ public class SystemUtil {
     public static String getHardwareIdentifiers() {
         if (hardwareIdentification == null)
             hardwareIdentification = new LegacyHardwareID(LibraryIntegrityChecker.checkOSHIIntegrity());
-        String identifier = hardwareIdentification.osFamily +
-                hardwareIdentification.cpuName +
-                hardwareIdentification.moboManufacturer +
-                hardwareIdentification.moboModel +
-                hardwareIdentification.serialNumber +
+        String identifier = hardwareIdentification.osFamily + "|" +
+                hardwareIdentification.cpuName + "|" +
+                hardwareIdentification.moboManufacturer + "|" +
+                hardwareIdentification.moboModel + "|" +
+                hardwareIdentification.serialNumber + "|" +
                 hardwareIdentification.modelAndSerial;
         return identifier.trim();
     }

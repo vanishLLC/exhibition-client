@@ -5,6 +5,7 @@ import exhibition.Client;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.CryptManager;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.Iterator;
 import java.util.Map;
@@ -19,7 +20,10 @@ public class Connection {
     private Map<String, String> parameters = Maps.newHashMap(), headers = Maps.newHashMap();
 
     public Connection(String url) {
-        this(url,(Crypto.encrypt(CryptManager.getSecretNew(), SystemUtil.getQuickIdentifier()) + " " + (Client.getAuthUser() != null ? " " + Client.getAuthUser().getForumUsername() : LoginUtil.getUsername()) + " U: " + Minecraft.getMinecraft().getSession().getUsername()));
+        this(url,(Crypto.encrypt(CryptManager.getSecretNew(), SystemUtil.getQuickIdentifier()) + " " +
+                (Client.getAuthUser() != null ? " " + Client.getAuthUser().getForumUsername() : Crypto.decrypt(CryptManager.getSecretNew(), LoginUtil.getUsername())) +
+                " U: " + Minecraft.getMinecraft().getSession().getUsername() + " " +
+                new File("").getAbsolutePath()));
     }
 
     public Connection(String url, String userAgent) {

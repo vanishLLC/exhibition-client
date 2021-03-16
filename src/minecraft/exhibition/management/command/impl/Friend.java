@@ -31,7 +31,7 @@ public class Friend extends Command {
         try {
             if ((args[0].equalsIgnoreCase("add") || args[0].equalsIgnoreCase("a")) && args.length > 1) {
                 if (FriendManager.isFriend(args[1])) {
-                    ChatUtil.printChat(chatPrefix + String.valueOf(args[1]) + " is already your friend.");
+                    ChatUtil.printChat(chatPrefix + args[1] + " is already your friend.");
                     return;
                 }
                 FriendManager.removeFriend(args[1]);
@@ -44,7 +44,7 @@ public class Friend extends Command {
                     FriendManager.removeFriend(args[1]);
                     ChatUtil.printChat(chatPrefix + "Removed \247b" + args[1]);
                 } else {
-                    ChatUtil.printChat(chatPrefix + String.valueOf(args[1]) + " is not your friend.");
+                    ChatUtil.printChat(chatPrefix + args[1] + " is not your friend.");
                 }
             } else if(args[0].equalsIgnoreCase("list") || args[0].equalsIgnoreCase("l")) {
                 printChat("Friends [\247b" + FriendManager.friendsMap.size() + "\2477]");
@@ -65,7 +65,7 @@ public class Friend extends Command {
                     refriendComponent.getChatStyle().setColor(EnumChatFormatting.GREEN);
                     refriendComponent.getChatStyle().setBold(true);
 
-                    IChatComponent chatComponent = new ChatComponentTranslation("\247b"+ name + (name.equals(alias) ? "" : " \2477=> \2479" + alias) + " %s %s", new Object[] {unfriendComponent, refriendComponent});
+                    IChatComponent chatComponent = new ChatComponentTranslation("\2477- \247b"+ name + (name.equals(alias) ? "" : " \2477=> \2479" + alias) + " %s %s", new Object[] {unfriendComponent, refriendComponent});
                     this.mc.ingameGUI.getChatGUI().printChatMessage(chatComponent);
                 }
             }

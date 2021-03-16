@@ -178,7 +178,7 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
                                 formattedText.contains("bhop")) &&
                                 formattedText.contains(playerName) &&
                                 formattedText.substring(0, indexLength).contains(playerName) &&
-                                !packet2.getChatComponent().getUnformattedText().contains("TestNCP")) {
+                                !packet2.getChatComponent().getUnformattedText().contains("TestNCP") && !packet2.getChatComponent().getUnformattedText().contains("Paper Challenge")) {
                             Notifications.getManager().post("Player Warning", "Someone called you a hacker.", 2500L, Notifications.Type.NOTIFY);
                         }
                         if (formattedText.contains("Ground items will be removed in")) {

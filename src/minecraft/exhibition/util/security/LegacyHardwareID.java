@@ -52,8 +52,8 @@ public class LegacyHardwareID {
 
             try {
                 for (HWDiskStore disk : ((SystemInfo) systemInfo).getHardware().getDiskStores()) {
-                    if (disk.getModel().contains("USB") || disk.getModel().toLowerCase().contains("flash") || disk.getModel().toLowerCase().contains("generic"))
-                        modelAndSerial = (modelAndSerial.trim().concat(disk.getModel().trim().concat(disk.getSerial().trim()))).trim();
+                    if (!disk.getModel().contains("USB") && !disk.getModel().toLowerCase().contains("flash") && !disk.getModel().toLowerCase().contains("generic"))
+                        modelAndSerial = (modelAndSerial.trim().concat(disk.getModel().split(" \\(")[0].trim().concat("|").concat(disk.getSerial().replace(" ","").trim()))).trim().concat("|");
                 }
             } catch (Exception ignored) {
 

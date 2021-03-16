@@ -31,7 +31,7 @@ public class AntiFall extends Module {
     public AntiFall(ModuleData data) {
         super(data);
         settings.put(VOID, new Setting<>(VOID, true, "Only catch when falling into void."));
-        settings.put(DISTANCE, new Setting<>(DISTANCE, 2, "The fall distance needed to catch.", 0.1, 2, 20));
+        settings.put(DISTANCE, new Setting<>(DISTANCE, 2, "The fall distance needed to catch.", 0.1, 2, 10));
     }
 
     public boolean shouldSafeWalk() {
@@ -57,7 +57,7 @@ public class AntiFall extends Module {
             }
 
             int dist = ((Number) settings.get(DISTANCE).getValue()).intValue();
-            if (mc.thePlayer.fallDistance >= dist && !Client.getModuleManager().isEnabled(Fly.class) && !Client.getModuleManager().isEnabled(Freecam.class)
+            if (mc.thePlayer.fallDistance >= dist && !Client.getModuleManager().isEnabled(Fly.class) && !Client.getModuleManager().isEnabled(LongJump.class) && !Client.getModuleManager().isEnabled(Freecam.class)
                     && !Client.getModuleManager().isEnabled(FreecamTP.class)
                     && mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.5, mc.thePlayer.posZ)).getBlock() == Blocks.air) {
                 if (!isBlockUnder()) {

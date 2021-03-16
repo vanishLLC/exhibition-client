@@ -134,7 +134,7 @@ public class ChestStealer extends Module {
                             float x = chest.getPos().getX();
                             float y = chest.getPos().getY();
                             float z = chest.getPos().getZ();
-                            if (((Killaura) Client.getModuleManager().get(Killaura.class)).loaded.isEmpty() && chest.lidAngle < 1 && Math.abs(RotationUtils.getYawChange(x + 0.5, z + 0.5)) < 90) {
+                            if (Client.getModuleManager().get(Killaura.class).loaded.isEmpty() && chest.lidAngle < 1 && Math.abs(RotationUtils.getYawChange(x + 0.5, z + 0.5)) < 90) {
                                 if (!rayTrace.getValue() || mc.theWorld.rayTraceBlocks(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY + mc.thePlayer.getEyeHeight(), mc.thePlayer.posZ), new Vec3(x + 0.5, y + 0.9, z + 0.5)) == null) {
                                     if (!isStealing && !chest.isEmpty && mc.thePlayer.getDistance(x, y, z) < 4 && stealTimer.delay(1000) && mc.currentScreen == null) {
                                         this.chest = chest;
@@ -328,7 +328,6 @@ public class ChestStealer extends Module {
                         (item.getItem().getUnlocalizedName().contains("bucket")) ||
                         (item.getItem().getUnlocalizedName().contains("chest") && !item.getDisplayName().toLowerCase().contains("collect")) ||
                         (item.getItem().getUnlocalizedName().contains("snow")) ||
-                        (item.getItem().getUnlocalizedName().contains("fish")) ||
                         (item.getItem().getUnlocalizedName().contains("enchant")) ||
                         (item.getItem().getUnlocalizedName().contains("exp")) ||
                         (item.getItem().getUnlocalizedName().contains("shears")) ||

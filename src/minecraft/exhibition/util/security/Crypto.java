@@ -42,12 +42,16 @@ public class Crypto {
 	 * @throws Exception
 	 *             Thrown if the key is invalid
 	 */
-	public static String decrypt(Key key, String text) throws Exception {
-		Cipher cipher = Cipher.getInstance(AES);
-		cipher.init(Cipher.DECRYPT_MODE, key);
-		byte[] decodedBytes = Base64.decodeBase64(text.getBytes(StandardCharsets.UTF_8));
-		byte[] original = cipher.doFinal(decodedBytes, 0, decodedBytes.length);
-		return new String(original, StandardCharsets.UTF_8);
+	public static String decrypt(Key key, String text) {
+		try {
+			Cipher cipher = Cipher.getInstance(AES);
+			cipher.init(Cipher.DECRYPT_MODE, key);
+			byte[] decodedBytes = Base64.decodeBase64(text.getBytes(StandardCharsets.UTF_8));
+			byte[] original = cipher.doFinal(decodedBytes, 0, decodedBytes.length);
+			return new String(original, StandardCharsets.UTF_8);
+		} catch (Exception e) {
+		}
+		return null;
 	}
 
 	public static String decryptPrivate(String str) {
