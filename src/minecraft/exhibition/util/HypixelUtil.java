@@ -2,8 +2,6 @@ package exhibition.util;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import exhibition.Client;
-import exhibition.util.render.Colors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -12,9 +10,6 @@ import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatStyle;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StringUtils;
 
 import java.util.ArrayList;
