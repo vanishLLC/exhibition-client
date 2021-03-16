@@ -277,8 +277,8 @@ public class Fly extends Module {
             EventPacket ep = event.cast();
             Packet packet = ep.getPacket();
 
-            if (packet instanceof C03PacketPlayer && blink.getValue() && !(boolean) settings.get(this.BYPASS).getValue()) {
-                if (PlayerUtil.isMoving() && !mc.thePlayer.isCollidedVertically && bruhTick > 0) {
+            if (packet instanceof C03PacketPlayer && blink.getValue()) {
+                if (bruhTick >= 0) {
                     packetList.add(packet);
                 }
                 event.setCancelled(true);
@@ -321,7 +321,7 @@ public class Fly extends Module {
                 float max = 0.00000043F;
 
                 if (bruhTick == 0) {
-                    mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.00304F, mc.thePlayer.posZ);
+                    mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.42F, mc.thePlayer.posZ);
                 }
 
                 int tickPassed = bruhTick % 5;
@@ -349,6 +349,11 @@ public class Fly extends Module {
                 if (hypickle) {
                     em.setY((em.getY() + (float) bruh));
                     em.setGround((bruhTick == 0 || up) && HypixelUtil.isVerifiedHypixel());
+                } else {
+//                    if (mc.thePlayer.ticksExisted % 2 == 0) {
+//                        em.setY(em.getY() - 1.0E-13);
+//                    }
+//                    em.setY(em.getY() - 1.0E-13);
                 }
 
                 distanceTraveled += Math.hypot(mc.thePlayer.posX - mc.thePlayer.prevPosX, mc.thePlayer.posZ - mc.thePlayer.prevPosZ);
@@ -394,7 +399,7 @@ public class Fly extends Module {
 
                 switch (((Options) settings.get(MODE).getValue()).getSelected()) {
                     case "Glide": {
-                        final boolean shouldBlock = mc.thePlayer.posY + 0.1 >= startY && mc.gameSettings.keyBindJump.getIsKeyPressed();
+                        final boolean shouldBlock = mc.thePlayer.posY + 0.1 >= startY;
                         if (mc.thePlayer.isSneaking()) {
                             mc.thePlayer.motionY = -0.42F;
                         } else if (mc.gameSettings.keyBindJump.getIsKeyPressed() && !shouldBlock) {

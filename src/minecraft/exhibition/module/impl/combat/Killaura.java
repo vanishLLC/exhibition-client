@@ -1111,8 +1111,7 @@ public class Killaura extends Module {
 
             double distance = MathHelper.sqrt_double(deltaX * deltaX + deltaY * deltaY);
 
-            if (distance >= 2) {
-                deltas.clear();
+            if (distance >= 10) {
                 deltas.add(new double[]{0, 0});
                 return this;
             }

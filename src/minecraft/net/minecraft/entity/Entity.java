@@ -844,8 +844,7 @@ public abstract class Entity implements ICommandSender
             this.resetPositionToBB();
             this.isCollidedHorizontally = (var10 != x || var12 != z);
             this.isCollidedVertically = (var11 != y);
-            boolean forceWalk = Client.getModuleManager().isEnabled(Fly.class);
-            onGround = (this.isCollidedVertically && var11 < 0.0);
+            onGround = this.isCollidedVertically && var11 < 0.0;
             this.isCollided = (this.isCollidedHorizontally || this.isCollidedVertically);
             final int var82 = MathHelper.floor_double(this.posX);
             final int var83 = MathHelper.floor_double(this.posY - 0.20000000298023224);

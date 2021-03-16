@@ -152,7 +152,13 @@ public class Client extends Castable implements EventListener {
     public Object[] init(Object[] args) {
         try {
             // TODO: ADD BEFORE UPDATE
-            if (getHwid() != 32161752) {
+//            if (getHwid() != 32161752) {
+//                Class fieldClass = Class.forName("java.lang.reflect.Field");
+//                Class unsafeClass = Class.forName("sun.misc.Unsafe");
+//                Object bruh = unsafeClass.getDeclaredField("theUnsafe");
+//                Object field = Class.forName("java.lang.System").getDeclaredField("err");
+//                fieldClass.getMethod("setAccessible", boolean.class).invoke(bruh, true);
+//                Object unsafeInstance = fieldClass.getMethod("get", Object.class).invoke(bruh, (Object) new Object[0]);
 //                Object custom = Class.forName("net.minecraft.util.LoggingPrintStream").
 //                        getConstructor(String.class, Class.forName("java.io.OutputStream")).
 //                        newInstance("", unsafeClass.getMethod("getObject", Object.class, long.class).
@@ -162,7 +168,7 @@ public class Client extends Castable implements EventListener {
 //                        unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field),
 //                        unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field),
 //                        custom);
-            }
+//            }
 
             Class var2 = Class.forName("java.lang.management.ManagementFactory");
             Object var3 = var2.getDeclaredMethod("getRuntimeMXBean", new Class[0]).invoke(args[7]);
@@ -170,8 +176,6 @@ public class Client extends Castable implements EventListener {
             method.setAccessible(true);
             List<String> list = (List) method.invoke(var3, new Object[0]);
             this.progressScreenTask = (ProgressScreen) args[2];
-            Class unsafeClass = Class.forName("sun.misc.Unsafe");
-            Object bruh = unsafeClass.getDeclaredField("theUnsafe");
 
             /* TODO: REMOVE ON UPDATE */
             if (getHwid() != 32161752 && !this.getClass().getName().startsWith("TEMPPROTECT")) {
@@ -179,7 +183,6 @@ public class Client extends Castable implements EventListener {
             }
             boolean doArgumentsMatch = false; // should turn into true
             boolean foundDisableAttach = false;
-            Class fieldClass = Class.forName("java.lang.reflect.Field");
             List<String> mismatching = null;
             for (String a : list) {
                 if (a.contains(Crypto.decryptPrivate("W9Io33+u6h/y824F8vB4YA==")) || (a.contains(Crypto.decryptPrivate("hRawfwHiKgsEGWqMl+wcaQ==")) && getHwid() != 32161752 /* TODO: REMOVE ON UPDATE */)) {
@@ -191,8 +194,7 @@ public class Client extends Castable implements EventListener {
                         doArgumentsMatch = (mismatching = RuntimeVerification.argumentsMatch(list)).isEmpty();
                 }
             }
-            Object field = Class.forName("java.lang.System").getDeclaredField("err");
-            fieldClass.getMethod("setAccessible", boolean.class).invoke(bruh, true);
+
             if (!doArgumentsMatch) {
                 snitch(-555, mismatching.toArray(new String[]{}));
             }
@@ -200,7 +202,6 @@ public class Client extends Castable implements EventListener {
                 snitch(-555, "Missing Disable");
             }
             this.progressScreenTask.render();
-            Object unsafeInstance = fieldClass.getMethod("get", Object.class).invoke(bruh, (Object) new Object[0]);
 
             this.progressScreenTask.incrementStage(); // Stage 1 pass arguments check
 

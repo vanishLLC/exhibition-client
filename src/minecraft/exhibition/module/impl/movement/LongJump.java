@@ -25,7 +25,6 @@ import exhibition.util.render.Colors;
 import exhibition.util.render.Depth;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.entity.player.PlayerCapabilities;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -60,7 +59,7 @@ public class LongJump extends Module {
     private String TIMER = "TIMER";
     //private Setting<Boolean> useBlink = new Setting<>("CHOKE", false, "Uses blink to bypass.");
     private Setting<Boolean> bowOnly = new Setting<>("BOW", false, "Only LongJumps if you bow yourself/take damage.");
-    private Setting<Boolean> dynamicJump = new Setting<>("DYNAMIC-JUMP", false, "Overrides Jump-Boost value. Your jump height will be based off of your pitch.");
+    private Setting<Boolean> dynamicJump = new Setting<>("DYNAMIC-JUMP", false, "Scales your Jump-Boost value based off of your pitch.");
     private Setting<Boolean> targetStrafe = new Setting<>("TARGETSTRAFE", false, "Target Strafes around players.");
     private Setting<Number> jumpBoost = new Setting<>("JUMP-BOOST", 0, "Increases your jump velocity.", 0.01, 0, 4);
     private Setting<Number> boostScale = new Setting<>("VEL-BOOST", 0.5, "Boosts your speed when you take KB.", 0.01, 0, 1);
@@ -567,9 +566,8 @@ public class LongJump extends Module {
                             int amplifier = mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getAmplifier();
                             baseSpeed *= (1.0D + 0.105D * (amplifier + 1));
                         }
-                        boolean bowMode = bowOnly.getValue() || HypixelUtil.isInGame("PIT") || HypixelUtil.isInGame("UHC");
 
-                        speed = bowMode && Client.getModuleManager().isEnabled(AutoPaper.class) ? velocityBoost : (boost + (0.0000000011324D * Math.random())) * baseSpeed;
+                        speed = Math.max( velocityBoost, (boost + (0.0000000011324D * Math.random())) * baseSpeed);
                     }
                 } else if (onGroundLastTick) { // C
                     if (distance < 1.73949644) {
@@ -641,8 +639,8 @@ public class LongJump extends Module {
                 float yaw = (allowTargetStrafe() && mc.thePlayer.movementInput.moveStrafe == 0 && mc.thePlayer.movementInput.moveForward > 0) ?
                         targetStrafe.getTargetYaw(mc.thePlayer.rotationYaw, em.getY()) : mc.thePlayer.rotationYaw;
 
-                em.setX((float) (-(Math.sin(mc.thePlayer.getDirection(yaw)) * speed)));
-                em.setZ((float) (Math.cos(mc.thePlayer.getDirection(yaw)) * speed));
+                em.setX(mc.thePlayer.motionX = (float) (-(Math.sin(mc.thePlayer.getDirection(yaw)) * speed)));
+                em.setZ(mc.thePlayer.motionZ = (float) (Math.cos(mc.thePlayer.getDirection(yaw)) * speed));
             } else {
                 em.setX(mc.thePlayer.motionX = 0).setY(mc.thePlayer.motionY = 0).setZ(mc.thePlayer.motionZ = 0);
             }
@@ -753,7 +751,7 @@ public class LongJump extends Module {
                                 if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
                                     ItemStack is = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
                                     Item item = is.getItem();
-                                    if (item instanceof ItemBow || item instanceof ItemFishingRod) {
+                                    if (item instanceof ItemBow || (item instanceof ItemFishingRod && ignoreRod)) {
                                         int hotbarSlot = i - 36;
                                         NetUtil.sendPacketNoEvents(new C09PacketHeldItemChange(hotbarSlot));
                                         NetUtil.sendPacketNoEvents(new C08PacketPlayerBlockPlacement(is));

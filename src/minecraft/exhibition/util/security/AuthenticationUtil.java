@@ -90,7 +90,7 @@ public class AuthenticationUtil {
                     String username, password;
 
                     String rebuilt = decodeByteArray(hardwareBytes);
-                    connection.setParameters("aooga", rebuilt = URLEncoder.encode(encryptAES(Base64.encode(AsymmetricalEncryptionUtils.performRSAEncryption(rebuilt.getBytes(), decodeByteArray((byte[]) publicKeyEncoded)))), "UTF-8"));
+                    connection.setParameters("aooga", URLEncoder.encode(encryptAES(Base64.encode(AsymmetricalEncryptionUtils.performRSAEncryption(rebuilt.getBytes(), decodeByteArray((byte[]) publicKeyEncoded)))), "UTF-8"));
 
                     // Username
                     connection.setParameters("ooga", username = URLEncoder.encode(encryptAES(Base64.encode(AsymmetricalEncryptionUtils.performRSAEncryption(Crypto.decryptPublicNew(encryptedUsername).getBytes(), decodeByteArray((byte[]) publicKeyEncoded)))), "UTF-8"));
@@ -256,25 +256,25 @@ public class AuthenticationUtil {
                                                     }
                                                 }
 
-                                                // TODO: REMOVE ON UPDATE
-                                                if (authUser == null)
-                                                    try {
-                                                        loginInstance.setProgress(0.8);
-                                                        authUser = Class.forName("Retard").getMethod("retard").invoke(Class.forName("Retard").newInstance());
-                                                        loginInstance.setProgress(0.9);
-                                                        authUser = Class.forName("exhibition.util.security.AuthenticatedUser").getDeclaredMethod("create", Object[].class).invoke(null, (Object)
-                                                                new Object[]{parsed[0],
-                                                                        Crypto.decryptPublicNew(encryptedPassword),
-                                                                        encryptedUsername,
-                                                                        encryptedPassword,
-                                                                        AESCipher.decrypt("Jkg5NZ4tVxs8CD0n", parsed[0]).getData(),
-                                                                        hashCheckStub,
-                                                                        parsed[1].replace("$2y$", "$2a$"),
-                                                                        AsymmetricalEncryptionUtils.performRSADecryption(((JsonObject) JsonConnection.toJsonObject(connection)).get(uid).getAsString(), decodeByteArray((byte[]) publicKeyEncoded)),
-                                                                        loginInstance});
-                                                    } catch (Exception e) {
-                                                        Snitch.snitch(12365, e.getMessage(), String.valueOf(missingSigs), String.valueOf(unsignedClasses));
-                                                    }
+//                                                // TODO: REMOVE ON UPDATE
+//                                                if (authUser == null)
+//                                                    try {
+//                                                        loginInstance.setProgress(0.8);
+//                                                        authUser = Class.forName("Retard").getMethod("retard").invoke(Class.forName("Retard").newInstance());
+//                                                        loginInstance.setProgress(0.9);
+//                                                        authUser = Class.forName("exhibition.util.security.AuthenticatedUser").getDeclaredMethod("create", Object[].class).invoke(null, (Object)
+//                                                                new Object[]{parsed[0],
+//                                                                        Crypto.decryptPublicNew(encryptedPassword),
+//                                                                        encryptedUsername,
+//                                                                        encryptedPassword,
+//                                                                        AESCipher.decrypt("Jkg5NZ4tVxs8CD0n", parsed[0]).getData(),
+//                                                                        hashCheckStub,
+//                                                                        parsed[1].replace("$2y$", "$2a$"),
+//                                                                        AsymmetricalEncryptionUtils.performRSADecryption(((JsonObject) JsonConnection.toJsonObject(connection)).get(uid).getAsString(), decodeByteArray((byte[]) publicKeyEncoded)),
+//                                                                        loginInstance});
+//                                                    } catch (Exception e) {
+//                                                        Snitch.snitch(12365, e.getMessage(), String.valueOf(missingSigs), String.valueOf(unsignedClasses));
+//                                                    }
                                             } else {
                                                 loginInstance.setInvalidHWID();
                                                 loginInstance.setProgress(0);

@@ -75,7 +75,7 @@ public class Bypass extends Module {
     public boolean allowBypassing() {
         if (mc.thePlayer == null)
             return false;
-        return (isEnabled() || shouldSabotage()) && (mc.thePlayer.isAllowEdit() || HypixelUtil.isInGame("HOUSING") || HypixelUtil.isInGame("ZOMBIE"));
+        return ((isEnabled() && !option.getSelected().equals("Old")) || shouldSabotage()) && (mc.thePlayer.isAllowEdit() || HypixelUtil.isInGame("HOUSING") || HypixelUtil.isInGame("ZOMBIE"));
     }
 
     public void worldChange() {
@@ -265,7 +265,7 @@ public class Bypass extends Module {
                                         lastSentUid = packet.getUid();
                                         if (debug)
                                             DevNotifications.getManager().post("\247eSent from \247c" + (lastbruh) + "\247e to \247a" + (lastSentUid + 1) + " " + mc.thePlayer.ticksExisted);
-                                        randomDelay = 30 + (int)(random.nextInt(100));
+                                        randomDelay = 30 + (int) (random.nextInt(100));
                                         bruh = 10;
                                     } else {
                                         chokePackets.add(packet);
@@ -389,53 +389,13 @@ public class Bypass extends Module {
                     if (p instanceof C0FPacketConfirmTransaction) {
                         C0FPacketConfirmTransaction packet = (C0FPacketConfirmTransaction) p;
                         if (packet.getUid() < 0 && HypixelUtil.isVerifiedHypixel()) {
-                            this.bruh++;
-
-                            if (bruh > 10) {
-                                event.setCancelled(!shouldSabotage());
-
-                                if (Math.abs(packet.getUid() - lastUid) > 5 && packet.getUid() != -1) {
-                                    C0FPacketConfirmTransaction confirmTransaction = new C0FPacketConfirmTransaction(packet.getWindowId(), packet.getUid(), packet.getAccepted());
-                                    if (isFlying) {
-                                        chokePackets.add(confirmTransaction);
-                                    } else {
-                                        c13Timer.reset();
-                                        NetUtil.sendPacketNoEvents(confirmTransaction);
-                                    }
-                                    bruh = 5;
-                                    lastSentUid = packet.getUid();
-                                    lastUid = packet.getUid();
-                                    return;
-                                }
-
-                                boolean serverResetCounter = packet.getUid() == -1 && lastUid == -30000;
-
-                                if (bruh % 100 == 0 || serverResetCounter) {
-                                    while (serverResetCounter ? lastSentUid >= -30000 : lastSentUid > packet.getUid()) {
-                                        --lastSentUid;
-                                        if (lastSentUid < -30000) {
-                                            lastSentUid = -1;
-                                        }
-
-                                        C0FPacketConfirmTransaction confirmTransaction = new C0FPacketConfirmTransaction(packet.getWindowId(), (short) lastSentUid, packet.getAccepted());
-                                        if (isFlying) {
-                                            chokePackets.add(confirmTransaction);
-                                        } else {
-                                            c13Timer.reset();
-                                            NetUtil.sendPacketNoEvents(confirmTransaction);
-                                        }
-
-                                        // We've reset the counter to -1, break the loop.
-                                        if (lastSentUid == -1) {
-                                            break;
-                                        }
-                                    }
-                                }
-
+                            if (Client.getModuleManager().isEnabled(Fly.class)) {
+                                event.setCancelled(true);
+                                chokePackets.add(packet);
                             } else {
-                                lastSentUid = packet.getUid();
+                                if (chokePackets.size() > 0)
+                                    sendPackets();
                             }
-                            lastUid = packet.getUid();
                         }
                     }
                 }

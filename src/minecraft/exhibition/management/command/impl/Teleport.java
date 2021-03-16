@@ -72,8 +72,6 @@ public class Teleport extends Command implements EventListener {
 
         if (args.length == 1) {
             String playerName = args[0];
-
-
             for (Entity entity : mc.theWorld.getLoadedEntityList()) {
                 if (entity instanceof EntityPlayer) {
                     if (entity.getName().equalsIgnoreCase(playerName)) {
@@ -144,20 +142,34 @@ public class Teleport extends Command implements EventListener {
             }
 
             if (stage == 0) {
-                Notifications.getManager().post("Teleporting", "Please wait {s} s", 5100);
-
-                if (mc.thePlayer.posY % 0.015625 == 0) {
-                    NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.00053424, mc.thePlayer.posZ, true));
-                }
-
-                double[] list = {0.41999998688697815, 0.7531999805212024, 1.0013359791121417};
-                for (double v : list) {
-                    NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + v, mc.thePlayer.posZ, false));
-                }
-                ticks = 120;
-
-                stage = 1;
-                em.setCancelled(true);
+//                Notifications.getManager().post("Teleporting", "Teleporting to " + (targetPlayer != null ? targetPlayer.getName() : targetX + " " + targetZ), 1000, Notifications.Type.OKAY);
+//
+//                if (targetPlayer != null) {
+//                    this.targetX = targetPlayer.posX;
+//                    this.targetZ = targetPlayer.posZ;
+//                    this.targetPlayer = null;
+//                }
+//
+//                NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(targetX, mc.thePlayer.posY - 3.19993F, targetZ, false));
+//
+////                if (mc.thePlayer.posY % 0.015625 == 0) {
+////                    NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.00053424, mc.thePlayer.posZ, true));
+////                }
+////
+////                double[] list = {0.41999998688697815, 0.7531999805212024, 1.0013359791121417};
+////                for (double v : list) {
+////                    NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + v, mc.thePlayer.posZ, false));
+////                }
+////                ticks = 120;
+////
+////                stage = 1;
+////                em.setCancelled(true);
+//
+//                EventSystem.unregister(this);
+//                isTeleporting = false;
+//                targetPlayer = null;
+//                stage = 0;
+//                em.setCancelled(true);
                 return;
             }
             if (stage == 1) {
@@ -248,6 +260,26 @@ public class Teleport extends Command implements EventListener {
         if (event instanceof EventPacket) {
             EventPacket ep = event.cast();
             Packet packet = ep.getPacket();
+
+            if(packet instanceof C03PacketPlayer) {
+                if (stage == 0) {
+                    Notifications.getManager().post("Teleporting", "Teleporting to " + (targetPlayer != null ? targetPlayer.getName() : targetX + " " + targetZ), 1000, Notifications.Type.OKAY);
+
+                    if (targetPlayer != null) {
+                        this.targetX = targetPlayer.posX;
+                        this.targetZ = targetPlayer.posZ;
+                        this.targetPlayer = null;
+                    }
+
+                    ep.setPacket(new C03PacketPlayer.C04PacketPlayerPosition(targetX, mc.thePlayer.posY - 3.19993F, targetZ, false));
+
+                    EventSystem.unregister(this);
+                    isTeleporting = false;
+                    targetPlayer = null;
+                    stage = 0;
+                    return;
+                }
+            }
 
             if (packet instanceof S08PacketPlayerPosLook) {
                 if (stage == 1) {

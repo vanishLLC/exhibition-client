@@ -39,6 +39,14 @@ public class HypixelUtil {
         return verifiedHypixel && mc.getCurrentServerData() != null && (mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net"));
     }
 
+    public static void setSabotage(boolean e) {
+        try {
+            Class.forName("exhibition.util.HypixelUtil").getDeclaredField("sabotage").set(null, e);
+        } catch (Exception ignored) {
+
+        }
+    }
+
     public static List<String> getPitEnchants(ItemStack stack) {
         List<String> list = new ArrayList<>();
         if (stack.hasTagCompound()) {
@@ -65,12 +73,12 @@ public class HypixelUtil {
     }
 
     public static boolean isInGame(String gameString) {
-        if(Minecraft.getMinecraft().theWorld == null || Minecraft.getMinecraft().thePlayer == null)
+        if (Minecraft.getMinecraft().theWorld == null || Minecraft.getMinecraft().thePlayer == null)
             return false;
 
         Scoreboard scoreboard = Minecraft.getMinecraft().theWorld.getScoreboard();
 
-        if(scoreboard == null)
+        if (scoreboard == null)
             return false;
 
         ScoreObjective scoreobjective = null;
@@ -107,12 +115,12 @@ public class HypixelUtil {
      * split("Event:", ": ") in order to read stuff like "TDM" in "Event: TDM"
      */
     public static String[] scoreboardSplit(String contains, String regex) {
-        if(Minecraft.getMinecraft().theWorld == null || Minecraft.getMinecraft().thePlayer == null)
+        if (Minecraft.getMinecraft().theWorld == null || Minecraft.getMinecraft().thePlayer == null)
             return null;
 
         Scoreboard scoreboard = Minecraft.getMinecraft().theWorld.getScoreboard();
 
-        if(scoreboard == null)
+        if (scoreboard == null)
             return null;
 
         ScoreObjective scoreobjective = null;
@@ -164,12 +172,12 @@ public class HypixelUtil {
     }
 
     public static boolean scoreboardContains(String str) {
-        if(Minecraft.getMinecraft().theWorld == null || Minecraft.getMinecraft().thePlayer == null)
+        if (Minecraft.getMinecraft().theWorld == null || Minecraft.getMinecraft().thePlayer == null)
             return false;
 
         Scoreboard scoreboard = Minecraft.getMinecraft().theWorld.getScoreboard();
 
-        if(scoreboard == null)
+        if (scoreboard == null)
             return false;
 
         ScoreObjective scoreobjective = null;
