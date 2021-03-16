@@ -10,7 +10,7 @@ import exhibition.Client;
 import exhibition.event.Event;
 import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventMotionUpdate;
-import exhibition.event.impl.EventRenderGui;
+import exhibition.event.impl.EventRenderGuiLast;
 import exhibition.event.impl.EventScreenDisplay;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
@@ -83,9 +83,9 @@ public class ChestStealer extends Module {
 
     private GuiChest chestContainer = null;
 
-    @RegisterEvent(events = {EventMotionUpdate.class, EventScreenDisplay.class, EventRenderGui.class})
+    @RegisterEvent(events = {EventMotionUpdate.class, EventScreenDisplay.class, EventRenderGuiLast.class})
     public void onEvent(Event event) {
-        if (event instanceof EventRenderGui) {
+        if (event instanceof EventRenderGuiLast) {
             if (silent.getValue().getSelected().equals("Render") && mc.currentScreen == null && chestContainer != null) {
                 chestContainer.drawScreen(0, 0, mc.timer.renderPartialTicks);
             }

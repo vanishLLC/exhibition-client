@@ -10,6 +10,7 @@ import exhibition.gui.screen.component.GuiSkeetPWField;
 import exhibition.gui.screen.component.GuiSkeetTextField;
 import exhibition.management.animate.Opacity;
 import exhibition.util.RenderingUtil;
+import exhibition.util.Timer;
 import exhibition.util.render.Colors;
 import exhibition.util.render.Depth;
 import exhibition.util.security.*;
@@ -30,6 +31,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Objects;
 
@@ -75,6 +77,8 @@ public class GuiLoginMenu extends PanoramaScreen {
 
     private boolean hasStackSizeIncrease = false;
 
+    private Timer showTimer = new Timer();
+
     public GuiLoginMenu(boolean fade) {
         this.fade = fade;
         oldInstance = Client.instance;
@@ -93,7 +97,7 @@ public class GuiLoginMenu extends PanoramaScreen {
 
                     }
                 }
-                if(a.contains("Xss")) {
+                if (a.contains("Xss")) {
                     hasStackSizeIncrease = true;
                 }
             }
@@ -106,7 +110,7 @@ public class GuiLoginMenu extends PanoramaScreen {
         menuSong = new PositionedSoundRecord(new ResourceLocation("sounds/music/fortnut.ogg"), 1, 1, true, 0, ISound.AttenuationType.LINEAR, 0, 0, 0);
         GuiModdedMainMenu.menuSong = new PositionedSoundRecord(new ResourceLocation("sounds/music/fortnat.ogg"), 1, 1, true, 0, ISound.AttenuationType.LINEAR, 0, 0, 0);
 
-        DiscordUtil.setDiscordPresence("Logging In","");
+        DiscordUtil.setDiscordPresence("Logging In", "");
     }
 
     private PositionedSoundRecord menuSong;
@@ -164,7 +168,7 @@ public class GuiLoginMenu extends PanoramaScreen {
         }
         Keyboard.enableRepeatEvents(true);
 
-        if(!hasStackSizeIncrease) {
+        if (!hasStackSizeIncrease) {
             username.setEnabled(false);
             password.isEnabled = false;
         }
@@ -265,7 +269,7 @@ public class GuiLoginMenu extends PanoramaScreen {
 
     @Override
     protected void actionPerformed(final GuiButton button) {
-        if(!hasStackSizeIncrease)
+        if (!hasStackSizeIncrease)
             return;
 
         if (button.id == 0) {
@@ -279,6 +283,8 @@ public class GuiLoginMenu extends PanoramaScreen {
     }
 
     private boolean firstDraw = true;
+
+    private String old = null;
 
     @Override
     public void drawScreen(final int x, final int y, final float z) {
@@ -313,16 +319,50 @@ public class GuiLoginMenu extends PanoramaScreen {
 
         boolean renderUser = username.getText().isEmpty() && !username.isFocused();
         if (renderUser) {
-            Client.fss.drawBorderedString("Username", width / 2F - 96, 67, Colors.getColor(90), Colors.getColor(0));
+            Client.fss.drawBorderedString("Forum Username", width / 2F - 96, 67, Colors.getColor(90), Colors.getColor(0));
         }
 
         boolean renderPass = password.getText().isEmpty() && !password.isFocused();
         if (renderPass) {
-            Client.fss.drawBorderedString("Password", width / 2F - 96, 107, Colors.getColor(90), Colors.getColor(0));
+            Client.fss.drawBorderedString("Forum Password", width / 2F - 96, 107, Colors.getColor(90), Colors.getColor(0));
         }
+
+        boolean shouldNotify = false;
+
+        if (old == null)
+            old = LoginUtil.getLastVersion();
+
+        if(old.equals("")) {
+            shouldNotify = true;
+        } else {
+            try {
+                String lastRanVersion = Client.version.substring(0, 2) + "/" + Client.version.substring(2, 4) + "/20" + Client.version.substring(4, 6);
+                String e = "03/15/2021";
+                SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
+                shouldNotify = format.parse(lastRanVersion).after(format.parse(e));
+            } catch (Exception e) {
+                shouldNotify = true;
+            }
+        }
+
+        if (!username.getText().isEmpty() && !password.getText().isEmpty() && shouldNotify) {
+            RenderingUtil.rectangleBordered(width / 2F - 70, 128, width / 2F + 70,144 + 7, 0.5, Colors.getColor(40, 150), Colors.getColor(150, 150));
+            String warning = "\2477- \247cMake sure to use your Forum login details! \2477-";
+            String warning2 = "\2477- \247bYou can change your login on the forums. \2477-";
+            String warning3 = "\2477- \247dMake sure your HWID has been set first! \2477-";
+            Client.fssBold.drawBorderedString(warning, width / 2F - Client.fssBold.getWidth(warning) / 2, 130, Colors.getColor(255, 100, 100), Colors.getColor(0));
+            Client.fssBold.drawBorderedString(warning2, width / 2F - Client.fssBold.getWidth(warning2) / 2, 137, Colors.getColor(255, 160, 100), Colors.getColor(0));
+            Client.fssBold.drawBorderedString(warning3, width / 2F - Client.fssBold.getWidth(warning3) / 2, 144, Colors.getColor(255, 160, 100), Colors.getColor(0));
+        }
+
         username.drawTextBox();
         password.drawTextBox();
-        if (!renderPass && status == Status.SUCCESS && !renderUser && Client.getAuthUser() != null) {
+
+        if(status != Status.SUCCESS) {
+            showTimer.reset();
+        }
+
+        if (!renderPass && status == Status.SUCCESS && showTimer.delay(300) && !renderUser && Client.getAuthUser() != null) {
             mc.getSoundHandler().stopSound(menuSong);
             if (Boolean.parseBoolean(System.getProperty("virtueTheme2"))) {
                 Client.virtueFont = new FontRenderer(mc.gameSettings, new ResourceLocation("textures/ascii.png"), mc.getTextureManager(), false);
@@ -400,13 +440,13 @@ public class GuiLoginMenu extends PanoramaScreen {
         GlStateManager.popMatrix();
         opacity.interp(0, 5);
 
-        if(!hasStackSizeIncrease) {
+        if (!hasStackSizeIncrease) {
             String enableSS = "Please relaunch with -Xss4m in your launch arguments.";
 
-            double centerX = scaledresolution.getScaledWidth()/2D;
-            double halfWidth = mc.fontRendererObj.getStringWidth(enableSS)/2D;
+            double centerX = scaledresolution.getScaledWidth() / 2D;
+            double halfWidth = mc.fontRendererObj.getStringWidth(enableSS) / 2D;
 
-            RenderingUtil.rectangle(centerX - halfWidth - 2,5, centerX + halfWidth + 2, 17, Colors.getColor(150,150));
+            RenderingUtil.rectangle(centerX - halfWidth - 2, 5, centerX + halfWidth + 2, 17, Colors.getColor(150, 150));
             mc.fontRendererObj.drawString("\247b" + enableSS, centerX - halfWidth - 0.5, 7 - 0.5, -1, false);
         }
 

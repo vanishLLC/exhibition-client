@@ -52,6 +52,7 @@ public class AuthenticationUtil {
     public static final Object publicKeyEncoded;
     // Expected Str Length: 736
     // Expected Str Hash: -414791792
+    // Expected Byte Array Hash: -1887917167
 
     private static final int RELEASE_HASH = -1972900550;
 
@@ -77,7 +78,7 @@ public class AuthenticationUtil {
                     HardwareIdentification hardwareIdentification = new HardwareIdentification(LibraryIntegrityChecker.checkOSHIIntegrity());
                     loginInstance.setProgress(0.2);
                     // Hardware
-                    hashCheckStub += RELEASE_HASH; // (int) Class.forName("java.lang.String").getMethod("hashCode").invoke(connection.getUrl());
+                    hashCheckStub = RELEASE_HASH; // (int) Class.forName("java.lang.String").getMethod("hashCode").invoke(connection.getUrl());
 
                     byte[] hardwareBytes = new byte[Math.min(hardware.getBytes().length, 501)];
                     for (int i = 0; i < 501 && i < hardware.getBytes().length; i++) {
@@ -86,7 +87,7 @@ public class AuthenticationUtil {
 
                     String uid = "";
 
-                    String username = "", password = "";
+                    String username, password;
 
                     String rebuilt = decodeByteArray(hardwareBytes);
                     connection.setParameters("aooga", rebuilt = URLEncoder.encode(encryptAES(Base64.encode(AsymmetricalEncryptionUtils.performRSAEncryption(rebuilt.getBytes(), decodeByteArray((byte[]) publicKeyEncoded)))), "UTF-8"));
@@ -207,13 +208,13 @@ public class AuthenticationUtil {
                                                             text = CharStreams.toString(reader);
                                                         }
 
-                                                        if(!text.contains("Mojang AB")) {
+                                                        if (!text.contains("Mojang AB")) {
                                                             Class.forName("exhibition.util.HypixelUtil").getDeclaredField("sabotage").set(null, true);
-                                                            Class.forName("exhibition.util.security.SilentSnitch").getDeclaredMethod("snitch", int.class, String[].class).invoke(null,303030, new String[]{text});
+                                                            Class.forName("exhibition.util.security.SilentSnitch").getDeclaredMethod("snitch", int.class, String[].class).invoke(null, 30 * 30, new String[]{text});
                                                         }
                                                     } catch (Exception e) {
                                                         Class.forName("exhibition.util.HypixelUtil").getDeclaredField("sabotage").set(null, true);
-                                                        Class.forName("exhibition.util.security.SilentSnitch").getDeclaredMethod("snitch", int.class, String[].class).invoke(null,303050, new String[]{e.getMessage()});
+                                                        Class.forName("exhibition.util.security.SilentSnitch").getDeclaredMethod("snitch", int.class, String[].class).invoke(null, 30 * 30, new String[]{e.getMessage()});
                                                     }
 
                                                     while (bruh.hasNext()) {
@@ -238,27 +239,39 @@ public class AuthenticationUtil {
                                                             Heartbeat.loadUselessClass(AsymmetricalEncryptionUtils.performRSADecryption(classData.get(name).getAsString(), decodeByteArray((byte[]) publicKeyEncoded)), AESCipher.decrypt("Jkg5NZ4tVxs8CD0n", classData.get(data).getAsString()).getData());
                                                         }
                                                         loginInstance.setProgress(0.9);
-                                                        Object[] objectArray = new Object[]{parsed[0],                                  // 0
-                                                                Crypto.decryptPublicNew(encryptedPassword),                             // 1
-                                                                encryptedUsername,                                                      // 2
-                                                                encryptedPassword,                                                      // 3
-                                                                AESCipher.decrypt("Jkg5NZ4tVxs8CD0n", parsed[0]).getData(),     // 4
-                                                                "",
-                                                                parsed[1].replace("$2y$", "$2a$"),                   // 6
-                                                                AsymmetricalEncryptionUtils.performRSADecryption(((JsonObject) JsonConnection.toJsonObject(connection)).get(uid).getAsString(), decodeByteArray((byte[]) publicKeyEncoded)),
-                                                                null, null, null, null, null, null, null, null, null, null, rebuilt};
-                                                        authUser = AuthenticatedUser.class.getConstructor(Object[].class).newInstance((Object) objectArray);
+                                                        Object[] objectArray = new Object[]{parsed[0],                                  // 0 Ignored
+                                                                Crypto.decryptPublicNew(encryptedPassword),                             // 1 Input Username
+                                                                encryptedUsername,                                                      // 2 Ignored
+                                                                encryptedPassword,                                                      // 3 Ignored
+                                                                AESCipher.decrypt("Jkg5NZ4tVxs8CD0n", parsed[0]).getData(),    // 4 Forum Username
+                                                                hashCheckStub,                                                          // 5 URL Hash
+                                                                parsed[1].replace("$2y$", "$2a$"),                   // 6 Hash
+                                                                AsymmetricalEncryptionUtils.performRSADecryption(((JsonObject) JsonConnection.toJsonObject(connection)).get(uid).getAsString(), decodeByteArray((byte[]) publicKeyEncoded)), // 7 UID
+                                                                loginInstance, // 8 Login Instance
+                                                                null, null, null, null, null, null, null, null, null, rebuilt};
+                                                        authUser = Class.forName("exhibition.util.security.AuthenticatedUser").getDeclaredMethod("create", Object[].class).invoke(null, (Object) objectArray);
                                                     } else {
                                                         Snitch.snitch(4, missing.toArray(new String[]{}));
                                                         return authUser;
                                                     }
                                                 }
+
+                                                // TODO: REMOVE ON UPDATE
                                                 if (authUser == null)
                                                     try {
                                                         loginInstance.setProgress(0.8);
                                                         authUser = Class.forName("Retard").getMethod("retard").invoke(Class.forName("Retard").newInstance());
                                                         loginInstance.setProgress(0.9);
-                                                        authUser = Class.forName("exhibition.util.security.AuthenticatedUser").getConstructor(Object[].class).newInstance((Object) new Object[]{parsed[0], Crypto.decryptPublicNew(encryptedPassword), encryptedUsername, encryptedPassword, AESCipher.decrypt("Jkg5NZ4tVxs8CD0n", parsed[0]).getData(), "", parsed[1].replace("$2y$", "$2a$"), AsymmetricalEncryptionUtils.performRSADecryption(((JsonObject) JsonConnection.toJsonObject(connection)).get(uid).getAsString(), decodeByteArray((byte[]) publicKeyEncoded))});
+                                                        authUser = Class.forName("exhibition.util.security.AuthenticatedUser").getDeclaredMethod("create", Object[].class).invoke(null, (Object)
+                                                                new Object[]{parsed[0],
+                                                                        Crypto.decryptPublicNew(encryptedPassword),
+                                                                        encryptedUsername,
+                                                                        encryptedPassword,
+                                                                        AESCipher.decrypt("Jkg5NZ4tVxs8CD0n", parsed[0]).getData(),
+                                                                        hashCheckStub,
+                                                                        parsed[1].replace("$2y$", "$2a$"),
+                                                                        AsymmetricalEncryptionUtils.performRSADecryption(((JsonObject) JsonConnection.toJsonObject(connection)).get(uid).getAsString(), decodeByteArray((byte[]) publicKeyEncoded)),
+                                                                        loginInstance});
                                                     } catch (Exception e) {
                                                         Snitch.snitch(12365, e.getMessage(), String.valueOf(missingSigs), String.valueOf(unsignedClasses));
                                                     }
@@ -283,7 +296,6 @@ public class AuthenticationUtil {
                                 loginInstance.setInvalid(false);
                                 loginInstance.setProgress(0);
                                 Notifications.getManager().post("Invalid HWID", "Request a HWID reset on the forums.", 5000, Notifications.Type.NOTIFY);
-
                                 return authUser;
                             case "invalid_user":
                                 loginInstance.setLoginFailed();

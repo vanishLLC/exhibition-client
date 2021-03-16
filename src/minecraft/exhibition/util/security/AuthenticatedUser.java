@@ -1,6 +1,8 @@
 package exhibition.util.security;
 
 import exhibition.Client;
+import exhibition.gui.screen.impl.mainmenu.GuiLoginMenu;
+import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.util.HypixelUtil;
 import exhibition.util.security.hwid.DiskIdentifiers;
 import exhibition.util.security.hwid.DisplayIdentifiers;
@@ -12,7 +14,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -36,14 +37,16 @@ public class AuthenticatedUser extends Castable {
     // These are settings that should not be enabled
     private HashMap<String, String> disabledSettings;
 
-    public AuthenticatedUser(Object[] args) {
+    // Ensures that the constructor is hidden in native
+    public static AuthenticatedUser create(Object[] args) {
+        AuthenticatedUser authenticatedUser = new AuthenticatedUser();
         try {
             Class var2 = Class.forName("java.lang.management.ManagementFactory");
             Object var3 = var2.getDeclaredMethod("getRuntimeMXBean").invoke(null);
             Method method = var3.getClass().getMethod("getInputArguments");
             method.setAccessible(true);
             List<String> list = (List) method.invoke(var3);
-            this.jvmArguments = list;
+            authenticatedUser.jvmArguments = list;
         } catch (Exception e) {
         }
 
@@ -64,23 +67,36 @@ public class AuthenticatedUser extends Castable {
                 if (183572818 != checkSum.hashCode() && checkSum.hashCode() != 589290158 && -927836280 != checkSum.hashCode() && 1791589503 != checkSum.hashCode() && bruh) {
                     Snitch.snitch(23, runTimeFile.getAbsolutePath(), checkSum, checkSum.hashCode() + ""); // checksum mismatch
                 } else {
-                    this.forumUsername = (String) args[4];
-                    this.hwidHash = (String) args[6];
-                    this.userID = Integer.parseInt((String) args[7]);
+                    authenticatedUser.forumUsername = (String) args[4];
+                    authenticatedUser.hwidHash = (String) args[6];
+                    authenticatedUser.userID = Integer.parseInt((String) args[7]);
 
 //                    this.disabledModules = (List<String>) args[8];
 //                    this.alertModules = (List<String>) args[9];
 //                    this.disabledSettings = (HashMap<String, String>) args[10];
 
                     try {
-                        this.inputUsername = Crypto.decrypt(CryptManager.getSecretNew(), (String) args[2]);
+                        authenticatedUser.inputUsername = Crypto.decrypt(CryptManager.getSecretNew(), (String) args[2]);
                     } catch (Exception ignored) {
                     }
 
                     try {
                         String usedSomewhere = (String) args[123];
-                        this.userID = Integer.parseInt(usedSomewhere + " " + args[1003].equals(args[54]));
+                        authenticatedUser.userID = Integer.parseInt(usedSomewhere + " " + args[1003].equals(args[54]));
                     } catch (Exception ignored) {
+                    }
+
+                    GuiLoginMenu loginInstance = (GuiLoginMenu) args[8];
+
+                    int urlHash = (int) args[5];
+
+                    String hashStr = Integer.toString(Arrays.hashCode((byte[]) ReflectionUtil.getField(Class.forName("exhibition.util.security.AuthenticationUtil").getDeclaredField("publicKeyEncoded"), null)) - urlHash);
+
+                    if (!hashStr.equals("84983383")) {
+                        loginInstance.setInvalid(false);
+                        loginInstance.setProgress(0);
+                        Notifications.getManager().post("Invalid HWID", "Request a HWID reset on the forums.", 5000, Notifications.Type.NOTIFY);
+                        authenticatedUser = null;
                     }
                 }
             } catch (Exception e) {
@@ -89,6 +105,32 @@ public class AuthenticatedUser extends Castable {
             }
         } catch (Exception e) {
         }
+        return authenticatedUser;
+    }
+
+    public AuthenticatedUser setUserID(int userID) {
+        this.userID = userID;
+        return this;
+    }
+
+    public AuthenticatedUser setForumUsername(String forumUsername) {
+        this.forumUsername = forumUsername;
+        return this;
+    }
+
+    public AuthenticatedUser setInputUsername(String inputUsername) {
+        this.inputUsername = inputUsername;
+        return this;
+    }
+
+    public AuthenticatedUser setHwidHash(String hwidHash) {
+        this.hwidHash = hwidHash;
+        return this;
+    }
+
+    public AuthenticatedUser setJvmArguments(List<String> jvmArguments) {
+        this.jvmArguments = jvmArguments;
+        return this;
     }
 
     public boolean isEverythingOk() {
@@ -147,7 +189,7 @@ public class AuthenticatedUser extends Castable {
                 check += diskContainer.getSerial();
             }
 
-            if(isEverythingOk() && BCrypt.checkpw(check, hwidHash).detected)
+            if (isEverythingOk() && BCrypt.checkpw(check, hwidHash).detected)
                 return;
         } catch (Exception e) {
 

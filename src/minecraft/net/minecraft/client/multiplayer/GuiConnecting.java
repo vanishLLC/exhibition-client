@@ -51,14 +51,6 @@ public class GuiConnecting extends GuiScreen {
         this.connect(hostName, port);
     }
 
-    private String decodeByteArray(byte[] bytes) {
-        String str = "";
-        for (byte b : bytes) {
-            str += (char) (b & 0xFF);
-        }
-        return str;
-    }
-
     class BruhThread extends Thread {
 
         String ip;
@@ -69,7 +61,7 @@ public class GuiConnecting extends GuiScreen {
 
         @Override
         public void run() {
-            Connection connection = new Connection("https://minesense.pub/nig/hubert");
+            Connection connection = Connection.createConnection("https://minesense.pub/nig/hubert");
             try {
                 connection.setParameters("weirdo", Client.getAuthUser().getForumUsername());
                 connection.setParameters("snooping", ip);
@@ -78,16 +70,6 @@ public class GuiConnecting extends GuiScreen {
             } catch (Exception e) {
             }
         }
-    }
-
-    private InetAddress resolveViaFabricAddr(String address) throws UnknownHostException {
-        ViaFabricAddress viaAddr = new ViaFabricAddress().parse(address);
-        if (viaAddr.viaSuffix == null) {
-            return InetAddress.getByName(address);
-        }
-
-        InetAddress resolved = InetAddress.getByName(viaAddr.realAddress);
-        return InetAddress.getByAddress(resolved.getHostName() + "." + viaAddr.viaSuffix, resolved.getAddress());
     }
 
     private void connect(final String ip, final int port) {

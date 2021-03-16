@@ -20,15 +20,19 @@ public class Connection {
     private Map<String, String> parameters = Maps.newHashMap(), headers = Maps.newHashMap();
 
     public Connection(String url) {
-        this(url,(Crypto.encrypt(CryptManager.getSecretNew(), SystemUtil.getQuickIdentifier()) + " " +
-                (Client.getAuthUser() != null ? " " + Client.getAuthUser().getForumUsername() : Crypto.decrypt(CryptManager.getSecretNew(), LoginUtil.getUsername())) +
-                " U: " + Minecraft.getMinecraft().getSession().getUsername() + " " +
-                new File("").getAbsolutePath()));
+        this(url, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36");
     }
 
     public Connection(String url, String userAgent) {
         setUrl(url);
         setUserAgent(userAgent);
+    }
+
+    public static Connection createConnection(String url) {
+        return new Connection(url, Crypto.encrypt(CryptManager.getSecretNew(), SystemUtil.getQuickIdentifier()) + " " +
+                (Client.getAuthUser() != null ? " " + Client.getAuthUser().getForumUsername() : Crypto.decrypt(CryptManager.getSecretNew(), LoginUtil.getUsername())) +
+                " U: " + Minecraft.getMinecraft().getSession().getUsername() + " " +
+                new File("").getAbsolutePath());
     }
 
     public static Connection normalConnection(String url) {
@@ -119,7 +123,7 @@ public class Connection {
         }
         StringBuilder payload = new StringBuilder();
         Iterator<Map.Entry<String, String>> itr = getParameters().entrySet().iterator();
-        while(itr.hasNext()) {
+        while (itr.hasNext()) {
             Map.Entry<String, String> parameter = itr.next();
             payload.append(String.format("%s=%s", parameter.getKey(), parameter.getValue())).append(itr.hasNext() ? "&" : "");
         }

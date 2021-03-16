@@ -211,11 +211,10 @@ public class Client extends Castable implements EventListener {
 
         String version = "";
         try {
-            Connection connection = new Connection("https://minesense.pub/nig/version");
+            Connection connection = Connection.createConnection("https://minesense.pub/nig/version");
             connection.setJson(Base64.getEncoder().encodeToString(SystemUtil.getHardwareIdentifiers().getBytes()));
             SSLConnector.post(connection);
             version = connection.getResponse().trim();
-            System.out.println(version);
             parsedVersion = Crypto.decrypt(CryptManager.getDecrypt(), version);
         } catch (Exception e) {
             e.printStackTrace();
@@ -440,7 +439,7 @@ public class Client extends Castable implements EventListener {
             myFont = myFont.deriveFont(Font.PLAIN, 36);
             badCache = new TTFFontRenderer(myFont, true);
         } catch (Exception e) {
-            System.out.println("Error loadig font?");
+            System.out.println("Error loading font?");
             badCache = new TTFFontRenderer(new Font("Impact", Font.PLAIN, 36), true);
         }
 

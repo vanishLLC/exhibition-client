@@ -89,6 +89,8 @@ public abstract class AbstractClientPlayer extends EntityPlayer {
     public ResourceLocation getLocationCape() {
         if ((this instanceof EntityPlayerSP && GlobalValues.showCape.getValue()) || (!(this instanceof EntityPlayerSP) && FriendManager.isFriend(this.getName()))) {
             return Client.capeLocation;
+        } else {
+            System.out.println((this instanceof EntityPlayerSP) + " " + GlobalValues.showCape.getValue());
         }
 
         if (!Config.isShowCapes()) {
