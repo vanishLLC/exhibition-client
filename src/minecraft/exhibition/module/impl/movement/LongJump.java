@@ -18,7 +18,6 @@ import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.combat.AutoPot;
 import exhibition.module.impl.combat.Bypass;
-import exhibition.module.impl.other.AutoPaper;
 import exhibition.module.impl.player.Scaffold;
 import exhibition.util.*;
 import exhibition.util.render.Colors;
