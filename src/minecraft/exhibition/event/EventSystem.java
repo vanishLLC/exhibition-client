@@ -19,7 +19,9 @@ import java.util.List;
  * </pre>
  */
 public class EventSystem {
-    private static final HashMap<Event, EventSubscription> registry = new HashMap<>();
+    private static final HashMap<Class<Event>, EventSubscription> registry = new HashMap<>();
+
+    // For events that aren't called on separate threads
     private static final HashMap<Class, Event> instances = new HashMap<>();
 
     /*
@@ -57,15 +59,13 @@ public class EventSystem {
      * @param listener
      */
     public static void register(EventListener listener) {
-        if (registry.containsKey(listener))
-            return;
-        List<Event> events = EventSystem.getEvents(listener);
-        for (Event event : events) {
+        List<Class<Event>> events = EventSystem.getEvents(listener);
+        for (Class<Event> event : events) {
             if (EventSystem.isEventRegistered(event)) {
                 EventSubscription subscription = EventSystem.registry.get(event);
                 subscription.add(listener);
             } else {
-                EventSubscription subscription = new EventSubscription<>(event);
+                EventSubscription subscription = new EventSubscription();
                 subscription.add(listener);
                 EventSystem.registry.put(event, subscription);
             }
@@ -78,8 +78,8 @@ public class EventSystem {
      * @param listener
      */
     public static void unregister(EventListener listener) {
-        List<Event> events = EventSystem.getEvents(listener);
-        for (Event event : events) {
+        List<Class<Event>> events = EventSystem.getEvents(listener);
+        for (Class<Event> event : events) {
             if (EventSystem.isEventRegistered(event)) {
                 EventSubscription sub = EventSystem.registry.get(event);
                 sub.remove(listener);
@@ -95,7 +95,7 @@ public class EventSystem {
      * @return
      */
     public static Event fire(Event event) {
-        EventSubscription subscription = EventSystem.registry.get(event);
+        EventSubscription subscription = EventSystem.registry.get(event.getClass());
         if (subscription != null) {
             subscription.fire(event);
         }
@@ -118,15 +118,15 @@ public class EventSystem {
      * @param listener
      * @return
      */
-    private static List<Event> getEvents(EventListener listener) {
-        ArrayList<Event> events = new ArrayList<>();
+    private static List<Class<Event>> getEvents(EventListener listener) {
+        ArrayList<Class<Event>> events = new ArrayList<>();
         for (Method method : listener.getClass().getDeclaredMethods()) {
             if (!method.isAnnotationPresent(RegisterEvent.class)) {
                 continue;
             }
             RegisterEvent ireg = method.getAnnotation(RegisterEvent.class);
             for (Class eventClass : ireg.events()) {
-                events.add(EventSystem.getInstance(eventClass));
+                events.add(eventClass);
             }
         }
         return events;
@@ -138,7 +138,7 @@ public class EventSystem {
      * @param event
      * @return
      */
-    private static boolean isEventRegistered(Event event) {
+    private static boolean isEventRegistered(Class<Event> event) {
         return EventSystem.registry.containsKey(event);
     }
 }

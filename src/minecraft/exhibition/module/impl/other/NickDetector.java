@@ -83,7 +83,7 @@ public class NickDetector extends Module {
                 S04PacketEntityEquipment packetIn = (S04PacketEntityEquipment) packet;
                 Entity entity = mc.theWorld.getEntityByID(packetIn.getEntityID());
 
-                if (entity != null && UUIDResolver.instance.isInvalidName(entity.getName())) {
+                if (entity != null && UUIDResolver.instance.checkedUsernames.containsKey(entity.getName()) && UUIDResolver.instance.isInvalidName(entity.getName())) {
                     ItemStack stack = packetIn.getItemStack();
                     if (stack != null && stack.hasTagCompound()) {
                         if (stack.getTagCompound().hasKey("ExtraAttributes", 10)) {

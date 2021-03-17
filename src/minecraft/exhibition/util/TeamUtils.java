@@ -14,7 +14,7 @@ public class TeamUtils {
         // ChatUtil.printChat(e2.getDisplayName().getFormattedText().contains("§" + isTeam(e)) + " " + isTeam(e));
         boolean pitMode = HypixelUtil.isInGame("THE HYPIXEL PIT");
         if (pitMode) {
-            if ((!HypixelUtil.scoreboardContains("event:") || HypixelUtil.scoreboardContains("SPIRE") || HypixelUtil.scoreboardContains("BLOCKHEAD") || HypixelUtil.scoreboardContains("RAFFLE") || HypixelUtil.scoreboardContains("PIZZA")))
+            if ((!HypixelUtil.scoreboardContains("event:") || HypixelUtil.scoreboardContains("SPIRE") || HypixelUtil.scoreboardContains("ROBBERY") || HypixelUtil.scoreboardContains("BLOCKHEAD") || HypixelUtil.scoreboardContains("RAFFLE") || HypixelUtil.scoreboardContains("PIZZA")))
                 return e == e2;
             if(HypixelUtil.scoreboardContains("event:") && HypixelUtil.scoreboardContains("SQUAD")) {
                 String first = e.getDisplayName().getFormattedText();

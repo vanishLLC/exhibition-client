@@ -275,7 +275,7 @@ public class Killaura extends Module {
 //                    }
 //                }
                 if (packet instanceof S08PacketPlayerPosLook) {
-                    critWaitTicks = critModule.isPacket() ? 15 : 6;
+                    critWaitTicks = critModule.isPacket() ? 20 : 6;
                     setupTick = 0;
                 }
 
@@ -286,12 +286,12 @@ public class Killaura extends Module {
 //                    ChatUtil.debug("Blocked " + mc.thePlayer.ticksExisted + " " + isBlocking);
 //                }
 
-                if (packet instanceof C01PacketChatMessage) {
-                    C01PacketChatMessage chatMessage = (C01PacketChatMessage) packet;
-                    if (chatMessage.getMessage().contains("/spawn")) {
-                        ChatUtil.printChat("Spawn " + chatMessage.getMessage());
-                    }
-                }
+//                if (packet instanceof C01PacketChatMessage) {
+//                    C01PacketChatMessage chatMessage = (C01PacketChatMessage) packet;
+//                    if (chatMessage.getMessage().contains("/spawn")) {
+//                        ChatUtil.printChat("Spawn " + chatMessage.getMessage());
+//                    }
+//                }
 
                 if (packet instanceof S45PacketTitle && (boolean) settings.get(DEATH).getValue()) {
                     S45PacketTitle titlePacket = ((S45PacketTitle) packet);
@@ -472,12 +472,10 @@ public class Killaura extends Module {
                         double xDelta = e.posX - e.lastTickPosX;
                         double zDelta = e.posZ - e.lastTickPosZ;
 
-                        if (Math.hypot(xDelta, zDelta) < 3) {
-                            if (deltaHashMap.containsKey(e)) {
-                                deltaHashMap.get(e).logDeltas(xDelta, zDelta, mc.thePlayer.ticksExisted);
-                            } else {
-                                deltaHashMap.put(e, new EntityDelta(xDelta, zDelta));
-                            }
+                        if (deltaHashMap.containsKey(e)) {
+                            deltaHashMap.get(e).logDeltas(xDelta, zDelta, mc.thePlayer.ticksExisted);
+                        } else {
+                            deltaHashMap.put(e, new EntityDelta(xDelta, zDelta));
                         }
                     }
 
@@ -606,11 +604,11 @@ public class Killaura extends Module {
 
                                             if (allowInvalidAngles && em.getPitch() >= 0 && backwardsDiff < normalDiff && newOffReverse < 0.1 && normalDiff > 90) {
                                                 angleTimer.reset();
-                                                em.setYaw(lastAngles.x = ((float) MathUtils.getIncremental(lastAngles.x += MathHelper.wrapAngleTo180_float((newYaw + 180)), 20) + randomNumber(1,-1)));
+                                                em.setYaw(lastAngles.x = ((float) MathUtils.getIncremental(lastAngles.x += MathHelper.wrapAngleTo180_float((newYaw + 180)), 20) + randomNumber(1, -1)));
                                                 em.setPitch(180 - em.getPitch());
                                             } else {
                                                 angleTimer.reset();
-                                                em.setYaw(lastAngles.x = ((float) MathUtils.getIncremental(lastAngles.x += (newYaw), 20) + randomNumber(1,-1)));
+                                                em.setYaw(lastAngles.x = ((float) MathUtils.getIncremental(lastAngles.x += (newYaw), 20) + randomNumber(1, -1)));
                                             }
                                         }
                                     }
@@ -667,7 +665,7 @@ public class Killaura extends Module {
                             if (target instanceof EntityPlayer && antiCritFunky.getValue() && hasEnchant(target, "Retro")) {
                                 int criticalHits = ((EntityPlayer) target).criticalHits;
                                 if ((criticalHits == 0 || criticalHits > 3) || target.waitTicks > 0) {
-                                    if(criticalHits == 0) {
+                                    if (criticalHits == 0) {
                                         ((EntityPlayer) target).criticalHits++;
                                     }
                                     crits = false;
@@ -753,7 +751,7 @@ public class Killaura extends Module {
                                             if (mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {
                                                 stepDelay = 2;
                                                 blockJump = true;
-                                                em.setY(em.getY() + 0.125);
+                                                em.setY(em.getY() + 0.125F + (-0.0000003525F * Math.random()));
                                                 em.setGround(false);
                                                 em.setForcePos(true);
                                                 isCritSetup = true;
@@ -860,9 +858,12 @@ public class Killaura extends Module {
 
                     if (((Number) settings.get(ANGLESTEP).getValue()).intValue() == 0 || (off <= 0.11 || (off <= 1 && off >= 0.22 && MathUtils.getIncremental(angleTimer.getDifference(), 50) <= 100))) {
 
-                        if (crits && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically && (((critModule.isPacket() && setupCrits))  && isCritSetup) && !em.isOnground()) {
-                            if (HypixelUtil.isVerifiedHypixel() && !Bypass.shouldSabotage() && mc.getCurrentServerData() != null && (mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net"))) {
-                                NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.046599998474120774, mc.thePlayer.posZ, false));
+                        if (crits && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically && (((critModule.isPacket() && setupCrits)) && isCritSetup) && !em.isOnground()) {
+                            if (HypixelUtil.isVerifiedHypixel() && mc.getCurrentServerData() != null && (mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net"))) {
+
+                                double bruh = (mc.thePlayer.posY + 0.125F) + (-0.08D * 0.9800000190734863D) + (-0.0000003525F * Math.random());
+
+                                NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, bruh, mc.thePlayer.posZ, false));
                             } else {
                                 Criticals.doCrits();
                             }
@@ -907,7 +908,7 @@ public class Killaura extends Module {
                                         player.criticalHits++;
                                     } else {
                                         if (player.criticalHits > 1) {
-                                            if(antiCritFunky.getValue() && hasEnchant(target, "Retro")) {
+                                            if (antiCritFunky.getValue() && hasEnchant(target, "Retro")) {
                                                 player.criticalHits = 0;
                                             }
                                         }
@@ -1048,7 +1049,7 @@ public class Killaura extends Module {
     private final double[] ZERO = new double[]{0, 0, 0};
 
     private double[] getPrediction(EntityLivingBase player, int ticks, double scale) {
-        if (!prediction.getValue() || !deltaHashMap.containsKey(player) || deltaHashMap.size() < 2) {
+        if (!prediction.getValue() || !deltaHashMap.containsKey(player)) {
             return ZERO;
         }
 
@@ -1111,7 +1112,10 @@ public class Killaura extends Module {
 
             double distance = MathHelper.sqrt_double(deltaX * deltaX + deltaY * deltaY);
 
-            if (distance >= 10) {
+            if (distance >= 5) {
+                if (deltas.remainingCapacity() == 0) {
+                    deltas.remove();
+                }
                 deltas.add(new double[]{0, 0});
                 return this;
             }
@@ -1318,7 +1322,7 @@ public class Killaura extends Module {
             }
         }
 
-        if (mc.thePlayer.getHealth() <= 19.5) {
+        if ((mc.thePlayer.getHealth() / mc.thePlayer.getMaxHealth()) <= 0.975) {
             weight += Math.max(entityLivingBase.waitTicks, 0);
             // If the player is hurt, we don't get any benefit?
             if (entityLivingBase.hurtTime >= 6) {

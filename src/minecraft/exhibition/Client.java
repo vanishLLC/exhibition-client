@@ -629,7 +629,7 @@ public class Client extends Castable implements EventListener {
             if (mc.thePlayer != null && mc.theWorld != null && HypixelUtil.isVerifiedHypixel()) {
                 if (packet instanceof C03PacketPlayer && hypixelApiKey == null && mc.thePlayer.ticksExisted > 10) {
                     DevNotifications.getManager().post("Grabbing key");
-                    ChatUtil.sendChat("/api new");
+                    ChatUtil.sendChat_NoFilter("/api new");
                     hypixelApiKey = "";
                     return;
                 }

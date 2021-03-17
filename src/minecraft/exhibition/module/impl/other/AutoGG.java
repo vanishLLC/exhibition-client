@@ -42,7 +42,7 @@ public class AutoGG extends Module {
             ((AutoPlay) Client.getModuleManager().get(AutoPlay.class)).resetTimer();
             ((KillSults) Client.getModuleManager().get(KillSults.class)).resetTimer();
             String message = chatQueue.poll();
-            ChatUtil.sendChat(message);
+            ChatUtil.sendChat_NoFilter(message);
         }
         if (castPacket instanceof S45PacketTitle) {
             S45PacketTitle packet = ((S45PacketTitle) castPacket);

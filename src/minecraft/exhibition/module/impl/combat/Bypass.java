@@ -59,7 +59,7 @@ public class Bypass extends Module {
         addSetting(DELAY);
         addSetting(AUTOBYPASS);
         addSetting(AUTODONG);
-        addSetting(new Setting<>("MODE", option, "Which bypass method should be used. (Experimental may WD ban)"));
+        addSetting(new Setting<>("MODE", option, "Which bypass method should be used. (DETECTED)"));
     }
 
     @Override
@@ -88,15 +88,10 @@ public class Bypass extends Module {
 
     }
 
-    private final boolean b = Boolean.parseBoolean(System.getProperty("bypassSecret"));
 
     @Override
     public void onDisable() {
-        if (b || mc.thePlayer == null)
-            return;
-        if (mc.getCurrentServerData() != null && mc.getCurrentServerData().serverIP.toLowerCase().contains("hypixel")) {
-            Notifications.getManager().post("Bypass Warning", "This feature is strongly recommended to bypass Watchdog.", 5_000, Notifications.Type.WARNING);
-        }
+
     }
 
     private final Random random = new Random();
@@ -107,6 +102,8 @@ public class Bypass extends Module {
     public void onEvent(Event event) {
         if (mc.getIntegratedServer() != null)
             return;
+
+        setHidden(false);
 
         if (event instanceof EventTick) {
             // If bruh is not set or they're in a lobby and it's set, let them change it

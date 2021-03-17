@@ -65,10 +65,10 @@ public class AutoOOF extends Module {
                     boolean canSpawn = HypixelUtil.scoreboardContains("Status: Idling") || HypixelUtil.scoreboardContains("Status: Bountied");
 
                     if (!canSpawn && !panicOnly.getValue())
-                        ChatUtil.sendChat("/oof");
+                        ChatUtil.sendChat_NoFilter("/oof");
 
                     if (canSpawn) {
-                        ChatUtil.sendChat("/spawn");
+                        ChatUtil.sendChat_NoFilter("/spawn");
                     }
 
                     Class<? extends Module>[] classes = new Class[]{Killaura.class, AntiVelocity.class, Speed.class, Fly.class, LongJump.class, BedFucker.class, BorderHop.class};

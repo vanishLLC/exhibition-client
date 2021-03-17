@@ -62,7 +62,7 @@ public class KillSults extends Module {
 
             String message = chatQueue.poll();
             if (!message.equals("")) {
-                ChatUtil.sendChat(message);
+                ChatUtil.sendChat_NoFilter(message);
             }
         }
         Packet packet = ep.getPacket();

@@ -42,7 +42,7 @@ public class AutoMath extends Module {
             Client.getModuleManager().get(KillSults.class).resetTimer();
             Client.getModuleManager().get(AutoGG.class).resetTimer();
             String message = chatQueue.poll();
-            ChatUtil.sendChat(message);
+            ChatUtil.sendChat_NoFilter(message);
         }
         Packet packet = ep.getPacket();
         if (packet instanceof S02PacketChat) {

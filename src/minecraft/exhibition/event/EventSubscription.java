@@ -13,13 +13,11 @@ import static exhibition.util.MinecraftUtil.mc;
  * Keeps track of subscribed listeners for a given assigned event.
  */
 @SuppressWarnings("unused")
-public class EventSubscription<T extends Event> {
+public class EventSubscription {
 
-    private final T event;
     private final List<EventListener> subscribed = new CopyOnWriteArrayList<>();
 
-    public EventSubscription(T event) {
-        this.event = event;
+    public EventSubscription() {
     }
 
     public void fire(Event event) {
@@ -43,10 +41,5 @@ public class EventSubscription<T extends Event> {
     public List<EventListener> getSubscribed() {
         return subscribed;
     }
-
-    public Event getEvent() {
-        return event;
-    }
-
 
 }

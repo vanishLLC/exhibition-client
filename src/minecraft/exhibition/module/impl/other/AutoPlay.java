@@ -48,7 +48,7 @@ public class AutoPlay extends Module {
             ((KillSults)Client.getModuleManager().get(KillSults.class)).resetTimer();
 
             String message = chatQueue.poll();
-            ChatUtil.sendChat(message);
+            ChatUtil.sendChat_NoFilter(message);
         }
         if (eventPacket.isIncoming()) {
             if (packet instanceof S02PacketChat) {

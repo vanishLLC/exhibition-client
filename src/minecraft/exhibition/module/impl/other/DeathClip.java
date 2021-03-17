@@ -67,7 +67,7 @@ public class DeathClip extends Module {
 			if (this.waitTicks > 0) {
 				this.waitTicks += 1;
 				if (this.waitTicks >= 4) {
-					ChatUtil.sendChat(((String) settings.get(MESSAGE).getValue()).toString());
+					ChatUtil.sendChat_NoFilter(((String) settings.get(MESSAGE).getValue()).toString());
 					this.waitTicks = 0;
 				}
 			}

@@ -102,10 +102,11 @@ public class NotificationTest extends Command {
 
         } else if (args[0].equalsIgnoreCase("virtue")) {
             VirtueClickGui.start();
-        }  else {
+        } else if (args[0].equalsIgnoreCase("chat")) {
+            ChatUtil.sendChat_NoFilter("/help");
+        } else {
             ChatUtil.printChat(chatPrefix + "???");
         }
-
     }
 
     /* (non-Javadoc)

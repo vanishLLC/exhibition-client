@@ -26,7 +26,7 @@ public class AutoSay extends Module {
 	public void onEvent(Event event) {
 		String message = ((String) settings.get(WORDS).getValue());
 		if (timer.delay(((Number)settings.get(DELAY).getValue()).longValue())) {
-			ChatUtil.sendChat(message + " " + RandomStringUtils.randomAlphabetic(5));
+			ChatUtil.sendChat_NoFilter(message + " " + RandomStringUtils.randomAlphabetic(5));
 			timer.reset();
 		}
 	}

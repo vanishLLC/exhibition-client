@@ -271,7 +271,7 @@ public class Teleport extends Command implements EventListener {
                         this.targetPlayer = null;
                     }
 
-                    ep.setPacket(new C03PacketPlayer.C04PacketPlayerPosition(targetX, mc.thePlayer.posY - 3.19993F, targetZ, false));
+                    ep.setPacket(new C03PacketPlayer.C04PacketPlayerPosition(targetX, mc.thePlayer.posY - 3.0, targetZ, false));
 
                     EventSystem.unregister(this);
                     isTeleporting = false;

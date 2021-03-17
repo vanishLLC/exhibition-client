@@ -104,7 +104,7 @@ public class TargetESP extends Module {
 
         String formatted = player.getDisplayName().getFormattedText();
 
-        if(Client.getModuleManager().isEnabled(TargetESP.class) && (bountyPattern.matcher(formatted).find() && !formatted.contains("\247l100g"))) {
+        if(Client.getModuleManager().isEnabled(TargetESP.class) && !HypixelUtil.scoreboardContains("ROBBERY") && (bountyPattern.matcher(formatted).find() && !formatted.contains("\247l100g"))) {
             return true;
         }
         if(Client.getModuleManager().isEnabled(TargetESP.class) && (formatted.contains("HELD") || (formatted.contains("BEAST") && !mc.thePlayer.getDisplayName().getFormattedText().contains("\247lBEAST"))) && HypixelUtil.scoreboardContains("Event")) {

@@ -157,45 +157,21 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
     protected void channelRead0(ChannelHandlerContext context, Packet packet) {
         if (channel.isOpen()) {
             try {
-                EventPacket ep = ((EventPacket) EventSystem.getInstance(EventPacket.class));
-                boolean canceled = false;
-                synchronized (EventSystem.getInstance(EventPacket.class)) {
-                    ep.fire(packet, false);
-                    canceled = ep.isCancelled();
+                EventPacket ep = new EventPacket();
+                ep.fire(packet, false);
+                if (ep.isCancelled()) {
+                    return;
                 }
-                if (!canceled) {
-                    if (packet instanceof S02PacketChat && Minecraft.getMinecraft().thePlayer != null) {
-                        S02PacketChat packet2 = (S02PacketChat) packet;
-                        String formattedText = packet2.getChatComponent().getFormattedText();
-                        String playerName = Minecraft.getMinecraft().thePlayer.getName();
-                        int indexLength = formattedText.length() > (playerName.length() * 2) - 1 ? (playerName.length() * 2) - 1 : formattedText.length();
-                        if ((!formattedText.equals("") &&
-                                formattedText.contains("hack") || formattedText.contains("hax") ||
-                                formattedText.contains("hqr") || formattedText.contains("hkr") ||
-                                formattedText.contains("recorded") || formattedText.contains("reported") ||
-                                formattedText.contains("ticket") || formattedText.contains("fly") ||
-                                formattedText.contains("cheater") || formattedText.contains("cheat") ||
-                                formattedText.contains("bhop")) &&
-                                formattedText.contains(playerName) &&
-                                formattedText.substring(0, indexLength).contains(playerName) &&
-                                !packet2.getChatComponent().getUnformattedText().contains("TestNCP") && !packet2.getChatComponent().getUnformattedText().contains("Paper Challenge")) {
-                            Notifications.getManager().post("Player Warning", "Someone called you a hacker.", 2500L, Notifications.Type.NOTIFY);
-                        }
-                        if (formattedText.contains("Ground items will be removed in")) {
-                            String message = formattedText.substring(formattedText.lastIndexOf("in "));
-                            Notifications.getManager().post("Server Warning", "Clearlag " + message, 2500L, Notifications.Type.NOTIFY);
-                        }
-                        if (formattedText.contains("Protect your bed and destroy the enemy beds.")) {
-                            Notifications.getManager().post("\247c\247lBedwars Warning (Wait {s} s)", "\247lFlying to other islands will result in a WD ban.", 15000L, Notifications.Type.WARNING);
-                            new Thread(() -> {
-                                try {
-                                    Thread.sleep(20000);
-                                } catch (Exception e) {
-
-                                }
-                                //Notifications.getManager().post("20 seconds has passed.", "You can now attack players and break beds.", Notifications.Type.OKAY);
-                            }).start();
-                        }
+                if (packet instanceof S02PacketChat && Minecraft.getMinecraft().thePlayer != null) {
+                    S02PacketChat packet2 = (S02PacketChat) packet;
+                    String formattedText = packet2.getChatComponent().getFormattedText();
+                    if (formattedText.contains("Ground items will be removed in")) {
+                        String message = formattedText.substring(formattedText.lastIndexOf("in "));
+                        Notifications.getManager().post("Server Warning", "Clearlag " + message, 2500L, Notifications.Type.NOTIFY);
+                    }
+                    if (formattedText.contains("Protect your bed and destroy the enemy beds.")) {
+                        Notifications.getManager().post("\247c\247lBedwars Warning (Wait {s} s)", "\247lFlying to other islands will result in a WD ban.", 15000L, Notifications.Type.WARNING);
+                    }
 //                        if(formattedText.contains("Gather resources and equipment on your island")) {
 //                            long length = 10000L;
 //                            Notifications.getManager().post("\247c\247lSkyWars Warning (Wait {s} s)", "\247lUsing LongJump may result in a ban.", length, Notifications.Type.WARNING);
@@ -211,10 +187,9 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
 //                        if (formattedText.contains("You are now in ") && !formattedText.contains("\247achannel")) {
 //                            String message = formattedText.substring(formattedText.lastIndexOf("in ") + 3);
 //                            Notifications.getManager().post("Faction Warning", "Chunk: " + message, 2500L, Type.INFO);
-//                        }
-                    }
-                    packet.processPacket(packetListener);
+//                        }                }
                 }
+                packet.processPacket(packetListener);
             } catch (ThreadQuickExitException var4) {
 
             }
@@ -248,25 +223,19 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
     }
 
     public void sendPacket(Packet packetIn) {
-        EventPacket ep = (EventPacket) EventSystem.getInstance(EventPacket.class);
-        boolean canceled = false;
-        Packet packet = packetIn;
-        synchronized (EventSystem.getInstance(EventPacket.class)) {
-            ep.fire(packetIn, true);
-            canceled = ep.isCancelled();
-            packet = ep.getPacket();
-        }
-        if (canceled) {
+        EventPacket ep = new EventPacket();
+        ep.fire(packetIn, true);
+        if (ep.isCancelled()) {
             return;
         }
         if (this.isChannelOpen()) {
             this.flushOutboundQueue();
-            this.dispatchPacket(packet, (GenericFutureListener<? extends Future<? super Void>>[]) null);
+            this.dispatchPacket(ep.getPacket(), (GenericFutureListener<? extends Future<? super Void>>[]) null);
         } else {
             this.field_181680_j.writeLock().lock();
 
             try {
-                this.outboundPacketsQueue.add(new NetworkManager.InboundHandlerTuplePacketListener(packet, (GenericFutureListener[]) null));
+                this.outboundPacketsQueue.add(new NetworkManager.InboundHandlerTuplePacketListener(ep.getPacket(), (GenericFutureListener[]) null));
             } finally {
                 this.field_181680_j.writeLock().unlock();
             }

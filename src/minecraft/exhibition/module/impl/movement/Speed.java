@@ -534,13 +534,9 @@ public class Speed extends Module {
                         double zDist = mc.thePlayer.posZ - mc.thePlayer.prevPosZ;
                         lastDist = Math.sqrt(xDist * xDist + zDist * zDist);
 
-                        if (PlayerUtil.isMoving() && stage > 0 && (strafeFix.getValue() && HypixelUtil.isVerifiedHypixel())) {
+                        if (lastDist > 0 && !PlayerUtil.isOnLiquid() && (strafeFix.getValue() && HypixelUtil.isVerifiedHypixel())) {
                             if (em.isOnground()) {
-                                em.setY(em.getY() + MathUtils.roundToPlace(0.00053424 + ((0.015625 - 0.00053424) * Math.random()), 7));
-                            }
-
-                            if (mc.thePlayer.motionY > 0.3) {
-                                //em.setGround(true);
+                                em.setY(em.getY() + 0.005625F + ((0.015625F - 0.005625F) * Math.random()));
                             }
                         }
                     }
