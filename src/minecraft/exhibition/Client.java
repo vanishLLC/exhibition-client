@@ -154,24 +154,28 @@ public class Client extends Castable implements EventListener {
     public Object[] init(Object[] args) {
         try {
             // TODO: ADD BEFORE UPDATE
-            if (getHwid() != 32161752) {
-                Class fieldClass = Class.forName("java.lang.reflect.Field");
-                Class unsafeClass = Class.forName("sun.misc.Unsafe");
-                Object bruh = unsafeClass.getDeclaredField("theUnsafe");
-                Object field = Class.forName("java.lang.System").getDeclaredField("err");
-                fieldClass.getMethod("setAccessible", boolean.class).invoke(bruh, true);
-                Object unsafeInstance = fieldClass.getMethod("get", Object.class).invoke(bruh, (Object) new Object[0]);
-                Object custom = Class.forName("net.minecraft.util.LoggingPrintStream").
-                        getConstructor(String.class, Class.forName("java.io.OutputStream")).
-                        newInstance("", unsafeClass.getMethod("getObject", Object.class, long.class).
-                                invoke(unsafeInstance, unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field), unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field)));
+            if (/* getHwid() != 32161752 */ true) {
+                try {
+                    Class fieldClass = Class.forName("java.lang.reflect.Field");
+                    Class unsafeClass = Class.forName("sun.misc.Unsafe");
+                    Object bruh = unsafeClass.getDeclaredField("theUnsafe");
+                    Object field = Class.forName("java.lang.System").getDeclaredField("err");
+                    fieldClass.getMethod("setAccessible", boolean.class).invoke(bruh, true);
+                    Object unsafeInstance = fieldClass.getMethod("get", Object.class).invoke(bruh, (Object) new Object[0]);
+                    Object custom = Class.forName("net.minecraft.util.LoggingPrintStream").
+                            getConstructor(String.class, Class.forName("java.io.OutputStream")).
+                            newInstance("", unsafeClass.getMethod("getObject", Object.class, long.class).
+                                    invoke(unsafeInstance, unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field), unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field)));
 
-                Object oldInstance = unsafeClass.getMethod("getAndSetObject", Object.class, long.class, Object.class).invoke(unsafeInstance,
-                        unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field),
-                        unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field),
-                        custom);
+                    Object oldInstance = unsafeClass.getMethod("getAndSetObject", Object.class, long.class, Object.class).invoke(unsafeInstance,
+                            unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field),
+                            unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field),
+                            custom);
 
-                ReflectionUtil.setStaticField(Class.forName("exhibition.util.security.LoggerContainer").getDeclaredField("oldLoggerInstance"), oldInstance);
+                    ReflectionUtil.setStaticField(Class.forName("exhibition.util.security.LoggerContainer").getDeclaredField("oldLoggerInstance"), oldInstance);
+                } catch (Exception e) {
+
+                }
             }
 
             Class var2 = Class.forName("java.lang.management.ManagementFactory");
@@ -182,14 +186,14 @@ public class Client extends Castable implements EventListener {
             this.progressScreenTask = (ProgressScreen) args[2];
 
             /* TODO: REMOVE ON UPDATE */
-            if (getHwid() != 32161752 && !this.getClass().getName().startsWith("TEMPPROTECT")) {
+            if (/* getHwid() != 32161752 */ true && !this.getClass().getName().startsWith("TEMPPROTECT")) {
                 Snitch.snitch(1000, this.getClass().getName());
             }
             boolean doArgumentsMatch = false; // should turn into true
             boolean foundDisableAttach = false;
             List<String> mismatching = null;
             for (String a : list) {
-                if (a.contains(Crypto.decryptPrivate("W9Io33+u6h/y824F8vB4YA==")) || (a.contains(Crypto.decryptPrivate("hRawfwHiKgsEGWqMl+wcaQ==")) && getHwid() != 32161752 /* TODO: REMOVE ON UPDATE */)) {
+                if (a.contains(Crypto.decryptPrivate("W9Io33+u6h/y824F8vB4YA==")) || (a.contains(Crypto.decryptPrivate("hRawfwHiKgsEGWqMl+wcaQ==")) && /* getHwid() != 32161752 */ true /* TODO: REMOVE ON UPDATE */)) {
                     snitch(1, a);
                 }
                 if (a.equals(Crypto.decryptPrivate("jcsPRcUqWhxo0fClF+5v02BFfJ8h2uE1iJ2JkdnvftE="))) {

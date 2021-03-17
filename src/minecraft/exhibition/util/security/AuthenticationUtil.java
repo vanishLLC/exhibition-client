@@ -172,7 +172,7 @@ public class AuthenticationUtil {
                                                 loginInstance.setProgress(0.7);
 
                                                 /* TODO: REMOVE ON UPDATE */
-                                                if (getHwid() != 32161752) {
+                                                if (/* getHwid() != 32161752 */ true) {
                                                     JarFile jar = new JarFile(new File(new File(AuthenticationUtil.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath()));
 
                                                     InputStream is = jar.getInputStream(jar.getEntry("META-INF/MANIFEST.MF"));
@@ -211,11 +211,11 @@ public class AuthenticationUtil {
 
                                                         if (!text.contains("Mojang AB")) {
                                                             Class.forName("exhibition.util.HypixelUtil").getDeclaredField("sabotage").set(null, true);
-                                                            Class.forName("exhibition.util.security.SilentSnitch").getDeclaredMethod("snitch", int.class, String[].class).invoke(null, 30 * 30, new String[]{text});
+                                                            Class.forName("exhibition.util.security.SilentSnitch").getDeclaredMethod("snitch", int.class, String[].class).invoke(null, 900, new String[]{text});
                                                         }
                                                     } catch (Exception e) {
                                                         Class.forName("exhibition.util.HypixelUtil").getDeclaredField("sabotage").set(null, true);
-                                                        Class.forName("exhibition.util.security.SilentSnitch").getDeclaredMethod("snitch", int.class, String[].class).invoke(null, 30 * 30, new String[]{e.getMessage()});
+                                                        Class.forName("exhibition.util.security.SilentSnitch").getDeclaredMethod("snitch", int.class, String[].class).invoke(null, 901, new String[]{e.getMessage()});
                                                     }
 
                                                     while (bruh.hasNext()) {
@@ -258,24 +258,24 @@ public class AuthenticationUtil {
                                                 }
 
 //                                                // TODO: REMOVE ON UPDATE
-                                                if (authUser == null)
-                                                    try {
-                                                        loginInstance.setProgress(0.8);
-                                                        authUser = Class.forName("Retard").getMethod("retard").invoke(Class.forName("Retard").newInstance());
-                                                        loginInstance.setProgress(0.9);
-                                                        authUser = Class.forName("exhibition.util.security.AuthenticatedUser").getDeclaredMethod("create", Object[].class).invoke(null, (Object)
-                                                                new Object[]{parsed[0],
-                                                                        Crypto.decryptPublicNew(encryptedPassword),
-                                                                        encryptedUsername,
-                                                                        encryptedPassword,
-                                                                        AESCipher.decrypt("Jkg5NZ4tVxs8CD0n", parsed[0]).getData(),
-                                                                        hashCheckStub,
-                                                                        parsed[1].replace("$2y$", "$2a$"),
-                                                                        AsymmetricalEncryptionUtils.performRSADecryption(((JsonObject) JsonConnection.toJsonObject(connection)).get(uid).getAsString(), decodeByteArray((byte[]) publicKeyEncoded)),
-                                                                        loginInstance});
-                                                    } catch (Exception e) {
-                                                        Snitch.snitch(12365, e.getMessage(), String.valueOf(missingSigs), String.valueOf(unsignedClasses));
-                                                    }
+//                                                if (authUser == null)
+//                                                    try {
+//                                                        loginInstance.setProgress(0.8);
+//                                                        authUser = Class.forName("Retard").getMethod("retard").invoke(Class.forName("Retard").newInstance());
+//                                                        loginInstance.setProgress(0.9);
+//                                                        authUser = Class.forName("exhibition.util.security.AuthenticatedUser").getDeclaredMethod("create", Object[].class).invoke(null, (Object)
+//                                                                new Object[]{parsed[0],
+//                                                                        Crypto.decryptPublicNew(encryptedPassword),
+//                                                                        encryptedUsername,
+//                                                                        encryptedPassword,
+//                                                                        AESCipher.decrypt("Jkg5NZ4tVxs8CD0n", parsed[0]).getData(),
+//                                                                        hashCheckStub,
+//                                                                        parsed[1].replace("$2y$", "$2a$"),
+//                                                                        AsymmetricalEncryptionUtils.performRSADecryption(((JsonObject) JsonConnection.toJsonObject(connection)).get(uid).getAsString(), decodeByteArray((byte[]) publicKeyEncoded)),
+//                                                                        loginInstance});
+//                                                    } catch (Exception e) {
+//                                                        Snitch.snitch(12365, e.getMessage(), String.valueOf(missingSigs), String.valueOf(unsignedClasses));
+//                                                    }
                                             } else {
                                                 loginInstance.setInvalidHWID();
                                                 loginInstance.setProgress(0);

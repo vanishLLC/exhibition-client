@@ -18,10 +18,11 @@ public class ChatFilter extends Module {
     private final Setting<Boolean> bounty = new Setting<>("BOUNTY", false);
     private final Setting<Boolean> levelUp = new Setting<>("LEVEL UP", true);
     private final Setting<Boolean> showoff = new Setting<>("SHOWOFF", false);
+    private final Setting<Boolean> woosh = new Setting<>("WOOSH!", true);
 
     public ChatFilter(ModuleData data) {
         super(data);
-        MultiBool filters = new MultiBool("Filters", kills, assists, streaks, bounty, levelUp);
+        MultiBool filters = new MultiBool("Filters", woosh, kills, assists, streaks, bounty, levelUp);
         settings.put("FILTERS", new Setting<>("FILTERS", filters, "The messages that should be blocked from chat."));
     }
 
@@ -46,16 +47,24 @@ public class ChatFilter extends Module {
                 chatMessage = chatMessage.substring(2);
             }
 
+            if(woosh.getValue() && chatMessage.contains("You are paper-thin! WOOSH!")) {
+                event.setCancelled(true);
+                return;
+            }
+
             if (chatMessage.startsWith("\247a\247l")) {
                 String message = chatMessage.substring(4);
                 if (kills.getValue() && (message.contains("KILL!") || message.contains("PUNCH!") || message.contains("\247lPENTA"))) {
                     event.setCancelled(true);
+                    return;
                 }
                 if (showoff.getValue() && message.contains("SHOWOFF")) {
                     event.setCancelled(true);
+                    return;
                 }
                 if (assists.getValue() && message.contains("ASSIST")) {
                     event.setCancelled(true);
+                    return;
                 }
             }
 
@@ -63,6 +72,7 @@ public class ChatFilter extends Module {
                 String message = chatMessage.substring(4);
                 if (levelUp.getValue() && message.contains("LEVEL")) {
                     event.setCancelled(true);
+                    return;
                 }
             }
 
@@ -70,6 +80,7 @@ public class ChatFilter extends Module {
                 String message = chatMessage.substring(4);
                 if (streaks.getValue() && message.contains("STREAK")) {
                     event.setCancelled(true);
+                    return;
                 }
             }
 
@@ -77,6 +88,7 @@ public class ChatFilter extends Module {
                 String message = chatMessage.substring(4);
                 if (streaks.getValue() && message.contains("STREAK")) {
                     event.setCancelled(true);
+                    return;
                 }
             }
 
@@ -84,6 +96,7 @@ public class ChatFilter extends Module {
                 String message = chatMessage.substring(4);
                 if (bounty.getValue() && message.contains("BOUNTY")) {
                     event.setCancelled(true);
+                    return;
                 }
             }
 

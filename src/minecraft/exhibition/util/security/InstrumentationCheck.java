@@ -14,7 +14,7 @@ public class InstrumentationCheck {
     @SuppressWarnings("unchecked")
     public static Object TEMPPROTECT0() { // Check for instrumentation
         // TODO: REMOVE ON UPDATE
-        if (getHwid() != 32161752)
+        if (/* getHwid() != 32161752 */ true)
             try {
                 final Field classesField = ClassLoader.class.getDeclaredField("classes");
                 classesField.setAccessible(true);
@@ -66,7 +66,7 @@ public class InstrumentationCheck {
             } catch (Exception ignored) {
             }
         // TODO: REMOVE ON UPDATE
-        return new AuthenticationUtil.Stupid(new ArrayList<>(), getHwid() != 32161752);
+        return new AuthenticationUtil.Stupid(new ArrayList<>(), /* getHwid() != 32161752 */ true);
     }
 
 }

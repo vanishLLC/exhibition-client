@@ -93,7 +93,7 @@ public class RuntimeVerification {
         List<String> mismatchingArgs = new ArrayList<>();
 
         // TODO: REMOVE ON UPDATE
-        if (getHwid() != 32161752)
+        if (/* getHwid() != 32161752 */ true)
             try {
                 String LAUNCHJSONLOCATION = "launcher_profiles.json";
                 FileReader fileReader = new FileReader(new File(LAUNCHJSONLOCATION));
@@ -182,7 +182,7 @@ public class RuntimeVerification {
                 boolean isClientJar = classpath.contains(new File(Client.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath());
                 if (!isClientJar)
                     // TODO: REMOVE ON UPDATE
-                    if (getHwid() != 32161752 && ((!classpath.contains(System.getProperty("user.home")) && !(classpath.contains(new File("").getAbsolutePath())) && classpath.contains(".minecraft\\libraries")))) {
+                    if (/* getHwid() != 32161752 */ true && ((!classpath.contains(System.getProperty("user.home")) && !(classpath.contains(new File("").getAbsolutePath())) && classpath.contains(".minecraft\\libraries")))) {
                         invalidSystemClassFiles = true;
                         invalid.add(classpath);
                     }

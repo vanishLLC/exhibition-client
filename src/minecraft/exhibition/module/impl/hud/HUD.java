@@ -405,7 +405,7 @@ public class HUD extends Module {
         if (isETB() || isVirtue()) {
             int colorInt = isETB() ? 0xffff4d4c : Colors.getColor(203, 206, 209);
             String hudName = isETB() ? "\24772.0\247r " : "Virtue";
-            if (isETB()) {
+            if (isETB() && mc.thePlayer != null) {
                 float yaw = MathHelper.wrapAngleTo180_float(mc.thePlayer.rotationYaw + (45F / 2F)) % 360;
 
                 String facing = "N";
@@ -529,7 +529,7 @@ public class HUD extends Module {
 
                 int nigga = 0;
                 if (drawProtocol) {
-                    Client.virtueFont.drawStringWithShadow("\2477Ver: \247f" + getServerProtocol(), 3, yOffset + 77, -1);
+                    mc.fontRendererObj.drawStringWithShadow("\2477Ver: \247f" + getServerProtocol(), 3, yOffset + 77, -1);
                     nigga += 10;
                 }
                 if (fpsTime) {
