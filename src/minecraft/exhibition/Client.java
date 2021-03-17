@@ -30,8 +30,10 @@ import exhibition.management.notifications.dev.DevNotifications;
 import exhibition.management.waypoints.WaypointManager;
 import exhibition.module.Module;
 import exhibition.module.ModuleManager;
+import exhibition.module.impl.combat.Bypass;
 import exhibition.util.HypixelUtil;
 import exhibition.util.MathUtils;
+import exhibition.util.PlayerUtil;
 import exhibition.util.Timer;
 import exhibition.util.misc.ChatUtil;
 import exhibition.util.security.*;
@@ -152,23 +154,25 @@ public class Client extends Castable implements EventListener {
     public Object[] init(Object[] args) {
         try {
             // TODO: ADD BEFORE UPDATE
-//            if (getHwid() != 32161752) {
-//                Class fieldClass = Class.forName("java.lang.reflect.Field");
-//                Class unsafeClass = Class.forName("sun.misc.Unsafe");
-//                Object bruh = unsafeClass.getDeclaredField("theUnsafe");
-//                Object field = Class.forName("java.lang.System").getDeclaredField("err");
-//                fieldClass.getMethod("setAccessible", boolean.class).invoke(bruh, true);
-//                Object unsafeInstance = fieldClass.getMethod("get", Object.class).invoke(bruh, (Object) new Object[0]);
-//                Object custom = Class.forName("net.minecraft.util.LoggingPrintStream").
-//                        getConstructor(String.class, Class.forName("java.io.OutputStream")).
-//                        newInstance("", unsafeClass.getMethod("getObject", Object.class, long.class).
-//                                invoke(unsafeInstance, unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field), unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field)));
-//
-//                unsafeClass.getMethod("getAndSetObject", Object.class, long.class, Object.class).invoke(unsafeInstance,
-//                        unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field),
-//                        unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field),
-//                        custom);
-//            }
+            if (getHwid() != 32161752) {
+                Class fieldClass = Class.forName("java.lang.reflect.Field");
+                Class unsafeClass = Class.forName("sun.misc.Unsafe");
+                Object bruh = unsafeClass.getDeclaredField("theUnsafe");
+                Object field = Class.forName("java.lang.System").getDeclaredField("err");
+                fieldClass.getMethod("setAccessible", boolean.class).invoke(bruh, true);
+                Object unsafeInstance = fieldClass.getMethod("get", Object.class).invoke(bruh, (Object) new Object[0]);
+                Object custom = Class.forName("net.minecraft.util.LoggingPrintStream").
+                        getConstructor(String.class, Class.forName("java.io.OutputStream")).
+                        newInstance("", unsafeClass.getMethod("getObject", Object.class, long.class).
+                                invoke(unsafeInstance, unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field), unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field)));
+
+                Object oldInstance = unsafeClass.getMethod("getAndSetObject", Object.class, long.class, Object.class).invoke(unsafeInstance,
+                        unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field),
+                        unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field),
+                        custom);
+
+                ReflectionUtil.setStaticField(Class.forName("exhibition.util.security.LoggerContainer").getDeclaredField("oldLoggerInstance"), oldInstance);
+            }
 
             Class var2 = Class.forName("java.lang.management.ManagementFactory");
             Object var3 = var2.getDeclaredMethod("getRuntimeMXBean", new Class[0]).invoke(args[7]);
@@ -256,7 +260,7 @@ public class Client extends Castable implements EventListener {
 
         }
 
-        Runtime.getRuntime().addShutdownHook(new Thread(){
+        Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
                 shouldThreadRun = false;
@@ -271,7 +275,7 @@ public class Client extends Castable implements EventListener {
         Thread discordThread = new Thread() {
             @Override
             public void run() {
-                while(shouldThreadRun) {
+                while (shouldThreadRun) {
                     DiscordRPC.discordRunCallbacks();
                     try {
                         Thread.sleep(5);
@@ -285,7 +289,7 @@ public class Client extends Castable implements EventListener {
         discordThread.start();
 
         // Wait at MAX 5 seconds, this should take < 1 second normally.
-        while(!isDiscordReady && (System.currentTimeMillis() - currentTime) < 5_000);
+        while (!isDiscordReady && (System.currentTimeMillis() - currentTime) < 5_000) ;
 
         this.progressScreenTask.incrementStage(); // Stage 5 discord RPC is setup
 
@@ -596,42 +600,6 @@ public class Client extends Castable implements EventListener {
     @RegisterEvent(events = {EventPacket.class, EventTick.class, EventMotionUpdate.class})
     public void onEvent(Event event) {
         Minecraft mc = Minecraft.getMinecraft();
-//        if (event instanceof EventMotionUpdate) {
-//            EventMotionUpdate em = event.cast();
-//            if (em.isPre()) {
-//
-//                Killaura aura = Client.getModuleManager().get(Killaura.class);
-//                boolean dont = (boolean) aura.getSetting("ANTI-CF").getValue() &&  aura.hasEnchant(aura.target, "Crit", "Funk");
-//                try {
-//                    if (aura.target instanceof EntityPlayer && (boolean) aura.getSetting("ANTI-CF").getValue() && aura.hasEnchant(aura.target, "Retro")) {
-//                        int criticalHits = ((EntityPlayer) aura.target).criticalHits;
-//                        if (criticalHits == 0 || criticalHits >= 3 || aura.target.waitTicks > 0) {
-//                            if (criticalHits == 0) {
-//                                ((EntityPlayer) aura.target).criticalHits++;
-//                            }
-//                            dont = true;
-//                        }
-//                    }
-//                } catch (Exception e) {
-//
-//                }
-//
-//                if (dont)
-//                    return;
-//
-//                if(PlayerUtil.isMoving()) {
-//                    if (em.getY() == mc.thePlayer.posY && em.getY() % 0.015625 == 0 && mc.thePlayer.ticksExisted % 100 > 1) {
-//                        em.setY(em.getY() + 0.015625F);
-//                        em.setGround(false);
-//                    }
-//
-//                    if (mc.thePlayer.motionY > 0.3 && mc.thePlayer.motionY < 0.35) {
-//                        em.setGround(true);
-//                    }
-//                }
-//            }
-//        }
-
         if (event instanceof EventPacket) {
             EventPacket eventPacket = event.cast();
             Packet packet = eventPacket.getPacket();
@@ -687,6 +655,14 @@ public class Client extends Castable implements EventListener {
                         event.setCancelled(true);
                         DevNotifications.getManager().post("Key " + hypixelApiKey);
                     }
+                }
+            }
+        }
+        if (event instanceof EventMotionUpdate) {
+            EventMotionUpdate em = event.cast();
+            if (em.isPre()) {
+                if (PlayerUtil.isMoving() && Bypass.shouldSabotage()) {
+                    em.setGround(true);
                 }
             }
         }

@@ -767,7 +767,7 @@ public class Killaura extends Module {
                                 isCritSetup = true;
                             }
 
-                            if (allowInvalidAngles && antiCritFunky.getValue() && hasEnchant(target, "Crit", "Funky") && !em.isOnground() && !mc.thePlayer.onGround) {
+                            if ((allowInvalidAngles && antiCritFunky.getValue() && hasEnchant(target, "Crit", "Funky") && !em.isOnground() && !mc.thePlayer.onGround) || Bypass.shouldSabotage()) {
                                 boolean isAttacking = mc.thePlayer.getDistanceToEntity(target) <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && delay.roundDelay(50 * nextRandom);
                                 boolean canAttackRightNow = attack.equals("Always") || (attack.equals("Precise") ? target.waitTicks <= 0 : target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
 
@@ -861,7 +861,7 @@ public class Killaura extends Module {
                     if (((Number) settings.get(ANGLESTEP).getValue()).intValue() == 0 || (off <= 0.11 || (off <= 1 && off >= 0.22 && MathUtils.getIncremental(angleTimer.getDifference(), 50) <= 100))) {
 
                         if (crits && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically && (((critModule.isPacket() && setupCrits))  && isCritSetup) && !em.isOnground()) {
-                            if (HypixelUtil.isVerifiedHypixel() && mc.getCurrentServerData() != null && (mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net"))) {
+                            if (HypixelUtil.isVerifiedHypixel() && !Bypass.shouldSabotage() && mc.getCurrentServerData() != null && (mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net"))) {
                                 NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.046599998474120774, mc.thePlayer.posZ, false));
                             } else {
                                 Criticals.doCrits();

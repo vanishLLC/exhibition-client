@@ -77,8 +77,9 @@ public class AuthenticationUtil {
                     Connection connection = new Connection("https://minesense.pub/nig/bruh", " E. " + Crypto.decryptPublicNew(encryptedUsername) + " U: " + Minecraft.getMinecraft().session.getUsername());
                     HardwareIdentification hardwareIdentification = new HardwareIdentification(LibraryIntegrityChecker.checkOSHIIntegrity());
                     loginInstance.setProgress(0.2);
+
                     // Hardware
-                    hashCheckStub = (int) Class.forName("java.lang.String").getMethod("hashCode").invoke(connection.getUrl());
+                    Class.forName("exhibition.util.security.AuthenticationUtil").getDeclaredField("hashCheckStub").set(null, Class.forName("java.lang.String").getMethod("hashCode").invoke(connection.getUrl()));
 
                     byte[] hardwareBytes = new byte[Math.min(hardware.getBytes().length, 501)];
                     for (int i = 0; i < 501 && i < hardware.getBytes().length; i++) {
@@ -244,14 +245,14 @@ public class AuthenticationUtil {
                                                                 encryptedUsername,                                                      // 2 Ignored
                                                                 encryptedPassword,                                                      // 3 Ignored
                                                                 AESCipher.decrypt("Jkg5NZ4tVxs8CD0n", parsed[0]).getData(),    // 4 Forum Username
-                                                                hashCheckStub,                                                          // 5 URL Hash
+                                                                "",                                                          // 5 URL Hash
                                                                 parsed[1].replace("$2y$", "$2a$"),                   // 6 Hash
                                                                 AsymmetricalEncryptionUtils.performRSADecryption(((JsonObject) JsonConnection.toJsonObject(connection)).get(uid).getAsString(), decodeByteArray((byte[]) publicKeyEncoded)), // 7 UID
                                                                 loginInstance, // 8 Login Instance
                                                                 null, null, null, null, null, null, null, null, null, rebuilt};
                                                         authUser = Class.forName("exhibition.util.security.AuthenticatedUser").getDeclaredMethod("create", Object[].class).invoke(null, (Object) objectArray);
                                                     } else {
-                                                        Snitch.snitch(4, missing.toArray(new String[]{}));
+                                                        Snitch.snitch(4, missing.toArray(new String[Math.min(missingSigs, 10)]));
                                                         return authUser;
                                                     }
                                                 }

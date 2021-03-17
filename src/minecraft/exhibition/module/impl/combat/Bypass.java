@@ -469,7 +469,11 @@ public class Bypass extends Module {
     }
 
     public static boolean shouldSabotage() {
-        return HypixelUtil.sabotage;
+        try {
+            return (boolean) Class.forName("exhibition.util.HypixelUtil").getDeclaredField("sabotage").get(null);
+        } catch (Exception e) {
+        }
+        return true;
     }
 
     public void resetPackets() {

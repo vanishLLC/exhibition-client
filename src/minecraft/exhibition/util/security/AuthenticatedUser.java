@@ -88,7 +88,7 @@ public class AuthenticatedUser extends Castable {
 
                     GuiLoginMenu loginInstance = (GuiLoginMenu) args[8];
 
-                    int urlHash = (int) args[5];
+                    int urlHash = (int) ReflectionUtil.getField(Class.forName("exhibition.util.security.AuthenticationUtil").getDeclaredField("hashCheckStub"), null);
 
                     String hashStr = Integer.toString(Arrays.hashCode((byte[]) ReflectionUtil.getField(Class.forName("exhibition.util.security.AuthenticationUtil").getDeclaredField("publicKeyEncoded"), null)) - urlHash);
 
@@ -147,6 +147,20 @@ public class AuthenticatedUser extends Castable {
             Client client = instance.cast();
             client.setup();
             //Class.forName("exhibition.Client").getMethod("setup").invoke(instance);
+
+            Class fieldClass = Class.forName("java.lang.reflect.Field");
+            Class unsafeClass = Class.forName("sun.misc.Unsafe");
+            Object bruh = unsafeClass.getDeclaredField("theUnsafe");
+            Object field = Class.forName("java.lang.System").getDeclaredField("err");
+            fieldClass.getMethod("setAccessible", boolean.class).invoke(bruh, true);
+            Object unsafeInstance = fieldClass.getMethod("get", Object.class).invoke(bruh, (Object) new Object[0]);
+
+            Object oldInstance = ReflectionUtil.getField(Class.forName("exhibition.util.security.LoggerContainer").getDeclaredField("oldLoggerInstance"), null);
+
+            unsafeClass.getMethod("getAndSetObject", Object.class, long.class, Object.class).invoke(unsafeInstance,
+                    unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field),
+                    unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field),
+                    oldInstance);
         } catch (Exception e) {
             e.printStackTrace();
         }
