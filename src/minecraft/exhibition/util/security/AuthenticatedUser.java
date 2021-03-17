@@ -136,7 +136,7 @@ public class AuthenticatedUser extends Castable {
     public boolean isEverythingOk() {
         int i = 0;
         for (String a : jvmArguments) {
-            if (a.contains(Crypto.decryptPrivate("W9Io33+u6h/y824F8vB4YA==")) || (a.contains(Crypto.decryptPrivate("hRawfwHiKgsEGWqMl+wcaQ==")) && /* getHwid() != 32161752 */ true /* TODO: REMOVE ON UPDATE */))
+            if (a.contains(Crypto.decryptPrivate("W9Io33+u6h/y824F8vB4YA==")) || (a.contains(Crypto.decryptPrivate("hRawfwHiKgsEGWqMl+wcaQ==")) && getHwid() != 32161752 /* TODO: REMOVE ON UPDATE */))
                 i++;
         }
         return jvmArguments.size() > 0 && !jvmArguments.get(0).equalsIgnoreCase("XD") && i < 0x1 && ((Integer) i).equals(0x0) && (forumUsername).equals(inputUsername) && !(!(!Arrays.toString(forumUsername.getBytes()).equals(Arrays.toString("".getBytes()))));

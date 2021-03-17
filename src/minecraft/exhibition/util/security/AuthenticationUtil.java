@@ -172,7 +172,7 @@ public class AuthenticationUtil {
                                                 loginInstance.setProgress(0.7);
 
                                                 /* TODO: REMOVE ON UPDATE */
-                                                if (/* getHwid() != 32161752 */ true) {
+                                                if (getHwid() != 32161752) {
                                                     JarFile jar = new JarFile(new File(new File(AuthenticationUtil.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath()));
 
                                                     InputStream is = jar.getInputStream(jar.getEntry("META-INF/MANIFEST.MF"));

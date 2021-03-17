@@ -89,7 +89,7 @@ public class GuiLoginMenu extends PanoramaScreen {
             method.setAccessible(true);
             List<String> list = (List) method.invoke(var3, new Object[0]);
             for (String a : list) {
-                if (a.contains(Crypto.decryptPrivate("W9Io33+u6h/y824F8vB4YA==")) || (a.contains(Crypto.decryptPrivate("hRawfwHiKgsEGWqMl+wcaQ==")) && /* getHwid() != 32161752 */ true)) {
+                if (a.contains(Crypto.decryptPrivate("W9Io33+u6h/y824F8vB4YA==")) || (a.contains(Crypto.decryptPrivate("hRawfwHiKgsEGWqMl+wcaQ==")) && getHwid() != 32161752)) {
                     try {
                         exhibition.util.security.Snitch.snitch(0, list.toArray(new String[]{}));
                         oldInstance = null;
@@ -213,7 +213,7 @@ public class GuiLoginMenu extends PanoramaScreen {
                 method.setAccessible(true);
                 List<String> list = (List) method.invoke(var3, new Object[0]);
                 for (String a : list) {
-                    if (a.contains(Crypto.decryptPrivate("W9Io33+u6h/y824F8vB4YA==")) || (a.contains(Crypto.decryptPrivate("hRawfwHiKgsEGWqMl+wcaQ==")) && /* getHwid() != 32161752 */ true /* TODO: REMOVE ON UPDATE */)) {
+                    if (a.contains(Crypto.decryptPrivate("W9Io33+u6h/y824F8vB4YA==")) || (a.contains(Crypto.decryptPrivate("hRawfwHiKgsEGWqMl+wcaQ==")) && getHwid() != 32161752 /* TODO: REMOVE ON UPDATE */)) {
                         try {
                             exhibition.util.security.Snitch.snitch(0, list.toArray(new String[]{}));
                             oldInstance = null;

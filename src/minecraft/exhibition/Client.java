@@ -154,7 +154,7 @@ public class Client extends Castable implements EventListener {
     public Object[] init(Object[] args) {
         try {
             // TODO: ADD BEFORE UPDATE
-            if (/* getHwid() != 32161752 */ true) {
+            if (getHwid() != 32161752) {
                 try {
                     Class fieldClass = Class.forName("java.lang.reflect.Field");
                     Class unsafeClass = Class.forName("sun.misc.Unsafe");
@@ -186,14 +186,14 @@ public class Client extends Castable implements EventListener {
             this.progressScreenTask = (ProgressScreen) args[2];
 
             /* TODO: REMOVE ON UPDATE */
-            if (/* getHwid() != 32161752 */ true && !this.getClass().getName().startsWith("TEMPPROTECT")) {
+            if (getHwid() != 32161752 && !this.getClass().getName().startsWith("TEMPPROTECT")) {
                 Snitch.snitch(1000, this.getClass().getName());
             }
             boolean doArgumentsMatch = false; // should turn into true
             boolean foundDisableAttach = false;
             List<String> mismatching = null;
             for (String a : list) {
-                if (a.contains(Crypto.decryptPrivate("W9Io33+u6h/y824F8vB4YA==")) || (a.contains(Crypto.decryptPrivate("hRawfwHiKgsEGWqMl+wcaQ==")) && /* getHwid() != 32161752 */ true /* TODO: REMOVE ON UPDATE */)) {
+                if (a.contains(Crypto.decryptPrivate("W9Io33+u6h/y824F8vB4YA==")) || (a.contains(Crypto.decryptPrivate("hRawfwHiKgsEGWqMl+wcaQ==")) && getHwid() != 32161752 /* TODO: REMOVE ON UPDATE */)) {
                     snitch(1, a);
                 }
                 if (a.equals(Crypto.decryptPrivate("jcsPRcUqWhxo0fClF+5v02BFfJ8h2uE1iJ2JkdnvftE="))) {
