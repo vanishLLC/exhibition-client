@@ -297,9 +297,7 @@ public class ESP2D extends Module {
                         if ((boolean) settings.get(ARMOR).getValue()) {
                             this.renderArmor(ent, scaledRes, x, y, endx, endy);
                         }
-                    }
-
-                    if (!(ent instanceof EntityPlayer) && (boolean) settings.get(NAME).getValue()) {
+                    } else if ((boolean) settings.get(NAME).getValue()) {
                         RenderingUtil.rectangle(0, 0, 0, 0, Colors.getColor(0, 0));
                         GlStateManager.pushMatrix();
                         GlStateManager.scale(2, 2, 2);
@@ -644,7 +642,7 @@ public class ESP2D extends Module {
                     if (renderStack.isItemDamaged() && renderStack.isItemStackDamageable())
                         mc.fontRendererObj.drawStringWithShadow((renderStack.getMaxDamage() - renderStack.getItemDamage()) + "", (float) endx + 22, center + offset, -1);
                     GlStateManager.pushMatrix();
-                    GlStateManager.translate(endx + 4, center + offset + original/4, 0);
+                    GlStateManager.translate(endx + 4, center + offset + original / 4, 0);
                     RenderHelper.enableGUIStandardItemLighting();
                     mc.getRenderItem().renderItemAndEffectIntoGUI(renderStack, 0, 0);
                     mc.getRenderItem().renderItemOverlays(mc.fontRendererObj, renderStack, 0, 0);

@@ -159,7 +159,7 @@ public class HardwareIdentification {
         }
 
         if(vadaptersArray.size() > 0) {
-            jsonObject.add("Virtual_Adapters", nadaptersArray);
+            jsonObject.add("Virtual_Adapters", vadaptersArray);
         }
 
         return gson.toJson(jsonObject);

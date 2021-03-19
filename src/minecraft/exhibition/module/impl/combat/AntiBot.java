@@ -404,7 +404,6 @@ public class AntiBot extends Module {
                                         shouldUpdateTOG = false;
                                         if (remove && ent.isInvisible() && ticksOnGroundMap.getOrDefault(ent.getName(), 0) < -20) {
                                             playersToRemove.add(ent);
-                                            DevNotifications.getManager().post("Removed " + ent.getName() + " D");
                                             continue;
                                         }
                                     }

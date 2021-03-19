@@ -54,7 +54,12 @@ public class BanStats extends Module {
     public void onEvent(Event event) {
         if (!banStatsThread.isRunning) {
             banTimer.reset();
-            banStatsThread.start();
+            try {
+                banStatsThread.start();
+            } catch (Exception e) {
+                banStatsThread.stopThread();
+                banStatsThread = new BanStatsThread(this);
+            }
         }
 
         try {

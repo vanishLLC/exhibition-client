@@ -85,7 +85,7 @@ public class GuiDownloadTerrain extends GuiScreen {
 
         Client.instance.differenceQueue.clear();
 
-        if (Client.instance.hypixelApiKey.equals(""))
+        if (Client.instance.hypixelApiKey != null && Client.instance.hypixelApiKey.equals(""))
             Client.instance.hypixelApiKey = null;
 
         if (!GlobalValues.keepPriority.getValue())

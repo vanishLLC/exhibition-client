@@ -7,6 +7,7 @@ package exhibition.management.command.impl;
 
 import exhibition.Client;
 import exhibition.gui.click.virtue.VirtueClickGui;
+import exhibition.management.PriorityManager;
 import exhibition.management.command.Command;
 import exhibition.management.notifications.dev.DevNotifications;
 import exhibition.management.notifications.usernotification.Notifications;
@@ -103,7 +104,9 @@ public class NotificationTest extends Command {
         } else if (args[0].equalsIgnoreCase("virtue")) {
             VirtueClickGui.start();
         } else if (args[0].equalsIgnoreCase("chat")) {
-            ChatUtil.sendChat_NoFilter("/help");
+            for (String s : PriorityManager.priorityList) {
+                ChatUtil.printChat(s);
+            }
         } else {
             ChatUtil.printChat(chatPrefix + "???");
         }

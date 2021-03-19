@@ -4,6 +4,7 @@ import exhibition.Client;
 import exhibition.event.EventSystem;
 import exhibition.management.command.Command;
 import exhibition.module.Module;
+import exhibition.module.data.ModuleData;
 import exhibition.module.impl.combat.AntiBot;
 import exhibition.module.impl.combat.Bypass;
 import exhibition.module.impl.hud.HUD;
@@ -36,7 +37,7 @@ public class HelpIAmmUsingABlatantClientAndNeedToPanic extends Command {
 
         for (Module module : Client.getModuleManager().getArray()) {
             if (!(module instanceof ChatCommands))
-                if (module.isEnabled() && !modules.contains(module)) {
+                if (module.isEnabled() && !modules.contains(module) && module.getType() != ModuleData.Type.Visuals) {
                     module.setEnabled(false);
                     EventSystem.unregister(module);
                     module.onDisable();
