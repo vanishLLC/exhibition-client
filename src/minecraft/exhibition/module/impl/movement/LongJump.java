@@ -294,27 +294,25 @@ public class LongJump extends Module {
 
                         if (item instanceof ItemBow) {
                             bowFound = true;
-                            ignoreRod = false;
                             if (shouldSwap) {
                                 mc.playerController.windowClick(mc.thePlayer.inventoryContainer.windowId, i, 4, 2, mc.thePlayer);
                             }
-
-                            if (arrowsFound)
+                            if(arrowsFound) {
+                                ignoreRod = false;
                                 break;
-
+                            }
                             continue;
                         }
                         if (item == Items.arrow) {
                             arrowsFound = true;
-                            ignoreRod = false;
-                            if (bowFound)
+                            if (bowFound) {
+                                ignoreRod = false;
                                 break;
-
+                            }
                             continue;
                         }
 
-                        if (item instanceof ItemFishingRod && !bowFound) {
-                            arrowsFound = false;
+                        if (item instanceof ItemFishingRod) {
                             ignoreRod = true;
                             if (shouldSwap) {
                                 mc.playerController.windowClick(mc.thePlayer.inventoryContainer.windowId, i, 4, 2, mc.thePlayer);
