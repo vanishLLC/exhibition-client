@@ -9,6 +9,7 @@ import exhibition.Client;
 import exhibition.event.Event;
 import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventMotionUpdate;
+import exhibition.event.impl.EventRender3D;
 import exhibition.event.impl.EventRenderGui;
 import exhibition.event.impl.EventTick;
 import exhibition.management.notifications.usernotification.Notifications;
@@ -29,6 +30,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -37,6 +39,9 @@ import net.minecraft.network.play.client.C09PacketHeldItemChange;
 import net.minecraft.network.play.client.C0APacketAnimation;
 import net.minecraft.network.play.client.C0BPacketEntityAction;
 import net.minecraft.potion.Potion;
+import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.tileentity.TileEntityEnderChest;
+import net.minecraft.tileentity.TileEntityLockable;
 import net.minecraft.util.*;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
@@ -123,7 +128,6 @@ public class Scaffold extends Module {
                 mc.thePlayer.swingProgressInt = 0;
                 mc.thePlayer.isSwingInProgress = false;
             }
-            NetUtil.sendPacket(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.STOP_SNEAKING));
 
             if (lastHeldSlot != -1) {
                 mc.thePlayer.inventory.currentItem = lastHeldSlot;
@@ -176,7 +180,7 @@ public class Scaffold extends Module {
         return !placeTimer.delay(200);
     }
 
-    @RegisterEvent(events = {EventTick.class, EventMotionUpdate.class, EventRenderGui.class})
+    @RegisterEvent(events = {EventTick.class, EventMotionUpdate.class, EventRenderGui.class, EventRender3D.class})
     public void onEvent(Event event) {
         String currentMode = ((Options) settings.get(MODE).getValue()).getSelected();
         if (event instanceof EventRenderGui) {
@@ -201,54 +205,96 @@ public class Scaffold extends Module {
             mc.fontRendererObj.drawString(getBlockCount() + "", res.getScaledWidth() / 2F - mc.fontRendererObj.getStringWidth(getBlockCount() + "") / 2F, res.getScaledHeight() / 2F - 25, color);
             GlStateManager.disableBlend();
         }
-//        if (event instanceof EventRender3D) {
-//            EventRender3D er = (EventRender3D) event;
+        if (event instanceof EventRender3D) {
+            EventRender3D er = (EventRender3D) event;
+
+            double x = mc.thePlayer.posX;
+
+            double z = mc.thePlayer.posZ;
+
+            double height = (mc.thePlayer.posY - (int) mc.thePlayer.posY);
+
+            double y = mc.thePlayer.posY - (mc.gameSettings.keyBindSneak.getIsKeyPressed() && mc.thePlayer.onGround ? 1.2 : (Client.getModuleManager().isEnabled(Speed.class) && PlayerUtil.isMoving()) ?
+                    ((((height < 0.24919 && (height > 0.105 || MathUtils.roundToPlace(height, 4) == 0.0993)) || MathUtils.roundToPlace(height, 4) == 0.0013 ||
+                            MathUtils.roundToPlace(height, 4) == 0.0156 || MathUtils.roundToPlace(height, 4) == 0.0479 ||
+                            MathUtils.roundToPlace(height, 4) == 0.01553 || MathUtils.roundToPlace(height, 4) == 0.0902) && Math.abs(mc.thePlayer.motionY) < 0.45) ? 1.25 : 1) : 0.8);
+
+            if (!mc.gameSettings.keyBindJump.getIsKeyPressed()) {
+                towerTimer.reset();
+                if (fastTower.getValue()) {
+                    mc.timer.timerSpeed = 1;
+                }
+            }
+
+            if (mc.thePlayer.motionY <= -0.625) {
+                y += mc.thePlayer.motionY + ((mc.thePlayer.motionY - 0.08D) * 0.9800000190734863D);
+            }
+
+//                if (mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {
+//                    double forward = mc.thePlayer.movementInput.moveForward;
+//                    double strafe = mc.thePlayer.movementInput.moveStrafe;
+//                    float yaw = mc.thePlayer.rotationYaw;
 //
-//            double x = mc.thePlayer.posX;
-//            double y = mc.thePlayer.posY - 1.8;
-//            double z = mc.thePlayer.posZ;
-//            if (mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {
-//                double forward = mc.thePlayer.movementInput.moveForward;
-//                double strafe = mc.thePlayer.movementInput.moveStrafe;
-//                float yaw = mc.thePlayer.rotationYaw;
-//                x += (forward * 0.5 * Math.cos(Math.toRadians(yaw + 90.0f)) + strafe * 0.5 * Math.sin(Math.toRadians(yaw + 90.0f)));
-//                z += (forward * 0.5 * Math.sin(Math.toRadians(yaw + 90.0f)) - strafe * 0.5 * Math.cos(Math.toRadians(yaw + 90.0f)));
-//            }
-//            BlockPos origin = new BlockPos(x, y, z);
-//
-//            GL11.glPushMatrix();
-//            RenderingUtil.pre3D();
-//            mc.entityRenderer.setupCameraTransform(mc.timer.renderPartialTicks, 2);
-//            float[][] arrays = {{0, 0, 0}, {1, 0, 0}, {0, 0, 1}, {-1, 0, 0}, {0, 0, -1}, {-1, 0, -1}, {1, 0, -1}, {-1, 0, 1}, {1, 0, 1}};
-//            Vec3 eye = new Vec3(mc.thePlayer.posX, mc.thePlayer.posY + 0.5, mc.thePlayer.posZ);
-//            EnumFacing[] face = EnumFacing.values();
-//            int j = face.length;
-//            for (float[] e : arrays) {
-//                BlockPos pos = origin.add(e[0], e[1], e[2]);
-//                for (int i = 0; i < j; i++) {
-//                    EnumFacing side = face[i];
-//                    BlockPos blockPos = pos.offset(side);
-//                    EnumFacing otherSide = side.getOpposite();
-//                    boolean a = true;
-//                    int color = Colors.getColor(255, 0);
-//                    if (a) {
-//                        color = Colors.getColor(255, 255, 0, 15);
-//                        if (blockPos(blockPos).canCollideCheck(blockState(blockPos), false) && (side == EnumFacing.UP)) {
-//                            color = Colors.getColor(0, 255, 0, 40);
-//                        }
-//                    }
-//
-//                    double rx = blockPos.getX() + side.getFrontOffsetX() - RenderManager.renderPosX;
-//                    double ry = blockPos.getY() + side.getFrontOffsetY() - RenderManager.renderPosY;
-//                    double rz = blockPos.getZ() + side.getFrontOffsetZ() - RenderManager.renderPosZ;
-//                    RenderingUtil.glColor(color);
-//                    RenderingUtil.drawBoundingBox(new AxisAlignedBB(rx, ry, rz, rx + 1, ry + 1, rz + 1));
-//                    GL11.glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+//                    double multiplier = 0;
+//                    x += (forward * multiplier * Math.cos(Math.toRadians(yaw + 90.0f)) + strafe * multiplier * Math.sin(Math.toRadians(yaw + 90.0f))) * (stepDown ? -0.1 : 1);
+//                    z += (forward * multiplier * Math.sin(Math.toRadians(yaw + 90.0f)) - strafe * multiplier * Math.cos(Math.toRadians(yaw + 90.0f))) * (stepDown ? -0.1 : 1);
 //                }
-//            }
-//            RenderingUtil.post3D();
-//            GL11.glPopMatrix();
-//        }
+            BlockPos pos = new BlockPos(x, y, z);
+
+            if (AutoPot.potting || AutoPot.haltTicks > 0)
+                return;
+
+            Vec3 vec = new Vec3(pos);
+            vec = vec.addVector(0.5, 0.5, 0.5);
+
+            if (vec != null) {
+                GL11.glPushMatrix();
+                RenderingUtil.pre3D();
+                mc.entityRenderer.setupCameraTransform(mc.timer.renderPartialTicks, 2);
+                RenderingUtil.glColor(Colors.getColor(255, 75));
+                RenderingUtil.drawBoundingBox(new AxisAlignedBB(vec.xCoord - RenderManager.renderPosX - 0.1, vec.yCoord - RenderManager.renderPosY - 0.1, vec.zCoord - RenderManager.renderPosZ - 0.1,
+                        vec.xCoord - RenderManager.renderPosX + 0.1, vec.yCoord - RenderManager.renderPosY + 0.1, vec.zCoord - RenderManager.renderPosZ + 0.1));
+
+                int[][] intArrays = {new int[]{0, 0, 0},
+                        new int[]{1, 0, 0}, new int[]{0, 0, 1},
+                        new int[]{-1, 0, 0}, new int[]{0, 0, -1},
+                        new int[]{1, 0, 1}, new int[]{-1, 0, -1},
+                        new int[]{1, 0, -1}, new int[]{-1, 0, 1}};
+
+                boolean first = true;
+
+                for (int[] array : intArrays) {
+                    BlockPos bruhPos = pos.add(array[0], array[1], array[2]);
+
+                    EnumFacing[] face = EnumFacing.values();
+                    for (EnumFacing side : face) {
+                        BlockPos blockPos = bruhPos.offset(side);
+                        EnumFacing otherSide = side.getOpposite();
+                        if (blockPos(blockPos).canCollideCheck(blockState(blockPos), false)) {
+                            Vec3 addBruh = getVector(new BlockData(blockPos, otherSide));
+
+                            Vec3 bruh = new Vec3(blockPos.getX(), blockPos.getY(), blockPos.getZ()).addVector(0.5D, 0.5D, 0.5D).add(new Vec3(otherSide.getDirectionVec().getX() / 2F, otherSide.getDirectionVec().getY() / 2F, otherSide.getDirectionVec().getZ() / 2F));
+                            RenderingUtil.glColor(first ? Colors.getColor(0, 255, 255, 75) : Colors.getColor(0, 255, 0, 75));
+                            RenderingUtil.drawBoundingBox(new AxisAlignedBB(bruh.xCoord - RenderManager.renderPosX - 0.05, bruh.yCoord - RenderManager.renderPosY - 0.05, bruh.zCoord - RenderManager.renderPosZ - 0.05,
+                                    bruh.xCoord - RenderManager.renderPosX + 0.05, bruh.yCoord - RenderManager.renderPosY + 0.05, bruh.zCoord - RenderManager.renderPosZ + 0.05));
+
+                            if (first) {
+                                bruh = bruh.add(addBruh);
+
+                                RenderingUtil.glColor(Colors.getColor(255, 255, 0, 75));
+                                RenderingUtil.drawBoundingBox(new AxisAlignedBB(bruh.xCoord - RenderManager.renderPosX - 0.05, bruh.yCoord - RenderManager.renderPosY - 0.05, bruh.zCoord - RenderManager.renderPosZ - 0.05,
+                                        bruh.xCoord - RenderManager.renderPosX + 0.05, bruh.yCoord - RenderManager.renderPosY + 0.05, bruh.zCoord - RenderManager.renderPosZ + 0.05));
+                            }
+                            first = false;
+                        }
+                    }
+                }
+
+                GL11.glColor4f(1, 1, 1, 1);
+                RenderingUtil.post3D();
+                GL11.glPopMatrix();
+            }
+        }
         if (event instanceof EventMotionUpdate) {
             setSuffix(currentMode);
             EventMotionUpdate em = (EventMotionUpdate) event;
@@ -378,9 +424,6 @@ public class Scaffold extends Module {
 //                }
                 BlockPos pos = new BlockPos(x, y, z);
 
-                if (AutoPot.potting || AutoPot.haltTicks > 0)
-                    return;
-
                 if (em.isPre()) {
                     Vec3 vec = getBlockLook(pos);
 
@@ -395,14 +438,14 @@ public class Scaffold extends Module {
                         //Face in the center of the block
                         float[] rotations = look(vec);
                         targetYaw = rotations[0];
-                        em.setPitch(rotations[1]);
+                        em.setPitch(Math.min(rotations[1], mc.gameSettings.keyBindJump.getIsKeyPressed() ? 90 : 70));
 
                         lastAngles.y = em.getPitch();
                         placeTimer.reset();
                     }
 
                     if (lastAngles.x != -1337) {
-                        float max = 35F + (float) (10F * Math.random());
+                        float max = 35F + (float) (5F * Math.random());
 
                         lastAngles.x += MathHelper.clamp_float(MathHelper.wrapAngleTo180_float(targetYaw - lastAngles.x), -max, max);
 
@@ -538,17 +581,12 @@ public class Scaffold extends Module {
     }
 
     private Vec3 checkPos(BlockPos pos) {
-        if (blacklistedBlocks.contains(mc.theWorld.getBlockState(pos).getBlock())) {
-            return null;
-        }
         EnumFacing[] face = EnumFacing.values();
-        int j = face.length;
-        for (int i = 0; i < j; i++) {
-            EnumFacing side = face[i];
+        for (EnumFacing side : face) {
             BlockPos blockPos = pos.offset(side);
             EnumFacing otherSide = side.getOpposite();
             if (blockPos(blockPos).canCollideCheck(blockState(blockPos), false)) {
-                return new Vec3(blockPos.getX(), blockPos.getY(), blockPos.getZ()).addVector(0.5D, 0.5D, 0.5D).add(new Vec3(otherSide.getDirectionVec().getX(), otherSide.getDirectionVec().getY(), otherSide.getDirectionVec().getZ()));
+                return new Vec3(blockPos.getX(), blockPos.getY(), blockPos.getZ()).addVector(0.5, 0.5, 0.5);
             }
         }
         return null;
@@ -563,8 +601,7 @@ public class Scaffold extends Module {
             EnumFacing otherSide = side.getOpposite();
             if (blockPos(blockPos).canCollideCheck(blockState(blockPos), false)) {
                 Vec3 bruh = getVector(new BlockData(blockPos, otherSide));
-                Vec3 vec = new Vec3(blockPos.getX(), blockPos.getY(), blockPos.getZ()).addVector(bruh.getX(), bruh.getY(), bruh.getZ())
-                        .add(new Vec3(otherSide.getDirectionVec().getX(), otherSide.getDirectionVec().getY(), otherSide.getDirectionVec().getZ()).multi(0.5D));
+                Vec3 vec = new Vec3(blockPos.getX(), blockPos.getY(), blockPos.getZ()).addVector(0.5, 0.5, 0.5).add(new Vec3(otherSide.getDirectionVec().getX() / 2F, otherSide.getDirectionVec().getY() / 2F, otherSide.getDirectionVec().getZ() / 2F));
 
                 IBlockState var11 = mc.theWorld.getBlockState(blockPos);
                 boolean needToSneak = false;
@@ -578,7 +615,9 @@ public class Scaffold extends Module {
                     mc.thePlayer.movementInput.sneak = true;
                 }
 
-                //Vec3 placeVector = getVector(new BlockData(pos, otherSide));
+                if(mc.thePlayer.isSprinting()) {
+                    NetUtil.sendPacketNoEvents(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.STOP_SPRINTING));
+                }
 
                 if (mc.playerController.onPlayerRightClick(mc.thePlayer, mc.theWorld, mc.thePlayer.getCurrentEquippedItem(), blockPos, otherSide, vec)) {
                     if ((Boolean) settings.get(SWING).getValue()) {
@@ -594,12 +633,15 @@ public class Scaffold extends Module {
                         }
                     }
 
-
                 }
+
+                if(mc.thePlayer.isSprinting()) {
+                    NetUtil.sendPacketNoEvents(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.START_SPRINTING));
+                }
+
                 if (needToSneak) {
                     NetUtil.sendPacketNoEvents(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.STOP_SNEAKING));
                     mc.thePlayer.movementInput.sneak = false;
-
                 }
                 return true;
             }
@@ -642,12 +684,17 @@ public class Scaffold extends Module {
 
     private Vec3 getVector(BlockData blockData) {
         int places = 13;
-        double randX = MathUtils.roundToPlace(randomFloat(1), places), randY = MathUtils.roundToPlace(randomFloat(20), places), randZ = MathUtils.roundToPlace(randomFloat(55), places);
-        double vx = 0;
-        double vy = 0;
-        double vz = 0;
+        double randX = MathUtils.roundToPlace(randomFloat(256), places), randY = MathUtils.roundToPlace(randomFloat(32), places), randZ = MathUtils.roundToPlace(randomFloat(55), places);
+        double vx = -0.5;
+        double vy = -0.5;
+        double vz = -0.5;
         switch (blockData.face) {
             case UP:
+                vx += randX;
+                vz += randZ;
+                vy += 0.5;
+                break;
+            case DOWN:
                 vx += randX;
                 vz += randZ;
                 break;
@@ -655,14 +702,31 @@ public class Scaffold extends Module {
             case NORTH:
                 vx += randX;
                 vy += randY;
+                vz += 0.5;
                 break;
             case EAST:
             case WEST:
                 vy += randY;
                 vz += randZ;
+                vx += 0.5;
                 break;
         }
-        return new Vec3(vx, vy, vz);
+
+        Block block = mc.theWorld.getBlock(blockData.position.getX(), blockData.position.getY(), blockData.position.getZ());
+
+        double minX = block.getBlockBoundsMinX();
+        double minY = block.getBlockBoundsMinY();
+        double minZ = block.getBlockBoundsMinZ();
+
+        double maxX = block.getBlockBoundsMaxX();
+        double maxY = block.getBlockBoundsMaxY();
+        double maxZ = block.getBlockBoundsMaxZ();
+
+        double scaledX = minX + (maxX - minX) * vx;
+        double scaledY = minY + (maxY - minY) * vy;
+        double scaledZ = minZ + (maxZ - minZ) * vz;
+
+        return new Vec3(scaledX, scaledY, scaledZ);
     }
 
     protected void swap(int slot, int hotbarNum) {
@@ -829,12 +893,10 @@ public class Scaffold extends Module {
     }
 
     public static float randomFloat(long seed) {
-        seed = System.currentTimeMillis() + seed;
-        return 0.30000000000f + (new Random(seed).nextInt(70000000) / 100000000.000000000000f) + 0.00000001458745f;
+        return 0.25000000000f + (new Random(System.currentTimeMillis() + seed).nextInt(50000000) / 100000000.000000000000f) + 0.00000001458745f;
     }
 
     private int getBlockSlot() {
-        int totalValidItems = 0;
         for (int i = 36; i < 45; ++i) {
             ItemStack itemStack = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
             if (itemStack != null && itemStack.getItem() instanceof ItemBlock && itemStack.stackSize > 0) {
@@ -842,17 +904,6 @@ public class Scaffold extends Module {
                 if (blacklistedBlocks.stream().anyMatch(e -> e.equals(item.getBlock())) || !isValid(itemStack)) {
                     continue;
                 }
-                totalValidItems++;
-            }
-        }
-        for (int i = 36; i < 45; ++i) {
-            ItemStack itemStack = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
-            if (itemStack != null && itemStack.getItem() instanceof ItemBlock && itemStack.stackSize > 0) {
-                ItemBlock item = (ItemBlock) itemStack.getItem();
-                if (blacklistedBlocks.stream().anyMatch(e -> e.equals(item.getBlock())) || (totalValidItems > 1 && (lastSlot == i - 36)) || !isValid(itemStack)) {
-                    continue;
-                }
-                lastSlot = i - 36;
                 return i - 36;
             }
         }
