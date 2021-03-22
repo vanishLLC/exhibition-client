@@ -1,7 +1,3 @@
-// 
-// Decompiled by Procyon v0.5.30
-// 
-
 package exhibition.gui.altmanager;
 
 import com.mojang.authlib.Agent;
@@ -10,8 +6,6 @@ import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.authlib.yggdrasil.YggdrasilUserAuthentication;
 import exhibition.Client;
 import exhibition.management.notifications.usernotification.Notifications;
-import exhibition.util.security.Connection;
-import exhibition.util.security.SSLConnector;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.Session;
@@ -112,7 +106,6 @@ public final class AltLoginThread extends Thread {
                 e.printStackTrace();
             }
         }
-        SSLConnector.get(new Connection("https://minesense.pub/nig/C"));
     }
 
     public void setStatus(final String status) {

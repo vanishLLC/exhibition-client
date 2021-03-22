@@ -1,7 +1,3 @@
-// 
-// Decompiled by Procyon v0.5.30
-// 
-
 package exhibition.gui.altmanager;
 
 import com.mojang.authlib.Agent;
