@@ -16,6 +16,7 @@ import exhibition.event.EventSystem;
 import exhibition.event.impl.EventRender3D;
 import exhibition.event.impl.EventRenderGui;
 import exhibition.event.impl.EventRenderGuiLast;
+import exhibition.event.impl.EventRenderGuiPre;
 import exhibition.gui.click.ClickGui;
 import exhibition.gui.console.SourceConsoleGUI;
 import exhibition.management.notifications.usernotification.Notifications;
