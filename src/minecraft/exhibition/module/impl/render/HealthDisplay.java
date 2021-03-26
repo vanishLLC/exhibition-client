@@ -7,15 +7,13 @@ package exhibition.module.impl.render;
 
 import exhibition.event.Event;
 import exhibition.event.RegisterEvent;
-import exhibition.event.impl.EventRenderGui;
-import exhibition.event.impl.EventRenderGuiLast;
+import exhibition.event.impl.EventRenderGuiPre;
 import exhibition.gui.screen.GuiView;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.util.MathUtils;
 import net.minecraft.client.gui.GuiIngame;
 import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
@@ -31,15 +29,15 @@ public class HealthDisplay extends Module {
         super(data);
     }
 
-    @RegisterEvent(events = {EventRenderGuiLast.class})
+    @RegisterEvent(events = {EventRenderGuiPre.class})
     public void onEvent(Event event) {
         if(mc.thePlayer == null || mc.theWorld == null)
             return;
 
-        if (event instanceof EventRenderGuiLast) {
+        if (event instanceof EventRenderGuiPre) {
 
             int guiOffset = (mc.currentScreen instanceof GuiInventory || mc.currentScreen instanceof GuiView) ? 75 : mc.thePlayer.openContainer != mc.thePlayer.inventoryContainer ? 100 : 0;
-            EventRenderGuiLast er = (EventRenderGuiLast) event;
+            EventRenderGuiPre er = (EventRenderGuiPre) event;
 
             boolean isLighting = GL11.glIsEnabled(GL11.GL_LIGHTING);
 
@@ -151,6 +149,7 @@ public class HealthDisplay extends Module {
             }
 
             if(isLighting) {
+
                 GL11.glEnable(GL11.GL_LIGHTING);
             }
 

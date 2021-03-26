@@ -28,6 +28,8 @@ import net.minecraft.potion.Potion;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 
+import java.util.Set;
+
 public class AutoSoup extends Module {
 
     private Timer timer = new Timer();
@@ -39,7 +41,8 @@ public class AutoSoup extends Module {
             mutton = new Setting<>("MUTTON", true),
             gapples = new Setting<>("GAPPLES", true),
             steak = new Setting<>("STEAK", true),
-            bread = new Setting<>("BREAD", true);
+            bread = new Setting<>("BREAD", true),
+            healing_egg = new Setting<>("HEALING EGG", true);
 
     private final Setting<Number> resHealth = new Setting<>("RES-HEALTH", 8.75, "Maximum health before consuming Mutton.", 0.25, 0.5, 10);
 
@@ -47,7 +50,7 @@ public class AutoSoup extends Module {
         super(data);
         settings.put(HEALTH, new Setting<>(HEALTH, 15.5, "Maximum health before healing.", 0.5, 1, 20));
         settings.put(DELAY, new Setting<>(DELAY, 350, "Delay before healing again.", 50, 100, 1000));
-        addSetting(new Setting<>("CONSUMABLES", new MultiBool("Consumables", soup, heads, mutton, gapples, steak, bread)));
+        addSetting(new Setting<>("CONSUMABLES", new MultiBool("Consumables", soup, heads, mutton, gapples, steak, bread, healing_egg)));
         addSetting(resHealth);
     }
 
@@ -194,11 +197,18 @@ public class AutoSoup extends Module {
 
                 boolean shouldMutton = mutton.getValue() && item == Items.mutton && shouldResistance && !mc.thePlayer.isPotionActive(Potion.resistance);
 
+                boolean shouldEgg = healing_egg.getValue() && needsRegenOrAbsorption && (is.getDisplayName().equalsIgnoreCase("§cFirst-Aid Egg"));
+
                 boolean shouldInstantHead = heads.getValue() && needsRegenOrAbsorption && (item == Items.skull || item == Items.baked_potato || item == Items.magma_cream);
 
                 if (priority < 1 && shouldInstantHead) {
                     slot = i;
                     priority = 1;
+                    continue;
+                }
+                if (priority < 2 && shouldEgg) {
+                    slot = i;
+                    priority = 2;
                     continue;
                 }
                 if (priority < 3 && shouldMutton) {
