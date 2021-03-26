@@ -8,6 +8,7 @@ import exhibition.Client;
 import exhibition.event.EventSystem;
 import exhibition.event.impl.EventSpawnPlayer;
 import exhibition.gui.screen.impl.mainmenu.ClientMainMenu;
+import exhibition.util.misc.ChatUtil;
 import io.netty.buffer.Unpooled;
 
 import java.io.File;
@@ -478,28 +479,36 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
         double d2 = (double) packetIn.getZ() / 32.0D;
         float f = (float) (packetIn.getYaw() * 360) / 256.0F;
         float f1 = (float) (packetIn.getPitch() * 360) / 256.0F;
-        EntityOtherPlayerMP entityotherplayermp = new EntityOtherPlayerMP(this.gameController.theWorld, this.getPlayerInfo(packetIn.getPlayer()).getGameProfile());
-        entityotherplayermp.prevPosX = entityotherplayermp.lastTickPosX = (double) (entityotherplayermp.serverPosX = packetIn.getX());
-        entityotherplayermp.prevPosY = entityotherplayermp.lastTickPosY = (double) (entityotherplayermp.serverPosY = packetIn.getY());
-        entityotherplayermp.prevPosZ = entityotherplayermp.lastTickPosZ = (double) (entityotherplayermp.serverPosZ = packetIn.getZ());
-        int i = packetIn.getCurrentItemID();
 
-        if (i == 0) {
-            entityotherplayermp.inventory.mainInventory[entityotherplayermp.inventory.currentItem] = null;
-        } else {
-            entityotherplayermp.inventory.mainInventory[entityotherplayermp.inventory.currentItem] = new ItemStack(Item.getItemById(i), 1, 0);
+        try {
+            EntityOtherPlayerMP entityotherplayermp = new EntityOtherPlayerMP(this.gameController.theWorld, this.getPlayerInfo(packetIn.getPlayer()).getGameProfile());
+            entityotherplayermp.prevPosX = entityotherplayermp.lastTickPosX = (double) (entityotherplayermp.serverPosX = packetIn.getX());
+            entityotherplayermp.prevPosY = entityotherplayermp.lastTickPosY = (double) (entityotherplayermp.serverPosY = packetIn.getY());
+            entityotherplayermp.prevPosZ = entityotherplayermp.lastTickPosZ = (double) (entityotherplayermp.serverPosZ = packetIn.getZ());
+            int i = packetIn.getCurrentItemID();
+
+            if (i == 0) {
+                entityotherplayermp.inventory.mainInventory[entityotherplayermp.inventory.currentItem] = null;
+            } else {
+                entityotherplayermp.inventory.mainInventory[entityotherplayermp.inventory.currentItem] = new ItemStack(Item.getItemById(i), 1, 0);
+            }
+
+            entityotherplayermp.setPositionAndRotation(d0, d1, d2, f, f1);
+            this.clientWorldController.addEntityToWorld(packetIn.getEntityID(), entityotherplayermp);
+            List<DataWatcher.WatchableObject> list = packetIn.func_148944_c();
+
+            if (list != null) {
+                entityotherplayermp.getDataWatcher().updateWatchedObjectsFromList(list);
+            }
+
+            EventSpawnPlayer em = EventSystem.getInstance(EventSpawnPlayer.class);
+            em.fire(entityotherplayermp);
+        } catch (Exception e) {
+            e.printStackTrace();
+            if(Minecraft.getMinecraft().thePlayer != null) {
+                ChatUtil.debug("???");
+            }
         }
-
-        entityotherplayermp.setPositionAndRotation(d0, d1, d2, f, f1);
-        this.clientWorldController.addEntityToWorld(packetIn.getEntityID(), entityotherplayermp);
-        List<DataWatcher.WatchableObject> list = packetIn.func_148944_c();
-
-        if (list != null) {
-            entityotherplayermp.getDataWatcher().updateWatchedObjectsFromList(list);
-        }
-
-        EventSpawnPlayer em = (EventSpawnPlayer) EventSystem.getInstance(EventSpawnPlayer.class);
-        em.fire(entityotherplayermp);
     }
 
     /**

@@ -132,16 +132,17 @@ public class NetGraph extends Module {
 
                 int validPacketSize = 0;
 
-                HashMap<String, Integer> packetMap = new HashMap<>();
+                //HashMap<String, Integer> packetMap = new HashMap<>();
 
                 for (TickPacketData tickPacketData : arrayBlockingQueue) {
-                    for (Packet outgoingPacket : tickPacketData.outgoingPackets) {
-                        if (outgoingPacket != null) {
-                            packetMap.put(outgoingPacket.getClass().getSimpleName(), packetMap.getOrDefault(outgoingPacket.getClass().getSimpleName(), 0) + 1);
-                        } else {
-                            packetMap.put(NetGraph.class.getSimpleName(), 999999);
-                        }
-                    }
+//                    for (Packet outgoingPacket : tickPacketData.outgoingPackets) {
+//                        if (outgoingPacket != null) {
+//                            if (!(outgoingPacket instanceof C03PacketPlayer) && !(outgoingPacket instanceof C00PacketKeepAlive) && !(outgoingPacket instanceof C0FPacketConfirmTransaction))
+//                                packetMap.put(outgoingPacket.getClass().getSimpleName(), packetMap.getOrDefault(outgoingPacket.getClass().getSimpleName(), 0) + 1);
+//                        } else {
+//                            packetMap.put(NetGraph.class.getSimpleName(), 999999);
+//                        }
+//                    }
 
                     if (tickPacketData.outgoingPackets.size() > highestCountIncoming) {
                         highestCountIncoming = tickPacketData.outgoingPackets.size();
@@ -152,15 +153,15 @@ public class NetGraph extends Module {
                     totalPackets += tickPacketData.outgoingPackets.size();
                 }
 
-                GlStateManager.pushMatrix();
-                GlStateManager.translate(100, 200, 0);
-                GlStateManager.scale(0.5, 0.5, 0.5);
-                int bruhOffset = 0;
-                for (Map.Entry<String, Integer> classIntegerEntry : packetMap.entrySet()) {
-                    mc.fontRendererObj.drawStringWithShadow(classIntegerEntry.getKey() + " " + classIntegerEntry.getValue(), 0, bruhOffset, -1);
-                    bruhOffset += 10;
-                }
-                GlStateManager.popMatrix();
+//                GlStateManager.pushMatrix();
+//                GlStateManager.translate(100, 200, 0);
+//                GlStateManager.scale(0.5, 0.5, 0.5);
+//                int bruhOffset = 0;
+//                for (Map.Entry<String, Integer> classIntegerEntry : packetMap.entrySet()) {
+//                    mc.fontRendererObj.drawStringWithShadow(classIntegerEntry.getKey() + " " + classIntegerEntry.getValue(), 0, bruhOffset, -1);
+//                    bruhOffset += 10;
+//                }
+//                GlStateManager.popMatrix();
 
                 float incomingScale = 20F / highestCountIncoming;
 

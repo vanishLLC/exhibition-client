@@ -63,48 +63,52 @@ public final class AltLoginThread extends Thread {
 
     @Override
     public void run() {
-        if (alt.getUsername().contains("@alt.com")) {
-            if (Client.altService.isVanilla()) {
+        try {
+            if (alt.getUsername().contains("@alt.com")) {
+                if (Client.altService.isVanilla()) {
+                    this.status = EnumChatFormatting.BLUE + "Switching to correct service.";
+                    Client.altService.switchService();
+                }
+            } else if (!Client.altService.isVanilla()) {
                 this.status = EnumChatFormatting.BLUE + "Switching to correct service.";
                 Client.altService.switchService();
             }
-        } else if (!Client.altService.isVanilla()) {
-            this.status = EnumChatFormatting.BLUE + "Switching to correct service.";
-            Client.altService.switchService();
-        }
-        if (alt.getPassword().equals("")) {
-            this.mc.session = new Session(alt.getUsername(), "", "", "mojang");
-            this.status = EnumChatFormatting.GREEN + "Logged in. (" + alt.getUsername() + " - offline name)";
-            return;
-        }
-        this.status = EnumChatFormatting.AQUA + "Logging in...";
-        final Session auth = this.createSession(alt.getUsername(), alt.getPassword());
-        if (auth == null) {
-            this.status = EnumChatFormatting.RED + "Login failed!";
-            if (!alt.getStatus().equals(Alt.Status.NotWorking)) {
-                alt.setStatus(Alt.Status.NotWorking);
+            if (alt.getPassword().equals("")) {
+                this.mc.session = new Session(alt.getUsername(), "", "", "mojang");
+                this.status = EnumChatFormatting.GREEN + "Logged in. (" + alt.getUsername() + " - offline name)";
+                return;
             }
-            String name = alt.getMask().equals("") ? alt.getUsername() : alt.getMask();
-            Notifications.getManager().post("Logging Failed!", "Failed logging into " + name, 2000, Notifications.Type.WARNING);
-            try {
-                Client.getFileManager().getFile(Alts.class).saveFile();
-            } catch (IOException e) {
-                e.printStackTrace();
+            this.status = EnumChatFormatting.AQUA + "Logging in...";
+            final Session auth = this.createSession(alt.getUsername(), alt.getPassword());
+            if (auth == null) {
+                this.status = EnumChatFormatting.RED + "Login failed!";
+                if (!alt.getStatus().equals(Alt.Status.NotWorking)) {
+                    alt.setStatus(Alt.Status.NotWorking);
+                }
+                String name = alt.getMask().equals("") ? alt.getUsername() : alt.getMask();
+                Notifications.getManager().post("Logging Failed!", "Failed logging into " + name, 2000, Notifications.Type.WARNING);
+                try {
+                    Client.getFileManager().getFile(Alts.class).saveFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                AltManager.lastAlt = alt;
+                this.status = EnumChatFormatting.GREEN + "Logged in. (" + auth.getUsername() + ")";
+                alt.setMask(auth.getUsername());
+                this.mc.session = auth;
+                if (alt.getStatus().equals(Alt.Status.Unchecked) || alt.getStatus().equals(Alt.Status.NotWorking)) {
+                    alt.setStatus(Alt.Status.Working);
+                }
+                Notifications.getManager().post("Logged in!", "Logged in as " + alt.getMask(), 2000, Notifications.Type.OKAY);
+                try {
+                    Client.getFileManager().getFile(Alts.class).saveFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-        } else {
-            AltManager.lastAlt = alt;
-            this.status = EnumChatFormatting.GREEN + "Logged in. (" + auth.getUsername() + ")";
-            alt.setMask(auth.getUsername());
-            this.mc.session = auth;
-            if (alt.getStatus().equals(Alt.Status.Unchecked) || alt.getStatus().equals(Alt.Status.NotWorking)) {
-                alt.setStatus(Alt.Status.Working);
-            }
-            Notifications.getManager().post("Logged in!", "Logged in as " + alt.getMask(), 2000, Notifications.Type.OKAY);
-            try {
-                Client.getFileManager().getFile(Alts.class).saveFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

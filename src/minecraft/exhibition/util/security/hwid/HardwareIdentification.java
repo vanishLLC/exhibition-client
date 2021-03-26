@@ -10,6 +10,11 @@ import oshi.SystemInfo;
 import oshi.hardware.*;
 import oshi.software.os.OperatingSystem;
 
+import java.util.Date;
+
+import static com.sun.jna.platform.win32.Advapi32Util.*;
+import static com.sun.jna.platform.win32.WinReg.HKEY_LOCAL_MACHINE;
+
 public class HardwareIdentification {
 
     //OS
@@ -84,6 +89,15 @@ public class HardwareIdentification {
 
         JsonObject osObject = new JsonObject();
         osObject.addProperty("name", operatingSystemIdentifiers.getFamily() + " " + operatingSystemIdentifiers.getVersion());
+        osObject.addProperty("build", operatingSystemIdentifiers.getBuild());
+
+        if (operatingSystemIdentifiers.getFamily().equals("Windows")) {
+            String keyPath = "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion";
+            if (registryKeyExists(HKEY_LOCAL_MACHINE, keyPath) && registryValueExists(HKEY_LOCAL_MACHINE, keyPath, "InstallDate")) {
+                long installDate = registryGetIntValue(HKEY_LOCAL_MACHINE, keyPath, "InstallDate") * 1000L;
+                osObject.addProperty("date", new Date(installDate).toString());
+            }
+        }
 
         jsonObject.add("OS", osObject);
 

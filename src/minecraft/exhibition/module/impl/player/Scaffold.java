@@ -11,7 +11,6 @@ import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventMotionUpdate;
 import exhibition.event.impl.EventRender3D;
 import exhibition.event.impl.EventRenderGui;
-import exhibition.event.impl.EventTick;
 import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
@@ -30,7 +29,6 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -180,7 +178,7 @@ public class Scaffold extends Module {
         return !placeTimer.delay(200);
     }
 
-    @RegisterEvent(events = {EventTick.class, EventMotionUpdate.class, EventRenderGui.class, EventRender3D.class})
+    @RegisterEvent(events = {EventMotionUpdate.class, EventRenderGui.class, EventRender3D.class})
     public void onEvent(Event event) {
         String currentMode = ((Options) settings.get(MODE).getValue()).getSelected();
         if (event instanceof EventRenderGui) {
@@ -205,96 +203,92 @@ public class Scaffold extends Module {
             mc.fontRendererObj.drawString(getBlockCount() + "", res.getScaledWidth() / 2F - mc.fontRendererObj.getStringWidth(getBlockCount() + "") / 2F, res.getScaledHeight() / 2F - 25, color);
             GlStateManager.disableBlend();
         }
-        if (event instanceof EventRender3D) {
-            EventRender3D er = (EventRender3D) event;
-
-            double x = mc.thePlayer.posX;
-
-            double z = mc.thePlayer.posZ;
-
-            double height = (mc.thePlayer.posY - (int) mc.thePlayer.posY);
-
-            double y = mc.thePlayer.posY - (mc.gameSettings.keyBindSneak.getIsKeyPressed() && mc.thePlayer.onGround ? 1.2 : (Client.getModuleManager().isEnabled(Speed.class) && PlayerUtil.isMoving()) ?
-                    ((((height < 0.24919 && (height > 0.105 || MathUtils.roundToPlace(height, 4) == 0.0993)) || MathUtils.roundToPlace(height, 4) == 0.0013 ||
-                            MathUtils.roundToPlace(height, 4) == 0.0156 || MathUtils.roundToPlace(height, 4) == 0.0479 ||
-                            MathUtils.roundToPlace(height, 4) == 0.01553 || MathUtils.roundToPlace(height, 4) == 0.0902) && Math.abs(mc.thePlayer.motionY) < 0.45) ? 1.25 : 1) : 0.8);
-
-            if (!mc.gameSettings.keyBindJump.getIsKeyPressed()) {
-                towerTimer.reset();
-                if (fastTower.getValue()) {
-                    mc.timer.timerSpeed = 1;
-                }
-            }
-
-            if (mc.thePlayer.motionY <= -0.625) {
-                y += mc.thePlayer.motionY + ((mc.thePlayer.motionY - 0.08D) * 0.9800000190734863D);
-            }
-
-//                if (mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {
-//                    double forward = mc.thePlayer.movementInput.moveForward;
-//                    double strafe = mc.thePlayer.movementInput.moveStrafe;
-//                    float yaw = mc.thePlayer.rotationYaw;
+//        if (event instanceof EventRender3D) {
+//            EventRender3D er = (EventRender3D) event;
 //
-//                    double multiplier = 0;
-//                    x += (forward * multiplier * Math.cos(Math.toRadians(yaw + 90.0f)) + strafe * multiplier * Math.sin(Math.toRadians(yaw + 90.0f))) * (stepDown ? -0.1 : 1);
-//                    z += (forward * multiplier * Math.sin(Math.toRadians(yaw + 90.0f)) - strafe * multiplier * Math.cos(Math.toRadians(yaw + 90.0f))) * (stepDown ? -0.1 : 1);
+//            double x = mc.thePlayer.posX;
+//
+//            double z = mc.thePlayer.posZ;
+//
+//            double height = (mc.thePlayer.posY - (int) mc.thePlayer.posY);
+//
+//            double y = mc.thePlayer.posY - (mc.gameSettings.keyBindSneak.getIsKeyPressed() && mc.thePlayer.onGround ? 1.2 : (Client.getModuleManager().isEnabled(Speed.class) && PlayerUtil.isMoving()) ?
+//                    ((((height < 0.24919 && (height > 0.105 || MathUtils.roundToPlace(height, 4) == 0.0993)) || MathUtils.roundToPlace(height, 4) == 0.0013 ||
+//                            MathUtils.roundToPlace(height, 4) == 0.0156 || MathUtils.roundToPlace(height, 4) == 0.0479 ||
+//                            MathUtils.roundToPlace(height, 4) == 0.01553 || MathUtils.roundToPlace(height, 4) == 0.0902) && Math.abs(mc.thePlayer.motionY) < 0.45) ? 1.25 : 1) : 0.8);
+//
+//            if (!mc.gameSettings.keyBindJump.getIsKeyPressed()) {
+//                towerTimer.reset();
+//                if (fastTower.getValue()) {
+//                    mc.timer.timerSpeed = 1;
 //                }
-            BlockPos pos = new BlockPos(x, y, z);
-
-            if (AutoPot.potting || AutoPot.haltTicks > 0)
-                return;
-
-            Vec3 vec = new Vec3(pos);
-            vec = vec.addVector(0.5, 0.5, 0.5);
-
-            if (vec != null) {
-                GL11.glPushMatrix();
-                RenderingUtil.pre3D();
-                mc.entityRenderer.setupCameraTransform(mc.timer.renderPartialTicks, 2);
-                RenderingUtil.glColor(Colors.getColor(255, 75));
-                RenderingUtil.drawBoundingBox(new AxisAlignedBB(vec.xCoord - RenderManager.renderPosX - 0.1, vec.yCoord - RenderManager.renderPosY - 0.1, vec.zCoord - RenderManager.renderPosZ - 0.1,
-                        vec.xCoord - RenderManager.renderPosX + 0.1, vec.yCoord - RenderManager.renderPosY + 0.1, vec.zCoord - RenderManager.renderPosZ + 0.1));
-
-                int[][] intArrays = {new int[]{0, 0, 0},
-                        new int[]{1, 0, 0}, new int[]{0, 0, 1},
-                        new int[]{-1, 0, 0}, new int[]{0, 0, -1},
-                        new int[]{1, 0, 1}, new int[]{-1, 0, -1},
-                        new int[]{1, 0, -1}, new int[]{-1, 0, 1}};
-
-                boolean first = true;
-
-                for (int[] array : intArrays) {
-                    BlockPos bruhPos = pos.add(array[0], array[1], array[2]);
-
-                    EnumFacing[] face = EnumFacing.values();
-                    for (EnumFacing side : face) {
-                        BlockPos blockPos = bruhPos.offset(side);
-                        EnumFacing otherSide = side.getOpposite();
-                        if (blockPos(blockPos).canCollideCheck(blockState(blockPos), false)) {
-                            Vec3 addBruh = getVector(new BlockData(blockPos, otherSide));
-
-                            Vec3 bruh = new Vec3(blockPos.getX(), blockPos.getY(), blockPos.getZ()).addVector(0.5D, 0.5D, 0.5D).add(new Vec3(otherSide.getDirectionVec().getX() / 2F, otherSide.getDirectionVec().getY() / 2F, otherSide.getDirectionVec().getZ() / 2F));
-                            RenderingUtil.glColor(first ? Colors.getColor(0, 255, 255, 75) : Colors.getColor(0, 255, 0, 75));
-                            RenderingUtil.drawBoundingBox(new AxisAlignedBB(bruh.xCoord - RenderManager.renderPosX - 0.05, bruh.yCoord - RenderManager.renderPosY - 0.05, bruh.zCoord - RenderManager.renderPosZ - 0.05,
-                                    bruh.xCoord - RenderManager.renderPosX + 0.05, bruh.yCoord - RenderManager.renderPosY + 0.05, bruh.zCoord - RenderManager.renderPosZ + 0.05));
-
-                            if (first) {
-                                bruh = bruh.add(addBruh);
-
-                                RenderingUtil.glColor(Colors.getColor(255, 255, 0, 75));
-                                RenderingUtil.drawBoundingBox(new AxisAlignedBB(bruh.xCoord - RenderManager.renderPosX - 0.05, bruh.yCoord - RenderManager.renderPosY - 0.05, bruh.zCoord - RenderManager.renderPosZ - 0.05,
-                                        bruh.xCoord - RenderManager.renderPosX + 0.05, bruh.yCoord - RenderManager.renderPosY + 0.05, bruh.zCoord - RenderManager.renderPosZ + 0.05));
-                            }
-                            first = false;
-                        }
-                    }
-                }
-
-                GL11.glColor4f(1, 1, 1, 1);
-                RenderingUtil.post3D();
-                GL11.glPopMatrix();
-            }
-        }
+//            }
+//
+////                if (mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {
+////                    double forward = mc.thePlayer.movementInput.moveForward;
+////                    double strafe = mc.thePlayer.movementInput.moveStrafe;
+////                    float yaw = mc.thePlayer.rotationYaw;
+////
+////                    double multiplier = 0;
+////                    x += (forward * multiplier * Math.cos(Math.toRadians(yaw + 90.0f)) + strafe * multiplier * Math.sin(Math.toRadians(yaw + 90.0f))) * (stepDown ? -0.1 : 1);
+////                    z += (forward * multiplier * Math.sin(Math.toRadians(yaw + 90.0f)) - strafe * multiplier * Math.cos(Math.toRadians(yaw + 90.0f))) * (stepDown ? -0.1 : 1);
+////                }
+//            BlockPos pos = new BlockPos(x, y, z);
+//
+//            if (AutoPot.potting || AutoPot.haltTicks > 0)
+//                return;
+//
+//            Vec3 vec = new Vec3(pos);
+//            vec = vec.addVector(0.5, 0.5, 0.5);
+//
+//            if (vec != null) {
+//                GL11.glPushMatrix();
+//                RenderingUtil.pre3D();
+//                mc.entityRenderer.setupCameraTransform(mc.timer.renderPartialTicks, 2);
+//                RenderingUtil.glColor(Colors.getColor(255, 75));
+//                RenderingUtil.drawBoundingBox(new AxisAlignedBB(vec.xCoord - RenderManager.renderPosX - 0.1, vec.yCoord - RenderManager.renderPosY - 0.1, vec.zCoord - RenderManager.renderPosZ - 0.1,
+//                        vec.xCoord - RenderManager.renderPosX + 0.1, vec.yCoord - RenderManager.renderPosY + 0.1, vec.zCoord - RenderManager.renderPosZ + 0.1));
+//
+//                int[][] intArrays = {new int[]{0, 0, 0},
+//                        new int[]{1, 0, 0}, new int[]{0, 0, 1},
+//                        new int[]{-1, 0, 0}, new int[]{0, 0, -1},
+//                        new int[]{1, 0, 1}, new int[]{-1, 0, -1},
+//                        new int[]{1, 0, -1}, new int[]{-1, 0, 1}};
+//
+//                boolean first = true;
+//
+//                for (int[] array : intArrays) {
+//                    BlockPos bruhPos = pos.add(array[0], array[1], array[2]);
+//
+//                    EnumFacing[] face = EnumFacing.values();
+//                    for (EnumFacing side : face) {
+//                        BlockPos blockPos = bruhPos.offset(side);
+//                        EnumFacing otherSide = side.getOpposite();
+//                        if (blockPos(blockPos).canCollideCheck(blockState(blockPos), false)) {
+//                            Vec3 addBruh = getVector(new BlockData(blockPos, otherSide));
+//
+//                            Vec3 bruh = new Vec3(blockPos.getX(), blockPos.getY(), blockPos.getZ()).addVector(0.5D, 0.5D, 0.5D).add(new Vec3(otherSide.getDirectionVec().getX() / 2F, otherSide.getDirectionVec().getY() / 2F, otherSide.getDirectionVec().getZ() / 2F));
+//                            RenderingUtil.glColor(first ? Colors.getColor(0, 255, 255, 75) : Colors.getColor(0, 255, 0, 75));
+//                            RenderingUtil.drawBoundingBox(new AxisAlignedBB(bruh.xCoord - RenderManager.renderPosX - 0.05, bruh.yCoord - RenderManager.renderPosY - 0.05, bruh.zCoord - RenderManager.renderPosZ - 0.05,
+//                                    bruh.xCoord - RenderManager.renderPosX + 0.05, bruh.yCoord - RenderManager.renderPosY + 0.05, bruh.zCoord - RenderManager.renderPosZ + 0.05));
+//
+//                            if (first) {
+//                                bruh = bruh.add(addBruh);
+//
+//                                RenderingUtil.glColor(Colors.getColor(255, 255, 0, 75));
+//                                RenderingUtil.drawBoundingBox(new AxisAlignedBB(bruh.xCoord - RenderManager.renderPosX - 0.05, bruh.yCoord - RenderManager.renderPosY - 0.05, bruh.zCoord - RenderManager.renderPosZ - 0.05,
+//                                        bruh.xCoord - RenderManager.renderPosX + 0.05, bruh.yCoord - RenderManager.renderPosY + 0.05, bruh.zCoord - RenderManager.renderPosZ + 0.05));
+//                            }
+//                            first = false;
+//                        }
+//                    }
+//                }
+//
+//                GL11.glColor4f(1, 1, 1, 1);
+//                RenderingUtil.post3D();
+//                GL11.glPopMatrix();
+//            }
+//        }
         if (event instanceof EventMotionUpdate) {
             setSuffix(currentMode);
             EventMotionUpdate em = (EventMotionUpdate) event;
