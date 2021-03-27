@@ -289,14 +289,14 @@ public class Speed extends Module {
                     if (stage == 1 && mc.thePlayer.isCollidedVertically && (mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f)) {
                         speed = lastDist;
                     } else if (stage == 2 && mc.thePlayer.isCollidedVertically && mc.thePlayer.onGround && (mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f)) {
-                        double gay = (double)0.42F;
+                        double gay = ((double)0.42F - (0.015625F + (0.0000000325 * Math.random())));
                         if (mc.thePlayer.isPotionActive(Potion.jump)) {
                             gay += (mc.thePlayer.getActivePotionEffect(Potion.jump).getAmplifier() + 1) * 0.1F;
                         }
                         em.setY(mc.thePlayer.motionY = gay);
                         velocityBoost /= 5;
 
-                        speed = moveSpeed * 2.13050398 - (0.000353 * Math.random());
+                        speed = moveSpeed * 2.13050398;
 
                         {
                             double forward = mc.thePlayer.movementInput.moveForward;
@@ -360,13 +360,10 @@ public class Speed extends Module {
 //
 //                        final double difference = bruh * (lastDist - baseSpeed);
 
-                        speed = lastDist * 0.587622177 - (0.00035653 * Math.random());
+                        em.setY(mc.thePlayer.motionY += 0.015425F + (0.0000000325 * Math.random()));
+                        speed = lastDist * 0.587622177;
 
-                        //em.setY(mc.thePlayer.motionY + (-0.000009234F + ((0.000009234F * 2) - 0.000009234F) * Math.random()));
                     } else {
-//                        if (stage >= 4)
-//                            em.setY(mc.thePlayer.motionY + (-0.000009234F + ((0.000009234F * 2) - 0.000009234F) * Math.random()));
-
                         final List collidingList = mc.theWorld.getCollidingBlockBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(0.0, mc.thePlayer.motionY, 0.0));
                         if ((collidingList.size() > 0 || mc.thePlayer.isCollidedVertically) && stage > 0) {
                             stage = (mc.thePlayer.moveForward != 0.0F || mc.thePlayer.moveStrafing != 0.0F) ? 1 : 0;
@@ -469,7 +466,7 @@ public class Speed extends Module {
 
                         if (strafeFix.getValue() && HypixelUtil.isVerifiedHypixel() && stage > 0 && lastDist > 0 && !PlayerUtil.isOnLiquid()) {
                             if (em.isOnground()) {
-                                em.setY(em.getY() + 0.015625F + (0.0019F * Math.random()));
+                                em.setY(em.getY() + (0.0625943 / 100000000));
                             }
                         }
                     }

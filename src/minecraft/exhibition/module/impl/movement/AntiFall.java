@@ -38,6 +38,11 @@ public class AntiFall extends Module {
         return isEnabled() && !timer.delay(600);
     }
 
+    @Override
+    public Priority getPriority() {
+        return Priority.LAST;
+    }
+
     @RegisterEvent(events = {EventMove.class, EventPacket.class})
     public void onEvent(Event event) {
         if (mc.thePlayer == null || mc.theWorld == null) {
@@ -56,7 +61,7 @@ public class AntiFall extends Module {
                 return;
             }
 
-            int dist = ((Number) settings.get(DISTANCE).getValue()).intValue();
+            double dist = ((Number) settings.get(DISTANCE).getValue()).doubleValue() - 2;
             if (mc.thePlayer.fallDistance >= dist && !Client.getModuleManager().isEnabled(Fly.class) && !Client.getModuleManager().isEnabled(LongJump.class) && !Client.getModuleManager().isEnabled(Freecam.class)
                     && !Client.getModuleManager().isEnabled(FreecamTP.class)
                     && mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.5, mc.thePlayer.posZ)).getBlock() == Blocks.air) {

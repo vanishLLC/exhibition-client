@@ -394,7 +394,7 @@ public class Scaffold extends Module {
                 double y = mc.thePlayer.posY - (mc.gameSettings.keyBindSneak.getIsKeyPressed() && mc.thePlayer.onGround ? 1.2 : (Client.getModuleManager().isEnabled(Speed.class) && PlayerUtil.isMoving()) ?
                         ((((height < 0.24919 && (height > 0.105 || MathUtils.roundToPlace(height, 4) == 0.0993)) || MathUtils.roundToPlace(height, 4) == 0.0013 ||
                                 MathUtils.roundToPlace(height, 4) == 0.0156 || MathUtils.roundToPlace(height, 4) == 0.0479 ||
-                                MathUtils.roundToPlace(height, 4) == 0.01553 || MathUtils.roundToPlace(height, 4) == 0.0902) && Math.abs(mc.thePlayer.motionY) < 0.45) ? 1.25 : 1) : 0.8);
+                                MathUtils.roundToPlace(height, 4) == 0.01553 || MathUtils.roundToPlace(height, 4) == 0.0902) && Math.abs(mc.thePlayer.motionY) < 0.45) ? 1.25 : 1.08) : 0.8);
 
                 if (!mc.gameSettings.keyBindJump.getIsKeyPressed()) {
                     towerTimer.reset();
