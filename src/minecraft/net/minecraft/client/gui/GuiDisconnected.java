@@ -27,7 +27,8 @@ public class GuiDisconnected extends GuiScreen {
     private final GuiScreen parentScreen;
     private int field_175353_i;
 
-    private long timeDifference;
+    private final long playTime;
+    private final long totalTime;
 
     public GuiDisconnected(GuiScreen p_i45020_1_, String p_i45020_2_, IChatComponent p_i45020_3_) {
         this.parentScreen = p_i45020_1_;
@@ -36,17 +37,24 @@ public class GuiDisconnected extends GuiScreen {
         boolean changed = false;
 
         if (Client.ticksInGame != -1) {
-            this.timeDifference = Client.ticksInGame * 50;
+            this.playTime = Client.ticksInGame * 50;
             Client.ticksInGame = -1;
         } else {
-            this.timeDifference = -1;
+            this.playTime = -1;
+        }
+
+        if (Client.joinTime != -1) {
+            this.totalTime = System.currentTimeMillis() - Client.joinTime;
+            Client.joinTime = -1;
+        } else {
+            this.totalTime = -1;
         }
 
         DiscordUtil.setDiscordPresence("Disconnect Screen","");
 
         String unformatted = this.message.getUnformattedText();
 
-        String playTime = getTimeLength(timeDifference);
+        String playTime = getTimeLength(this.playTime);
         String banLength = "Permanent";
         String banReason = unformatted.contains("WATCHDOG") ? "Watchdog" :
                 (unformatted.toLowerCase().contains("compromised") || unformatted.toLowerCase().contains("alert")) ? "Security Alert" : "Staff Ban";
@@ -106,7 +114,7 @@ public class GuiDisconnected extends GuiScreen {
                 e.printStackTrace();
             }
         if (unformatted.contains("bann")) {
-            if (timeDifference >= 10000L) // Don't report if < 10 Seconds
+            if (this.playTime >= 10000L) // Don't report if < 10 Seconds
                 new SilentSnitch.BanReport(playTime, banReason, banLength, username).start();
             new Thread(IPUtil::setIPBanned).start();
         }
@@ -293,14 +301,14 @@ public class GuiDisconnected extends GuiScreen {
         String str = "Current Alt: " + currentAlt;
         fontRendererObj.drawStringWithShadow(str, this.width / 2F - fontRendererObj.getStringWidth(str) - 5, this.height / 2F + this.field_175353_i / 2F + this.fontRendererObj.FONT_HEIGHT + 56, -1);
 
-        if (timeDifference != -1 && this.message.getUnformattedText().contains("ban")) {
-            String timeDiff = "Playtime: " + getTimeLength(timeDifference);
+        if (playTime != -1 && this.message.getUnformattedText().contains("ban")) {
+            String timeDiff = "Playtime: " + getTimeLength(playTime) + " / " + getTimeLength(totalTime);
             fontRendererObj.drawStringWithShadow(timeDiff, width / 2D - fontRendererObj.getStringWidth(timeDiff) / 2D, 12, -1);
         }
 
         BanStats banStats = Client.getModuleManager().get(BanStats.class);
 
-        if(banStats.isEnabled() && timeDifference != -1) {
+        if(banStats.isEnabled() && playTime != -1) {
             String s = "Bans since connect: " + banStats.bansSinceConnect;
             fontRendererObj.drawStringWithShadow(s, width / 2D - fontRendererObj.getStringWidth(s) / 2D, 22, -1);
         }

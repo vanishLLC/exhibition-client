@@ -425,7 +425,7 @@ public class HackerDetect extends Module {
 
                         float diff = Math.abs(MathHelper.wrapAngleTo180_float(-(MathHelper.wrapAngleTo180_float(ent.rotationYaw) - (float) MathHelper.wrapAngleTo180_float(yawDirection))));
 
-                        if (MathUtils.roundToPlace(velocity, 1) >= 0.5 && diff > 46) {
+                        if (MathUtils.roundToPlace(velocity, 1) >= 0.355 && diff > 46) {
                             speedFlags += diff > 120 ? 15 : diff > 90 ? 7 : 3;
                             //ChatUtil.debug("Yaw Diff: " + diff + " " + ent.getName() + " " + velocity);
                         }
@@ -448,19 +448,6 @@ public class HackerDetect extends Module {
                             ent.lastAirYaw = yawDirection;
                             //ChatUtil.debug("Yaw Diff Air " + tickInAir + ": " + diff + " " + ent.getName() + " " + velocity);
                         }
-                    }
-
-                    if (tickInAir > 0 && !jumped && motionY > -0.3 && motionY < 0 && (ent.ticksExisted - ent.jumpedTick) <= 2 && mc.theWorld.getBlockState(new BlockPos(ent.posX, ent.posY + 2, ent.posZ)).getBlock() == Blocks.air) {
-                        speedFlags += 5;
-                        ent.lowhopFlags++;
-                        if (ent.ticksExisted - ent.lastFlaggedTick < 15 && ent.lowhopFlags > 2 && !PriorityManager.isPriority(ent) && velocity > 0.28) {
-                            Notifications.getManager().post("Hacker Detected", ent.getName() + " is using LowHop.", 7500, Notifications.Type.WARNING);
-                            if ((boolean) settings.get("REPORT").getValue())
-                                ChatUtil.sendChat_NoFilter("/wdr " + ent.getName() + " killaura fly speed scaffold");
-                            PriorityManager.setAsPriority(ent);
-                        }
-
-                        ent.lastFlaggedTick = ent.ticksExisted;
                     }
 
                     if (ent.isBlocking()) {

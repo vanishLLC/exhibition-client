@@ -21,6 +21,7 @@ import exhibition.module.impl.player.Scaffold;
 import exhibition.util.HypixelUtil;
 import exhibition.util.MathUtils;
 import exhibition.util.PlayerUtil;
+import exhibition.util.misc.ChatUtil;
 import exhibition.util.render.Colors;
 import exhibition.util.render.Depth;
 import net.minecraft.block.material.Material;
@@ -74,7 +75,7 @@ public class Speed extends Module {
         double baseSpeed = 0.28730000691562896;
         if (mc.thePlayer.isPotionActive(Potion.moveSpeed) && (!((Options) settings.get(MODE).getValue()).getSelected().equals("HypixelHop") || mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getDuration() > 10)) {
             int amplifier = mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getAmplifier();
-            baseSpeed *= (1.0D + 0.1D * (amplifier + 1));
+            baseSpeed *= (1.0D + 0.15D * (amplifier + 1));
         }
         return baseSpeed;
     }
@@ -282,12 +283,13 @@ public class Speed extends Module {
 
                     boolean canSprint = mc.thePlayer.getFoodStats().getFoodLevel() >= 6;
 
-                    double moveSpeed = speed = (defaultSpeed()) * ((mc.thePlayer.isInsideOfMaterial(Material.vine)) ? 0.5 : (mc.thePlayer.isSneaking()) ? 0.8 : (PlayerUtil.isInLiquid() ? 0.54 : (reset) ? 0.45 : ((mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.1, mc.thePlayer.posZ)).getBlock().slipperiness == 0.98f) ? 2.4 : canSprint ? 1.0 : 0.765)));
+                    double moveSpeed = speed = (defaultSpeed()) * ((mc.thePlayer.isInsideOfMaterial(Material.vine)) ? 0.5 : (mc.thePlayer.isSneaking()) ? 0.8 : (PlayerUtil.isInLiquid() ? 0.54 : (reset) ? 0.45 : ((mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.1, mc.thePlayer.posZ)).getBlock().slipperiness == 0.98f) ? 2.4 : canSprint ? ticks == 1 ? 0.793 : 1.0 : 0.765)));
 
                     int current = stage;
 
                     if (stage == 1 && mc.thePlayer.isCollidedVertically && (mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f)) {
                         speed = lastDist;
+                        ticks = 1;
                     } else if (stage == 2 && mc.thePlayer.isCollidedVertically && mc.thePlayer.onGround && (mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f)) {
                         double gay = ((double)0.42F - (0.015625F + (0.0000000325 * Math.random())));
                         if (mc.thePlayer.isPotionActive(Potion.jump)) {
@@ -361,12 +363,17 @@ public class Speed extends Module {
 //                        final double difference = bruh * (lastDist - baseSpeed);
 
                         em.setY(mc.thePlayer.motionY += 0.015425F + (0.0000000325 * Math.random()));
-                        speed = lastDist * 0.587622177;
+                        speed = lastDist * (ticks == 1 ? 0.59989892348 : 0.587622177);
 
                     } else {
                         final List collidingList = mc.theWorld.getCollidingBlockBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(0.0, mc.thePlayer.motionY, 0.0));
                         if ((collidingList.size() > 0 || mc.thePlayer.isCollidedVertically) && stage > 0) {
                             stage = (mc.thePlayer.moveForward != 0.0F || mc.thePlayer.moveStrafing != 0.0F) ? 1 : 0;
+                            if(stage == 0) {
+                                ticks = 1;
+                            } else {
+                                ticks = 0;
+                            }
                         }
 
 //                        List<Double> list = new ArrayList<>();

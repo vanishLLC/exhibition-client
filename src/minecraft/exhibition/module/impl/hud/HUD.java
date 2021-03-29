@@ -18,7 +18,6 @@ import exhibition.module.data.MultiBool;
 import exhibition.module.data.Options;
 import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.combat.Bypass;
-import exhibition.module.impl.movement.Speed;
 import exhibition.module.impl.other.AutoSkin;
 import exhibition.module.impl.other.ChatCommands;
 import exhibition.util.HypixelUtil;

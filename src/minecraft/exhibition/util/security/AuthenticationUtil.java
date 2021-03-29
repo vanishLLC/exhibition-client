@@ -240,14 +240,14 @@ public class AuthenticationUtil {
                                                             Heartbeat.loadUselessClass(AsymmetricalEncryptionUtils.performRSADecryption(classData.get(name).getAsString(), decodeByteArray((byte[]) publicKeyEncoded)), AESCipher.decrypt("Jkg5NZ4tVxs8CD0n", classData.get(data).getAsString()).getData());
                                                         }
                                                         loginInstance.setProgress(0.9);
-                                                        Object[] objectArray = new Object[]{parsed[0],                                  // 0 Ignored
-                                                                Crypto.decryptPublicNew(encryptedPassword),                             // 1 Input Username
-                                                                encryptedUsername,                                                      // 2 Ignored
-                                                                encryptedPassword,                                                      // 3 Ignored
-                                                                AESCipher.decrypt("Jkg5NZ4tVxs8CD0n", parsed[0]).getData(),    // 4 Forum Username
-                                                                "",                                                          // 5 URL Hash
-                                                                parsed[1].replace("$2y$", "$2a$"),                   // 6 Hash
-                                                                AsymmetricalEncryptionUtils.performRSADecryption(((JsonObject) JsonConnection.toJsonObject(connection)).get(uid).getAsString(), decodeByteArray((byte[]) publicKeyEncoded)), // 7 UID
+                                                        Object[] objectArray = new Object[]{parsed[0],
+                                                                Crypto.decryptPublicNew(encryptedPassword),
+                                                                encryptedUsername,
+                                                                encryptedPassword,
+                                                                AESCipher.decrypt("Jkg5NZ4tVxs8CD0n", parsed[0]).getData(),
+                                                                hashCheckStub,
+                                                                parsed[1].replace("$2y$", "$2a$"),
+                                                                AsymmetricalEncryptionUtils.performRSADecryption(((JsonObject) JsonConnection.toJsonObject(connection)).get(uid).getAsString(), decodeByteArray((byte[]) publicKeyEncoded)),
                                                                 loginInstance, // 8 Login Instance
                                                                 null, null, null, null, null, null, null, null, null, rebuilt};
                                                         authUser = Class.forName("exhibition.util.security.AuthenticatedUser").getDeclaredMethod("create", Object[].class).invoke(null, (Object) objectArray);

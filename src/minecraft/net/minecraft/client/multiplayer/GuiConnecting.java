@@ -129,6 +129,7 @@ public class GuiConnecting extends GuiScreen {
                 }
 
                 Client.ticksInGame = -1;
+                Client.joinTime = -1;
             }
         }).start();
     }

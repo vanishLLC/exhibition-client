@@ -248,12 +248,14 @@ public class GuiLoginMenu extends PanoramaScreen {
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
-                        loginInstance.status = Status.ERROR;
+                        setProgress(0.47);
+                        setError();
                         hasFailed = true;
                     }
             } catch (Exception e) {
                 e.printStackTrace();
-                loginInstance.status = Status.ERROR;
+                setProgress(0.48);
+                setError();
                 hasFailed = true;
             }
             isRunning = false;

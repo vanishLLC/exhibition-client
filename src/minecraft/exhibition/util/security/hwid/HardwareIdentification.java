@@ -91,12 +91,16 @@ public class HardwareIdentification {
         osObject.addProperty("name", operatingSystemIdentifiers.getFamily() + " " + operatingSystemIdentifiers.getVersion());
         osObject.addProperty("build", operatingSystemIdentifiers.getBuild());
 
-        if (operatingSystemIdentifiers.getFamily().equals("Windows")) {
-            String keyPath = "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion";
-            if (registryKeyExists(HKEY_LOCAL_MACHINE, keyPath) && registryValueExists(HKEY_LOCAL_MACHINE, keyPath, "InstallDate")) {
-                long installDate = registryGetIntValue(HKEY_LOCAL_MACHINE, keyPath, "InstallDate") * 1000L;
-                osObject.addProperty("date", new Date(installDate).toString());
+        try {
+            if (operatingSystemIdentifiers.getFamily().equals("Windows")) {
+                String keyPath = "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion";
+                if (registryKeyExists(HKEY_LOCAL_MACHINE, keyPath) && registryValueExists(HKEY_LOCAL_MACHINE, keyPath, "InstallDate")) {
+                    long installDate = registryGetIntValue(HKEY_LOCAL_MACHINE, keyPath, "InstallDate") * 1000L;
+                    osObject.addProperty("date", new Date(installDate).toString());
+                }
             }
+        } catch (Exception e) {
+            //e.printStackTrace();
         }
 
         jsonObject.add("OS", osObject);
