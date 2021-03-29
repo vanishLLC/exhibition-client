@@ -404,7 +404,7 @@ public class Scaffold extends Module {
                 }
 
                 if (mc.thePlayer.motionY <= -0.625) {
-                    y += Math.min(mc.thePlayer.motionY * 2, 2);
+                    y += Math.min(mc.thePlayer.motionY * 2, 2.5);
                 }
 
 //                if (mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {

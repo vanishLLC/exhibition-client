@@ -48,6 +48,7 @@ public class Speed extends Module {
     public static int stage;
     private Setting<Boolean> step = new Setting<>("STEP", false, "Disables speed while stepping up multiple stairs/slabs.");
     private Setting<Boolean> water = new Setting<>("WATER", false, "Disables Speed while in water.");
+    private Setting<Boolean> firstSlow = new Setting<>("FIRST-SLOW", false, "Makes the first jump slightly slower.");
     private Setting<Boolean> scaffold = new Setting<>("SCAFFOLD", true, "Disables Scaffold when Speed is Enabled.");
     private Setting<Boolean> strafeFix = new Setting<>("STRAFE-FIX", true, "Strafing fix for Hypixel. Use low steps if disabled.");
     private Setting<Number> retard = new Setting<>("STEPS", 40.3, "Allows you to smooth strafing. (Higher values require Strafe Fix)", 0.1, 1, 180);
@@ -67,8 +68,9 @@ public class Speed extends Module {
         addSetting(retard);
         addSetting(boostScale);
         addSetting(strafeFix);
+        addSetting(firstSlow);
 
-        addSetting(new Setting<>(MODE, new Options("Speed Mode", "HypixelHop", "StrafeTest", "HypixelHop", "HypixelOld", "Mineplex", "Hop", "OnGround", "YPort", "OldHop", "OldSlow"), "Speed bypass method."));
+        addSetting(new Setting<>(MODE, new Options("Speed Mode", "HypixelHop", /*"StrafeTest", */"HypixelHop", "HypixelOld", "Mineplex", "Hop", "OnGround", "YPort", "OldHop", "OldSlow"), "Speed bypass method."));
     }
 
     private double defaultSpeed() {
@@ -197,64 +199,64 @@ public class Speed extends Module {
             return;
         }
         switch (currentMode) {
-            case "StrafeTest": {
-                if (event instanceof EventMove) {
-                    EventMove em = (EventMove) event;
-                    speed = MathHelper.sqrt_double(em.getX() * em.getX() + em.getZ() * em.getZ());
-
-                    //Stage checks if you're greater than 0 as step sets you -6 stage to make sure the player wont flag.
-                    if (stage > 0) {
-                        double forward = mc.thePlayer.movementInput.moveForward;
-                        double strafe = mc.thePlayer.movementInput.moveStrafe;
-                        TargetStrafe targetStrafe = Client.getModuleManager().get(TargetStrafe.class);
-                        float yaw = strafe == 0 && forward > 0 ? targetStrafe.getTargetYaw(mc.thePlayer.rotationYaw, em.getY()) : mc.thePlayer.rotationYaw;
-                        boolean isCircleStrafing = mc.thePlayer.rotationYaw != yaw;
-                        if (forward == 0.0f && strafe == 0.0f) {
-                            mc.thePlayer.setPosition(mc.thePlayer.posX + 1, mc.thePlayer.posY, mc.thePlayer.posZ + 1);
-                            mc.thePlayer.setPosition(mc.thePlayer.prevPosX, mc.thePlayer.posY, mc.thePlayer.prevPosZ);
-                            em.setX(mc.thePlayer.motionX = 0);
-                            em.setZ(mc.thePlayer.motionZ = 0);
-                        } else if (forward != 0.0f && !isCircleStrafing) {
-                            if (forward != 0.0D) {
-                                if (strafe > 0.0D) {
-                                    yaw += (forward > 0.0D ? -45 : 45);
-                                } else if (strafe < 0.0D) {
-                                    yaw += (forward > 0.0D ? 45 : -45);
-                                }
-                                strafe = 0.0D;
-                                if (forward > 0.0D) {
-                                    forward = 1;
-                                } else if (forward < 0.0D) {
-                                    forward = -1;
-                                }
-                            }
-                        }
-                        final double cos = Math.cos(Math.toRadians(yaw + 90.0F));
-                        final double sin = Math.sin(Math.toRadians(yaw + 90.0F));
-                        em.setX(mc.thePlayer.motionX = forward * speed * cos + strafe * speed * sin);
-                        em.setZ(mc.thePlayer.motionZ = forward * speed * sin - strafe * speed * cos);
-                    }
-                    //If the player is moving, step the stage up.
-                    if (mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f) {
-                        stage++;
-                    }
-                }
-                if (event instanceof EventMotionUpdate) {
-                    EventMotionUpdate em = (EventMotionUpdate) event;
-                    if (em.isPre()) {
-                        double xDist = mc.thePlayer.posX - mc.thePlayer.prevPosX;
-                        double zDist = mc.thePlayer.posZ - mc.thePlayer.prevPosZ;
-                        lastDist = Math.sqrt(xDist * xDist + zDist * zDist);
-
-                        if (lastDist > 0 && !PlayerUtil.isOnLiquid() && (strafeFix.getValue() && HypixelUtil.isVerifiedHypixel())) {
-                            if (em.isOnground()) {
-                                em.setY(em.getY() + 0.005625F + ((0.015625F - 0.005625F) * Math.random()));
-                            }
-                        }
-                    }
-                }
-                break;
-            }
+//            case "StrafeTest": {
+//                if (event instanceof EventMove) {
+//                    EventMove em = (EventMove) event;
+//                    speed = MathHelper.sqrt_double(em.getX() * em.getX() + em.getZ() * em.getZ());
+//
+//                    //Stage checks if you're greater than 0 as step sets you -6 stage to make sure the player wont flag.
+//                    if (stage > 0) {
+//                        double forward = mc.thePlayer.movementInput.moveForward;
+//                        double strafe = mc.thePlayer.movementInput.moveStrafe;
+//                        TargetStrafe targetStrafe = Client.getModuleManager().get(TargetStrafe.class);
+//                        float yaw = strafe == 0 && forward > 0 ? targetStrafe.getTargetYaw(mc.thePlayer.rotationYaw, em.getY()) : mc.thePlayer.rotationYaw;
+//                        boolean isCircleStrafing = mc.thePlayer.rotationYaw != yaw;
+//                        if (forward == 0.0f && strafe == 0.0f) {
+//                            mc.thePlayer.setPosition(mc.thePlayer.posX + 1, mc.thePlayer.posY, mc.thePlayer.posZ + 1);
+//                            mc.thePlayer.setPosition(mc.thePlayer.prevPosX, mc.thePlayer.posY, mc.thePlayer.prevPosZ);
+//                            em.setX(mc.thePlayer.motionX = 0);
+//                            em.setZ(mc.thePlayer.motionZ = 0);
+//                        } else if (forward != 0.0f && !isCircleStrafing) {
+//                            if (forward != 0.0D) {
+//                                if (strafe > 0.0D) {
+//                                    yaw += (forward > 0.0D ? -45 : 45);
+//                                } else if (strafe < 0.0D) {
+//                                    yaw += (forward > 0.0D ? 45 : -45);
+//                                }
+//                                strafe = 0.0D;
+//                                if (forward > 0.0D) {
+//                                    forward = 1;
+//                                } else if (forward < 0.0D) {
+//                                    forward = -1;
+//                                }
+//                            }
+//                        }
+//                        final double cos = Math.cos(Math.toRadians(yaw + 90.0F));
+//                        final double sin = Math.sin(Math.toRadians(yaw + 90.0F));
+//                        em.setX(mc.thePlayer.motionX = forward * speed * cos + strafe * speed * sin);
+//                        em.setZ(mc.thePlayer.motionZ = forward * speed * sin - strafe * speed * cos);
+//                    }
+//                    //If the player is moving, step the stage up.
+//                    if (mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f) {
+//                        stage++;
+//                    }
+//                }
+//                if (event instanceof EventMotionUpdate) {
+//                    EventMotionUpdate em = (EventMotionUpdate) event;
+//                    if (em.isPre()) {
+//                        double xDist = mc.thePlayer.posX - mc.thePlayer.prevPosX;
+//                        double zDist = mc.thePlayer.posZ - mc.thePlayer.prevPosZ;
+//                        lastDist = Math.sqrt(xDist * xDist + zDist * zDist);
+//
+//                        if (lastDist > 0 && !PlayerUtil.isOnLiquid() && (strafeFix.getValue() && HypixelUtil.isVerifiedHypixel())) {
+//                            if (em.isOnground()) {
+//                                em.setY(em.getY() + 0.005625F + ((0.015625F - 0.005625F) * Math.random()));
+//                            }
+//                        }
+//                    }
+//                }
+//                break;
+//            }
             case "HypixelHop": {
                 if (event instanceof EventMove) {
                     EventMove em = (EventMove) event;
@@ -283,7 +285,7 @@ public class Speed extends Module {
 
                     boolean canSprint = mc.thePlayer.getFoodStats().getFoodLevel() >= 6;
 
-                    double moveSpeed = speed = (defaultSpeed()) * ((mc.thePlayer.isInsideOfMaterial(Material.vine)) ? 0.5 : (mc.thePlayer.isSneaking()) ? 0.8 : (PlayerUtil.isInLiquid() ? 0.54 : (reset) ? 0.45 : ((mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.1, mc.thePlayer.posZ)).getBlock().slipperiness == 0.98f) ? 2.4 : canSprint ? ticks == 1 ? 0.793 : 1.0 : 0.765)));
+                    double moveSpeed = speed = (defaultSpeed()) * ((mc.thePlayer.isInsideOfMaterial(Material.vine)) ? 0.5 : (mc.thePlayer.isSneaking()) ? 0.8 : (PlayerUtil.isInLiquid() ? 0.54 : (reset) ? 0.45 : ((mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.1, mc.thePlayer.posZ)).getBlock().slipperiness == 0.98f) ? 2.4 : canSprint ? (ticks == 1 && firstSlow.getValue()) ? 0.793 : 1.0 : 0.765)));
 
                     int current = stage;
 
