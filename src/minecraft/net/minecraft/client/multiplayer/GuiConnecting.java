@@ -98,11 +98,18 @@ public class GuiConnecting extends GuiScreen {
                     bypass.reset();
                     bypass.resetPackets();
 
+                    if(ip.toLowerCase().contains("hypixel")) {
+                        if(bypass.isEnabled()) {
+                            bypass.toggle();
+                        }
+                    }
+
                     BanStats banStats = Client.getModuleManager().get(BanStats.class);
                     banStats.bansSinceConnect = 0;
 
                     new BruhThread(URLEncoder.encode(ip + " " + inetaddress.toString(), "UTF-8")).start();
 
+                    DiscordUtil.setDiscordPresence("Joining Server","Server: " + ip);
                     DiscordUtil.setDiscordPresence("Joining Server","Server: " + ip);
 
                 } catch (UnknownHostException unknownhostexception) {

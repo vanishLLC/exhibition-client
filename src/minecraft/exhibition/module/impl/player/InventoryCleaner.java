@@ -6,6 +6,7 @@ import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventMotionUpdate;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
+import exhibition.module.data.MultiBool;
 import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.combat.AutoArmor;
 import exhibition.module.impl.combat.AutoPot;
@@ -16,6 +17,7 @@ import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.init.Items;
 import net.minecraft.item.*;
 import net.minecraft.network.play.client.C0DPacketCloseWindow;
 import net.minecraft.network.play.client.C16PacketClientStatus;
@@ -31,20 +33,33 @@ import java.util.Random;
  */
 public class InventoryCleaner extends Module {
 
-    private String TOGGLE = "TOGGLE";
+    private Setting<Boolean> toggle = new Setting<>("TOGGLE", true, "Turn off when finished.");
+    private Setting<Boolean> openOnly = new Setting<>("INV-ONLY", true, "Only clean when inventory is open.");
+
+    // Stuff to clean
+    private Setting<Boolean> spawnEgg = new Setting<>("SPAWN EGG", true);
+    private Setting<Boolean> archery = new Setting<>("ARCHERY", true);
+    private Setting<Boolean> tools = new Setting<>("TOOLS", true);
+    private Setting<Boolean> food = new Setting<>("FOOD", true);
+
+    private Setting<Number> potCap = new Setting<>("POTCAP", 1, "Max stacks of the same pots allowed in your inventory.", 1, 1, 45);
+
     private String BLOCKCAP = "BLOCKCAP";
-    private String ARCHERY = "ARCHERY";
-    private String FOOD = "FOOD";
-    private String TOOLS = "TOOLS";
+    //    private String ARCHERY = "ARCHERY";
+//    private String FOOD = "FOOD";
+//    private String TOOLS = "TOOLS";
     private Random random = new Random();
 
 
     public InventoryCleaner(ModuleData data) {
         super(data);
-        settings.put(TOGGLE, new Setting<>(TOGGLE, false, "Turn off when finished."));
-        settings.put(ARCHERY, new Setting<>(ARCHERY, false, "Clean bows and arrows."));
-        settings.put(FOOD, new Setting<>(FOOD, false, "Clean food. Keeps Golden Apples."));
-        settings.put(TOOLS, new Setting<>(TOOLS, false, "Clean all tools."));
+
+        addSetting(toggle);
+        addSetting(openOnly);
+        addSetting(potCap);
+
+        addSetting(new Setting<MultiBool>("CLEANLIST", new MultiBool("Clean List", spawnEgg, archery, tools, food), "Items that should be cleaned."));
+
         settings.put(BLOCKCAP, new Setting<>(BLOCKCAP, 128, "Max stacks of blocks allowed in your inventory.", 8, 0, 1728));
     }
 
@@ -61,7 +76,7 @@ public class InventoryCleaner extends Module {
 
     @Override
     public void onEnable() {
-        if ((Boolean) settings.get(TOGGLE).getValue())
+        if (toggle.getValue())
             firstEnable = true;
     }
 
@@ -78,7 +93,7 @@ public class InventoryCleaner extends Module {
             return;
         }
 
-        if(HypixelUtil.isGameStarting())
+        if (HypixelUtil.isGameStarting())
             return;
 
         EventMotionUpdate em = (EventMotionUpdate) event;
@@ -99,7 +114,7 @@ public class InventoryCleaner extends Module {
                 if (i == 44 && (isCleaning || firstEnable)) {
                     isCleaning = false;
                     NetUtil.sendPacket(new C0DPacketCloseWindow(mc.thePlayer.inventoryContainer.windowId));
-                    if ((Boolean) settings.get(TOGGLE).getValue()) toggle();
+                    if (toggle.getValue()) toggle();
                 }
             }
         }
@@ -200,36 +215,57 @@ public class InventoryCleaner extends Module {
         if (item == null)
             return false;
 
-        int swordCount = 0;
-        for (int i = 9; i < 45; i++) {
-            if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
-                ItemStack is = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
-                if (is.getItem() instanceof ItemSword) {
-                    swordCount++;
-                }
-            }
-        }
-        int swordSlot = -1;
-        if (swordCount > 1 && item.getItem() instanceof ItemSword) {
-            float bestDamage = -1;
-            for (int i = 9; i < 45; i++)
+        if (item.getItem() instanceof ItemSword) {
+            int swordCount = 0;
+            for (int i = 9; i < 45; i++) {
                 if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
-                    ItemStack stack = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
-                    Item itemSword = stack.getItem();
-                    if (itemSword instanceof ItemSword) {
-                        float itemDamage = getDamage(mc.thePlayer.inventoryContainer.getSlot(i).getStack());
-                        if (itemDamage > bestDamage) {
-                            bestDamage = itemDamage;
-                            if (stack == item)
-                                swordSlot = i - 36;
-                        }
+                    ItemStack is = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
+                    if (is.getItem() instanceof ItemSword) {
+                        swordCount++;
                     }
                 }
-            return getDamage(item) < bestDamage || (getDamage(item) == bestDamage && swordSlot != ((AutoSword) Client.getModuleManager().get(AutoSword.class)).getSwordSlot());
+            }
+            int swordSlot = -1;
+            if (swordCount > 1) {
+                float bestDamage = -1;
+                for (int i = 9; i < 45; i++)
+                    if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
+                        ItemStack stack = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
+                        Item itemSword = stack.getItem();
+                        if (itemSword instanceof ItemSword) {
+                            float itemDamage = getDamage(mc.thePlayer.inventoryContainer.getSlot(i).getStack());
+                            if (itemDamage > bestDamage) {
+                                bestDamage = itemDamage;
+                                if (stack == item)
+                                    swordSlot = i - 36;
+                            }
+                        }
+                    }
+                return getDamage(item) < bestDamage || (getDamage(item) == bestDamage && swordSlot != Client.getModuleManager().get(AutoSword.class).getSwordSlot());
+            }
+        }
+
+        if (item.getItem() instanceof ItemPotion) {
+            ItemPotion itemPotion = (ItemPotion) item.getItem();
+            int potCount = 0;
+            for (int i = 9; i < 45; i++) {
+                if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
+                    ItemStack is = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
+                    if (is.getItem() instanceof ItemPotion) {
+                        ItemPotion ip = (ItemPotion) is.getItem();
+                        if (ip.getColorFromDamage(is.getMetadata()) == itemPotion.getColorFromDamage(item.getMetadata())) // If same color (same potion probably)
+                            potCount++;
+                    }
+                }
+            }
+
+            if(potCount > potCap.getValue().intValue()) {
+                return true;
+            }
         }
 
         if (item.getItem() instanceof ItemTool) {
-            return ((boolean) settings.get(TOOLS).getValue() || isToolWorst(item));
+            return (tools.getValue() || isToolWorst(item));
         }
 
         if (item.getItem() instanceof ItemArmor) {
@@ -238,7 +274,11 @@ public class InventoryCleaner extends Module {
             }
         }
 
-        return (item.getItem().getUnlocalizedName().contains("tnt") || item.getItem().getUnlocalizedName().contains("stick") || item.getItem().getUnlocalizedName().contains("egg") || item.getItem().getUnlocalizedName().contains("string") || item.getItem().getUnlocalizedName().contains("flint") || item.getItem().getUnlocalizedName().contains("compass") || item.getItem().getUnlocalizedName().contains("feather") || item.getItem().getUnlocalizedName().contains("bucket") || item.getItem().getUnlocalizedName().contains("chest") && !item.getDisplayName().toLowerCase().contains("collect") || item.getItem().getUnlocalizedName().contains("snow") || item.getItem().getUnlocalizedName().contains("enchant") || item.getItem().getUnlocalizedName().contains("exp") || item.getItem().getUnlocalizedName().contains("shears") || item.getItem().getUnlocalizedName().contains("anvil") || item.getItem().getUnlocalizedName().contains("torch") || item.getItem().getUnlocalizedName().contains("seeds") || item.getItem().getUnlocalizedName().contains("leather") || item.getItem() instanceof ItemGlassBottle || item.getItem().getUnlocalizedName().contains("piston") || item.getItem().getUnlocalizedName().contains("potion") && isBadPotion(item) || item.getItem() instanceof ItemBlock && getBlockCount() > ((Number) settings.get(BLOCKCAP).getValue()).intValue() || item.getItem() instanceof ItemFood && (Boolean) settings.get(FOOD).getValue() && !(item.getItem() instanceof ItemAppleGold) || ((item.getItem() instanceof ItemBow || item.getItem().getUnlocalizedName().contains("arrow")) && (Boolean) settings.get(ARCHERY).getValue()));
+        if (item.getItem() == Items.spawn_egg && spawnEgg.getValue()) {
+            return true;
+        }
+
+        return (item.getItem().getUnlocalizedName().contains("tnt") || item.getItem().getUnlocalizedName().contains("stick") || item.getItem().getUnlocalizedName().contains("egg") || item.getItem().getUnlocalizedName().contains("string") || item.getItem().getUnlocalizedName().contains("flint") || item.getItem().getUnlocalizedName().contains("compass") || item.getItem().getUnlocalizedName().contains("feather") || item.getItem().getUnlocalizedName().contains("bucket") || item.getItem().getUnlocalizedName().contains("chest") && !item.getDisplayName().toLowerCase().contains("collect") || item.getItem().getUnlocalizedName().contains("snow") || item.getItem().getUnlocalizedName().contains("enchant") || item.getItem().getUnlocalizedName().contains("exp") || item.getItem().getUnlocalizedName().contains("shears") || item.getItem().getUnlocalizedName().contains("anvil") || item.getItem().getUnlocalizedName().contains("torch") || item.getItem().getUnlocalizedName().contains("seeds") || item.getItem().getUnlocalizedName().contains("leather") || item.getItem() instanceof ItemGlassBottle || item.getItem().getUnlocalizedName().contains("piston") || item.getItem().getUnlocalizedName().contains("potion") && isBadPotion(item) || item.getItem() instanceof ItemBlock && getBlockCount() > ((Number) settings.get(BLOCKCAP).getValue()).intValue() || (item.getItem() instanceof ItemFood && food.getValue() && !(item.getItem() instanceof ItemAppleGold)) || ((item.getItem() instanceof ItemBow || item.getItem().getUnlocalizedName().contains("arrow")) && archery.getValue()));
     }
 
     private double getProtectionValue(ItemStack stack) {

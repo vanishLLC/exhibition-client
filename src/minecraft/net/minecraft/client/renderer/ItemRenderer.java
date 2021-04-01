@@ -407,10 +407,24 @@ public class ItemRenderer
                     case BLOCK:
                         /**/
                         GL11.glTranslated(-0.1, 0.15, 0);
-                        Animations animations = (Animations) Client.getModuleManager().get(Animations.class);
+                        Animations animations = Client.getModuleManager().get(Animations.class);
                         switch (animations.getSelected()) {
                             case "Swing": {
                                 this.transformFirstPersonItem(f / 2, f1);
+                                break;
+                            }
+                            case "E": {
+                                this.transformFirstPersonItem(f / 2.5F, 0);
+                                float var15 = MathHelper.sin(MathHelper.sqrt_float(f1) * 3.1415927F);
+                                GlStateManager.translate(-0.1, 0.075, -0.1);
+                                GlStateManager.translate(0, -var15 * 0.1, 0);
+                                GlStateManager.rotate(var15 * 30, -0.5F, 0, 0);
+
+
+//                                GlStateManager.translate(var15 * 0.6, 0.5, -var15 * 0.6);
+//                                GlStateManager.rotate(20,-1,0,0);
+//                                GlStateManager.rotate(75,0,-1,0);
+//                                GlStateManager.rotate(-5,0,0,1);
                                 break;
                             }
                             case "Swack": {

@@ -9,6 +9,7 @@ import exhibition.Client;
 import exhibition.event.Event;
 import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventMotionUpdate;
+import exhibition.event.impl.EventMove;
 import exhibition.event.impl.EventRender3D;
 import exhibition.management.ColorManager;
 import exhibition.management.friend.FriendManager;
@@ -46,7 +47,6 @@ public class TargetStrafe extends Module {
     private Setting<Boolean> behind = new Setting<>("BEHIND", false, "Attempts to move behind the target if possible.");
     private Setting teams = new Setting<>("TEAMS", false, "Ignores enemies on the same team.");
     private Setting flip = new Setting<>("ANTI-STUCK", true, "Attempts to stop you from getting stuck.");
-    private Setting autoPriority = new Setting<>("AUTO-PRIORITY", true, "Automatically prioritizes whoever you target. (Like a Magnet)");
 
     private Options targetMode = new Options("Target Mode", "Nearby", "Nearby", "Priority", "Aura Only");
     private Options pathMode = new Options("Path Mode", "Normal", "Normal", "Adaptive");
@@ -57,13 +57,11 @@ public class TargetStrafe extends Module {
     private Setting<Number> offset = new Setting<>("OFFSET", 0, "Angle offset for Behind", 5, -180, 180);
 
     private boolean reverse = false;
-    private boolean collidedLast = false;
 
     private Timer delay = new Timer();
 
     public TargetStrafe(ModuleData data) {
         super(data);
-        addSetting(autoPriority.getName(), autoPriority);
         addSetting(flip);
         addSetting(behind);
         addSetting(teams);
@@ -78,50 +76,25 @@ public class TargetStrafe extends Module {
     @Override
     public void onEnable() {
         reverse = false;
-        collidedLast = false;
+    }
+
+    @Override
+    public Priority getPriority() {
+        return Priority.FIRST;
     }
 
     public boolean isSmart() {
         return pathMode.getSelected().equalsIgnoreCase("Adaptive");
     }
 
-    @RegisterEvent(events = {EventMotionUpdate.class, EventRender3D.class})
+    @RegisterEvent(events = {EventMotionUpdate.class, EventRender3D.class, EventMove.class})
     public void onEvent(Event event) {
         double rad = ((Number) radius.getValue()).doubleValue();
         double range = ((Number) this.range.getValue()).doubleValue();
 
-        boolean magnet = (boolean) autoPriority.getValue();
+        boolean isStrafing = (Client.getModuleManager().isEnabled(Speed.class) || Client.getModuleManager().get(LongJump.class).allowTargetStrafe() || Client.getModuleManager().get(Fly.class).allowTargetStrafe());
 
-        boolean isStrafing = (Client.getModuleManager().isEnabled(Speed.class) || Client.getModuleManager().get(LongJump.class).allowTargetStrafe() || ((Fly) Client.getModuleManager().get(Fly.class)).allowTargetStrafe());
-
-        if (event instanceof EventMotionUpdate) {
-            EventMotionUpdate em = event.cast();
-            if (em.isPre()) {
-                setSuffix(pathMode.getSelected());
-                target = null;
-                target = Killaura.getTarget();
-                if (target == null && !targetMode.getSelected().equals("Aura Only")) {
-                    for (Entity entity : mc.theWorld.getPlayerEntities().stream().filter(Entity::isPlayerMP).sorted(Comparator.comparingDouble(o -> -o.getDistanceToEntity(mc.thePlayer))).collect(Collectors.toList())) {
-                        if (!AntiBot.isBot(entity) && !FriendManager.isFriend(entity.getName())) {
-                            EntityPlayer ent = (EntityPlayer) entity;
-                            boolean nearest = targetMode.getSelected().equalsIgnoreCase("Nearby");
-                            if ((nearest || (targetMode.getSelected().equals("Priority") && TargetESP.isPriority(ent)) || (targetMode.getSelected().equals("Aura Only") && Killaura.getTarget() == ent)) && mc.thePlayer.getDistanceToEntity(ent) <= range && (!(boolean) teams.getValue() || !TeamUtils.isTeam(mc.thePlayer, ent))) {
-                                target = ent;
-                                if (ent != Client.getModuleManager().get(Killaura.class).vip && magnet) {
-                                    Client.getModuleManager().get(Killaura.class).vip = ent;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if ((boolean) flip.getValue() && mc.thePlayer.isCollidedHorizontally && !collidedLast && delay.delay(450)) {
-                    reverse = !reverse;
-                    delay.reset();
-                }
-                collidedLast = mc.thePlayer.isCollidedHorizontally;
-            }
-        } else {
+        if(event instanceof EventRender3D){
             EventRender3D er = event.cast();
             float pTicks = er.renderPartialTicks;
 
@@ -157,247 +130,274 @@ public class TargetStrafe extends Module {
                     GlStateManager.popMatrix();
                 }
             } else {
-                if (target != null) {
-                    double x = (target.prevPosX + (target.posX - target.prevPosX) * pTicks) - RenderManager.renderPosX;
-                    double y = (target.prevPosY + (target.posY - target.prevPosY) * pTicks) - RenderManager.renderPosY;
-                    double z = (target.prevPosZ + (target.posZ - target.prevPosZ) * pTicks) - RenderManager.renderPosZ;
+//                if (target != null) {
+//                    double x = (target.prevPosX + (target.posX - target.prevPosX) * pTicks) - RenderManager.renderPosX;
+//                    double y = (target.prevPosY + (target.posY - target.prevPosY) * pTicks) - RenderManager.renderPosY;
+//                    double z = (target.prevPosZ + (target.posZ - target.prevPosZ) * pTicks) - RenderManager.renderPosZ;
+//
+//                    float factor = 10;
+//                    double var41 = 0.4;
+//                    GlStateManager.pushMatrix();
+//                    double lastRad = -1;
+//
+//                    List<Vec3> posList = new ArrayList<>();
+//
+//                    Vec3 closest = null;
+//
+//                    double lowestDist = Double.MAX_VALUE;
+//
+//                    for (int i = 0; i < (360F / factor); i++) {
+//                        double cos = Math.cos((i * factor) * (Math.PI * 2 / 360));
+//                        double sin = Math.sin((i * factor) * (Math.PI * 2 / 360));
+//                        double rotY = (rad * cos);
+//                        double rotX = (rad * sin);
+//
+//                        double diffX = (target.posX + rotX) - mc.thePlayer.posX;
+//                        double diffZ = (target.posZ + rotY) - mc.thePlayer.posZ;
+//                        double diffY = (target.posY - mc.thePlayer.posY);
+//
+//                        boolean isVoid = !(Client.getModuleManager().isEnabled(LongJump.class) || Client.getModuleManager().isEnabled(Fly.class));
+//
+//                        for (int _y = (int) target.posY; _y >= 0; _y--) {
+//                            if (!(mc.theWorld.getBlockState(new BlockPos(target.posX + rotX, _y, target.posZ + rotY)).getBlock() instanceof BlockAir)) {
+//                                isVoid = false;
+//                                break;
+//                            }
+//                        }
+//
+//                        boolean isFineTick = !isSmart() || (mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(diffX, 0, diffZ).expand(var41, 0, var41)).isEmpty() && !isVoid) && lastRad == -1;
+//
+//                        GlStateManager.pushMatrix();
+//                        RenderingUtil.pre3D();
+//                        GlStateManager.translate(x + rotX, y, z + rotY);
+//                        AxisAlignedBB var12 = new AxisAlignedBB(-0.025, -0.025, -0.025, 0.025, 0.025, 0.025);
+//                        RenderingUtil.glColor(isFineTick ? -1 : Colors.getColor(255, 150, 0));
+//                        RenderingUtil.drawBoundingBox(var12);
+//                        RenderingUtil.post3D();
+//                        GlStateManager.popMatrix();
+//
+//                        double increment = 0.1;
+//
+//                        Vec3 vec = new Vec3(rotX, 0, rotY);
+//
+//                        List<Vec3> validPoints = new ArrayList<>();
+//
+//                        if (!isFineTick || lastRad != -1) {
+//                            for (int bruh = 1; bruh < 30; bruh++) {
+//                                double posRad = rad + (increment * bruh);
+//
+//                                double adjustedRad = posRad;
+//
+//                                double rotPosX = (adjustedRad * cos);
+//                                double rotPosY = (adjustedRad * sin);
+//
+//                                double diffPosX = (target.posX + rotPosX) - mc.thePlayer.posX;
+//                                double diffPosZ = (target.posZ + rotPosY) - mc.thePlayer.posZ;
+//
+//                                boolean willNotCollide = mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(diffPosX, 0, diffPosZ).expand(var41, 0, var41)).isEmpty();
+//
+//                                boolean isCurrentlyVoid = !(Client.getModuleManager().isEnabled(LongJump.class) || Client.getModuleManager().isEnabled(Fly.class));
+//
+//                                for (int _y = (int) target.posY; _y >= 0; _y--) {
+//                                    if (!(mc.theWorld.getBlockState(new BlockPos(target.posX + rotPosX, _y, target.posZ + rotPosY)).getBlock() instanceof BlockAir)) {
+//                                        isCurrentlyVoid = false;
+//                                        break;
+//                                    }
+//                                }
+//
+//                                boolean isFinePos = willNotCollide && !isCurrentlyVoid;
+//
+//                                if (!isFinePos) {
+//                                    GlStateManager.pushMatrix();
+//                                    RenderingUtil.pre3D();
+//                                    GlStateManager.translate(x + rotPosX, y, z + rotPosY);
+//                                    RenderingUtil.glColor(isFinePos ? Colors.getColor(0, 255, 0, 255) : Colors.getColor(255, 0, 0, 30));
+//                                    RenderingUtil.drawBoundingBox(var12);
+//                                    RenderingUtil.post3D();
+//                                    GlStateManager.popMatrix();
+//                                }
+//
+//                                if (isFinePos) {
+//                                    isFineTick = true;
+//                                    vec = new Vec3(rotPosX, 0, rotPosY);
+//                                    validPoints.add(vec);
+//                                }
+//                            }
+//
+//                            int lowest = (int) (rad / increment);
+//
+//                            for (int bruh = 1; bruh < lowest; bruh++) {
+//                                double posRad = rad - (increment * bruh);
+//
+//                                double adjustedRad = posRad;
+//
+//                                double rotPosX = (adjustedRad * cos);
+//                                double rotPosY = (adjustedRad * sin);
+//
+//                                double diffPosX = (target.posX + rotPosX) - mc.thePlayer.posX;
+//                                double diffPosZ = (target.posZ + rotPosY) - mc.thePlayer.posZ;
+//
+//                                boolean willNotCollide = mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(diffPosX, 0, diffPosZ).expand(var41, 0, var41)).isEmpty();
+//
+//                                boolean isCurrentlyVoid = !(Client.getModuleManager().isEnabled(LongJump.class) || Client.getModuleManager().isEnabled(Fly.class));
+//
+//                                for (int _y = (int) target.posY; _y >= 0; _y--) {
+//                                    if (!(mc.theWorld.getBlockState(new BlockPos(target.posX + rotPosX, _y, target.posZ + rotPosY)).getBlock() instanceof BlockAir)) {
+//                                        isCurrentlyVoid = false;
+//                                        break;
+//                                    }
+//                                }
+//
+//                                boolean isFinePos = willNotCollide && !isCurrentlyVoid;
+//
+//                                if (!isFinePos) {
+//                                    GlStateManager.pushMatrix();
+//                                    RenderingUtil.pre3D();
+//                                    GlStateManager.translate(x + rotPosX, y, z + rotPosY);
+//                                    RenderingUtil.glColor(isFinePos ? Colors.getColor(0, 255, 0, 255) : Colors.getColor(255, 0, 0, 30));
+//                                    RenderingUtil.drawBoundingBox(var12);
+//                                    RenderingUtil.post3D();
+//                                    GlStateManager.popMatrix();
+//                                }
+//
+//                                if (isFinePos) {
+//                                    vec = new Vec3(rotPosX, 0, rotPosY);
+//                                    validPoints.add(vec);
+//                                }
+//                            }
+//
+//                            Vec3 closestValid = null;
+//
+//                            double currentRad = Double.MAX_VALUE;
+//
+//                            double lastPosRad = lastRad;
+//
+//                            for (Vec3 validPoint : validPoints) {
+//                                double radius = Math.sqrt(validPoint.getX() * validPoint.getX() + validPoint.getZ() * validPoint.getZ());
+//
+//                                double radDiff = Math.abs(lastPosRad - radius);
+//                                if (lastRad == rad || radDiff < currentRad) {
+//                                    currentRad = radDiff;
+//                                    lastRad = radius;
+//                                    closestValid = validPoint;
+//                                }
+//
+//                            }
+//
+//                            if (closestValid != null) {
+//                                GlStateManager.pushMatrix();
+//                                RenderingUtil.pre3D();
+//                                GlStateManager.translate(x + closestValid.getX(), y, z + closestValid.getZ());
+//                                RenderingUtil.glColor(Colors.getColor(150, 150, 255, 255));
+//                                RenderingUtil.drawBoundingBox(var12);
+//                                RenderingUtil.post3D();
+//                                GlStateManager.popMatrix();
+//                                vec = closestValid;
+//                            }
+//                        } else {
+//                            vec = new Vec3(rotX, 0, rotY);
+//                            posList.add(vec);
+//                        }
+//
+////                        double realX = x + vec.getX() + RenderManager.renderPosX;
+////                        double realZ = z + vec.getZ() + RenderManager.renderPosZ;
+////
+////                        float rotationOffset = RotationUtils.getYawChangeGiven(realX, realZ, mc.thePlayer.rotationYaw);
+////
+////                        double mx = Math.cos(Math.toRadians(mc.thePlayer.rotationYaw + rotationOffset + 90));
+////                        double mz = Math.sin(Math.toRadians(mc.thePlayer.rotationYaw + rotationOffset + 90));
+////
+////                        double predictedX = mc.thePlayer.posX - RenderManager.renderPosX;
+////                        double predictedZ = mc.thePlayer.posZ - RenderManager.renderPosZ;
+////
+////                        double posX = vec.getX();
+////                        double posZ = vec.getZ();
+////
+////                        double d0 = 0 - posX;
+////                        double d2 = 0 - posZ;
+////
+////                        double hypot = Math.hypot(d0, d2);
+//
+//                        double distance = mc.thePlayer.getDistance(x + vec.getX() + RenderManager.renderPosX, mc.thePlayer.posY, z + vec.getZ() + RenderManager.renderPosZ);
+//                        if (distance < lowestDist) {
+//                            lowestDist = distance;
+//                            closest = vec;
+//                        }
+//
+////                        GL11.glLineWidth(2);
+////                        RenderingUtil.draw3DLine(0,0,0, hypot * mx, y, hypot * mz, Colors.getColor(0, 150));
+//
+//
+//                        //GL11.glLineWidth(5);
+//                        //RenderingUtil.draw3DLine(x + rotX, y, z + rotY, x + rotX2, y, z + rotY2, Client.getModuleManager().isEnabled(Speed.class) ? Colors.getColor(120, 255, 120, 255) : Colors.getColor(255, 255));
+//                    }
+//
+//                    if (closest != null) {
+//                        GlStateManager.pushMatrix();
+//                        RenderingUtil.pre3D();
+//                        GlStateManager.translate(x + closest.getX(), y, z + closest.getZ());
+//                        RenderingUtil.glColor(Colors.getColor(255, 255, 0, 255));
+//                        AxisAlignedBB var12 = new AxisAlignedBB(-0.05, -0.025, -0.05, 0.05, 0.025, 0.05);
+//                        RenderingUtil.drawBoundingBox(var12);
+//                        RenderingUtil.post3D();
+//                        GlStateManager.popMatrix();
+//                    }
+//
+//                    Vec3 bestPos = null;
+//                    for (Vec3 vec3 : posList) {
+//
+//                        float currentYaw = getEntityYawToPos(target, vec3.getX(), vec3.getZ());
+//
+//                        float bestYaw = bestPos == null ? 0 : getEntityYawToPos(target, bestPos.getX(), bestPos.getZ());
+//
+//                        double bestDistance = Math.abs(MathHelper.wrapAngleTo180_float(bestYaw));
+//
+//                        double currentDistance = Math.abs(MathHelper.wrapAngleTo180_float(currentYaw));
+//
+//                        if (currentDistance >= bestDistance && currentDistance > 150) {
+//                            bestPos = vec3;
+//                        }
+//                    }
+//
+//                    if (bestPos != null) {
+//                        GlStateManager.pushMatrix();
+//                        RenderingUtil.pre3D();
+//                        GlStateManager.translate(x + bestPos.getX(), y, z + bestPos.getZ());
+//                        RenderingUtil.glColor(Colors.getColor(0, 0, 255, 255));
+//                        AxisAlignedBB var12 = new AxisAlignedBB(-0.025, -0.025, -0.025, 0.025, 0.025, 0.025);
+//                        RenderingUtil.drawBoundingBox(var12);
+//                        RenderingUtil.post3D();
+//                        GlStateManager.popMatrix();
+//                    }
+//
+//                    GlStateManager.popMatrix();
+//                }
+            }
+        }
 
-                    float factor = 10;
-                    double var41 = 0.4;
-                    GlStateManager.pushMatrix();
-                    double lastRad = -1;
-
-                    List<Vec3> posList = new ArrayList<>();
-
-                    Vec3 closest = null;
-
-                    double lowestDist = Double.MAX_VALUE;
-
-                    for (int i = 0; i < (360F / factor); i++) {
-                        double cos = Math.cos((i * factor) * (Math.PI * 2 / 360));
-                        double sin = Math.sin((i * factor) * (Math.PI * 2 / 360));
-                        double rotY = (rad * cos);
-                        double rotX = (rad * sin);
-
-                        double diffX = (target.posX + rotX) - mc.thePlayer.posX;
-                        double diffZ = (target.posZ + rotY) - mc.thePlayer.posZ;
-                        double diffY = (target.posY - mc.thePlayer.posY);
-
-                        boolean isVoid = !(Client.getModuleManager().isEnabled(LongJump.class) || Client.getModuleManager().isEnabled(Fly.class));
-
-                        for (int _y = (int) target.posY; _y >= 0; _y--) {
-                            if (!(mc.theWorld.getBlockState(new BlockPos(target.posX + rotX, _y, target.posZ + rotY)).getBlock() instanceof BlockAir)) {
-                                isVoid = false;
-                                break;
+        if(event instanceof EventMove) {
+            if ((boolean) flip.getValue() && mc.thePlayer.isCollidedHorizontally && delay.delay(450)) {
+                reverse = !reverse;
+                delay.reset();
+            }
+        }
+        if (event instanceof EventMotionUpdate) {
+            EventMotionUpdate em = event.cast();
+            if (em.isPre()) {
+                setSuffix(pathMode.getSelected());
+                target = null;
+                if (targetMode.getSelected().equals("Aura Only")) {
+                    target = Killaura.getTarget();
+                } else {
+                    for (Entity entity : mc.theWorld.getPlayerEntities().stream().filter(Entity::isPlayerMP).sorted(Comparator.comparingDouble(o -> -o.getDistanceToEntity(mc.thePlayer))).collect(Collectors.toList())) {
+                        if (!AntiBot.isBot(entity) && !FriendManager.isFriend(entity.getName())) {
+                            EntityPlayer ent = (EntityPlayer) entity;
+                            boolean nearest = targetMode.getSelected().equalsIgnoreCase("Nearby");
+                            if ((nearest || (targetMode.getSelected().equals("Priority") && TargetESP.isPriority(ent)) || (targetMode.getSelected().equals("Aura Only") && Killaura.getTarget() == ent)) && mc.thePlayer.getDistanceToEntity(ent) <= range && (!(boolean) teams.getValue() || !TeamUtils.isTeam(mc.thePlayer, ent))) {
+                                target = ent;
                             }
                         }
-
-                        boolean isFineTick = !isSmart() || (mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(diffX, 0, diffZ).expand(var41, 0, var41)).isEmpty() && !isVoid) && lastRad == -1;
-
-                        GlStateManager.pushMatrix();
-                        RenderingUtil.pre3D();
-                        GlStateManager.translate(x + rotX, y, z + rotY);
-                        AxisAlignedBB var12 = new AxisAlignedBB(-0.025, -0.025, -0.025, 0.025, 0.025, 0.025);
-                        RenderingUtil.glColor(isFineTick ? -1 : Colors.getColor(255, 150, 0));
-                        RenderingUtil.drawBoundingBox(var12);
-                        RenderingUtil.post3D();
-                        GlStateManager.popMatrix();
-
-                        double increment = 0.1;
-
-                        Vec3 vec = new Vec3(rotX, 0, rotY);
-
-                        List<Vec3> validPoints = new ArrayList<>();
-
-                        if (!isFineTick || lastRad != -1) {
-                            for (int bruh = 1; bruh < 30; bruh++) {
-                                double posRad = rad + (increment * bruh);
-
-                                double adjustedRad = posRad;
-
-                                double rotPosX = (adjustedRad * cos);
-                                double rotPosY = (adjustedRad * sin);
-
-                                double diffPosX = (target.posX + rotPosX) - mc.thePlayer.posX;
-                                double diffPosZ = (target.posZ + rotPosY) - mc.thePlayer.posZ;
-
-                                boolean willNotCollide = mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(diffPosX, 0, diffPosZ).expand(var41, 0, var41)).isEmpty();
-
-                                boolean isCurrentlyVoid = !(Client.getModuleManager().isEnabled(LongJump.class) || Client.getModuleManager().isEnabled(Fly.class));
-
-                                for (int _y = (int) target.posY; _y >= 0; _y--) {
-                                    if (!(mc.theWorld.getBlockState(new BlockPos(target.posX + rotPosX, _y, target.posZ + rotPosY)).getBlock() instanceof BlockAir)) {
-                                        isCurrentlyVoid = false;
-                                        break;
-                                    }
-                                }
-
-                                boolean isFinePos = willNotCollide && !isCurrentlyVoid;
-
-                                if (!isFinePos) {
-                                    GlStateManager.pushMatrix();
-                                    RenderingUtil.pre3D();
-                                    GlStateManager.translate(x + rotPosX, y, z + rotPosY);
-                                    RenderingUtil.glColor(isFinePos ? Colors.getColor(0, 255, 0, 255) : Colors.getColor(255, 0, 0, 30));
-                                    RenderingUtil.drawBoundingBox(var12);
-                                    RenderingUtil.post3D();
-                                    GlStateManager.popMatrix();
-                                }
-
-                                if (isFinePos) {
-                                    isFineTick = true;
-                                    vec = new Vec3(rotPosX, 0, rotPosY);
-                                    validPoints.add(vec);
-                                }
-                            }
-
-                            int lowest = (int) (rad / increment);
-
-                            for (int bruh = 1; bruh < lowest; bruh++) {
-                                double posRad = rad - (increment * bruh);
-
-                                double adjustedRad = posRad;
-
-                                double rotPosX = (adjustedRad * cos);
-                                double rotPosY = (adjustedRad * sin);
-
-                                double diffPosX = (target.posX + rotPosX) - mc.thePlayer.posX;
-                                double diffPosZ = (target.posZ + rotPosY) - mc.thePlayer.posZ;
-
-                                boolean willNotCollide = mc.theWorld.getCollidingBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(diffPosX, 0, diffPosZ).expand(var41, 0, var41)).isEmpty();
-
-                                boolean isCurrentlyVoid = !(Client.getModuleManager().isEnabled(LongJump.class) || Client.getModuleManager().isEnabled(Fly.class));
-
-                                for (int _y = (int) target.posY; _y >= 0; _y--) {
-                                    if (!(mc.theWorld.getBlockState(new BlockPos(target.posX + rotPosX, _y, target.posZ + rotPosY)).getBlock() instanceof BlockAir)) {
-                                        isCurrentlyVoid = false;
-                                        break;
-                                    }
-                                }
-
-                                boolean isFinePos = willNotCollide && !isCurrentlyVoid;
-
-                                if (!isFinePos) {
-                                    GlStateManager.pushMatrix();
-                                    RenderingUtil.pre3D();
-                                    GlStateManager.translate(x + rotPosX, y, z + rotPosY);
-                                    RenderingUtil.glColor(isFinePos ? Colors.getColor(0, 255, 0, 255) : Colors.getColor(255, 0, 0, 30));
-                                    RenderingUtil.drawBoundingBox(var12);
-                                    RenderingUtil.post3D();
-                                    GlStateManager.popMatrix();
-                                }
-
-                                if (isFinePos) {
-                                    vec = new Vec3(rotPosX, 0, rotPosY);
-                                    validPoints.add(vec);
-                                }
-                            }
-
-                            Vec3 closestValid = null;
-
-                            double currentRad = Double.MAX_VALUE;
-
-                            double lastPosRad = lastRad;
-
-                            for (Vec3 validPoint : validPoints) {
-                                double radius = Math.sqrt(validPoint.getX() * validPoint.getX() + validPoint.getZ() * validPoint.getZ());
-
-                                double radDiff = Math.abs(lastPosRad - radius);
-                                if (lastRad == rad || radDiff < currentRad) {
-                                    currentRad = radDiff;
-                                    lastRad = radius;
-                                    closestValid = validPoint;
-                                }
-
-                            }
-
-                            if (closestValid != null) {
-                                GlStateManager.pushMatrix();
-                                RenderingUtil.pre3D();
-                                GlStateManager.translate(x + closestValid.getX(), y, z + closestValid.getZ());
-                                RenderingUtil.glColor(Colors.getColor(150, 150, 255, 255));
-                                RenderingUtil.drawBoundingBox(var12);
-                                RenderingUtil.post3D();
-                                GlStateManager.popMatrix();
-                                vec = closestValid;
-                            }
-                        } else {
-                            vec = new Vec3(rotX, 0, rotY);
-                            posList.add(vec);
-                        }
-
-//                        double realX = x + vec.getX() + RenderManager.renderPosX;
-//                        double realZ = z + vec.getZ() + RenderManager.renderPosZ;
-//
-//                        float rotationOffset = RotationUtils.getYawChangeGiven(realX, realZ, mc.thePlayer.rotationYaw);
-//
-//                        double mx = Math.cos(Math.toRadians(mc.thePlayer.rotationYaw + rotationOffset + 90));
-//                        double mz = Math.sin(Math.toRadians(mc.thePlayer.rotationYaw + rotationOffset + 90));
-//
-//                        double predictedX = mc.thePlayer.posX - RenderManager.renderPosX;
-//                        double predictedZ = mc.thePlayer.posZ - RenderManager.renderPosZ;
-//
-//                        double posX = vec.getX();
-//                        double posZ = vec.getZ();
-//
-//                        double d0 = 0 - posX;
-//                        double d2 = 0 - posZ;
-//
-//                        double hypot = Math.hypot(d0, d2);
-
-                        double distance = mc.thePlayer.getDistance(x + vec.getX() + RenderManager.renderPosX, mc.thePlayer.posY, z + vec.getZ() + RenderManager.renderPosZ);
-                        if (distance < lowestDist) {
-                            lowestDist = distance;
-                            closest = vec;
-                        }
-
-//                        GL11.glLineWidth(2);
-//                        RenderingUtil.draw3DLine(0,0,0, hypot * mx, y, hypot * mz, Colors.getColor(0, 150));
-
-
-                        //GL11.glLineWidth(5);
-                        //RenderingUtil.draw3DLine(x + rotX, y, z + rotY, x + rotX2, y, z + rotY2, Client.getModuleManager().isEnabled(Speed.class) ? Colors.getColor(120, 255, 120, 255) : Colors.getColor(255, 255));
                     }
-
-                    if (closest != null) {
-                        GlStateManager.pushMatrix();
-                        RenderingUtil.pre3D();
-                        GlStateManager.translate(x + closest.getX(), y, z + closest.getZ());
-                        RenderingUtil.glColor(Colors.getColor(255, 255, 0, 255));
-                        AxisAlignedBB var12 = new AxisAlignedBB(-0.05, -0.025, -0.05, 0.05, 0.025, 0.05);
-                        RenderingUtil.drawBoundingBox(var12);
-                        RenderingUtil.post3D();
-                        GlStateManager.popMatrix();
-                    }
-
-                    Vec3 bestPos = null;
-                    for (Vec3 vec3 : posList) {
-
-                        float currentYaw = getEntityYawToPos(target, vec3.getX(), vec3.getZ());
-
-                        float bestYaw = bestPos == null ? 0 : getEntityYawToPos(target, bestPos.getX(), bestPos.getZ());
-
-                        double bestDistance = Math.abs(MathHelper.wrapAngleTo180_float(bestYaw));
-
-                        double currentDistance = Math.abs(MathHelper.wrapAngleTo180_float(currentYaw));
-
-                        if (currentDistance >= bestDistance && currentDistance > 150) {
-                            bestPos = vec3;
-                        }
-                    }
-
-                    if (bestPos != null) {
-                        GlStateManager.pushMatrix();
-                        RenderingUtil.pre3D();
-                        GlStateManager.translate(x + bestPos.getX(), y, z + bestPos.getZ());
-                        RenderingUtil.glColor(Colors.getColor(0, 0, 255, 255));
-                        AxisAlignedBB var12 = new AxisAlignedBB(-0.025, -0.025, -0.025, 0.025, 0.025, 0.025);
-                        RenderingUtil.drawBoundingBox(var12);
-                        RenderingUtil.post3D();
-                        GlStateManager.popMatrix();
-                    }
-
-                    GlStateManager.popMatrix();
                 }
             }
         }
@@ -468,7 +468,7 @@ public class TargetStrafe extends Module {
                     correctedY = var18.calculateYOffset(tempBoundingBox, correctedY);
                 }
 
-                if(correctedY != motionY) {
+                if (correctedY != motionY) {
                     correctedY += 0.1;
                 }
 
@@ -500,7 +500,7 @@ public class TargetStrafe extends Module {
                             correctedYTemp = var18.calculateYOffset(tempBoundingBoxTemp, correctedYTemp);
                         }
 
-                        if(correctedYTemp != motionY) {
+                        if (correctedYTemp != motionY) {
                             correctedYTemp += 0.1;
                         }
 
@@ -546,7 +546,7 @@ public class TargetStrafe extends Module {
                             correctedYTemp = var18.calculateYOffset(tempBoundingBoxTemp, correctedYTemp);
                         }
 
-                        if(correctedYTemp != motionY) {
+                        if (correctedYTemp != motionY) {
                             correctedYTemp += 0.1;
                         }
 

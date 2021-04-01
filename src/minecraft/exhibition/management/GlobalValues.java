@@ -18,8 +18,8 @@ public class GlobalValues {
 
     public static Setting<Boolean> scaleFix = new Setting<>("Scale Fix", true, "Forces the ClickGUI to be the same size regardless of scale.");
     public static Setting<Boolean> allowDebug = new Setting<>("Debug", false, "Enables some debug features in the client.");
-    public static Setting<Boolean> showCape = new Setting<>("Show Cape", false, "Renders a custom cape on your player.");
-    public static Setting<Boolean> keepPriority = new Setting<>("Keep Priority", false, "Prioritized players are not reset each match.");
+    public static Setting<Boolean> showCape = new Setting<>("Show Cape", true, "Renders a custom cape on your player.");
+    public static Setting<Boolean> keepPriority = new Setting<>("Keep Priority", true, "Prioritized players are not reset each match.");
     public static Setting<Boolean> showFlags = new Setting<>("Show Flags", false, "Shows predicted NCP flags in chat.");
 
     public static Setting<Boolean> centerNotifs = new Setting<>("Center Notifs", false, "Centers Notifications under your crosshair.");

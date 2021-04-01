@@ -88,9 +88,15 @@ public class NoRotate extends Module {
                         float rotationYaw = f % 360.0F;
                         float rotationPitch = f1 % 360.0F;
 
+                        if(mc.thePlayer.fallDistance > 1.25) {
+                            mc.thePlayer.motionX = mc.thePlayer.motionZ = 0;
+                        }
+
                         mc.thePlayer.setPositionAndRotation(d0, d1, d2, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch);
                         NetUtil.sendPacketNoEvents(new C03PacketPlayer.C06PacketPlayerPosLook(mc.thePlayer.posX, mc.thePlayer.getEntityBoundingBox().minY, mc.thePlayer.posZ, rotationYaw, rotationPitch, false));
                         event.setCancelled(true);
+
+
                     }
 
                     if (Client.getModuleManager().get(LongJump.class).isEnabled()) {

@@ -329,7 +329,11 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
             ((ITickable) this.packetListener).update();
         }
 
-        this.channel.flush();
+        try {
+            this.channel.flush();
+        } catch (Exception e) {
+
+        }
     }
 
     /**

@@ -36,7 +36,7 @@ public class NoFall extends Module {
 
     @RegisterEvent(events = {EventMotionUpdate.class, EventMove.class})
     public void onEvent(Event event) {
-        if (PlayerUtil.isInLiquid() || PlayerUtil.isOnLiquid() || mc.thePlayer.capabilities.allowFlying || mc.thePlayer.isSpectator())
+        if (PlayerUtil.isInLiquid() || PlayerUtil.isOnLiquid() || !mc.thePlayer.capabilities.allowEdit || mc.thePlayer.capabilities.allowFlying || mc.thePlayer.isSpectator())
             return;
         if (event instanceof EventMotionUpdate) {
             EventMotionUpdate em = (EventMotionUpdate) event;
@@ -61,28 +61,25 @@ public class NoFall extends Module {
                 if (predictedFallen >= 3.0) {
                     Bypass bypass = Client.getModuleManager().get(Bypass.class);
                     boolean allowVanilla = bypass.allowBypassing() && (bypass.option.getSelected().equals("Watchdog Off") || (bypass.bruh == 0 || bypass.bruh > 10));
+
+                    boolean preModification = !HypixelUtil.isVerifiedHypixel() || (vanilla.getValue() && allowVanilla);
+
                     if (em.isPre()) {
-                        boolean sendPacket = false;
-                        if (!HypixelUtil.isVerifiedHypixel() || (vanilla.getValue() && allowVanilla)) {
+                        if (preModification) {
                             if (bypass.bruh > 10) {
                                 bypass.bruh -= 1;
                             }
                             em.setGround(true);
-                        } else {
-                            sendPacket = true;
-                        }
-                        dist = mc.thePlayer.fallDistance;
+                            dist = mc.thePlayer.fallDistance;
 
-                        if (fastFall.getValue() && distanceToGround != -1 && distanceToGround <= 15 && timer.delay(2500)) {
-                            //mc.thePlayer.setPositionAndUpdate(mc.thePlayer.posX, mc.thePlayer.posY - , mc.thePlayer.posZ);
-                            mc.thePlayer.motionY = -Math.min(distanceToGround, 9);
-                            sendPacket = false;
-                            timer.reset();
+                            if (fastFall.getValue() && distanceToGround != -1 && distanceToGround <= 15 && timer.delay(2500)) {
+                                //mc.thePlayer.setPositionAndUpdate(mc.thePlayer.posX, mc.thePlayer.posY - , mc.thePlayer.posZ);
+                                mc.thePlayer.motionY = -Math.min(distanceToGround, 9);
+                                timer.reset();
+                            }
                         }
-
-                        if (sendPacket) {
-                            NetUtil.sendPacketNoEvents(new C03PacketPlayer(true));
-                        }
+                    } else if (em.isPost() && HypixelUtil.isVerifiedHypixel()) {
+                        NetUtil.sendPacketNoEvents(new C03PacketPlayer(true));
                     }
                 }
 

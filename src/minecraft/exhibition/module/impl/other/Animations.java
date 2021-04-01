@@ -14,7 +14,7 @@ import exhibition.util.misc.ChatUtil;
 
 public class Animations extends Module {
 
-    private Options swang = new Options("Block Swing", "Swing", new String[]{"Swing", "Swung", "Swong", "Swonk", "Swang", "Swank", "Swack", "1.8 (Loser)"});
+    private Options swang = new Options("Block Swing", "Swing", "Swing", "Swung", "Swong", "Swonk", "Swang", "Swank", "Swack", "E", "1.8 (Loser)");
 
     public Animations(ModuleData data) {
         super(data);

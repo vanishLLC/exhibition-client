@@ -397,6 +397,8 @@ public class HackerDetect extends Module {
 
                     int tickInAir = ent.onGround ? 0 : ent.ticksExisted - ent.jumpedTick;
 
+                    float lastAirYaw = ent.lastAirYaw;
+
                     int speedFlags = 0;
 
                     float yawDirection;
@@ -425,7 +427,7 @@ public class HackerDetect extends Module {
 
                         float diff = Math.abs(MathHelper.wrapAngleTo180_float(-(MathHelper.wrapAngleTo180_float(ent.rotationYaw) - (float) MathHelper.wrapAngleTo180_float(yawDirection))));
 
-                        if (MathUtils.roundToPlace(velocity, 1) >= 0.355 && diff > 46) {
+                        if (MathUtils.roundToPlace(velocity, 1) >= 0.355 && Math.round(diff) > 44.5) {
                             speedFlags += diff > 120 ? 15 : diff > 90 ? 7 : 3;
                             //ChatUtil.debug("Yaw Diff: " + diff + " " + ent.getName() + " " + velocity);
                         }
@@ -440,7 +442,7 @@ public class HackerDetect extends Module {
 //                    }
 
                     if (tickInAir > 0 && tickInAir < 10) {
-                        float diff = Math.abs(MathHelper.wrapAngleTo180_float(-(MathHelper.wrapAngleTo180_float(ent.lastAirYaw) - (float) MathHelper.wrapAngleTo180_float(yawDirection))));
+                        float diff = Math.abs(MathHelper.wrapAngleTo180_float(-(MathHelper.wrapAngleTo180_float(lastAirYaw) - (float) MathHelper.wrapAngleTo180_float(yawDirection))));
 
                         if (diff > 60 && MathUtils.roundToPlace(velocity, 1) >= 0.36 && velocity < 2) {
                             speedFlags += diff > 100 ? 7 : diff > 60 ? 5 : 2;

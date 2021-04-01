@@ -291,22 +291,22 @@ public class AuthenticationUtil {
                             case "invalid_password":
                                 loginInstance.setInvalid(true);
                                 loginInstance.setProgress(0);
-                                Notifications.getManager().post("Invalid Password", "Reset your password on the forums.", 5000, Notifications.Type.WARNING);
+                                Notifications.getManager().post("Invalid Password", "Action logged. Reset your password on the forums.", 5000, Notifications.Type.WARNING);
                                 return authUser;
                             case "invalid_hwid":
-                                loginInstance.setInvalid(false);
+                                loginInstance.setInvalidHWID();
                                 loginInstance.setProgress(0);
-                                Notifications.getManager().post("Invalid HWID", "Request a HWID reset on the forums.", 5000, Notifications.Type.NOTIFY);
+                                Notifications.getManager().post("Invalid HWID", "Action logged. Please request a HWID reset on the forums.", 5000, Notifications.Type.NOTIFY);
                                 return authUser;
                             case "invalid_user":
                                 loginInstance.setLoginFailed();
                                 loginInstance.setProgress(0);
-                                Notifications.getManager().post("Invalid Username", "You are not registered on the forums.", 5000, Notifications.Type.WARNING);
+                                Notifications.getManager().post("Invalid Username", "Action logged. You are not registered on the forums.", 5000, Notifications.Type.WARNING);
                                 return authUser;
                             case "login_failed":
                                 loginInstance.setLoginFailed();
                                 loginInstance.setProgress(0);
-                                Notifications.getManager().post("Login Failed", "Request your HWID to be set on the forums.", 5000, Notifications.Type.WARNING);
+                                Notifications.getManager().post("Login Failed", "Action logged. Request your HWID to be set on the forums.", 5000, Notifications.Type.WARNING);
                                 return authUser;
                             default:
                                 SilentSnitch.snitch(11, ((JsonObject) JsonConnection.toJsonObject(connection)).get("response").getAsString(), Crypto.decryptPublicNew(encryptedUsername), Crypto.decryptPublicNew(encryptedPassword), hardware);

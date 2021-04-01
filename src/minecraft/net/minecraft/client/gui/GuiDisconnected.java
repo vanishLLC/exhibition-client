@@ -299,7 +299,10 @@ public class GuiDisconnected extends GuiScreen {
         }
 
         String str = "Current Alt: " + currentAlt;
-        fontRendererObj.drawStringWithShadow(str, this.width / 2F - fontRendererObj.getStringWidth(str) - 5, this.height / 2F + this.field_175353_i / 2F + this.fontRendererObj.FONT_HEIGHT + 56, -1);
+        fontRendererObj.drawStringWithShadow(str, this.width / 2F - fontRendererObj.getStringWidth(str) - 5, this.height / 2F + this.field_175353_i / 2F + this.fontRendererObj.FONT_HEIGHT + 50, -1);
+
+        String unbannedLift = "Unbanned Alts: " + AltManager.registry.stream().filter(Alt::isUnbanned).count();
+        fontRendererObj.drawStringWithShadow(unbannedLift, this.width / 2F - fontRendererObj.getStringWidth(str)/2F - fontRendererObj.getStringWidth(unbannedLift)/2F - 5, this.height / 2F + this.field_175353_i / 2F + this.fontRendererObj.FONT_HEIGHT + 62, -1);
 
         if (playTime != -1 && this.message.getUnformattedText().contains("ban")) {
             String timeDiff = "Playtime: " + getTimeLength(playTime) + " / " + getTimeLength(totalTime);

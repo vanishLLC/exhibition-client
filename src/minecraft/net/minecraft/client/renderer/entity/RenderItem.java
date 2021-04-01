@@ -421,6 +421,8 @@ public class RenderItem implements IResourceManagerReloadListener
             }
         }
 
+        // TODO: Custom item translation/rotations
+
         this.renderItem(stack, model);
         GlStateManager.cullFace(1029);
         GlStateManager.popMatrix();

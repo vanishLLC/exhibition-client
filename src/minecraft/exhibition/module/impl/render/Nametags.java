@@ -291,7 +291,6 @@ public class Nametags extends Module {
 
                 if (armor || hovered && selectArmor.equals("Hover") || isPriority) {
 
-
                     List<ItemStack> itemsToRender = new ArrayList<>();
                     for (int i = 0; i < 5; i++) {
                         ItemStack stack = ent.getEquipmentInSlot(i);
@@ -305,7 +304,7 @@ public class Nametags extends Module {
                         boolean stackDamaged = stack.getItemDamage() > 0 && stack.getMaxDamage() - stack.getItemDamage() > 0;
                         int bruh = stackDamaged ? -27 : -24;
 
-                        RenderingUtil.rectangleBordered(x, bruh, x + 11, bruh + 11, 0.5, backgroundColor, borderColor);
+                        RenderingUtil.rectangle(x, bruh, x + 11, bruh + 11, backgroundColor);
 
                         RenderHelper.enableGUIStandardItemLighting();
                         GlStateManager.translate(x - 0.5, bruh, 0);

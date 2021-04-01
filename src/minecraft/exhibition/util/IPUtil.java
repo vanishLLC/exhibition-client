@@ -14,7 +14,7 @@ public class IPUtil {
     private static List<String> usedAddresses = new ArrayList<>();
 
     private static String getIPAddress() {
-        Connection connection = new Connection("https://api.ipify.org/?format=json");
+        Connection connection = new Connection("https://api.myip.com");
         Connector.get(connection);
         JsonObject jsonObject = (JsonObject) JsonParser.parseString(connection.getResponse());
         if (jsonObject != null && jsonObject.has("ip")) {
@@ -36,6 +36,7 @@ public class IPUtil {
                 Notifications.getManager().post("IP Check", "Could not check current IP.", Notifications.Type.NOTIFY);
             }
         } catch (Exception e) {
+            e.printStackTrace();
             Notifications.getManager().post("IP Check", "Could not check current IP.", Notifications.Type.NOTIFY);
         }
     }
