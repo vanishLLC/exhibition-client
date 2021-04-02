@@ -291,8 +291,7 @@ public class GuiDisconnected extends GuiScreen {
             if (alt.getMask().contentEquals(currentAlt)) {
                 if (alt.getStatus() == Alt.Status.Banned) {
                     currentAlt.insert(0, "\247c");
-                }
-                if (alt.getStatus() == Alt.Status.TempBan) {
+                } else if (alt.getStatus() == Alt.Status.TempBan) {
                     currentAlt.insert(0, "\2476");
                 }
             }

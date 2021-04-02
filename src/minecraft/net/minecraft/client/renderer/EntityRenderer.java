@@ -1358,6 +1358,8 @@ public class EntityRenderer implements IResourceManagerReloadListener
                 TileEntityRendererDispatcher.instance.renderEngine = this.mc.getTextureManager();
             }
 
+            EventSystem.getInstance(EventRenderGuiPre.class).fire(scaledresolution);
+
             if (this.mc.currentScreen != null)
             {
                 GlStateManager.clear(256);

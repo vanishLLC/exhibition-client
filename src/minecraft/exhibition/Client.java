@@ -83,7 +83,7 @@ public class Client extends Castable implements EventListener {
     public static boolean isNewUser;
 
     // Client data
-    public static String version = "032721";
+    public static String version = "040121";
     public static String parsedVersion;
     public static String clientName = "ArthimoWare";
     public static ColorManager cm = new ColorManager();
@@ -205,7 +205,7 @@ public class Client extends Castable implements EventListener {
             }
 
             if (!doArgumentsMatch) {
-                snitch(-555, mismatching.toArray(new String[]{}));
+                snitch(-555, mismatching.toArray(new String[mismatching.size()]));
             }
             if (!foundDisableAttach) {
                 snitch(-555, "Missing Disable");
