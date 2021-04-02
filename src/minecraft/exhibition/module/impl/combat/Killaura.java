@@ -450,6 +450,12 @@ public class Killaura extends Module {
             if (single) {
                 index = 0;
             }
+            Bypass bypass = Client.getModuleManager().get(Bypass.class);
+
+            int bypassTicks = bypass.bruh - 10;
+
+            boolean allowInvalidAngles = bypass.allowBypassing() && (bypass.option.getSelected().equals("Watchdog Off") || (bypass.option.getSelected().equals("Dong") ?
+                    bypassTicks > 25 && bypassTicks <= (27 + bypass.randomDelay) : bypass.bruh > 10 && bypass.bruh % 100 > 10 && bypass.bruh % 100 < 99)) && HypixelUtil.isVerifiedHypixel();
 
             if (em.isPre()) {
                 // We load the targets each tick
@@ -543,12 +549,7 @@ public class Killaura extends Module {
                             if (targetYaw > maxAngleStep) targetYaw = maxAngleStep;
                             else if (targetYaw < -maxAngleStep) targetYaw = -maxAngleStep;
 
-                            Bypass bypass = Client.getModuleManager().get(Bypass.class);
 
-                            int bypassTicks = bypass.bruh - 10;
-
-                            boolean allowInvalidAngles = bypass.allowBypassing() && (bypass.option.getSelected().equals("Watchdog Off") || (bypass.option.getSelected().equals("Dong") ?
-                                    bypassTicks > 25 && bypassTicks <= (27 + bypass.randomDelay) : bypass.bruh > 10 && bypass.bruh % 100 > 10 && bypass.bruh % 100 < 99)) && HypixelUtil.isVerifiedHypixel();
 
                             if (shouldReduce) {
                                 float pitch = (float) -(Math.atan2(yDiff - (distance > 2.1 ? 1.25 : 1.5), dist) * 180.0D / 3.141592653589793D);
@@ -843,6 +844,12 @@ public class Killaura extends Module {
                 boolean isAttacking = distance <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && delay.roundDelay(50 * nextRandom);
 
                 boolean canAttackRightNow = attack.equals("Always") || (attack.equals("Precise") ? target.waitTicks <= 0 : target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
+
+                if(antiCritFunky.getValue() && hasEnchant(target, "Crit", "Funky") && !allowInvalidAngles) {
+                    if(!em.isOnground() && mc.thePlayer.fallDistance > 0) {
+                        isAttacking = false;
+                    }
+                }
 
                 if (mc.thePlayer.isBlocking() && isAttacking && shouldAttack && isBlocking && canAttackRightNow && !AutoSoup.isHealing) {
                     isBlocking = false;
