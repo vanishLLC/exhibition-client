@@ -51,9 +51,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C00PacketKeepAlive;
 import net.minecraft.network.play.client.C03PacketPlayer;
-import net.minecraft.network.play.server.S02PacketChat;
-import net.minecraft.network.play.server.S03PacketTimeUpdate;
-import net.minecraft.network.play.server.S08PacketPlayerPosLook;
+import net.minecraft.network.play.server.*;
 import net.minecraft.util.CryptManager;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
@@ -608,7 +606,7 @@ public class Client extends Castable implements EventListener {
         if (event instanceof EventPacket) {
             EventPacket eventPacket = event.cast();
             Packet packet = eventPacket.getPacket();
-            if (eventPacket.isIncoming() && !(packet instanceof C00PacketKeepAlive)) {
+            if (eventPacket.isIncoming() && !(packet instanceof S00PacketKeepAlive) && !(packet instanceof S32PacketConfirmTransaction)) {
                 packetTimer.reset();
             }
             if (packet instanceof S08PacketPlayerPosLook && (mc.thePlayer == null || mc.thePlayer.ticksExisted < 40)) {

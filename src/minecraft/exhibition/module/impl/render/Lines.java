@@ -12,6 +12,7 @@ import exhibition.management.ColorManager;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
+import exhibition.util.HypixelUtil;
 import exhibition.util.RenderingUtil;
 import exhibition.util.render.Colors;
 import net.minecraft.client.renderer.GlStateManager;
@@ -54,9 +55,16 @@ public class Lines extends Module {
         mc.gameSettings.viewBobbing = false;
         mc.entityRenderer.orientCamera(mc.timer.renderPartialTicks);
 
+        boolean isInPit = HypixelUtil.isInGame("PIT");
+
+
         for (Object o : mc.theWorld.loadedTileEntityList) {
             int color = -1;
             TileEntity ent = (TileEntity) o;
+            if(ent.getPos().getX() == 20 && ent.getPos().getY() >= 66) {
+                continue;
+            }
+
             if (o instanceof TileEntityChest && ((boolean) settings.get(CHEST).getValue())) {
                 if (!(((TileEntityChest) o).getChestType() != 0) && !(((TileEntityChest) o).isEmpty || ((TileEntityChest) o).lidAngle > 0)) {
                     color = Colors.getColor(114, 0, 187);
@@ -80,7 +88,8 @@ public class Lines extends Module {
             RenderingUtil.draw3DLine(posX, posY, posZ, color);
         }
 
-        for (Entity entity : mc.theWorld.getLoadedEntityList()) {
+
+        for (Entity entity : mc.theWorld.playerEntities) {
             if (entity instanceof EntityPlayer && entity != mc.thePlayer && ((boolean) settings.get(PLAYER).getValue())) {
                 int color = Colors.getColor(240);
                 float posX = (float) ((float) (entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * mc.timer.renderPartialTicks) - RenderManager.renderPosX);

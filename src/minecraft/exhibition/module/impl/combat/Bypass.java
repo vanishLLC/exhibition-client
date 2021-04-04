@@ -2,6 +2,7 @@ package exhibition.module.impl.combat;
 
 import exhibition.Client;
 import exhibition.event.Event;
+import exhibition.event.EventSystem;
 import exhibition.event.RegisterEvent;
 import exhibition.event.impl.*;
 import exhibition.management.notifications.dev.DevNotifications;
@@ -88,6 +89,13 @@ public class Bypass extends Module {
 
     }
 
+    @Override
+    public void onEnable() {
+        if(mc.thePlayer == null || mc.theWorld == null || mc.getCurrentServerData() == null || mc.getIntegratedServer() != null || HypixelUtil.isVerifiedHypixel()) {
+            toggle();
+            EventSystem.unregister(this);
+        }
+    }
 
     @Override
     public void onDisable() {

@@ -863,7 +863,7 @@ public class Killaura extends Module {
                             HypixelUtil.isInGame("DUEL") ? 1.85 :
                                     HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1);
 
-                    if (((Number) settings.get(ANGLESTEP).getValue()).intValue() == 0 || (off <= 0.11 || (off <= 1 && off >= 0.22 && MathUtils.getIncremental(angleTimer.getDifference(), 50) <= 100))) {
+                    if (((Number) settings.get(ANGLESTEP).getValue()).intValue() <= 0 || (off <= 0.11 || (off <= 1 && off >= 0.22 && MathUtils.getIncremental(angleTimer.getDifference(), 50) <= 100))) {
 
                         if (crits && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically && (((critModule.isPacket() && setupCrits)) && isCritSetup) && !em.isOnground()) {
                             if (HypixelUtil.isVerifiedHypixel() && mc.getCurrentServerData() != null && (mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net"))) {
