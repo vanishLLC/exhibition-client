@@ -845,7 +845,7 @@ public class Killaura extends Module {
 
                 boolean canAttackRightNow = attack.equals("Always") || (attack.equals("Precise") ? target.waitTicks <= 0 : target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
 
-                if(antiCritFunky.getValue() && hasEnchant(target, "Crit", "Funky") && !allowInvalidAngles) {
+                if(Client.getModuleManager().isEnabled(Speed.class) && antiCritFunky.getValue() && hasEnchant(target, "Crit", "Funky") && !allowInvalidAngles) {
                     if(!em.isOnground() && mc.thePlayer.fallDistance > 0) {
                         isAttacking = false;
                     }
