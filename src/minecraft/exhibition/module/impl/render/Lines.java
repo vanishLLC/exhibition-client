@@ -8,14 +8,12 @@ package exhibition.module.impl.render;
 import exhibition.event.Event;
 import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventRender3D;
-import exhibition.management.ColorManager;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
 import exhibition.util.HypixelUtil;
 import exhibition.util.RenderingUtil;
 import exhibition.util.render.Colors;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -37,10 +35,10 @@ public class Lines extends Module {
      */
     public Lines(ModuleData data) {
         super(data);
-        settings.put(SIGN, new Setting(SIGN, false, "Draw lines at signs."));
-        settings.put(CHEST, new Setting(CHEST, true, "Draw lines at chests."));
-        settings.put(SPAWNER, new Setting(SPAWNER, false, "Draw lines at spawners."));
-        settings.put(PLAYER, new Setting(PLAYER, false, "Draw lines on players."));
+        settings.put(SIGN, new Setting<>(SIGN, false, "Draw lines at signs."));
+        settings.put(CHEST, new Setting<>(CHEST, true, "Draw lines at chests."));
+        settings.put(SPAWNER, new Setting<>(SPAWNER, false, "Draw lines at spawners."));
+        settings.put(PLAYER, new Setting<>(PLAYER, false, "Draw lines on players."));
     }
 
     /* (non-Javadoc)
@@ -61,7 +59,7 @@ public class Lines extends Module {
         for (Object o : mc.theWorld.loadedTileEntityList) {
             int color = -1;
             TileEntity ent = (TileEntity) o;
-            if(ent.getPos().getX() == 20 && ent.getPos().getY() >= 66) {
+            if(isInPit && ent.getPos().getX() == 20 && ent.getPos().getY() >= 66) {
                 continue;
             }
 

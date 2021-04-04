@@ -38,7 +38,6 @@ import exhibition.util.Timer;
 import exhibition.util.misc.ChatUtil;
 import exhibition.util.security.*;
 import io.netty.channel.ChannelHandler;
-import net.arikia.dev.drpc.DiscordEventHandlers;
 import net.arikia.dev.drpc.DiscordRPC;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -49,7 +48,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.client.C00PacketKeepAlive;
 import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.server.*;
 import net.minecraft.util.CryptManager;
@@ -81,7 +79,7 @@ public class Client extends Castable implements EventListener {
     public static boolean isNewUser;
 
     // Client data
-    public static String version = "040121";
+    public static String version = "040321";
     public static String parsedVersion;
     public static String clientName = "ArthimoWare";
     public static ColorManager cm = new ColorManager();

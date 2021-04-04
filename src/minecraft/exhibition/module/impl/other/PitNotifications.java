@@ -20,6 +20,8 @@ public class PitNotifications extends Module {
 
     private MultiBool options;
 
+    private Setting<Boolean> sewers = new Setting<>("SEWER CHEST", true);
+
     public PitNotifications(ModuleData data) {
         super(data);
         settings.put("SELFISH", new Setting<>("SELFISH", true, "Only notifies you of streaks, bounties, etc... that pertain to you."));
@@ -31,7 +33,8 @@ public class PitNotifications extends Module {
                 new Setting<>("BOUNTY!", true),
                 new Setting<>("TRADE REQUEST!", true),
                 new Setting<>("NIGHT QUEST!", true),
-                new Setting<>("DRAGON EGG!", true)};
+                new Setting<>("DRAGON EGG!", true),
+                sewers};
         settings.put("OPTIONS", new Setting<>("OPTIONS", options = new MultiBool("Notifications", Notifications), "Things to notify"));
     }
 
@@ -50,6 +53,14 @@ public class PitNotifications extends Module {
                 } catch (Exception ignored) {
                 }
             }
+
+            if (sewers.getValue() && formatted.contains("SEWERS!") && formatted.toLowerCase().contains("spawned")) {
+                try {
+                    Notifications.getManager().post("Sewer chest spawned", "robit", 2000L, Notifications.Type.OKAY);
+                } catch (Exception ignored) {
+                }
+            }
+
             if (formatted.contains("§5§lMAJOR EVENT!") && options.getValue("MAJOR EVENT!")) {
                 try {
                     formatted = formatted.replace("§5§lMAJOR EVENT! ", "");
@@ -79,7 +90,7 @@ public class PitNotifications extends Module {
                 }
             }
 
-            if ((Boolean) settings.get("SELFISH").getValue() && formatted.contains(mc.thePlayer.getName())){
+            if ((Boolean) settings.get("SELFISH").getValue() && formatted.contains(mc.thePlayer.getName())) {
                 if (formatted.contains("§r§c§lSTREAK!") && options.getValue("STREAK!")) {
                     try {
                         formatted = formatted.replace("§r§c§lSTREAK! ", "");
@@ -103,7 +114,7 @@ public class PitNotifications extends Module {
                 }
             }
 
-            if (!((Boolean) settings.get("SELFISH").getValue())){
+            if (!((Boolean) settings.get("SELFISH").getValue())) {
                 if (formatted.contains("§r§c§lSTREAK!") && options.getValue("STREAK!")) {
                     try {
                         formatted = formatted.replace("§r§c§lSTREAK! ", "");
