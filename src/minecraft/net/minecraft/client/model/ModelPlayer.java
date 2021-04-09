@@ -136,7 +136,7 @@ public class ModelPlayer extends ModelBiped
         copyModelAngles(this.bipedLeftArm, this.bipedLeftArmwear);
         copyModelAngles(this.bipedRightArm, this.bipedRightArmwear);
         copyModelAngles(this.bipedBody, this.bipedBodyWear);
-        if (entityIn instanceof EntityPlayer)
+        if (entityIn instanceof EntityPlayer && Client.getModuleManager().isEnabled(SpookySkeltal.class))
             SpookySkeltal.updateModel((EntityPlayer)entityIn, (ModelPlayer)this);
     }
 

@@ -57,9 +57,6 @@ public class BowAimbot extends Module {
             if (o instanceof EntityLivingBase) {
                 EntityLivingBase ent = (EntityLivingBase) o;
                 if (ent instanceof EntityPlayer && mc.thePlayer.canEntityBeSeen(ent) && !FriendManager.isFriend(ent.getName()) && ent.isEntityAlive()) {
-                    if (ent == ((Killaura) Client.getModuleManager().get(Killaura.class)).vip) {
-                        return ent;
-                    }
                     loaded.add(ent);
                 }
             }

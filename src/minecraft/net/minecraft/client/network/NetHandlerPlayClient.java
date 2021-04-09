@@ -8,6 +8,7 @@ import exhibition.Client;
 import exhibition.event.EventSystem;
 import exhibition.event.impl.EventSpawnPlayer;
 import exhibition.gui.screen.impl.mainmenu.ClientMainMenu;
+import exhibition.util.HypixelUtil;
 import exhibition.util.misc.ChatUtil;
 import io.netty.buffer.Unpooled;
 
@@ -1567,6 +1568,9 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
     public void handleScoreboardObjective(S3BPacketScoreboardObjective packetIn) {
         PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
         Scoreboard scoreboard = this.clientWorldController.getScoreboard();
+
+        HypixelUtil.scoreboardCache = null;
+        HypixelUtil.scoreboardContains("");
 
         if (packetIn.func_149338_e() == 0) {
             ScoreObjective scoreobjective = scoreboard.addScoreObjective(packetIn.func_149339_c(), IScoreObjectiveCriteria.DUMMY);

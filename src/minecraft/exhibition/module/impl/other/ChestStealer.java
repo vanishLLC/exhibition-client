@@ -21,6 +21,8 @@ import exhibition.util.HypixelUtil;
 import exhibition.util.NetUtil;
 import exhibition.util.RotationUtils;
 import exhibition.util.Timer;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.enchantment.Enchantment;
@@ -28,7 +30,6 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.*;
-import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
 import net.minecraft.network.play.client.C0APacketAnimation;
 import net.minecraft.network.play.client.C0DPacketCloseWindow;
 import net.minecraft.potion.Potion;
@@ -37,8 +38,6 @@ import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.*;
 
 import java.util.*;
-
-import static exhibition.module.impl.player.Scaffold.randomFloat;
 
 public class ChestStealer extends Module {
 
@@ -95,8 +94,8 @@ public class ChestStealer extends Module {
             if (esd.getGuiScreen() instanceof GuiChest) {
                 GuiChest guiChest = (GuiChest) esd.getGuiScreen();
                 IInventory inventry = guiChest.lowerChestInventory;
-                String name = guiChest.lowerChestInventory.getDisplayName().getUnformattedText().toLowerCase();
-                boolean isVanillaChest = !inventry.hasCustomName() || name.equalsIgnoreCase(new ChatComponentTranslation("container.chest").getUnformattedText().toLowerCase().trim()) || name.equalsIgnoreCase("low") || name.equalsIgnoreCase("Chest");
+                String name = guiChest.lowerChestInventory.getDisplayName().getFormattedText().toLowerCase();
+                boolean isVanillaChest = !inventry.hasCustomName() || name.equals(new ChatComponentTranslation("container.chest").getFormattedText().toLowerCase().trim()) || name.equalsIgnoreCase("low") || name.equalsIgnoreCase("Chest");
                 chestContainer = guiChest;
 
                 if ((boolean) settings.get(IGNORE).getValue() && !isVanillaChest) {
@@ -151,8 +150,12 @@ public class ChestStealer extends Module {
                         }
                     }
                 if (em.isPost() && chest != null) {
-                    NetUtil.sendPacketNoEvents(new C08PacketPlayerBlockPlacement(chest.getPos(), getFacingDirection(chest.getPos()).getIndex(), mc.thePlayer.getCurrentEquippedItem(), randomFloat(1), 0.5F + randomFloat(2345), randomFloat(652436)));
-                    NetUtil.sendPacketNoEvents(new C0APacketAnimation());
+                    MovingObjectPosition hitResult = getHitResult(chest.getPos());
+                    if(hitResult != null) {
+                        if (mc.playerController.onPlayerRightClick(mc.thePlayer, mc.theWorld, mc.thePlayer.getCurrentEquippedItem(), chest.getPos(), hitResult.sideHit, hitResult.hitVec)) {
+                            NetUtil.sendPacketNoEvents(new C0APacketAnimation());
+                        }
+                    }
                     chest = null;
                 }
             }
@@ -160,8 +163,8 @@ public class ChestStealer extends Module {
                 if (chestContainer != null) {
                     GuiChest guiChest = chestContainer;
                     IInventory inventry = guiChest.lowerChestInventory;
-                    String name = guiChest.lowerChestInventory.getDisplayName().getUnformattedText().toLowerCase();
-                    boolean isVanillaChest = !inventry.hasCustomName() || name.trim().equalsIgnoreCase(new ChatComponentTranslation("container.chest").getUnformattedText().trim()) || name.equalsIgnoreCase("low") || name.equalsIgnoreCase("Chest");
+                    String name = guiChest.lowerChestInventory.getDisplayName().getFormattedText().toLowerCase();
+                    boolean isVanillaChest = !inventry.hasCustomName() || name.equalsIgnoreCase(new ChatComponentTranslation("container.chest").getFormattedText().toLowerCase().trim()) || name.equalsIgnoreCase("low") || name.equalsIgnoreCase("Chest");
                     chestContainer = guiChest;
 
                     if ((boolean) settings.get(IGNORE).getValue() && !isVanillaChest) {
@@ -294,13 +297,14 @@ public class ChestStealer extends Module {
         }
     }
 
-    private EnumFacing getFacingDirection(final BlockPos pos) {
-        EnumFacing direction = EnumFacing.NORTH;
-        final MovingObjectPosition rayResult = mc.theWorld.rayTraceBlocks(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY + mc.thePlayer.getEyeHeight(), mc.thePlayer.posZ), new Vec3(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5));
-        if (rayResult != null) {
-            return rayResult.sideHit;
-        }
-        return direction;
+    private MovingObjectPosition getHitResult(final BlockPos pos) {
+        IBlockState blockState = mc.theWorld.getBlockState(pos);
+        Block block = blockState.getBlock();
+
+        double centerX = block.getBlockBoundsMinX() + (block.getBlockBoundsMaxX() - block.getBlockBoundsMinX())/2;
+        double centerY = block.getBlockBoundsMinY() + (block.getBlockBoundsMaxY() - block.getBlockBoundsMinY())/2;
+        double centerZ = block.getBlockBoundsMinZ() + (block.getBlockBoundsMaxZ() - block.getBlockBoundsMinZ())/2;
+        return mc.theWorld.rayTraceBlocksIgnored(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY + mc.thePlayer.getEyeHeight(), mc.thePlayer.posZ), new Vec3(pos.getX() + centerX, pos.getY() + centerY, pos.getZ() + centerZ), pos);
     }
 
     private boolean isBad(ItemStack item) {

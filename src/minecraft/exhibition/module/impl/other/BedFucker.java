@@ -22,8 +22,6 @@ import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.util.*;
 import org.lwjgl.opengl.GL11;
 
-import static exhibition.module.impl.player.Scaffold.randomFloat;
-
 /**
  * Created by cool1 on 1/19/2017.
  */
@@ -58,6 +56,8 @@ public class BedFucker extends Module {
             }
 
             if (em.isPre()) {
+                this.blockBreaking = null;
+                outer:
                 for (int y = 6; y >= -6; --y) {
                     for (int x = -6; x <= 6; ++x) {
                         for (int z = -6; z <= 6; ++z) {
@@ -66,13 +66,20 @@ public class BedFucker extends Module {
                                 uwot = !uwot;
                             }
                             if (uwot) {
-                                final BlockPos pos = new BlockPos(mc.thePlayer.posX + x, mc.thePlayer.posY + y, mc.thePlayer.posZ + z);
+                                double posX = mc.thePlayer.posX + x;
+                                double posY = mc.thePlayer.posY + y;
+                                double posZ = mc.thePlayer.posZ + z;
 
-                                if ((mc.theWorld.getBlockState(pos).getBlock() != Blocks.air && this.blockChecks(mc.theWorld.getBlockState(pos).getBlock()) && this.getFacingDirection(pos) != null) && mc.thePlayer.getDistance(mc.thePlayer.posX + x, mc.thePlayer.posY + y, mc.thePlayer.posZ + z) < mc.playerController.getBlockReachDistance()) {
-                                    final float[] rotations = this.getBlockRotations(mc.thePlayer.posX + x + 0.5, mc.thePlayer.posY + y, mc.thePlayer.posZ + z + 0.5);
+                                final BlockPos pos = new BlockPos(posX, posY, posZ);
+
+                                if ((mc.theWorld.getBlockState(pos).getBlock() != Blocks.air &&
+                                        this.blockChecks(mc.theWorld.getBlockState(pos).getBlock()) &&
+                                        this.getHitResult(pos) != null) &&
+                                        mc.thePlayer.getDistance(posX, posY, posZ) < mc.playerController.getBlockReachDistance()) {
 
                                     IBlockState blockState = mc.theWorld.getBlockState(pos);
                                     Block block = blockState.getBlock();
+
                                     if (block == Blocks.wheat && block instanceof BlockCrops) {
                                         BlockCrops cropBlock = (BlockCrops) block;
                                         if (cropBlock.canGrow(null, null, blockState, true)) {
@@ -80,23 +87,28 @@ public class BedFucker extends Module {
                                         }
                                     }
 
-                                    em.setYaw(rotations[0]);
-                                    em.setPitch(rotations[1]);
                                     this.blockBreaking = pos;
-                                    return;
+                                    break outer;
                                 }
                             }
                         }
                     }
                 }
-                this.blockBreaking = null;
+
+                if(this.blockBreaking != null) {
+                    final float[] rotations = this.getBlockRotations(blockBreaking.getX() + 0.5, blockBreaking.getY() + 0.1, blockBreaking.getZ() + 0.5);
+
+                    em.setYaw(rotations[0]);
+                    em.setPitch(rotations[1]);
+                }
+
             } else {
                 if (this.blockBreaking != null) {
                     if (mc.playerController.blockHitDelay > 0) {
                         mc.playerController.blockHitDelay = 0;
                     }
-                    final EnumFacing direction = this.getFacingDirection(this.blockBreaking);
-                    if (direction != null) {
+                    MovingObjectPosition hitResult = this.getHitResult(this.blockBreaking);
+                    if (hitResult != null) {
                         IBlockState blockState = mc.theWorld.getBlockState(blockBreaking);
                         Block block = blockState.getBlock();
                         if (block == Blocks.bed || block == Blocks.wheat) {
@@ -107,11 +119,11 @@ public class BedFucker extends Module {
                                 }
                             }
 
-                            if (mc.playerController.onPlayerDamageBlock(this.blockBreaking, direction)) {
+                            if (mc.playerController.onPlayerDamageBlock(this.blockBreaking, hitResult.sideHit)) {
                                 mc.thePlayer.swingItem();
                             }
                         } else {
-                            if (mc.playerController.onPlayerRightClick(mc.thePlayer, mc.theWorld, mc.thePlayer.getCurrentEquippedItem(), blockBreaking, direction, new Vec3(blockBreaking).addVector(0.3F + randomFloat(1), 0.3F + randomFloat(2345), 0.3F + randomFloat(652436)))) {
+                            if (mc.playerController.onPlayerRightClick(mc.thePlayer, mc.theWorld, mc.thePlayer.getCurrentEquippedItem(), blockBreaking, hitResult.sideHit, hitResult.hitVec)) {
                                 mc.thePlayer.swingItem();
                             }
                         }
@@ -121,8 +133,14 @@ public class BedFucker extends Module {
         }
         if (event instanceof EventRender3D) {
             if (blockBreaking != null) {
+
+                IBlockState blockState = mc.theWorld.getBlockState(blockBreaking);
+                Block block = blockState.getBlock();
+
                 RenderingUtil.pre3D();
-                drawESP(blockBreaking.getX(), blockBreaking.getY(), blockBreaking.getZ(), blockBreaking.getX() + 1, blockBreaking.getY() + 1, blockBreaking.getZ() + 1, 100, 100, 100);
+                drawESP(blockBreaking.getX() + block.getBlockBoundsMinX(), blockBreaking.getY() + block.getBlockBoundsMinY(), blockBreaking.getZ() + block.getBlockBoundsMinZ(),
+                        blockBreaking.getX() + block.getBlockBoundsMaxX(), blockBreaking.getY() + + block.getBlockBoundsMaxY(), blockBreaking.getZ() + block.getBlockBoundsMaxZ(),
+                        100, 255, 100);
                 RenderingUtil.post3D();
             }
         }
@@ -148,7 +166,7 @@ public class BedFucker extends Module {
         final double z3 = z - RenderManager.renderPosZ;
         final double x4 = x2 - RenderManager.renderPosX;
         final double y4 = y2 - RenderManager.renderPosY;
-        drawFilledBBESP(new AxisAlignedBB(x3, y3, z3, x4, y4, z2 - RenderManager.renderPosZ), Colors.getColor(0, 0, 50, 0));
+        drawFilledBBESP(new AxisAlignedBB(x3, y3, z3, x4, y4, z2 - RenderManager.renderPosZ), Colors.getColor((int)r, (int)g, (int)b, 150));
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
@@ -226,10 +244,10 @@ public class BedFucker extends Module {
 
     public void drawFilledBBESP(final AxisAlignedBB axisalignedbb, final int color) {
         GL11.glPushMatrix();
-        float red = (color >> 24 & 0xFF) / 255.0F;
-        float green = (color >> 16 & 0xFF) / 255.0F;
-        float blue = (color >> 8 & 0xFF) / 255.0F;
-        float alpha = (color & 0xFF) / 255.0F;
+        float alpha = (color >> 24 & 0xFF) / 255.0F;
+        float red = (color >> 16 & 0xFF) / 255.0F;
+        float green = (color >> 8 & 0xFF) / 255.0F;
+        float blue = (color & 0xFF) / 255.0F;
         GL11.glColor4f(red, green, blue, alpha);
         drawFilledBox(axisalignedbb);
         GL11.glPopMatrix();
@@ -240,34 +258,25 @@ public class BedFucker extends Module {
     }
 
     public float[] getBlockRotations(final double x, final double y, final double z) {
-        final double var4 = x - mc.thePlayer.posX;
-        final double var5 = z - mc.thePlayer.posZ;
-        final double var6 = y - (mc.thePlayer.posY + mc.thePlayer.getEyeHeight() - 1.0);
-        final double var7 = MathHelper.sqrt_double(var4 * var4 + var5 * var5);
-        final float var8 = (float) (Math.atan2(var5, var4) * 180.0 / 3.141592653589793) - 90.0f;
-        return new float[]{var8, (float) (-(Math.atan2(var6, var7) * 180.0 / 3.141592653589793))};
+        double diffX = x - mc.thePlayer.posX;
+        double diffY = y - (mc.thePlayer.posY + mc.thePlayer.getEyeHeight());
+        double diffZ = z - mc.thePlayer.posZ;
+        double distance = MathHelper.sqrt_double(diffX * diffX + diffZ * diffZ);
+        float yaw = (float) Math.toDegrees(Math.atan2(diffZ, diffX)) - 90.0F;
+        float pitch = (float) -Math.toDegrees(Math.atan2(diffY, distance));
+
+        return new float[]{mc.thePlayer.rotationYaw + MathHelper.wrapAngleTo180_float(yaw - mc.thePlayer.rotationYaw), mc.thePlayer.rotationPitch + MathHelper.wrapAngleTo180_float(pitch - mc.thePlayer.rotationPitch)};
     }
 
-    private EnumFacing getFacingDirection(final BlockPos pos) {
-        EnumFacing direction = null;
-        if (!mc.theWorld.getBlockState(pos.add(0, 1, 0)).getBlock().isBlockNormalCube()) {
-            direction = EnumFacing.UP;
-        } else if (!mc.theWorld.getBlockState(pos.add(0, -1, 0)).getBlock().isBlockNormalCube()) {
-            direction = EnumFacing.DOWN;
-        } else if (!mc.theWorld.getBlockState(pos.add(1, 0, 0)).getBlock().isBlockNormalCube()) {
-            direction = EnumFacing.EAST;
-        } else if (!mc.theWorld.getBlockState(pos.add(-1, 0, 0)).getBlock().isBlockNormalCube()) {
-            direction = EnumFacing.WEST;
-        } else if (!mc.theWorld.getBlockState(pos.add(0, 0, -1)).getBlock().isBlockNormalCube()) {
-            direction = EnumFacing.SOUTH;
-        } else if (!mc.theWorld.getBlockState(pos.add(0, 0, 1)).getBlock().isBlockNormalCube()) {
-            direction = EnumFacing.NORTH;
-        }
-        final MovingObjectPosition rayResult = mc.theWorld.rayTraceBlocks(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY + mc.thePlayer.getEyeHeight(), mc.thePlayer.posZ), new Vec3(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5));
-        if (rayResult != null && rayResult.getBlockPos() == pos) {
-            return rayResult.sideHit;
-        }
-        return direction;
+    private MovingObjectPosition getHitResult(final BlockPos pos) {
+
+        IBlockState blockState = mc.theWorld.getBlockState(pos);
+        Block block = blockState.getBlock();
+
+        double centerX = block.getBlockBoundsMinX() + (block.getBlockBoundsMaxX() - block.getBlockBoundsMinX())/2;
+        double centerY = block.getBlockBoundsMinY() + (block.getBlockBoundsMaxY() - block.getBlockBoundsMinY())/2;
+        double centerZ = block.getBlockBoundsMinZ() + (block.getBlockBoundsMaxZ() - block.getBlockBoundsMinZ())/2;
+        return mc.theWorld.rayTraceBlocksIgnored(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY + mc.thePlayer.getEyeHeight(), mc.thePlayer.posZ), new Vec3(pos.getX() + centerX, pos.getY() + centerY, pos.getZ() + centerZ), pos);
     }
 
 }

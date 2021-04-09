@@ -149,7 +149,6 @@ public class HealthDisplay extends Module {
             }
 
             if(isLighting) {
-
                 GL11.glEnable(GL11.GL_LIGHTING);
             }
 

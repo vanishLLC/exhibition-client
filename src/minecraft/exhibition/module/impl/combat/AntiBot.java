@@ -198,11 +198,14 @@ public class AntiBot extends Module {
 
                 List<EntityPlayer> playersToRemove = new ArrayList<>();
 
+                boolean inPit = HypixelUtil.isInGame("PIT");
+                boolean inSkywars = HypixelUtil.isInGame("SKYWARS");
+
                 for (EntityPlayer ent : mc.theWorld.playerEntities) {
                     if (!(ent instanceof EntityPlayerSP)) {
                         if (FriendManager.isFriend(ent.getName())) continue;
 
-                        if (HypixelUtil.isInGame("SKYWARS") && HypixelUtil.isGameActive()) {
+                        if (inSkywars && HypixelUtil.isGameActive()) {
                             if (ent.isDead) {
                                 DevNotifications.getManager().post(mc.thePlayer.ticksExisted + " " + ent.getHealth() + " " + ent.getName() + " has died.");
                                 ticksOnGroundMap.remove(ent.getName());
@@ -313,9 +316,6 @@ public class AntiBot extends Module {
                                 isTouchingGround(ent)) && !mc.theWorld.getBlockState(new BlockPos(ent.posX, ent.posY + ent.getEyeHeight(), ent.posZ)).getBlock().isBlockNormalCube();
                         * */
 
-
-
-
                         boolean shouldUpdateTOG = true;
 
                         if (!invalid.contains(ent)) {
@@ -328,6 +328,38 @@ public class AntiBot extends Module {
 
                                     boolean isInTabList = isInTabList(list, ent);
 
+                                    //Get formatted name
+                                    String str = ent.getDisplayName().getFormattedText();
+                                    // if the formatted name is equal to a default name "name + \247r" or the name contains "NPC" or they're not in the tab list, remove the entity.
+                                    boolean botNameFormat = str.endsWith("\247c" + ent.getName() + "\247r");
+
+                                    if (inPit) {
+
+                                        boolean hasPitCharacters = str.contains("[") || str.contains("]") || str.contains("\247l");
+
+                                        if (!hasPitCharacters) {
+                                            invalid.add(ent);
+                                        } else if (botNameFormat || str.equalsIgnoreCase(ent.getName()) || str.contains("[NPC]")) {
+                                            if (!isInTabList && isOnHypixel) {
+                                                invalid.add(ent);
+                                                shouldUpdateTOG = false;
+                                                if (remove && ent.isInvisible() && mc.thePlayer.getDistanceToEntity(ent) < 10 && ticksOnGroundMap.getOrDefault(ent.getName(), 0) < -20) {
+                                                    playersToRemove.add(ent);
+                                                    DevNotifications.getManager().post("Removed " + ent.getName() + " C*");
+                                                    continue;
+                                                }
+                                            }
+                                        } else if (((str.equals(ent.getName() + "\247r") || str.equals("\247r" + ent.getName()) || str.equals("\247r" + ent.getName() + "\247r")) && !isInTabList) || str.contains("[NPC]")) {
+                                            invalid.add(ent);
+                                            shouldUpdateTOG = false;
+                                            if (remove && ent.isInvisible() && ticksOnGroundMap.getOrDefault(ent.getName(), 0) < -20) {
+                                                playersToRemove.add(ent);
+                                                continue;
+                                            }
+                                        }
+                                        break;
+                                    }
+
                                     if (doPingCheck) {
                                         if (ticksOnGroundMap.getOrDefault(ent.getName(), 0) < 15 && isInTabList && ESP2D.getPlayerPing(ent) > 1) {
                                             invalid.add(ent);
@@ -335,10 +367,6 @@ public class AntiBot extends Module {
                                         }
                                     }
 
-                                    //Get formatted name
-                                    String str = ent.getDisplayName().getFormattedText();
-                                    // if the formatted name is equal to a default name "name + \247r" or the name contains "NPC" or they're not in the tab list, remove the entity.
-                                    boolean botNameFormat = str.endsWith("\247c" + ent.getName() + "\247r");
 
                                     if (Client.getModuleManager().isEnabled(Aimbot.class) && HypixelUtil.scoreboardContains("team: ") && (HypixelUtil.scoreboardContains("co\uD83C\uDF89ps") || HypixelUtil.scoreboardContains("cr\uD83C\uDF89ims"))) {
                                         if (mc.thePlayer.getEquipmentInSlot(1) != null && mc.thePlayer.getEquipmentInSlot(1).getItem() == Items.clay_ball) {
@@ -417,7 +445,7 @@ public class AntiBot extends Module {
                             }
                         }
 
-                        if(shouldUpdateTOG) {
+                        if (shouldUpdateTOG) {
                             boolean onGround = motionY < 1 && (((mc.theWorld.getBlockState(new BlockPos(ent.posX, ent.posY - (motionYNormal < 0.05 ? 0.45 : 0.9), ent.posZ)).getBlock().getMaterial() != Material.air &&
                                     mc.theWorld.getBlockState(new BlockPos(ent.lastTickPosX, ent.lastTickPosY - (motionYNormal < 0.05 ? 0.45 : 0.9), ent.lastTickPosZ)).getBlock().getMaterial() != Material.air)
                                     || (mc.theWorld.getBlockState(new BlockPos(ent.posX, ent.posY - (motionYNormal < 0.1 ? 0.65 : 1.255), ent.posZ)).getBlock().getMaterial() != Material.air &&

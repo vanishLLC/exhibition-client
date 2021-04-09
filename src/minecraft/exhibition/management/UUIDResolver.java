@@ -128,7 +128,7 @@ public class UUIDResolver {
                 validMap.put(name, current);
             }
 
-            responseMap.put(testConnection.getResponse(), current);
+            responseMap.put(names.toString(), current);
 
             for (Map.Entry<String, UUID> entry : names.entrySet()) {
                 if (!validMap.containsKey(entry.getKey()) && !checkedUsernames.containsKey(entry.getKey())) {
@@ -151,6 +151,10 @@ public class UUIDResolver {
 
         @Override
         public void run() {
+            e();
+        }
+
+        public void e() {
             isChecking = true;
             try {
                 // Resolve items first
@@ -194,7 +198,7 @@ public class UUIDResolver {
                                                             String resolvedName = profileJsonObject.get("name").getAsString();
                                                             if (resolvedName != null) {
                                                                 resolvedMap.put(pair.getUsername(), resolvedName);
-                                                                Notifications.getManager().post("Nick Detector", pair.getUsername() + " may be " + resolvedName + "!", 2500, Notifications.Type.NOTIFY);
+                                                                Notifications.getManager().post("Nick Detector", pair.getUsername() + " may be " + resolvedName + "! (N1)", 2500, Notifications.Type.NOTIFY);
                                                             }
                                                         }
                                                     }
@@ -237,7 +241,7 @@ public class UUIDResolver {
                 try {
                     if (isChecking && HypixelUtil.isInGame("PIT") && nickDetector.denick.getValue()) {
                         for (String username : usernameList.keySet()) {
-                            if (!validMap.containsKey(username) && recentlyResolved.contains(username) && !resolvedMap.containsKey(username)) {
+                            if (!validMap.containsKey(username) && checkedUsernames.containsKey(username) && !resolvedMap.containsKey(username)) {
                                 if (!isChecking || !nickDetector.denick.getValue() || Minecraft.getMinecraft().thePlayer == null || Minecraft.getMinecraft().theWorld == null)
                                     continue;
                                 Minecraft mc = Minecraft.getMinecraft();
@@ -283,8 +287,10 @@ public class UUIDResolver {
                                                                     if (profileJsonObject.has("name")) {
                                                                         String resolvedName = profileJsonObject.get("name").getAsString();
                                                                         if (resolvedName != null) {
-                                                                            resolvedMap.put(username, resolvedName);
-                                                                            Notifications.getManager().post("Nick Detector", username + " may be " + resolvedName + "!", 2500, Notifications.Type.NOTIFY);
+                                                                            if(!username.equals(resolvedName)) {
+                                                                                resolvedMap.put(username, resolvedName);
+                                                                                Notifications.getManager().post("Nick Detector", username + " may be " + resolvedName + "! (N2)", 2500, Notifications.Type.NOTIFY);
+                                                                            }
                                                                             break;
                                                                         }
                                                                     }
@@ -299,7 +305,6 @@ public class UUIDResolver {
                                         }
                                     }
                                 }
-
                             }
                         }
                     }
@@ -314,7 +319,7 @@ public class UUIDResolver {
                         for (String username : usernameList.keySet()) {
                             if (!isChecking || Minecraft.getMinecraft().thePlayer == null)
                                 return;
-                            if (validMap.containsKey(username) && recentlyResolved.contains(username)) {
+                            if (validMap.containsKey(username) && checkedUsernames.containsKey(username) && recentlyResolved.contains(username)) {
                                 Connection hypixelApiConnection = new Connection("https://api.hypixel.net/player");
 
                                 hypixelApiConnection.setParameters("key", Client.instance.hypixelApiKey);
@@ -335,7 +340,7 @@ public class UUIDResolver {
                                     }
                                 }
 
-                                hypixelResponseMap.put(hypixelApiConnection.getResponse(), System.currentTimeMillis());
+                                hypixelResponseMap.put(username, System.currentTimeMillis());
                             }
                         }
                     }
@@ -387,13 +392,13 @@ public class UUIDResolver {
                                                                     Connection profileConnection = new Connection("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid);
                                                                     Connector.get(profileConnection);
                                                                     JsonObject profileJsonObject = (JsonObject) JsonParser.parseString(profileConnection.getResponse());
-                                                                    responseMap.put(profileConnection.getResponse(), System.currentTimeMillis());
+                                                                    responseMap.put(username, System.currentTimeMillis());
 
                                                                     if (profileJsonObject.has("name")) {
                                                                         String resolvedName = profileJsonObject.get("name").getAsString();
                                                                         if (resolvedName != null) {
                                                                             resolvedMap.put(username, resolvedName);
-                                                                            Notifications.getManager().post("Nick Detector", username + " may be " + resolvedName + "!", 2500, Notifications.Type.NOTIFY);
+                                                                            Notifications.getManager().post("Nick Detector", username + " may be " + resolvedName + "! (N3)", 2500, Notifications.Type.NOTIFY);
                                                                             break;
                                                                         }
                                                                     }
@@ -422,6 +427,7 @@ public class UUIDResolver {
             }
             isChecking = false;
         }
+
     }
 
 }

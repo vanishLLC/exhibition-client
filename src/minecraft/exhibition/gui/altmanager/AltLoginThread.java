@@ -1,7 +1,6 @@
 package exhibition.gui.altmanager;
 
 import com.mojang.authlib.Agent;
-import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.authlib.yggdrasil.YggdrasilUserAuthentication;
 import exhibition.Client;
@@ -26,33 +25,16 @@ public final class AltLoginThread extends Thread {
     }
 
     private Session createSession(final String username, final String password) {
-        final YggdrasilAuthenticationService service = new YggdrasilAuthenticationService(Proxy.NO_PROXY, "");
-        final YggdrasilUserAuthentication auth = (YggdrasilUserAuthentication) service.createUserAuthentication(Agent.MINECRAFT);
-        auth.setUsername(username);
-        auth.setPassword(password);
         try {
+            final YggdrasilAuthenticationService service = new YggdrasilAuthenticationService(Proxy.NO_PROXY, "");
+            final YggdrasilUserAuthentication auth = (YggdrasilUserAuthentication) service.createUserAuthentication(Agent.MINECRAFT);
+            auth.setUsername(username);
+            auth.setPassword(password);
             auth.logIn();
 
-//            AutoSkin autoSkin = (AutoSkin) Client.getModuleManager().get(AutoSkin.class);
-//            if (autoSkin.isEnabled()) {
-//                String skinUrl = autoSkin.stringURL.getValue();
-//                boolean isSlim = autoSkin.slimSkin.getValue();
-//
-//                try {
-//                    System.out.println(Client.mojang.getUUIDOfUsername(auth.getSelectedProfile().getName()));
-//                    System.out.println(auth.getAuthenticatedToken());
-////                    if (Client.mojang.getStatus(Mojang.ServiceType.AUTHSERVER_MOJANG_COM) == Mojang.ServiceStatus.GREEN) {
-////                        Client.mojang.updateSkin(Client.mojang.getUUIDOfUsername(auth.getSelectedProfile().getName()), auth.getAuthenticatedToken(), Mojang.SkinType.SLIM, skinUrl);
-////                    }
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                    Notifications.getManager().post("Error", "Could not change skin.", 750, Notifications.Type.NOTIFY);
-//                }
-//            }
-
             return new Session(auth.getSelectedProfile().getName(), auth.getSelectedProfile().getId().toString(), auth.getAuthenticatedToken(), "mojang");
-        } catch (AuthenticationException localAuthenticationException) {
-            localAuthenticationException.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }
@@ -79,6 +61,7 @@ public final class AltLoginThread extends Thread {
                 return;
             }
             this.status = EnumChatFormatting.AQUA + "Logging in...";
+            Notifications.getManager().post("Logging in", "Logging in to " + alt.getMask(), 2000, Notifications.Type.OKAY);
             final Session auth = this.createSession(alt.getUsername(), alt.getPassword());
             if (auth == null) {
                 this.status = EnumChatFormatting.RED + "Login failed!";

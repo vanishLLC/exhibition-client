@@ -207,7 +207,7 @@ public class GuiMultiplayer extends GuiScreen implements GuiYesNoCallback
             {
                 this.refreshServerList();
             } else if(button.id == 420) {
-                new Thread(IPUtil::checkIP).start();
+                new IPUtil.IPCheckThread().start();
             } else if(button.id == 6969) {
                 mc.displayGuiScreen(new GuiAltManager(this));
             } else if(button.id == 44444) {

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Random;
 
+import exhibition.util.render.font.FontCache;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
@@ -54,7 +55,7 @@ public class FontRenderer implements IResourceManagerReloadListener {
      * drop shadows.
      */
     public int[] colorCode = new int[32];
-    private ResourceLocation locationFontTexture;
+    public ResourceLocation locationFontTexture;
 
     /**
      * The RenderEngine used to load and setup glyph textures.
@@ -64,12 +65,12 @@ public class FontRenderer implements IResourceManagerReloadListener {
     /**
      * Current X coordinate at which to draw the next character.
      */
-    private float posX;
+    public float posX;
 
     /**
      * Current Y coordinate at which to draw the next character.
      */
-    private float posY;
+    public float posY;
 
     /**
      * If true, strings should be rendered with Unicode fonts instead of the default.png font
@@ -114,7 +115,7 @@ public class FontRenderer implements IResourceManagerReloadListener {
     /**
      * Set if the "l" style (bold) is active in currently rendering string
      */
-    private boolean boldStyle;
+    public boolean boldStyle;
 
     /**
      * Set if the "o" style (italic) is active in currently rendering string
@@ -281,6 +282,8 @@ public class FontRenderer implements IResourceManagerReloadListener {
      * Render a single character with the default.png font at current (posX,posY) location...
      */
     private float renderDefaultChar(int p_78266_1_, boolean p_78266_2_) {
+        FontCache.instance.renderChar(this, p_78266_1_, p_78266_2_);
+
         int i = p_78266_1_ % 16 * 8;
         int j = p_78266_1_ / 16 * 8;
         int k = p_78266_2_ ? 1 : 0;
@@ -576,6 +579,10 @@ public class FontRenderer implements IResourceManagerReloadListener {
         if (text == null) {
             return 0;
         } else {
+            if (FontCache.instance.render(this, text, (float) x, (float) y, color, dropShadow)) {
+                return (int) x;
+            }
+
             if (this.bidiFlag) {
                 text = this.bidiReorder(text);
             }

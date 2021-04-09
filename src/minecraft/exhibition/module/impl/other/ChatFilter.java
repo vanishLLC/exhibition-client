@@ -18,11 +18,10 @@ public class ChatFilter extends Module {
     private final Setting<Boolean> bounty = new Setting<>("BOUNTY", false);
     private final Setting<Boolean> levelUp = new Setting<>("LEVEL UP", true);
     private final Setting<Boolean> showoff = new Setting<>("SHOWOFF", false);
-    private final Setting<Boolean> woosh = new Setting<>("WOOSH!", true);
 
     public ChatFilter(ModuleData data) {
         super(data);
-        MultiBool filters = new MultiBool("Filters", woosh, kills, assists, streaks, bounty, levelUp);
+        MultiBool filters = new MultiBool("Filters", kills, assists, streaks, bounty, levelUp);
         settings.put("FILTERS", new Setting<>("FILTERS", filters, "The messages that should be blocked from chat."));
     }
 
@@ -45,11 +44,6 @@ public class ChatFilter extends Module {
 
             if(chatMessage.startsWith("\247r") && chatMessage.length() > 4) {
                 chatMessage = chatMessage.substring(2);
-            }
-
-            if(woosh.getValue() && chatMessage.contains("You are paper-thin! WOOSH!")) {
-                event.setCancelled(true);
-                return;
             }
 
             if (chatMessage.startsWith("\247a\247l")) {

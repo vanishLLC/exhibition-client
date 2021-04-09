@@ -110,18 +110,19 @@ public class Nametags extends Module {
         if (event instanceof EventRenderGui) {
             EventRenderGui er = (EventRenderGui) event;
             ScaledResolution scaledRes = new ScaledResolution(mc);
-            List<EntityPlayer> entList = new ArrayList<>(entityPositions.keySet());
-            entList.sort(Comparator.comparing(EntityPlayer::isImportant));
 
             TTFFontRenderer font = Client.fonts[3];
 
-            for (EntityPlayer ent : entList) {
-                int dist = (int) mc.thePlayer.getDistanceToEntity(ent);
+            for (EntityPlayer ent : entityPositions.keySet()) {
+                double[] renderPositions = entityPositions.getOrDefault(ent, defaultTo).array;
 
-                boolean prioritized = PriorityManager.isPriority(ent) || ent == Client.getModuleManager().get(Killaura.class).vip;
+                if ((renderPositions[2] < 0.0D) || (renderPositions[2] >= 1.0D)) {
+                    continue;
+                }
+
+                boolean prioritized = PriorityManager.isPriority(ent);
 
                 boolean isPriority = prioritized || TargetESP.isPriority(ent) || FriendManager.isFriend(ent.getName());
-
 
                 boolean invalid = false;
                 if (!isPriority) {
@@ -131,27 +132,7 @@ public class Nametags extends Module {
                     }
                 }
 
-                String playerName = ent.getDisplayName().getFormattedText();
-
-                String str = ((boolean) distance.getValue() ? "\247a" + dist + "m\247r " : "") + playerName;
-                str = str.replace(playerName, FriendManager.isFriend(ent.getName()) ? FriendManager.getAlias(ent.getName()) : "\247f\247l" + playerName);
-
-                if ((boolean) settings.get(BOTS).getValue() && AntiBot.isBot(ent)) {
-                    boolean isNCP = str.contains("[NPC] ");
-                    str = str.replace("[NPC] ", "");
-                    str += " \247c[" + (isNCP ? "NPC" : "BOT") + "]";
-                }
-
-                str = str.replace("\2478", "\247f");
-
-                double[] renderPositions = entityPositions.getOrDefault(ent, defaultTo).array;
-
-                if ((renderPositions[2] < 0.0D) || (renderPositions[2] >= 1.0D)) {
-                    continue;
-                }
-
                 GlStateManager.pushMatrix();
-
 
                 GlStateManager.translate(renderPositions[0] / scaledRes.getScaleFactor(), renderPositions[1] / scaledRes.getScaleFactor(), 0.0D);
                 scale();
@@ -200,7 +181,10 @@ public class Nametags extends Module {
                 if (percentage < 0.2) {
                     percentage = 0.2F;
                 }
-                if (!(boolean) settings.get(OPACITY).getValue() || isPriority || AntiBot.isBot(ent)) {
+
+                boolean isBot = AntiBot.isBot(ent);
+
+                if (!(boolean) settings.get(OPACITY).getValue() || isPriority || isBot) {
                     percentage = 1;
                 }
                 int backgroundColor = FriendManager.isFriend(ent.getName()) ? Colors.getColor(52, 229, 235, 200) :
@@ -216,6 +200,19 @@ public class Nametags extends Module {
                     borderColor = Colors.getColor(255, 255, 0, (int) (200 * percentage));
                 }
 
+                String playerName = ent.getDisplayName().getFormattedText();
+
+                String str = ((boolean) this.distance.getValue() ? "\247a" + (int) mc.thePlayer.getDistanceToEntity(ent) + "m\247r " : "") + playerName;
+                str = str.replace(playerName, FriendManager.isFriend(ent.getName()) ? FriendManager.getAlias(ent.getName()) : "\247f\247l" + playerName);
+
+                if ((boolean) settings.get(BOTS).getValue() && isBot) {
+                    boolean isNCP = str.contains("[NPC] ");
+                    str = str.replace("[NPC] ", "");
+                    str += " \247c[" + (isNCP ? "NPC" : "BOT") + "]";
+                }
+
+                str = str.replace("\2478", "\247f");
+
                 float strWidth = font.getWidth(str);
 
                 RenderingUtil.rectangleBordered(-strWidth / 2 - 2, -11, strWidth / 2 + 2, 0, 0.5, backgroundColor, borderColor);
@@ -228,25 +225,31 @@ public class Nametags extends Module {
 
                 font.drawBorderedString(str, -strWidth / 2, -8.5F, color, Colors.getColorOpacity(-1, (int) (190 * percentage)));
 
-                if (!AntiBot.isBot(ent)) {
+                String selectHealth = this.health.getSelected();
+                String selectArmor = this.armor.getSelected();
+
+                boolean hovered = x3 < mouseX && mouseX < x4 && y1 < mouseY && mouseY < y2;
+
+                float health = Float.isNaN(ent.getHealth()) ? 0 : ent.getHealth();
+                float realHealthProgress = (health / ent.getMaxHealth());
+                float[] fractions = new float[]{0f, 0.5f, 1f};
+                Color[] colors = new Color[]{Color.RED, Color.YELLOW, Color.GREEN};
+                Color customColor = health >= 0 ? ESP2D.blendColors(fractions, colors, realHealthProgress).brighter() : Color.RED;
+
+                if (!isBot) {
                     double left = -strWidth / 2 - 2;
 
                     float progress;
-                    float health = ent.getHealth();
                     float absorption = ent.getAbsorptionAmount();
 
                     progress = health / (ent.getMaxHealth() + absorption);
 
-                    float realHealthProgress = (health / ent.getMaxHealth());
 
-                    float[] fractions = new float[]{0f, 0.5f, 1f};
-                    Color[] colors = new Color[]{Color.RED, Color.YELLOW, Color.GREEN};
-                    Color customColor = health >= 0 ? ESP2D.blendColors(fractions, colors, realHealthProgress).brighter() : Color.RED;
                     double difference = strWidth + 4;
                     double healthLocation = left + (strWidth + 4) * progress;
 
                     RenderingUtil.rectangle(left, 0, healthLocation, 1.5, Colors.getColorOpacity(customColor.getRGB(), (int) (percentage * 255)));
-                    RenderingUtil.rectangle(healthLocation, 0, left + difference, 1.5, Colors.getColor(160,0,0, (int) (percentage * 255)));
+                    RenderingUtil.rectangle(healthLocation, 0, left + difference, 1.5, Colors.getColor(160, 0, 0, (int) (percentage * 255)));
 
 
                     if (absorption > 0) {
@@ -258,39 +261,21 @@ public class Nametags extends Module {
                     RenderingUtil.rectangle(left, 1, left + difference, 1.5, Colors.getColor(0, (int) (percentage * 110)));
                 }
 
-                String selectHealth = this.health.getSelected();
-                String selectArmor = this.armor.getSelected();
-
                 boolean healthOption = selectHealth.equals("Always") || (isPriority && selectHealth.equals("Priority Only"));
-                boolean armor = selectArmor.equals("Always") || (isPriority && selectArmor.equals("Priority Only"));
-
-                boolean hovered = x3 < mouseX && mouseX < x4 && y1 < mouseY && mouseY < y2;
-
                 if (healthOption || hovered && selectHealth.equals("Hover")) {
-                    float health = Float.isNaN(ent.getHealth()) ? 0 : ent.getHealth();
-                    String healthInfo = String.valueOf(MathUtils.roundToPlace(health/2F, 1)).replaceFirst("\\.0", "") +
-                            (ent.getAbsorptionAmount() > 0 ? " \2476" + String.valueOf((int)ent.getAbsorptionAmount()/2F).replaceFirst("\\.0", "") : "");
+                    String healthInfo = String.valueOf(MathUtils.roundToPlace(health / 2F, 1)).replaceFirst("\\.0", "") +
+                            (ent.getAbsorptionAmount() > 0 ? " \2476" + String.valueOf((int) ent.getAbsorptionAmount() / 2F).replaceFirst("\\.0", "") : "");
 
                     float strWidth2 = font.getWidth(healthInfo);
 
-                    float[] fractions = new float[]{0f, 0.5f, 1f};
-                    Color[] colors = new Color[]{Color.RED, Color.YELLOW, Color.GREEN};
-
-                    float progress = health / ent.getMaxHealth();
-                    Color customColor = health >= 0 ? ESP2D.blendColors(fractions, colors, progress).brighter() : Color.RED;
-
                     double fullWidth = Math.max(strWidth2 + 2, 11);
 
-                    try {
-                        RenderingUtil.rectangleBordered(strWidth / 2 + 3, -11, strWidth / 2 + 3 + fullWidth, 0, 0.5, backgroundColor, borderColor);
-                        font.drawBorderedString(healthInfo, strWidth / 2 + 3.5 + fullWidth / 2 - strWidth2 / 2, -8.5, Colors.getColor(customColor.getRed(), customColor.getGreen(), customColor.getBlue(), (int) (255 * percentage)), Colors.getColor(customColor.getRed(), customColor.getGreen(), customColor.getBlue(), (int) (190 * percentage)));
-                    } catch (Exception ignored) {
-
-                    }
+                    RenderingUtil.rectangleBordered(strWidth / 2 + 3, -11, strWidth / 2 + 3 + fullWidth, 0, 0.5, backgroundColor, borderColor);
+                    font.drawBorderedString(healthInfo, strWidth / 2 + 3.5 + fullWidth / 2 - strWidth2 / 2, -8.5, Colors.getColor(customColor.getRed(), customColor.getGreen(), customColor.getBlue(), (int) (255 * percentage)), Colors.getColor(customColor.getRed(), customColor.getGreen(), customColor.getBlue(), (int) (190 * percentage)));
                 }
 
+                boolean armor = selectArmor.equals("Always") || (isPriority && selectArmor.equals("Priority Only"));
                 if (armor || hovered && selectArmor.equals("Hover") || isPriority) {
-
                     List<ItemStack> itemsToRender = new ArrayList<>();
                     for (int i = 0; i < 5; i++) {
                         ItemStack stack = ent.getEquipmentInSlot(i);
@@ -339,8 +324,8 @@ public class Nametags extends Module {
                                     for (String s : StringUtils.stripHypixelControlCodes(e)
                                             .replace("\247f\2477\2479", "")
                                             .replace("“", "")
-                                            .replace("”","")
-                                            .replace("\"","")
+                                            .replace("”", "")
+                                            .replace("\"", "")
                                             .replace("(", "").split(" ")) {
                                         if (s.contains("RARE") || s.length() < 1) {
                                             continue;
@@ -352,7 +337,7 @@ public class Nametags extends Module {
                                             level += s.equals("II") ? 1 : 2;
                                         }
                                     }
-                                    if(!temp.toString().equals("")) {
+                                    if (!temp.toString().equals("")) {
                                         render.add((strongEnchant ? "\247c\247l" : "\247e\247l") + temp + getColor(level) + "\247l" + level);
                                     }
                                 }
@@ -419,7 +404,7 @@ public class Nametags extends Module {
 
                         int potionEffect = (int) Math.round(255.0D - (double) stack.getItemDamage() * 255.0D / (double) stack.getMaxDamage());
                         int var10 = 255 - potionEffect << 16 | potionEffect << 8;
-                        Color customColor = new Color(var10).brighter();
+                        Color potionColor = new Color(var10).brighter();
 
                         int x2 = (x * 2);
                         if (stackDamaged) {
@@ -428,7 +413,7 @@ public class Nametags extends Module {
                             GlStateManager.pushMatrix();
                             GlStateManager.disableDepth();
                             GL11.glScalef(0.5F, 0.5F, 0.5F);
-                            mc.fontRendererObj.drawStringWithShadow(aa, x2 - width / 4D, -9 - y, customColor.getRGB());
+                            mc.fontRendererObj.drawStringWithShadow(aa, x2 - width / 4D, -9 - y, potionColor.getRGB());
                             GlStateManager.enableDepth();
                             GlStateManager.popMatrix();
                         }
@@ -537,6 +522,8 @@ public class Nametags extends Module {
         public IntBuffer viewport = BufferUtils.createIntBuffer(16);
         public FloatBuffer modelView = BufferUtils.createFloatBuffer(16);
         public FloatBuffer projection = BufferUtils.createFloatBuffer(16);
+
+        // public boolean isImportant = false;
 
         public double[] array = new double[3];
 

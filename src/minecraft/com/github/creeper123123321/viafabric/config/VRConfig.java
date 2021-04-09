@@ -25,6 +25,7 @@
 
 package com.github.creeper123123321.viafabric.config;
 
+import us.myles.ViaVersion.api.protocol.ProtocolVersion;
 import us.myles.ViaVersion.util.Config;
 
 import java.io.File;
@@ -39,6 +40,7 @@ public class VRConfig extends Config {
     public VRConfig(File configFile) {
         super(configFile);
         reloadConfig();
+        setClientSideVersion(ProtocolVersion.v1_8.getVersion());
     }
 
     @Override

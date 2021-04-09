@@ -35,11 +35,7 @@ public class HypixelUtil {
     }
 
     public static void setSabotage(boolean e) {
-        try {
-            Class.forName("exhibition.util.HypixelUtil").getDeclaredField("sabotage").set(null, e);
-        } catch (Exception ignored) {
-
-        }
+        sabotage = e;
     }
 
     public static List<String> getPitEnchants(ItemStack stack) {
@@ -166,14 +162,18 @@ public class HypixelUtil {
         return null;
     }
 
+    public static List<String> scoreboardCache = null;
+
     public static boolean scoreboardContains(String str) {
         if (Minecraft.getMinecraft().theWorld == null || Minecraft.getMinecraft().thePlayer == null)
             return false;
 
         Scoreboard scoreboard = Minecraft.getMinecraft().theWorld.getScoreboard();
 
-        if (scoreboard == null)
+        if (scoreboard == null) {
+            scoreboardCache = null;
             return false;
+        }
 
         ScoreObjective scoreobjective = null;
         ScorePlayerTeam scoreboardPlayersTeam = scoreboard.getPlayersTeam(Minecraft.getMinecraft().thePlayer.getName());
@@ -206,13 +206,27 @@ public class HypixelUtil {
                     arraylist1 = arraylist;
                 }
 
-                for (Score score : arraylist1) {
-                    ScorePlayerTeam scoreplayerteam1 = scoreboard.getPlayersTeam(score.getPlayerName());
-                    String s1 = StringUtils.stripHypixelControlCodes(ScorePlayerTeam.formatPlayerName(scoreplayerteam1, score.getPlayerName()).replace("\uD83D\uDC7D", "").replace("\uD83C\uDF82", ""));
-                    if (s1.toLowerCase().contains(str.toLowerCase())) {
-                        return true;
+
+                boolean found = false;
+                if(scoreboardCache == null) {
+                    scoreboardCache = new ArrayList<>();
+                    for (Score score : arraylist1) {
+                        ScorePlayerTeam scoreplayerteam1 = scoreboard.getPlayersTeam(score.getPlayerName());
+                        String s1 = StringUtils.stripHypixelControlCodes(ScorePlayerTeam.formatPlayerName(scoreplayerteam1, score.getPlayerName()).replace("\uD83D\uDC7D", "").replace("\uD83C\uDF82", ""));
+                        scoreboardCache.add(s1);
+                        if (s1.toLowerCase().contains(str.toLowerCase())) {
+                            found = true;
+                        }
+                    }
+                } else {
+                    for (String s : scoreboardCache) {
+                        if (s.toLowerCase().contains(str.toLowerCase())) {
+                           return true;
+                        }
                     }
                 }
+
+                return found;
             } catch (Exception e) {
 
             }

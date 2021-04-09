@@ -31,6 +31,7 @@ import exhibition.management.waypoints.WaypointManager;
 import exhibition.module.Module;
 import exhibition.module.ModuleManager;
 import exhibition.module.impl.combat.Bypass;
+import exhibition.module.impl.render.SpookySkeltal;
 import exhibition.util.HypixelUtil;
 import exhibition.util.MathUtils;
 import exhibition.util.PlayerUtil;

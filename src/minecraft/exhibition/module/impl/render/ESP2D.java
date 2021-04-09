@@ -9,6 +9,7 @@ import exhibition.event.impl.EventRenderGui;
 import exhibition.event.impl.EventTick;
 import exhibition.management.ColorManager;
 import exhibition.management.ColorObject;
+import exhibition.management.UUIDResolver;
 import exhibition.management.font.TTFFontRenderer;
 import exhibition.management.friend.FriendManager;
 import exhibition.module.Module;
@@ -23,9 +24,7 @@ import exhibition.util.RenderingUtil;
 import exhibition.util.TeamUtils;
 import exhibition.util.render.Colors;
 import exhibition.util.render.Depth;
-import net.minecraft.block.Block;
 import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.client.gui.GuiPlayerTabOverlay;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.network.NetworkPlayerInfo;
@@ -46,12 +45,8 @@ import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.passive.IAnimals;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.MathHelper;
-import net.minecraft.util.StatCollector;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
@@ -774,8 +769,9 @@ public class ESP2D extends Module {
         boolean ignorePit = HypixelUtil.isInGame("THE HYPIXEL PIT") && IGNORESPAWN.getValue();
 
         for (Entity ent : mc.theWorld.getLoadedEntityList()) {
-            if (ent instanceof EntityPlayer)
-                if (ignorePit && !TargetESP.isPriority((EntityPlayer) ent)) {
+            if (ent instanceof EntityPlayer) {
+                boolean isImportant = TargetESP.isPriority((EntityPlayer) ent) || FriendManager.isFriend(ent.getName()) || UUIDResolver.instance.isInvalidName(ent.getName());
+                if (ignorePit && !isImportant) {
                     double x = ent.posX;
                     double y = ent.posY;
                     double z = ent.posZ;
@@ -784,6 +780,7 @@ public class ESP2D extends Module {
                         continue;
                     }
                 }
+            }
 
             double x = ent.lastTickPosX + (ent.posX - ent.lastTickPosX) * pTicks - mc.getRenderManager().viewerPosX;
             double y = ent.lastTickPosY + (ent.posY - ent.lastTickPosY) * pTicks - mc.getRenderManager().viewerPosY;
@@ -826,8 +823,6 @@ public class ESP2D extends Module {
 
         public double[] array = new double[4];
 
-        double opacity = -1;
-
         Bruh(double[] array) {
             this.array[0] = array[0];
             this.array[1] = array[1];
@@ -844,9 +839,7 @@ public class ESP2D extends Module {
         for (NetworkPlayerInfo networkPlayerInfo : list) {
             if (networkPlayerInfo.getGameProfile() != null)
                 if (player.getGameProfile().equals(networkPlayerInfo.getGameProfile()) || (player.getName().equals(networkPlayerInfo.getGameProfile().getName()))) {
-                    if (networkPlayerInfo.getResponseTime() <= 0) {
-                        ping = 0;
-                    } else {
+                    if (networkPlayerInfo.getResponseTime() > 0) {
                         ping = networkPlayerInfo.getResponseTime();
                     }
                     break;

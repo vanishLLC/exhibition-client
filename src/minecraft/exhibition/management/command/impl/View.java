@@ -26,7 +26,7 @@ public class View extends Command {
             for (Entity entity : mc.theWorld.getLoadedEntityList()) {
                 if (entity instanceof EntityPlayer) {
                     if (entity.getName().equalsIgnoreCase(playerName)) {
-                        new Thread(){
+                        new Thread("View Thread"){
                             @Override
                             public void run() {
                                 try {

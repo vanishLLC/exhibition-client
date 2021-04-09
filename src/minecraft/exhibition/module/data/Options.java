@@ -29,7 +29,12 @@ public class Options {
     }
 
     public void setSelected(String selected) {
-        this.selected = selected;
+        for (String option : options) {
+            if (selected.equalsIgnoreCase(option)) {
+                this.selected = option;
+                return;
+            }
+        }
     }
 
     public String[] getOptions() {

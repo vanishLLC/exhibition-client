@@ -1236,6 +1236,162 @@ public abstract class World implements IBlockAccess {
         }
     }
 
+    public MovingObjectPosition rayTraceBlocksIgnored(Vec3 start, Vec3 end, BlockPos valid) {
+        boolean stopOnLiquid = false, ignoreBlockWithoutBoundingBox = true;
+        if (!Double.isNaN(start.xCoord) && !Double.isNaN(start.yCoord) && !Double.isNaN(start.zCoord)) {
+            if (!Double.isNaN(end.xCoord) && !Double.isNaN(end.yCoord) && !Double.isNaN(end.zCoord)) {
+                int i = MathHelper.floor_double(end.xCoord);
+                int j = MathHelper.floor_double(end.yCoord);
+                int k = MathHelper.floor_double(end.zCoord);
+                int l = MathHelper.floor_double(start.xCoord);
+                int i1 = MathHelper.floor_double(start.yCoord);
+                int j1 = MathHelper.floor_double(start.zCoord);
+                BlockPos blockpos = new BlockPos(l, i1, j1);
+                IBlockState iblockstate = this.getBlockState(blockpos);
+                Block block = iblockstate.getBlock();
+
+                int penetrated = 0;
+
+                if ((!ignoreBlockWithoutBoundingBox || block.getCollisionBoundingBox(this, blockpos, iblockstate) != null) && block.canCollideCheck(iblockstate, stopOnLiquid)) {
+                    MovingObjectPosition movingobjectposition = block.collisionRayTrace(this, blockpos, start, end);
+                    if (movingobjectposition != null) {
+                        boolean allowed = true;
+                        if (movingobjectposition.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
+                            if (!movingobjectposition.getBlockPos().equals(valid)) {
+                                allowed = false;
+                            }
+                        }
+                        if (allowed) {
+                            return movingobjectposition;
+                        }
+                    }
+                }
+
+                MovingObjectPosition movingobjectposition2 = null;
+                int k1 = 200;
+
+
+                while (k1-- >= 0) {
+                    if (Double.isNaN(start.xCoord) || Double.isNaN(start.yCoord) || Double.isNaN(start.zCoord)) {
+                        return null;
+                    }
+
+                    if (l == i && i1 == j && j1 == k) {
+                        return null;
+                    }
+
+                    boolean flag2 = true;
+                    boolean flag = true;
+                    boolean flag1 = true;
+                    double d0 = 999.0D;
+                    double d1 = 999.0D;
+                    double d2 = 999.0D;
+
+                    if (i > l) {
+                        d0 = (double) l + 1.0D;
+                    } else if (i < l) {
+                        d0 = (double) l + 0.0D;
+                    } else {
+                        flag2 = false;
+                    }
+
+                    if (j > i1) {
+                        d1 = (double) i1 + 1.0D;
+                    } else if (j < i1) {
+                        d1 = (double) i1 + 0.0D;
+                    } else {
+                        flag = false;
+                    }
+
+                    if (k > j1) {
+                        d2 = (double) j1 + 1.0D;
+                    } else if (k < j1) {
+                        d2 = (double) j1 + 0.0D;
+                    } else {
+                        flag1 = false;
+                    }
+
+                    double d3 = 999.0D;
+                    double d4 = 999.0D;
+                    double d5 = 999.0D;
+                    double d6 = end.xCoord - start.xCoord;
+                    double d7 = end.yCoord - start.yCoord;
+                    double d8 = end.zCoord - start.zCoord;
+
+                    if (flag2) {
+                        d3 = (d0 - start.xCoord) / d6;
+                    }
+
+                    if (flag) {
+                        d4 = (d1 - start.yCoord) / d7;
+                    }
+
+                    if (flag1) {
+                        d5 = (d2 - start.zCoord) / d8;
+                    }
+
+                    if (d3 == -0.0D) {
+                        d3 = -1.0E-4D;
+                    }
+
+                    if (d4 == -0.0D) {
+                        d4 = -1.0E-4D;
+                    }
+
+                    if (d5 == -0.0D) {
+                        d5 = -1.0E-4D;
+                    }
+
+                    EnumFacing enumfacing;
+
+                    if (d3 < d4 && d3 < d5) {
+                        enumfacing = i > l ? EnumFacing.WEST : EnumFacing.EAST;
+                        start = new Vec3(d0, start.yCoord + d7 * d3, start.zCoord + d8 * d3);
+                    } else if (d4 < d5) {
+                        enumfacing = j > i1 ? EnumFacing.DOWN : EnumFacing.UP;
+                        start = new Vec3(start.xCoord + d6 * d4, d1, start.zCoord + d8 * d4);
+                    } else {
+                        enumfacing = k > j1 ? EnumFacing.NORTH : EnumFacing.SOUTH;
+                        start = new Vec3(start.xCoord + d6 * d5, start.yCoord + d7 * d5, d2);
+                    }
+
+                    l = MathHelper.floor_double(start.xCoord) - (enumfacing == EnumFacing.EAST ? 1 : 0);
+                    i1 = MathHelper.floor_double(start.yCoord) - (enumfacing == EnumFacing.UP ? 1 : 0);
+                    j1 = MathHelper.floor_double(start.zCoord) - (enumfacing == EnumFacing.SOUTH ? 1 : 0);
+                    blockpos = new BlockPos(l, i1, j1);
+                    IBlockState iblockstate1 = this.getBlockState(blockpos);
+                    Block block1 = iblockstate1.getBlock();
+
+                    if (!ignoreBlockWithoutBoundingBox || block1.getCollisionBoundingBox(this, blockpos, iblockstate1) != null) {
+                        if (block1.canCollideCheck(iblockstate1, stopOnLiquid)) {
+                            MovingObjectPosition movingobjectposition1 = block1.collisionRayTrace(this, blockpos, start, end);
+
+                            boolean allowed = true;
+                            if (movingobjectposition1 != null) {
+                                if (movingobjectposition1.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
+                                    if (!movingobjectposition1.getBlockPos().equals(valid)) {
+                                        allowed = false;
+                                    }
+                                }
+
+                                if (allowed) {
+                                    return movingobjectposition1;
+                                }
+                            }
+                        } else {
+                            movingobjectposition2 = new MovingObjectPosition(MovingObjectPosition.MovingObjectType.MISS, start, enumfacing, blockpos);
+                        }
+                    }
+                }
+                return null;
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
     /**
      * Plays a sound at the entity's position. Args: entity, sound, volume (relative to 1.0), and frequency (or pitch,
      * also relative to 1.0).

@@ -278,8 +278,10 @@ public class ConfigManager {
                                     MultiBool multiBool = (MultiBool) setting.getValue();
                                     List<String> items = Arrays.asList(settingValue.replace("[", "").replace("]", "").split("\\s*,\\s*"));
                                     items.forEach(o -> multiBool.getBooleans().forEach(bool -> {
-                                        if (o.contains(bool.getName())) {
-                                            bool.setValue((o.split("=")[1]).equalsIgnoreCase("true"));
+                                        String[] vSplit = o.split("=");
+                                        if (vSplit[0].equalsIgnoreCase(bool.getName())) {
+                                            String e = vSplit[1];
+                                            bool.setValue(Boolean.valueOf(e));
                                         }
                                     }));
                                 }

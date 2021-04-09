@@ -434,21 +434,16 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
                                 setting.setValue(Boolean.parseBoolean(settingValue));
                             } // If the multiBool is supposed to be an option
                             else if (setting.getValue().getClass().equals(Options.class)) {
-                                Options option = ((Options) setting.getValue());
-                                for (String options : option.getOptions()) {
-                                    if (settingValue.equals(options)) {
-                                        option.setSelected(options);
-                                        break;
-                                    }
-                                }
+                                ((Options) setting.getValue()).setSelected(settingValue);
                             } // If the multiBool is supposed to be a multibool
                             else if (setting.getValue().getClass().equals(MultiBool.class)) {
                                 MultiBool multiBool = (MultiBool) setting.getValue();
                                 List<String> items = Arrays.asList(settingValue.replace("[", "").replace("]", "").split("\\s*,\\s*"));
                                 items.forEach(o -> multiBool.getBooleans().forEach(bool -> {
-                                    if (o.startsWith(bool.getName())) {
-                                        String e = (o.split("=")[1]);
-                                        bool.setValue(e.equalsIgnoreCase("true"));
+                                    String[] vSplit = o.split("=");
+                                    if (vSplit[0].equalsIgnoreCase(bool.getName())) {
+                                        String e = vSplit[1];
+                                        bool.setValue(Boolean.valueOf(e));
                                     }
                                 }));
                             } // If the multiBool is supposed to be a multibool
@@ -497,21 +492,16 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
                                     setting.setValue(Boolean.parseBoolean(settingValue));
                                 } // If the multiBool is supposed to be an option
                                 else if (setting.getValue().getClass().equals(Options.class)) {
-                                    Options option = ((Options) setting.getValue());
-                                    for (String options : option.getOptions()) {
-                                        if (settingValue.equals(options)) {
-                                            option.setSelected(options);
-                                            break;
-                                        }
-                                    }
+                                    ((Options) setting.getValue()).setSelected(settingValue);
                                 } // If the multiBool is supposed to be a multibool
                                 else if (setting.getValue().getClass().equals(MultiBool.class)) {
                                     MultiBool multiBool = (MultiBool) setting.getValue();
                                     List<String> items = Arrays.asList(settingValue.replace("[", "").replace("]", "").split("\\s*,\\s*"));
                                     items.forEach(o -> multiBool.getBooleans().forEach(bool -> {
-                                        if (o.startsWith(bool.getName())) {
-                                            String e = (o.split("=")[1]);
-                                            bool.setValue(e.equalsIgnoreCase("true"));
+                                        String[] vSplit = o.split("=");
+                                        if (vSplit[0].equalsIgnoreCase(bool.getName())) {
+                                            String e = vSplit[1];
+                                            bool.setValue(Boolean.valueOf(e));
                                         }
                                     }));
                                 } // If the multiBool is supposed to be a multibool

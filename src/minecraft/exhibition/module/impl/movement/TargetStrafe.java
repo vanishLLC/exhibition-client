@@ -22,7 +22,6 @@ import exhibition.module.impl.combat.Killaura;
 import exhibition.module.impl.player.Scaffold;
 import exhibition.module.impl.render.TargetESP;
 import exhibition.util.*;
-import exhibition.util.misc.ChatUtil;
 import exhibition.util.render.Colors;
 import net.minecraft.block.BlockAir;
 import net.minecraft.client.renderer.GlStateManager;

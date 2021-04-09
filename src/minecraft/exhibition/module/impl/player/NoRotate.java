@@ -16,6 +16,7 @@ import exhibition.util.Timer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
+import net.minecraft.util.MathHelper;
 
 public class NoRotate extends Module {
 
@@ -92,11 +93,11 @@ public class NoRotate extends Module {
                             mc.thePlayer.motionX = mc.thePlayer.motionZ = 0;
                         }
 
-                        mc.thePlayer.setPositionAndRotation(d0, d1, d2, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch);
-                        NetUtil.sendPacketNoEvents(new C03PacketPlayer.C06PacketPlayerPosLook(mc.thePlayer.posX, mc.thePlayer.getEntityBoundingBox().minY, mc.thePlayer.posZ, rotationYaw, rotationPitch, false));
+                        float normalizedYaw = rotationYaw + MathHelper.wrapAngleTo180_float(mc.thePlayer.rotationYaw - rotationYaw);
+
+                        mc.thePlayer.setPositionAndRotation(d0, d1, d2, normalizedYaw, mc.thePlayer.rotationPitch);
+                        NetUtil.sendPacket(new C03PacketPlayer.C06PacketPlayerPosLook(mc.thePlayer.posX, mc.thePlayer.getEntityBoundingBox().minY, mc.thePlayer.posZ, rotationYaw, rotationPitch, false));
                         event.setCancelled(true);
-
-
                     }
 
                     if (Client.getModuleManager().get(LongJump.class).isEnabled()) {

@@ -236,7 +236,7 @@ public class GuiDisconnected extends GuiScreen {
             } catch (Exception ignored) {
             }
         } else if (button.id == 6) {
-            new Thread(IPUtil::checkIP).start();
+            new IPUtil.IPCheckThread().start();
         } else if (button.id == 7) {
             this.mc.displayGuiScreen(new GuiAltManager(this));
         } else if (button.id == 8) {

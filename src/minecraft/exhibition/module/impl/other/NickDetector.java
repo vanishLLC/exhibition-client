@@ -19,6 +19,7 @@ import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -83,22 +84,25 @@ public class NickDetector extends Module {
                 S04PacketEntityEquipment packetIn = (S04PacketEntityEquipment) packet;
                 Entity entity = mc.theWorld.getEntityByID(packetIn.getEntityID());
 
-                if (entity != null && UUIDResolver.instance.checkedUsernames.containsKey(entity.getName()) && UUIDResolver.instance.isInvalidName(entity.getName())) {
-                    ItemStack stack = packetIn.getItemStack();
-                    if (stack != null && stack.hasTagCompound()) {
-                        if (stack.getTagCompound().hasKey("ExtraAttributes", 10)) {
-                            NBTTagCompound nbttagcompound = stack.getTagCompound().getCompoundTag("ExtraAttributes");
+                if (entity instanceof EntityPlayer) {
+                    EntityPlayer player = (EntityPlayer) entity;
+                    if (UUIDResolver.instance.checkedUsernames.containsKey(player.getName()) && UUIDResolver.instance.isInvalidUUID(player.getGameProfile().getId())) {
+                        ItemStack stack = packetIn.getItemStack();
+                        if (stack != null && stack.hasTagCompound()) {
+                            if (stack.getTagCompound().hasKey("ExtraAttributes", 10)) {
+                                NBTTagCompound nbttagcompound = stack.getTagCompound().getCompoundTag("ExtraAttributes");
 
-                            if (nbttagcompound.hasKey("Nonce", 3)) {
-                                try {
-                                    long nonceLong = nbttagcompound.getLong("Nonce");
+                                if (nbttagcompound.hasKey("Nonce", 3)) {
+                                    try {
+                                        long nonceLong = nbttagcompound.getLong("Nonce");
 
-                                    if (nonceLong <= 100)
-                                        return;
+                                        if (nonceLong <= 100)
+                                            return;
 
-                                    resolvePairList.add(new ResolvePair(entity.getName(), stack));
-                                } catch (Exception e) {
+                                        resolvePairList.add(new ResolvePair(player.getName(), stack));
+                                    } catch (Exception e) {
 
+                                    }
                                 }
                             }
                         }
@@ -150,7 +154,7 @@ public class NickDetector extends Module {
                                             String resolvedName = profileJsonObject.get("name").getAsString();
                                             if (resolvedName != null) {
                                                 UUIDResolver.instance.resolvedMap.put(headName, resolvedName);
-                                                Notifications.getManager().post("Nick Detector", headName + " may be " + resolvedName + "!", 2500, Notifications.Type.NOTIFY);
+                                                Notifications.getManager().post("Nick Detector", headName + " may be " + resolvedName + "!*", 2500, Notifications.Type.NOTIFY);
                                             }
                                         }
                                     }
@@ -193,10 +197,10 @@ public class NickDetector extends Module {
         }
     }
 
-    public class ResolvePair {
+    public static class ResolvePair {
 
-        String username;
-        ItemStack item;
+        public String username;
+        public ItemStack item;
 
         public ResolvePair(String username, ItemStack item) {
             this.username = username;

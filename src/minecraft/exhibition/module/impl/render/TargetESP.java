@@ -99,16 +99,31 @@ public class TargetESP extends Module {
     private static final Pattern bountyPattern = Pattern.compile("\247l[\\d]+g");
 
     public static boolean isPriority(EntityPlayer player) {
-        if (player.equals(Client.getModuleManager().get(Killaura.class).vip) || PriorityManager.isPriority(player))
+        if (PriorityManager.isPriority(player))
             return true;
 
-        String formatted = player.getDisplayName().getFormattedText();
+        if(HypixelUtil.scoreboardCache != null && Client.getModuleManager().isEnabled(TargetESP.class) ) {
+            boolean isRobbery = false;
+            boolean isEvent = false;
 
-        if(Client.getModuleManager().isEnabled(TargetESP.class) && !HypixelUtil.scoreboardContains("ROBBERY") && (bountyPattern.matcher(formatted).find() && !formatted.contains("\247l100g"))) {
-            return true;
-        }
-        if(Client.getModuleManager().isEnabled(TargetESP.class) && (formatted.contains("HELD") || (formatted.contains("BEAST") && !mc.thePlayer.getDisplayName().getFormattedText().contains("\247lBEAST"))) && HypixelUtil.scoreboardContains("Event")) {
-            return true;
+            for(String s : HypixelUtil.scoreboardCache) {
+                if(s == null || s.equals(""))
+                    continue;
+
+                if(s.toLowerCase().contains("ROBBERY".toLowerCase())) {
+                    isRobbery = true;
+                } else if(s.toLowerCase().contains("Event".toLowerCase())) {
+                    isEvent = true;
+                }
+            }
+
+            String formatted = player.getDisplayName().getFormattedText();
+            if (!isRobbery && (bountyPattern.matcher(formatted).find() && !formatted.contains("\247l100g"))) {
+                return true;
+            }
+            if ((formatted.contains("HELD") || (formatted.contains("BEAST") && !mc.thePlayer.getDisplayName().getFormattedText().contains("\247lBEAST"))) && isEvent) {
+                return true;
+            }
         }
         return false;
     }

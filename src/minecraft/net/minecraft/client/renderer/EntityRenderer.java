@@ -1075,8 +1075,23 @@ public class EntityRenderer implements IResourceManagerReloadListener
         updateLightmap(partialTicks);
     }
 
+    private static int updates = 0;
+
     private void updateLightmap(float partialTicks)
     {
+        boolean shouldReturn = false;
+        if(updates > 0) {
+            shouldReturn = true;
+        }
+        updates++;
+
+        if(updates > 100) {
+            updates = 0;
+        }
+
+        if(shouldReturn)
+            return;
+
         if (this.lightmapUpdateNeeded)
         {
             this.mc.mcProfiler.startSection("lightTex");
@@ -1913,7 +1928,7 @@ public class EntityRenderer implements IResourceManagerReloadListener
             // GlStateManager.disableDepth();
         }
         this.mc.mcProfiler.endStartSection("eventRender3D");
-        ((EventRender3D) EventSystem.getInstance(EventRender3D.class)).fire(renderPartialTicks, 0, 0, 0);
+        EventSystem.getInstance(EventRender3D.class).fire(renderPartialTicks, 0, 0, 0);
         if (extras) {
             GlStateManager.enableTexture2D();
             // GlStateManager.enableDepth();

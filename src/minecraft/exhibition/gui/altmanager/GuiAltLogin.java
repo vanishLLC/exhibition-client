@@ -77,6 +77,10 @@ public final class GuiAltLogin extends PanoramaScreen {
         this.username = new GuiTextField(var3, this.mc.fontRendererObj, this.width / 2 - 100, 60, 200, 20);
         this.password = new PasswordField(this.mc.fontRendererObj, this.width / 2 - 100, 100, 200, 20);
         this.username.setFocused(true);
+
+        this.username.setMaxStringLength(1000);
+        this.password.setMaxStringLength(1000);
+
         Keyboard.enableRepeatEvents(true);
         super.initGui();
     }

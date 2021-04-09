@@ -21,28 +21,31 @@ public class Target extends Command {
         Killaura killaura = ((Killaura) Client.getModuleManager().get(Killaura.class));
 
         if (args == null) {
-            if (killaura.vip != null) {
-                killaura.vip = null;
-                ChatUtil.printChat(chatPrefix + "Target entity cleared!");
-                return;
-            }
             printUsage();
             return;
         }
         if (args.length > 0) {
             String name = args[0];
-            if (name.equalsIgnoreCase("none")) {
-                killaura.vip = null;
-                ChatUtil.printChat(chatPrefix + "Target entity cleared!");
-                return;
-            }
-            if (name.equalsIgnoreCase("clear")) {
+            if (name.equalsIgnoreCase("clear") || name.equalsIgnoreCase("c")) {
                 PriorityManager.clearPriorityList();
                 ChatUtil.printChat(chatPrefix + "Priority list cleared!");
                 return;
-            }
-            if (name.equalsIgnoreCase("add")) {
-                if(args.length == 2) {
+            } else if (name.equalsIgnoreCase("add") || name.equalsIgnoreCase("a")) {
+                if (args.length == 2) {
+                    String vip = args[1];
+                    if (!PriorityManager.isPriority(vip)) {
+                        PriorityManager.setAsPriority(vip);
+                        ChatUtil.printChat(chatPrefix + "Added \247f" + vip + "\2478 to the Priority list.");
+                    } else {
+                        PriorityManager.removePriority(vip);
+                        ChatUtil.printChat(chatPrefix + "Removed \247f" + vip + "\2478 from the Priority list.");
+                    }
+                } else {
+                    ChatUtil.printChat(chatPrefix + "\247cPlease enter a valid name.");
+                }
+                return;
+            } else if (name.equalsIgnoreCase("remove") || name.equalsIgnoreCase("r")) {
+                if (args.length == 2) {
                     String vip = args[1];
                     if (!PriorityManager.isPriority(vip)) {
                         PriorityManager.setAsPriority(vip);
@@ -58,25 +61,16 @@ public class Target extends Command {
             }
             if (mc.theWorld.getPlayerEntityByName(name) != null) {
                 EntityPlayer vip = mc.theWorld.getPlayerEntityByName(name);
-                if (vip != killaura.vip && !PriorityManager.isPriority(vip)) {
-                    killaura.vip = vip;
-                    ChatUtil.printChat(chatPrefix + "Now targeting " + args[0]);
+                if (!PriorityManager.isPriority(vip)) {
+                    PriorityManager.setAsPriority(vip);
+                    ChatUtil.printChat(chatPrefix + "Added \247f" + vip.getName() + "\2478 to the Priority list.");
                 } else {
                     PriorityManager.removePriority(vip);
-                    vip.flags = 0;
-                    killaura.vip = null;
-                    ChatUtil.printChat(chatPrefix + "Is no longer priority " + args[0]);
+                    ChatUtil.printChat(chatPrefix + "Removed \247f" + vip.getName() + "\2478 from the Priority list.");
                 }
                 return;
             } else {
-                killaura.vip = null;
                 ChatUtil.printChat(chatPrefix + "No entity with the name " + "\"" + args[0] + "\"" + " currently exists.");
-            }
-        } else {
-            if (killaura.vip != null) {
-                killaura.vip = null;
-                ChatUtil.printChat(chatPrefix + "Target entity cleared!");
-                return;
             }
         }
         printUsage();
@@ -84,7 +78,7 @@ public class Target extends Command {
 
     @Override
     public String getUsage() {
-        return "Target <Target>";
+        return "Target <(a)dd/(r)emove/(c)lear> <name>";
     }
 
 }

@@ -83,7 +83,10 @@ public class AntiAim extends Module {
             }
 
             EventMotionUpdate em = (EventMotionUpdate) event;
-            if (em.isPre() && Killaura.getTarget() == null) {
+
+            Killaura killaura = Client.getModuleManager().get(Killaura.class);
+
+            if (em.isPre() && (!killaura.isEnabled() || Killaura.getTarget() == null || ((Number)killaura.getSetting("ANGLESTEP").getValue()).intValue() <= 0)) {
                 if (lastAngles == null) {
                     lastAngles = new float[]{mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch};
                 }
@@ -102,7 +105,7 @@ public class AntiAim extends Module {
                         em.setYaw(yaw);
                         break;
                     case "Reverse":
-                        float yawReverse = ((mc.thePlayer.rotationYaw) + 180);
+                        float yawReverse = ((mc.thePlayer.rotationYaw) + 178.9F);
                         lastAngles = new float[]{yawReverse, lastAngles[1]};
                         em.setYaw(yawReverse);
 
@@ -117,7 +120,7 @@ public class AntiAim extends Module {
                             fake1 = !fake1;
                             fakeJitter.reset();
                         }
-                        float yawRight = ((mc.thePlayer.rotationYaw) + (fake1 ? 90 : -90));
+                        float yawRight = ((mc.thePlayer.rotationYaw) + (fake1 ? 89.9F : -89.9F));
                         lastAngles = new float[]{yawRight, lastAngles[1]};
                         em.setYaw(yawRight);
                         break;
@@ -126,7 +129,7 @@ public class AntiAim extends Module {
                             fake1 = !fake1;
                             fakeJitter.reset();
                         }
-                        float yawFakeHead = ((mc.thePlayer.rotationYaw) + (fake1 ? 90 : -90));
+                        float yawFakeHead = ((mc.thePlayer.rotationYaw) + (fake1 ? 89.9F : -89.9F));
                         if (fake1) {
                             fake1 = false;
                         }
@@ -154,7 +157,7 @@ public class AntiAim extends Module {
                     case "Normal":
                         break;
                     case "HalfDown":
-                        float pitchDown = 90;
+                        float pitchDown = 89.9F;
                         lastAngles = new float[]{lastAngles[0], pitchDown};
                         em.setPitch(pitchDown);
                         break;
@@ -175,17 +178,17 @@ public class AntiAim extends Module {
                     case "Stutter":
                         float sutter;
                         if (fake) {
-                            sutter = 90;
+                            sutter = 89.9F;
                             em.setPitch(sutter);
                         } else {
-                            sutter = -45;
+                            sutter = -45.3F;
                             em.setPitch(sutter);
                         }
                         lastAngles = new float[]{lastAngles[0], sutter};
                         break;
                     case "Up":
-                        lastAngles = new float[]{lastAngles[0], -90};
-                        em.setPitch(-90);
+                        lastAngles = new float[]{lastAngles[0], -89.9F};
+                        em.setPitch(-89.9F);
                         break;
                     case "Zero":
                         lastAngles = new float[]{lastAngles[0], -179};

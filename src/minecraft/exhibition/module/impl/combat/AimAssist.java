@@ -110,9 +110,6 @@ public class AimAssist extends Module {
                 if (ent.isEntityAlive() && ent instanceof EntityPlayer && ent
                         .getDistanceToEntity(mc.thePlayer) < ((Number) settings.get(RANGE).getValue()).floatValue()
                         && fovCheck(ent)) {
-                    if (ent == ((Killaura) Client.getModuleManager().get(Killaura.class)).vip) {
-                        return ent;
-                    }
                     loaded.add(ent);
                 }
             }

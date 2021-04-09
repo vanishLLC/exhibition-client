@@ -37,9 +37,6 @@ import net.minecraft.network.play.client.C09PacketHeldItemChange;
 import net.minecraft.network.play.client.C0APacketAnimation;
 import net.minecraft.network.play.client.C0BPacketEntityAction;
 import net.minecraft.potion.Potion;
-import net.minecraft.tileentity.TileEntityChest;
-import net.minecraft.tileentity.TileEntityEnderChest;
-import net.minecraft.tileentity.TileEntityLockable;
 import net.minecraft.util.*;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
@@ -439,7 +436,7 @@ public class Scaffold extends Module {
                     }
 
                     if (lastAngles.x != -1337) {
-                        float max = 35F + (float) (5F * Math.random());
+                        float max = 35F + (float) (10F * Math.random());
 
                         lastAngles.x += MathHelper.clamp_float(MathHelper.wrapAngleTo180_float(targetYaw - lastAngles.x), -max, max);
 
@@ -571,7 +568,7 @@ public class Scaffold extends Module {
 
         float max = 35F + (float) (10F * Math.random());
 
-        return new float[]{lastAngles.x + (yaw - lastAngles.x), lastAngles.y + MathHelper.wrapAngleTo180_float(pitch - lastAngles.y)};
+        return new float[]{lastAngles.x + MathHelper.wrapAngleTo180_float(yaw - lastAngles.x), lastAngles.y + MathHelper.wrapAngleTo180_float(pitch - lastAngles.y)};
     }
 
     private Vec3 checkPos(BlockPos pos) {

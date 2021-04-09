@@ -11,7 +11,7 @@ import java.util.List;
 
 public class IPUtil {
 
-    private static List<String> usedAddresses = new ArrayList<>();
+    private static final List<String> usedAddresses = new ArrayList<>();
 
     private static String getIPAddress() {
         Connection connection = new Connection("https://api.myip.com");
@@ -48,6 +48,18 @@ public class IPUtil {
                 Notifications.getManager().post("IP Banned", "This IP is now temp banned, please change IP!", Notifications.Type.WARNING);
                 usedAddresses.add(currentIP);
             }
+        }
+    }
+
+    public static class IPCheckThread extends Thread {
+
+        public IPCheckThread() {
+            super("IP Check Thread");
+        }
+
+        @Override
+        public void run() {
+            checkIP();
         }
     }
 

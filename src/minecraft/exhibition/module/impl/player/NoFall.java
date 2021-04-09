@@ -50,7 +50,6 @@ public class NoFall extends Module {
             }
 
             if (dist > mc.thePlayer.fallDistance || mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {
-                mc.timer.timerSpeed = 1;
                 dist = 0;
             }
 
@@ -58,7 +57,7 @@ public class NoFall extends Module {
                 double fallY = mc.thePlayer.motionY;
                 double fallen = mc.thePlayer.fallDistance - dist;
                 double predictedFallen = fallen + -((fallY - 0.08D) * 0.9800000190734863D);
-                if (predictedFallen >= 3.0) {
+                if (predictedFallen >= 3.0 && mc.thePlayer.posY > 0) {
                     Bypass bypass = Client.getModuleManager().get(Bypass.class);
                     boolean allowVanilla = bypass.allowBypassing() && (bypass.option.getSelected().equals("Watchdog Off") || (bypass.bruh == 0 || bypass.bruh > 10));
 

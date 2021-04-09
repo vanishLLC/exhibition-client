@@ -50,7 +50,6 @@ public class SpotifyManager {
             .build();
 
 
-
     private Timer timer = new Timer();
 
     public SpotifyManager() {
@@ -60,19 +59,22 @@ public class SpotifyManager {
                 .setClientSecret(clientSecret)
                 .setRedirectUri(redirectURI)
                 .build();
-        new Thread(() -> {
-            authorizationCodeUri_Sync();
-            while (!authorizationCode_Sync() && Spotify.spotifyManager != null && Client.getModuleManager().isEnabled(Spotify.class)) {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+        new Thread("Spotify Auth Thread") {
+            @Override
+            public void run() {
+                authorizationCodeUri_Sync();
+                while (!authorizationCode_Sync() && Spotify.spotifyManager != null && Client.getModuleManager().isEnabled(Spotify.class)) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    if (Spotify.spotifyManager == null)
+                        break;
                 }
-                if(Spotify.spotifyManager == null)
-                    break;
+                setConnected(true);
             }
-            this.setConnected(true);
-        }).start();
+        }.start();
     }
 
     boolean threadStarted = false;
@@ -174,7 +176,7 @@ public class SpotifyManager {
                             break;
                         }
                     }
-                    if(attempts <= 3) {
+                    if (attempts <= 3) {
                         setConnected(true);
                     } else {
                         Notifications.getManager().post("Spotify Error", "Could not authenticate, toggle Spotify to try again!", 5000, Notifications.Type.SPOTIFY);
@@ -193,7 +195,7 @@ public class SpotifyManager {
 
                     spotifyApi.setAccessToken(authorizationCodeCredentials.getAccessToken());
                     spotifyApi.setRefreshToken(authorizationCodeCredentials.getRefreshToken());
-                    expires = System.currentTimeMillis() + (authorizationCodeCredentials.getExpiresIn()/2 * 1000);
+                    expires = System.currentTimeMillis() + (authorizationCodeCredentials.getExpiresIn() / 2 * 1000);
 
                     Notifications.getManager().post("Token Refresh", "New token expires in " + authorizationCodeCredentials.getExpiresIn() + "s!", 2500, Notifications.Type.SPOTIFY);
                     getInformationAboutUsersCurrentPlaybackRequest = null;
