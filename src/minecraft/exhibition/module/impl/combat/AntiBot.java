@@ -334,12 +334,12 @@ public class AntiBot extends Module {
                                     boolean botNameFormat = str.endsWith("\247c" + ent.getName() + "\247r");
 
                                     if (inPit) {
-
                                         boolean hasPitCharacters = str.contains("[") || str.contains("]") || str.contains("\247l");
 
                                         if (!hasPitCharacters) {
                                             invalid.add(ent);
-                                        } else if (botNameFormat || str.equalsIgnoreCase(ent.getName()) || str.contains("[NPC]")) {
+                                        }
+                                        if (botNameFormat || str.equalsIgnoreCase(ent.getName()) || str.contains("[NPC]")) {
                                             if (!isInTabList && isOnHypixel) {
                                                 invalid.add(ent);
                                                 shouldUpdateTOG = false;
@@ -349,7 +349,9 @@ public class AntiBot extends Module {
                                                     continue;
                                                 }
                                             }
-                                        } else if (((str.equals(ent.getName() + "\247r") || str.equals("\247r" + ent.getName()) || str.equals("\247r" + ent.getName() + "\247r")) && !isInTabList) || str.contains("[NPC]")) {
+                                        }
+
+                                        if (((str.equals(ent.getName() + "\247r") || str.equals("\247r" + ent.getName()) || str.equals("\247r" + ent.getName() + "\247r")) && !isInTabList) || str.contains("[NPC]")) {
                                             invalid.add(ent);
                                             shouldUpdateTOG = false;
                                             if (remove && ent.isInvisible() && ticksOnGroundMap.getOrDefault(ent.getName(), 0) < -20) {
