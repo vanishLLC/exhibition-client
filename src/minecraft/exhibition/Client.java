@@ -31,7 +31,6 @@ import exhibition.management.waypoints.WaypointManager;
 import exhibition.module.Module;
 import exhibition.module.ModuleManager;
 import exhibition.module.impl.combat.Bypass;
-import exhibition.module.impl.render.SpookySkeltal;
 import exhibition.util.HypixelUtil;
 import exhibition.util.MathUtils;
 import exhibition.util.PlayerUtil;
@@ -80,7 +79,7 @@ public class Client extends Castable implements EventListener {
     public static boolean isNewUser;
 
     // Client data
-    public static String version = "040321";
+    public static String version = "041121";
     public static String parsedVersion;
     public static String clientName = "ArthimoWare";
     public static ColorManager cm = new ColorManager();
