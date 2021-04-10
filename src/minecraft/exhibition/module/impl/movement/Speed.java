@@ -381,10 +381,13 @@ public class Speed extends Module {
                                     yaw -= 179.83;
                                 }
 
-                                if (strafe > 0.0D) {
-                                    yaw += (oldForward > 0.0D ? -44.5933 : 44.5933);
-                                } else if (strafe < 0.0D) {
-                                    yaw += (oldForward > 0.0D ? 44.5933 : -44.5933);
+                                if(strafe != 0) {
+                                    forward = 0.985F;
+                                    if (strafe > 0.0D) {
+                                        yaw += (oldForward > 0.0D ? -44.5933 : 44.5933);
+                                    } else if (strafe < 0.0D) {
+                                        yaw += (oldForward > 0.0D ? 44.5933 : -44.5933);
+                                    }
                                 }
                             } else {
                                 if (strafe > 0.0D) {
@@ -398,7 +401,7 @@ public class Speed extends Module {
 
                         float difference = MathHelper.wrapAngleTo180_float(-(currentYaw - yaw));
 
-                        float cap = isCircleStrafing ? ((Number) targetStrafe.getSetting("STEPS").getValue()).floatValue() : mc.thePlayer.hurtTime == 10 ? Math.max(((Number) retard.getValue()).floatValue(), 90) : ((Number) retard.getValue()).floatValue();
+                        float cap = isCircleStrafing ? Math.min(retard.getValue().floatValue(), ((Number) targetStrafe.getSetting("STEPS").getValue()).floatValue()) : retard.getValue().floatValue();
 
                         if (Math.abs(difference) >= cap) {
                             difference = MathHelper.clamp_float(difference, -cap, cap);
@@ -620,10 +623,13 @@ public class Speed extends Module {
                                     yaw -= 179.83;
                                 }
 
-                                if (strafe > 0.0D) {
-                                    yaw += (oldForward > 0.0D ? -44.5933 : 44.5933);
-                                } else if (strafe < 0.0D) {
-                                    yaw += (oldForward > 0.0D ? 44.5933 : -44.5933);
+                                if(strafe != 0) {
+                                    forward = 0.985F;
+                                    if (strafe > 0.0D) {
+                                        yaw += (oldForward > 0.0D ? -44.5933 : 44.5933);
+                                    } else if (strafe < 0.0D) {
+                                        yaw += (oldForward > 0.0D ? 44.5933 : -44.5933);
+                                    }
                                 }
                             } else {
                                 if (strafe > 0.0D) {
@@ -637,7 +643,7 @@ public class Speed extends Module {
 
                         float difference = MathHelper.wrapAngleTo180_float(-(currentYaw - yaw));
 
-                        float cap = isCircleStrafing ? ((Number) targetStrafe.getSetting("STEPS").getValue()).floatValue() : mc.thePlayer.hurtTime == 10 ? Math.max(((Number) retard.getValue()).floatValue(), 90) : ((Number) retard.getValue()).floatValue();
+                        float cap = isCircleStrafing ? Math.min(retard.getValue().floatValue(), ((Number) targetStrafe.getSetting("STEPS").getValue()).floatValue()) : retard.getValue().floatValue();
 
                         if (Math.abs(difference) >= cap) {
                             difference = MathHelper.clamp_float(difference, -cap, cap);

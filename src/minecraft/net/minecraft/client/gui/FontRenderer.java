@@ -282,7 +282,7 @@ public class FontRenderer implements IResourceManagerReloadListener {
      * Render a single character with the default.png font at current (posX,posY) location...
      */
     private float renderDefaultChar(int p_78266_1_, boolean p_78266_2_) {
-        FontCache.instance.renderChar(this, p_78266_1_, p_78266_2_);
+        //FontCache.instance.renderChar(this, p_78266_1_, p_78266_2_);
 
         int i = p_78266_1_ % 16 * 8;
         int j = p_78266_1_ / 16 * 8;
@@ -579,9 +579,9 @@ public class FontRenderer implements IResourceManagerReloadListener {
         if (text == null) {
             return 0;
         } else {
-            if (FontCache.instance.render(this, text, (float) x, (float) y, color, dropShadow)) {
-                return (int) x;
-            }
+//            if (FontCache.instance.render(this, text, (float) x, (float) y, color, dropShadow)) {
+//                return (int) x;
+//            }
 
             if (this.bidiFlag) {
                 text = this.bidiReorder(text);
