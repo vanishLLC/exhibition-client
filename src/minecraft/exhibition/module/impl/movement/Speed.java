@@ -309,15 +309,20 @@ public class Speed extends Module {
 //
 //                        final double difference = bruh * (lastDist - baseSpeed);
 
-//                        if (strafeFix.getValue() && HypixelUtil.isVerifiedHypixel())
-//                            em.setY(mc.thePlayer.motionY += 0.0028425F + (0.0000000325 * Math.random()));
+                        double baseSpeed = 0.3303950079529733;
+                        if (mc.thePlayer.isPotionActive(Potion.moveSpeed) && (!((Options) settings.get(MODE).getValue()).getSelected().startsWith("HypixelHop") || mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getDuration() > 10)) {
+                            int amplifier = mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getAmplifier();
+                            baseSpeed *= (1.0D + 0.15D * (amplifier + 1));
+                        }
 
-                        speed = lastDist * (ticks == 1 ? 0.59989892348 : 0.587622177);
+                        speed = lastDist - (0.661 * (lastDist - (ticks == 1 ? defaultSpeed() : baseSpeed)) - (0.00000125F / Math.max(hops, 1)));
+
+//                        speed = lastDist * (ticks == 1 ? 0.59989892348 : 0.587622177);
 
                     } else {
-                        if(stage == 7) {
-                            em.setY(mc.thePlayer.motionY += -(0.18999F + (0.0000004F * Math.random())));
-                        }
+//                        if(stage == 7) {
+//                            em.setY(mc.thePlayer.motionY += -(0.18999F + (0.00000004F * Math.random())));
+//                        }
 
                         final List collidingList = mc.theWorld.getCollidingBlockBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(0.0, mc.thePlayer.motionY, 0.0));
                         if ((collidingList.size() > 0 || mc.thePlayer.isCollidedVertically) && stage > 0) {
@@ -377,7 +382,7 @@ public class Speed extends Module {
                                 if (forward > 0.0D) {
                                     forward = 1;
                                 } else if (forward < 0.0D) {
-                                    forward = 1;
+                                    forward = 0.85F;
                                     yaw -= 179.83;
                                 }
 
@@ -395,13 +400,17 @@ public class Speed extends Module {
                                 } else if (strafe < 0.0D) {
                                     yaw += (89.453);
                                 }
-                                forward = 0.985F;
+                                forward = 0.75F;
                             }
                         }
 
                         float difference = MathHelper.wrapAngleTo180_float(-(currentYaw - yaw));
 
                         float cap = isCircleStrafing ? Math.min(retard.getValue().floatValue(), ((Number) targetStrafe.getSetting("STEPS").getValue()).floatValue()) : retard.getValue().floatValue();
+
+                        if(isCircleStrafing) {
+                            forward = 0.985F;
+                        }
 
                         if (Math.abs(difference) >= cap) {
                             difference = MathHelper.clamp_float(difference, -cap, cap);
@@ -427,12 +436,11 @@ public class Speed extends Module {
                         double zDist = mc.thePlayer.posZ - mc.thePlayer.prevPosZ;
                         lastDist = Math.sqrt(xDist * xDist + zDist * zDist);
 
-                        if (strafeFix.getValue() && HypixelUtil.isVerifiedHypixel() && stage > 0 && lastDist > 0 && !PlayerUtil.isOnLiquid()) {
+                        if (strafeFix.getValue() && HypixelUtil.isVerifiedHypixel() && stage > 1 && lastDist > 0 && !PlayerUtil.isOnLiquid()) {
                             if (em.isOnground()) {
                                 hops++;
-                                double offset = ((0.0225943 * (1 - Math.random()/2)) / 100000000);
+                                double offset = (0.015625F + (0.015625F * Math.random())) / 1_000_000;
                                 em.setY(em.getY() + offset);
-                                mc.thePlayer.posY += offset;
                             }
                         }
 

@@ -1075,7 +1075,7 @@ public class EntityRenderer implements IResourceManagerReloadListener
         updateLightmap(partialTicks);
     }
 
-    private static int updates = 0;
+    private static int updates = -1;
 
     private void updateLightmap(float partialTicks)
     {

@@ -11,6 +11,7 @@ import exhibition.module.data.ModuleData;
 import exhibition.module.impl.combat.AutoPot;
 import exhibition.module.impl.movement.LongJump;
 import exhibition.module.impl.movement.Speed;
+import exhibition.util.MathUtils;
 import exhibition.util.NetUtil;
 import exhibition.util.Timer;
 import net.minecraft.network.Packet;
@@ -95,7 +96,7 @@ public class NoRotate extends Module {
 
                         float normalizedYaw = rotationYaw + MathHelper.wrapAngleTo180_float(mc.thePlayer.rotationYaw - rotationYaw);
 
-                        mc.thePlayer.setPositionAndRotation(d0, d1, d2, normalizedYaw, mc.thePlayer.rotationPitch);
+                        mc.thePlayer.setPositionAndRotation(d0, d1, d2, normalizedYaw + MathUtils.randomNumber(100,-100)/100F, MathHelper.clamp_float(mc.thePlayer.rotationPitch + MathUtils.randomNumber(100,-100)/100F, -89.5F, 89.5F));
                         NetUtil.sendPacket(new C03PacketPlayer.C06PacketPlayerPosLook(mc.thePlayer.posX, mc.thePlayer.getEntityBoundingBox().minY, mc.thePlayer.posZ, rotationYaw, rotationPitch, false));
                         event.setCancelled(true);
                     }

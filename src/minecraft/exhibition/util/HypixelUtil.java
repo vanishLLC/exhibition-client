@@ -225,7 +225,6 @@ public class HypixelUtil {
                         }
                     }
                 }
-
                 return found;
             } catch (Exception e) {
 

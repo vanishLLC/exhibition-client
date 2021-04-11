@@ -63,28 +63,49 @@ public class NoFall extends Module {
 
                     boolean preModification = !HypixelUtil.isVerifiedHypixel() || (vanilla.getValue() && allowVanilla);
 
-                    if (em.isPre()) {
-                        if (preModification) {
-                            if (bypass.bruh > 10) {
-                                bypass.bruh -= 1;
-                            }
-                            em.setGround(true);
-                            dist = mc.thePlayer.fallDistance;
+                    if (fallY > -3) {
+                        if (em.isPre()) {
+                            if (preModification) {
+                                if (bypass.bruh > 10) {
+                                    bypass.bruh -= 1;
+                                }
+                                em.setGround(true);
+                                dist = mc.thePlayer.fallDistance;
 
-                            if (fastFall.getValue() && distanceToGround != -1 && distanceToGround <= 15 && timer.delay(2500)) {
-                                //mc.thePlayer.setPositionAndUpdate(mc.thePlayer.posX, mc.thePlayer.posY - , mc.thePlayer.posZ);
-                                mc.thePlayer.motionY = -Math.min(distanceToGround, 9);
-                                timer.reset();
+                                if (fastFall.getValue() && distanceToGround != -1 && distanceToGround <= 15 && timer.delay(2500)) {
+                                    //mc.thePlayer.setPositionAndUpdate(mc.thePlayer.posX, mc.thePlayer.posY - , mc.thePlayer.posZ);
+                                    mc.thePlayer.motionY = -Math.min(distanceToGround, 9);
+                                    timer.reset();
+                                }
                             }
+                        } else if (em.isPost() && HypixelUtil.isVerifiedHypixel()) {
+                            NetUtil.sendPacketNoEvents(new C03PacketPlayer(true));
                         }
-                    } else if (em.isPost() && HypixelUtil.isVerifiedHypixel()) {
-                        NetUtil.sendPacketNoEvents(new C03PacketPlayer(true));
                     }
                 }
 
             }
 
         }
+    }
+
+    private boolean isBlockUnder() {
+        for (int i = (int) (mc.thePlayer.posY); i >= 0; i--) {
+            double[][] offsets = new double[][]{new double[]{0, 0}, new double[]{-0.35, -0.35}, new double[]{-0.35, 0.35}, new double[]{0.35, 0.35}, new double[]{0.35, -0.35}};
+            for (double[] offset : offsets) {
+                double offsetX = offset[0];
+                double offsetZ = offset[1];
+
+                double posX = offsetX + mc.thePlayer.posX;
+                double posY = i;
+                double posZ = offsetZ + mc.thePlayer.posZ;
+                BlockPos pos = new BlockPos(posX, posY, posZ);
+                if (!(mc.theWorld.getBlockState(pos).getBlock() instanceof BlockAir)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }

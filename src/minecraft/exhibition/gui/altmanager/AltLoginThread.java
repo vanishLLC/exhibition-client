@@ -61,7 +61,7 @@ public final class AltLoginThread extends Thread {
                 return;
             }
             this.status = EnumChatFormatting.AQUA + "Logging in...";
-            Notifications.getManager().post("Logging in", "Logging in to " + alt.getMask(), 2000, Notifications.Type.OKAY);
+            Notifications.getManager().post("Logging in", "Logging in to " + alt.getMask(), 2000, Notifications.Type.INFO);
             final Session auth = this.createSession(alt.getUsername(), alt.getPassword());
             if (auth == null) {
                 this.status = EnumChatFormatting.RED + "Login failed!";

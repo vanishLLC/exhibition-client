@@ -505,9 +505,9 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
             EventSpawnPlayer em = EventSystem.getInstance(EventSpawnPlayer.class);
             em.fire(entityotherplayermp);
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             if(Minecraft.getMinecraft().thePlayer != null) {
-                ChatUtil.debug("???");
+                //ChatUtil.debug("???");
             }
         }
     }
@@ -1570,7 +1570,10 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
         Scoreboard scoreboard = this.clientWorldController.getScoreboard();
 
         HypixelUtil.scoreboardCache = null;
-        HypixelUtil.scoreboardContains("");
+        try {
+            HypixelUtil.scoreboardContains("____");
+        } catch (Exception e) {
+        }
 
         if (packetIn.func_149338_e() == 0) {
             ScoreObjective scoreobjective = scoreboard.addScoreObjective(packetIn.func_149339_c(), IScoreObjectiveCriteria.DUMMY);
@@ -1596,6 +1599,12 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
         Scoreboard scoreboard = this.clientWorldController.getScoreboard();
         ScoreObjective scoreobjective = scoreboard.getObjective(packetIn.getObjectiveName());
 
+        HypixelUtil.scoreboardCache = null;
+        try {
+            HypixelUtil.scoreboardContains("____");
+        } catch (Exception e) {
+        }
+
         if (packetIn.getScoreAction() == S3CPacketUpdateScore.Action.CHANGE) {
             Score score = scoreboard.getValueFromObjective(packetIn.getPlayerName(), scoreobjective);
             score.setScorePoints(packetIn.getScoreValue());
@@ -1616,6 +1625,12 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
         PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
         Scoreboard scoreboard = this.clientWorldController.getScoreboard();
 
+        HypixelUtil.scoreboardCache = null;
+        try {
+            HypixelUtil.scoreboardContains("____");
+        } catch (Exception e) {
+        }
+
         if (packetIn.func_149370_d().length() == 0) {
             scoreboard.setObjectiveInDisplaySlot(packetIn.func_149371_c(), (ScoreObjective) null);
         } else {
@@ -1632,6 +1647,12 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
         PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.gameController);
         Scoreboard scoreboard = this.clientWorldController.getScoreboard();
         ScorePlayerTeam scoreplayerteam;
+
+        HypixelUtil.scoreboardCache = null;
+        try {
+            HypixelUtil.scoreboardContains("____");
+        } catch (Exception e) {
+        }
 
         if (packetIn.func_149307_h() == 0) {
             scoreplayerteam = scoreboard.createTeam(packetIn.func_149312_c());

@@ -13,7 +13,7 @@ public final class MathUtils {
 		if (Double.isInfinite(value) || Double.isNaN(value) || places < 0) {
 			return value;
 		}
-		BigDecimal bd = new BigDecimal(value);
+		BigDecimal bd = new BigDecimal(Double.toString(value));
 		bd = bd.setScale(places, RoundingMode.HALF_UP);
 		return bd.doubleValue();
 	}
