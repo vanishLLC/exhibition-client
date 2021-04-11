@@ -23,6 +23,7 @@ import exhibition.util.MathUtils;
 import exhibition.util.PlayerUtil;
 import exhibition.util.render.Colors;
 import exhibition.util.render.Depth;
+import exhibition.util.security.BypassValues;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
@@ -238,7 +239,7 @@ public class Speed extends Module {
                         speed = lastDist;
                         ticks = 1;
                     } else if (stage == 2 && mc.thePlayer.isCollidedVertically && mc.thePlayer.onGround && (mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f)) {
-                        double gay = 0.42F;
+                        double gay = strafeFix.getValue() && HypixelUtil.isVerifiedHypixel() ? BypassValues.getJumpValue() : 0.42F;
                         if (mc.thePlayer.isPotionActive(Potion.jump)) {
                             gay += (mc.thePlayer.getActivePotionEffect(Potion.jump).getAmplifier() + 1) * 0.1F;
                         }
@@ -320,9 +321,6 @@ public class Speed extends Module {
 //                        speed = lastDist * (ticks == 1 ? 0.59989892348 : 0.587622177);
 
                     } else {
-//                        if(stage == 7) {
-//                            em.setY(mc.thePlayer.motionY += -(0.18999F + (0.00000004F * Math.random())));
-//                        }
 
                         final List collidingList = mc.theWorld.getCollidingBlockBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(0.0, mc.thePlayer.motionY, 0.0));
                         if ((collidingList.size() > 0 || mc.thePlayer.isCollidedVertically) && stage > 0) {
@@ -386,7 +384,7 @@ public class Speed extends Module {
                                     yaw -= 179.83;
                                 }
 
-                                if(strafe != 0) {
+                                if (strafe != 0) {
                                     forward = 0.985F;
                                     if (strafe > 0.0D) {
                                         yaw += (oldForward > 0.0D ? -44.5933 : 44.5933);
@@ -408,7 +406,7 @@ public class Speed extends Module {
 
                         float cap = isCircleStrafing ? Math.min(retard.getValue().floatValue(), ((Number) targetStrafe.getSetting("STEPS").getValue()).floatValue()) : retard.getValue().floatValue();
 
-                        if(isCircleStrafing) {
+                        if (isCircleStrafing) {
                             forward = 0.985F;
                         }
 
@@ -439,8 +437,9 @@ public class Speed extends Module {
                         if (strafeFix.getValue() && HypixelUtil.isVerifiedHypixel() && stage > 1 && lastDist > 0 && !PlayerUtil.isOnLiquid()) {
                             if (em.isOnground()) {
                                 hops++;
-                                double offset = (0.015625F + (0.015625F * Math.random())) / 1_000_000;
+                                double offset = BypassValues.getOffsetValue();
                                 em.setY(em.getY() + offset);
+                                mc.thePlayer.setPosition(mc.thePlayer.posX, em.getY(), mc.thePlayer.posZ);
                             }
                         }
 
@@ -631,7 +630,7 @@ public class Speed extends Module {
                                     yaw -= 179.83;
                                 }
 
-                                if(strafe != 0) {
+                                if (strafe != 0) {
                                     forward = 0.985F;
                                     if (strafe > 0.0D) {
                                         yaw += (oldForward > 0.0D ? -44.5933 : 44.5933);

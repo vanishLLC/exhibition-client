@@ -500,16 +500,6 @@ public class Scaffold extends Module {
                         }
                     }
 
-                    if (mc.gameSettings.keyBindJump.getIsKeyPressed() && getBlockCount() > 0) {
-                        if ((Boolean) settings.get(TOWER).getValue()) {
-                            mc.thePlayer.motionX = mc.thePlayer.motionZ = 0;
-                            mc.thePlayer.setPosition(mc.thePlayer.posX + 1, mc.thePlayer.posY, mc.thePlayer.posZ + 1);
-                            mc.thePlayer.setPosition(mc.thePlayer.prevPosX, mc.thePlayer.posY, mc.thePlayer.prevPosZ);
-                        }
-                    } else {
-                        towerTimer.reset();
-                    }
-
                     if (!material(pos).isReplaceable())
                         return;
 
