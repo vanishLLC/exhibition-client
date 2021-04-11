@@ -661,6 +661,9 @@ public class Client extends Castable implements EventListener {
         if (event instanceof EventTick) {
             if(joinTime == -1) {
                 joinTime = System.currentTimeMillis();
+                if (mc.getCurrentServerData() != null) {
+                    DiscordUtil.setDiscordPresence("In Game", "IP: " + mc.getCurrentServerData().serverIP);
+                }
             }
 
             if (mc.thePlayer.isAllowEdit() && !HypixelUtil.isGameStarting() && HypixelUtil.scoreboardContains("www.hypixel.net")) {

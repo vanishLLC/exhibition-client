@@ -77,7 +77,7 @@ public class DiscordUtil {
     }
 
     public static void setDiscordPresence(String state, String details) {
-        DiscordRichPresence.Builder discordRichPresence = new DiscordRichPresence.Builder(state).setStartTimestamps(startTime).setBigImage("logo", "");
+        DiscordRichPresence.Builder discordRichPresence = new DiscordRichPresence.Builder("Status: " + state).setStartTimestamps(Client.joinTime != -1 ? Client.joinTime : startTime).setBigImage("logo", "");
 
         if (Client.getAuthUser() != null) {
             switch (Client.getAuthUser().userID) {

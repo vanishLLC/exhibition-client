@@ -90,22 +90,11 @@ public class GuiDownloadTerrain extends GuiScreen {
 
         if (!GlobalValues.keepPriority.getValue())
             PriorityManager.clearPriorityList();
+
         if (mc.getCurrentServerData() != null) {
-            String serverProtocol = "1.8.x";
-
-            if (mc.getNetHandler() != null && mc.getNetHandler().getNetworkManager() != null) {
-                ChannelHandler viaDecoder = mc.getNetHandler().getNetworkManager().channel.pipeline().get(CommonTransformer.HANDLER_DECODER_NAME);
-                if (viaDecoder instanceof VRDecodeHandler) {
-                    ProtocolInfo protocol = ((VRDecodeHandler) viaDecoder).getInfo().getProtocolInfo();
-                    if (protocol != null) {
-                        ProtocolVersion serverVer = ProtocolVersion.getProtocol(protocol.getServerProtocolVersion());
-                        serverProtocol = serverVer.getName();
-                    }
-                }
-            }
-
-            DiscordUtil.setDiscordPresence("In Game (" + serverProtocol + ")", "IP: " + mc.getCurrentServerData().serverIP);
+            DiscordUtil.setDiscordPresence("In Game", "IP: " + mc.getCurrentServerData().serverIP);
         }
+
         this.buttonList.clear();
     }
 
