@@ -86,7 +86,7 @@ public class DiscordUtil {
                     break;
                 }
                 case 2: { // Dream
-                    discordRichPresence.setBigImage("logo", "").setSmallImage("dream", "pepepsad");
+                    discordRichPresence.setBigImage("logo", "").setSmallImage("dream", "consider urself cursed.");
                     break;
                 }
                 case 3: { // Neohack
