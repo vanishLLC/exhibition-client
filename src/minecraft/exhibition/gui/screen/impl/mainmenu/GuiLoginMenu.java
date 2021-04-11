@@ -161,7 +161,7 @@ public class GuiLoginMenu extends PanoramaScreen {
                 username.setText(getDecrypted(okHand.get(0)));
                 password.setText(getDecrypted(okHand.get(1)));
                 if (okHand.size() > 2)
-                    LoginUtil.loginResponseHashCode = Integer.valueOf(okHand.get(2));
+                    LoginUtil.loginResponseHashCode = Integer.parseInt(okHand.get(2));
             }
         } catch (Exception e) {
             e.printStackTrace();

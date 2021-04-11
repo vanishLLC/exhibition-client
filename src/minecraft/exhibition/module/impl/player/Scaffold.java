@@ -29,6 +29,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -114,6 +115,14 @@ public class Scaffold extends Module {
         if (fastTower.getValue()) {
             mc.timer.timerSpeed = 1F;
         }
+
+        if(mc.thePlayer.isSprinting()) {
+            mc.thePlayer.setSprinting(false);
+            if(mc.gameSettings.keyBindSprint.getIsKeyPressed()) {
+                KeyBinding.setKeyBindState(mc.gameSettings.keyBindSprint.getKeyCode(), false);
+                KeyBinding.onTick(mc.gameSettings.keyBindSprint.getKeyCode());
+            }
+        }
     }
 
     public void onDisable() {
@@ -128,6 +137,11 @@ public class Scaffold extends Module {
                 mc.thePlayer.inventory.currentItem = lastHeldSlot;
                 mc.playerController.updateController();
                 lastHeldSlot = -1;
+            }
+
+            if(shouldReSprint && mc.thePlayer.isSprinting()) {
+                NetUtil.sendPacketNoEvents(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.START_SPRINTING));
+                shouldReSprint = false;
             }
         }
         if (fastTower.getValue()) {
@@ -170,6 +184,8 @@ public class Scaffold extends Module {
     }
 
     private Timer placeTimer = new Timer();
+
+    private boolean shouldUnSneak, shouldReSprint;
 
     public boolean isPlacing() {
         return !placeTimer.delay(200);
@@ -391,7 +407,20 @@ public class Scaffold extends Module {
                 double y = mc.thePlayer.posY - (mc.gameSettings.keyBindSneak.getIsKeyPressed() && mc.thePlayer.onGround ? 1.2 : (Client.getModuleManager().isEnabled(Speed.class) && PlayerUtil.isMoving()) ?
                         ((((height < 0.24919 && (height > 0.105 || MathUtils.roundToPlace(height, 4) == 0.0993)) || MathUtils.roundToPlace(height, 4) == 0.0013 ||
                                 MathUtils.roundToPlace(height, 4) == 0.0156 || MathUtils.roundToPlace(height, 4) == 0.0479 ||
-                                MathUtils.roundToPlace(height, 4) == 0.01553 || MathUtils.roundToPlace(height, 4) == 0.0902) && Math.abs(mc.thePlayer.motionY) < 0.45) ? 1.25 : 1.08) : 0.8);
+                                MathUtils.roundToPlace(height, 4) == 0.01553 || MathUtils.roundToPlace(height, 4) == 0.0902 ||
+                                MathUtils.roundToPlace(height, 4) == 0.2734) && Math.abs(mc.thePlayer.motionY) < 0.45) ? 1.25 : 1.08) : 0.8);
+
+                if(height > 0.27 && mc.thePlayer.motionY < 0.01 && height < 0.42) {
+                    y -= 0.5;
+                }
+
+                if(MathUtils.roundToPlace(height, 4) == 0.005) {
+                    y = 0.8;
+                }
+
+                if(MathUtils.roundToPlace(height, 4) == 0.1662) {
+                    y += 1.0;
+                }
 
                 if (!mc.gameSettings.keyBindJump.getIsKeyPressed()) {
                     towerTimer.reset();
@@ -416,6 +445,11 @@ public class Scaffold extends Module {
                 BlockPos pos = new BlockPos(x, y, z);
 
                 if (em.isPre()) {
+                    if(shouldReSprint && mc.thePlayer.isSprinting()) {
+                        NetUtil.sendPacketNoEvents(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.START_SPRINTING));
+                        shouldReSprint = false;
+                    }
+
                     Vec3 vec = getBlockLook(pos);
 
                     if (lastAngles.x == -1337) {
@@ -429,7 +463,7 @@ public class Scaffold extends Module {
                         //Face in the center of the block
                         float[] rotations = look(vec);
                         targetYaw = rotations[0];
-                        em.setPitch(Math.min(rotations[1], mc.gameSettings.keyBindJump.getIsKeyPressed() ? 90 : 70));
+                        em.setPitch(Math.min(rotations[1], mc.gameSettings.keyBindJump.getIsKeyPressed() ? 90 : 69.95F));
 
                         lastAngles.y = em.getPitch();
                         placeTimer.reset();
@@ -490,7 +524,7 @@ public class Scaffold extends Module {
 
                     boolean isJumping = mc.gameSettings.keyBindJump.getIsKeyPressed() || Keyboard.isKeyDown(mc.gameSettings.keyBindJump.getKeyCode());
                     if (isJumping && getBlockCount() > 0) {
-                        if ((!PlayerUtil.isMoving() || (Boolean) settings.get(TOWER).getValue())) {
+                        if ((!PlayerUtil.isMoving() && (Boolean) settings.get(TOWER).getValue())) {
                             if (fastTower.getValue()) {
                                 if (fastPlaceTimer.delay(600)) {
                                     mc.timer.timerSpeed = 2.23F + (float) (0.04F * Math.random());
@@ -514,11 +548,6 @@ public class Scaffold extends Module {
                                 }
                                 if (jump != (double) 0.42F) {
                                     forceDown = false;
-                                }
-
-                                if ((Boolean) settings.get(TOWER).getValue()) {
-                                    mc.thePlayer.motionX = 0;
-                                    mc.thePlayer.motionZ = 0;
                                 }
 
                                 if (forceDown && towerTimer.delay(1500)) {
@@ -606,8 +635,8 @@ public class Scaffold extends Module {
                     mc.thePlayer.movementInput.sneak = true;
                 }
 
-                if(mc.thePlayer.isSprinting()) {
-                    NetUtil.sendPacketNoEvents(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.STOP_SPRINTING));
+                if(mc.thePlayer.isSprinting() && !Client.getModuleManager().isEnabled(Speed.class)) {
+                    mc.thePlayer.setSprinting(false);
                 }
 
                 if (mc.playerController.onPlayerRightClick(mc.thePlayer, mc.theWorld, mc.thePlayer.getCurrentEquippedItem(), blockPos, otherSide, vec)) {
@@ -627,7 +656,7 @@ public class Scaffold extends Module {
                 }
 
                 if(mc.thePlayer.isSprinting()) {
-                    NetUtil.sendPacketNoEvents(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.START_SPRINTING));
+                    shouldReSprint = true;
                 }
 
                 if (needToSneak) {

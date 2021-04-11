@@ -188,7 +188,7 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
                     add(new FreecamTP(new ModuleData(Movement, "FreecamTP", "Follows your Freecam path to Teleport.")));
                     add(new BanStats(new ModuleData(Other, "BanStats", "Shows hypixel ban stats for the last few seconds.")));
                     add(new AutoClicker(new ModuleData(Combat, "AutoClicker", "Auto clicks for you.")));
-                    add(new AutoPaper(new ModuleData(Other, "AutoPaper", "Automatically enables Paper Challenge on Skywars.")));
+                    //add(new AutoPaper(new ModuleData(Other, "AutoPaper", "Automatically enables Paper Challenge on Skywars.")));
                     add(new PitNotifications(new ModuleData(Other, "PitNotifications", "Notifications for events in the pit.")));
                     add(new MCV(new ModuleData(Other, "MCV", "View others inventories with a middle click.")));
 

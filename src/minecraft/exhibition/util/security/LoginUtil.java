@@ -27,7 +27,7 @@ public class LoginUtil {
     }
 
     public static int getLoginResponseHashCode() {
-        return getLoginInformation().isEmpty() ? -1 : Integer.parseInt(getLoginInformation().get(2));
+        return getLoginInformation().isEmpty() || getLoginInformation().size() < 3 ? -1 : Integer.parseInt(getLoginInformation().get(2));
     }
 
     public static String getUsername() {

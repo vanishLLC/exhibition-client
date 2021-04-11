@@ -63,7 +63,7 @@ public class NoFall extends Module {
 
                     boolean preModification = !HypixelUtil.isVerifiedHypixel() || (vanilla.getValue() && allowVanilla);
 
-                    if (fallY > -3) {
+                    if (isBlockUnder()) {
                         if (em.isPre()) {
                             if (preModification) {
                                 if (bypass.bruh > 10) {

@@ -22,6 +22,18 @@ public abstract class Module extends Saveable implements EventListener, Bindable
     private Keybind keybind;
     private boolean enabled;
     private boolean held;
+
+    /*
+     * Values for testing things without relaunching
+     * Each module will have it's own instance of these values.
+     * Use them when developing/testing to hold a value without
+     * removing most cases where you may need to restart the client.
+     */
+    private boolean testBoolA, testB;
+    private double testDoubleA, testDoubleB;
+    private float testFloatA, testFloatB;
+    private int testIntA, testIntB;
+
     public Translate translate = new Translate(0, 0);
     public ModuleManager<Module> manager = Client.getModuleManager();
 

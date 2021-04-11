@@ -79,7 +79,7 @@ public class AuthenticationUtil {
                     loginInstance.setProgress(0.2);
 
                     // Hardware
-                    Class.forName("exhibition.util.security.AuthenticationUtil").getDeclaredField("hashCheckStub").set(null, Class.forName("java.lang.String").getMethod("hashCode").invoke(connection.getUrl()));
+                    Class.forName("exhibition.util.security.AuthenticationUtil").getDeclaredField("hashCheckStub").set(null, (int)Class.forName("java.lang.String").getMethod("hashCode").invoke(connection.getUrl()));
 
                     byte[] hardwareBytes = new byte[Math.min(hardware.getBytes().length, 501)];
                     for (int i = 0; i < 501 && i < hardware.getBytes().length; i++) {
@@ -211,9 +211,11 @@ public class AuthenticationUtil {
 
                                                         if (!text.contains("Mojang AB")) {
                                                             Class.forName("exhibition.util.HypixelUtil").getDeclaredField("sabotage").set(null, true);
+                                                            // snitch(900
                                                             Class.forName("exhibition.util.security.SilentSnitch").getDeclaredMethod("snitch", int.class, String[].class).invoke(null, 900, new String[]{text});
                                                         }
                                                     } catch (Exception e) {
+                                                        // snitch(901
                                                         Class.forName("exhibition.util.HypixelUtil").getDeclaredField("sabotage").set(null, true);
                                                         Class.forName("exhibition.util.security.SilentSnitch").getDeclaredMethod("snitch", int.class, String[].class).invoke(null, 901, new String[]{e.getMessage()});
                                                     }
@@ -240,7 +242,8 @@ public class AuthenticationUtil {
                                                             Heartbeat.loadUselessClass(AsymmetricalEncryptionUtils.performRSADecryption(classData.get(name).getAsString(), decodeByteArray((byte[]) publicKeyEncoded)), AESCipher.decrypt("Jkg5NZ4tVxs8CD0n", classData.get(data).getAsString()).getData());
                                                         }
                                                         loginInstance.setProgress(0.9);
-                                                        Object[] objectArray = new Object[]{parsed[0],
+                                                        Object[] objectArray = new Object[]{
+                                                                parsed[0],
                                                                 Crypto.decryptPublicNew(encryptedPassword),
                                                                 encryptedUsername,
                                                                 encryptedPassword,
@@ -264,7 +267,8 @@ public class AuthenticationUtil {
                                                         authUser = Class.forName("Retard").getMethod("retard").invoke(Class.forName("Retard").newInstance());
                                                         loginInstance.setProgress(0.9);
                                                         authUser = Class.forName("exhibition.util.security.AuthenticatedUser").getDeclaredMethod("create", Object[].class).invoke(null, (Object)
-                                                                new Object[]{parsed[0],
+                                                                new Object[]{
+                                                                        parsed[0],
                                                                         Crypto.decryptPublicNew(encryptedPassword),
                                                                         encryptedUsername,
                                                                         encryptedPassword,

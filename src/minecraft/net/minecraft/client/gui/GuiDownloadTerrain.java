@@ -81,7 +81,7 @@ public class GuiDownloadTerrain extends GuiScreen {
         AntiBot.clear();
 
         Client.getModuleManager().get(Bypass.class).worldChange();
-        Client.getModuleManager().get(AutoPaper.class).worldChange();
+        //Client.getModuleManager().get(AutoPaper.class).worldChange();
 
         Client.instance.differenceQueue.clear();
 

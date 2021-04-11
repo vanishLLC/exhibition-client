@@ -228,15 +228,6 @@ public class Client extends Castable implements EventListener {
         }
 
         this.progressScreenTask.incrementStage(); // Stage 2 version was fetched correctly
-        List<String> okHand = LoginUtil.getLoginInformation();
-        try {
-            if (!okHand.isEmpty() && okHand.size() > 1) {
-                if (okHand.size() > 2)
-                    LoginUtil.loginResponseHashCode = (int) Math.sqrt(Integer.parseInt(okHand.get(2)));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         this.progressScreenTask.incrementStage(); // Stage 3 login cache was checked
         AuthenticationUtil.isHWIDValid(parsedVersion + commandManager, true);
