@@ -81,12 +81,39 @@ public class DiscordUtil {
 
         if (Client.getAuthUser() != null) {
             switch (Client.getAuthUser().userID) {
-                case 1: {
-                    discordRichPresence.setBigImage("logo", "").setSmallImage("money", "Money Money Money Money Money Money Money Money Money Money Money Money! (Only cares about Money)");
+                case 1: { // Arithmo
+                    discordRichPresence.setBigImage("logo", "Rubbish Client").setSmallImage("money", "Money Money Money Money Money Money Money Money Money Money Money Money! (Only cares about Money)");
+                    break;
+                }
+                case 2: { // Dream
+                    discordRichPresence.setBigImage("logo", "").setSmallImage("dream", "pepepsad");
+                    break;
+                }
+                case 3: { // Neohack
+                    discordRichPresence.setBigImage("logo", "").setSmallImage("neo", "Huh?");
                     break;
                 }
                 case 5: { // Frog
                     discordRichPresence.setBigImage("frog", "Will you let him in?").setSmallImage("logo", "");
+                    break;
+                }
+                case 46: { // Max
+                    discordRichPresence.setBigImage("logo", "").setSmallImage("max", "[Intro: Playboi Carti & Jamie Foxx]\n" +
+                            "Yo, Pi'erre, you wanna come out here?\n" +
+                            "Uh\n" +
+                            "\n" +
+                            "[Chorus]\n" +
+                            "In New York I Milly Rock (Rock)\n" +
+                            "Hide it in my sock (Sock)\n" +
+                            "Running from an opp (Opp)\n" +
+                            "And I shoot at opp (Opp)\n" +
+                            "Uh, uh (What?)\n" +
+                            "And I'm on the block (What? What? What? What?)\n" +
+                            "And I'm on the block (What?)");
+                    break;
+                }
+                case 114: { // 3DS
+                    discordRichPresence.setBigImage("3ds", "I'm bumboy08's girlfriend >.<").setSmallImage("cop", "im gonna shoot you, you stupid fucking prisoner");
                     break;
                 }
                 default:
