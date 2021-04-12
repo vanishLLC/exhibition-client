@@ -45,7 +45,6 @@ public class GuiAltManager extends PanoramaScreen {
         this.status = EnumChatFormatting.GRAY + "Idle...";
         this.isDragging = false;
         this.parentScreen = parentScreen;
-        DiscordUtil.setDiscordPresence("Alt Manager","");
     }
 
     public void actionPerformed(final GuiButton button) {
@@ -530,6 +529,7 @@ public class GuiAltManager extends PanoramaScreen {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        DiscordUtil.setDiscordPresence("Alt Manager","");
         seatchField = new GuiTextField(this.eventButton, this.mc.fontRendererObj, this.width / 2 + 116, this.height - 22, 72, 16);
         this.buttonList.add(new GuiMenuButton(4206969, 2, 30, 47, 20, "Favorite Current"));
 
