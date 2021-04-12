@@ -77,6 +77,9 @@ public class DiscordUtil {
     }
 
     public static void setDiscordPresence(String state, String details) {
+        if(!Client.isDiscordReady)
+            return;
+
         DiscordRichPresence.Builder discordRichPresence = new DiscordRichPresence.Builder("Status: " + state).setStartTimestamps(Client.joinTime != -1 ? Client.joinTime : startTime).setBigImage("logo", "");
 
         if (Client.getAuthUser() != null) {
@@ -98,18 +101,11 @@ public class DiscordUtil {
                     break;
                 }
                 case 46: { // Max
-                    discordRichPresence.setBigImage("logo", "").setSmallImage("max", "[Intro: Playboi Carti & Jamie Foxx]\n" +
-                            "Yo, Pi'erre, you wanna come out here?\n" +
-                            "Uh\n" +
-                            "\n" +
-                            "[Chorus]\n" +
-                            "In New York I Milly Rock (Rock)\n" +
-                            "Hide it in my sock (Sock)\n" +
-                            "Running from an opp (Opp)\n" +
-                            "And I shoot at opp (Opp)\n" +
-                            "Uh, uh (What?)\n" +
-                            "And I'm on the block (What? What? What? What?)\n" +
-                            "And I'm on the block (What?)");
+                    discordRichPresence.setBigImage("logo", "").setSmallImage("max", "[Intro] Playboi Carti Jamie Foxx " +
+                            "Yo, Pierre, you wanna come out here? " +
+                            "Uh " +
+                            "[Chorus] " +
+                            "In New York I Milly Rock (Rock)");
                     break;
                 }
                 case 114: { // 3DS

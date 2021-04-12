@@ -36,9 +36,12 @@ public class GuiDisconnected extends GuiScreen {
         this.message = p_i45020_3_;
         boolean changed = false;
 
+        String details = "";
+
         if (Client.ticksInGame != -1) {
             this.playTime = Client.ticksInGame * 50;
             Client.ticksInGame = -1;
+            details += "Lasted: " + getTimeLength(this.playTime, false);
         } else {
             this.playTime = -1;
         }
@@ -46,15 +49,21 @@ public class GuiDisconnected extends GuiScreen {
         if (Client.joinTime != -1) {
             this.totalTime = System.currentTimeMillis() - Client.joinTime;
             Client.joinTime = -1;
+            details += "/" + getTimeLength(this.playTime, false);
         } else {
             this.totalTime = -1;
         }
 
-        DiscordUtil.setDiscordPresence("Disconnect Screen","");
+        BanStats banStats = Client.getModuleManager().get(BanStats.class);
+        if (banStats.isEnabled() && playTime != -1) {
+            details += " Bans: " + banStats.bansSinceConnect;
+        }
+
+        DiscordUtil.setDiscordPresence("Disconnect Screen", details);
 
         String unformatted = this.message.getUnformattedText();
 
-        String playTime = getTimeLength(this.playTime);
+        String playTime = getTimeLength(this.playTime, true);
         String banLength = "Permanent";
         String banReason = unformatted.contains("WATCHDOG") ? "Watchdog" :
                 (unformatted.toLowerCase().contains("compromised") || unformatted.toLowerCase().contains("alert")) ? "Security Alert" : "Staff Ban";
@@ -301,16 +310,16 @@ public class GuiDisconnected extends GuiScreen {
         fontRendererObj.drawStringWithShadow(str, this.width / 2F - fontRendererObj.getStringWidth(str) - 5, this.height / 2F + this.field_175353_i / 2F + this.fontRendererObj.FONT_HEIGHT + 50, -1);
 
         String unbannedLift = "Unbanned Alts: " + AltManager.registry.stream().filter(Alt::isUnbanned).count();
-        fontRendererObj.drawStringWithShadow(unbannedLift, this.width / 2F - fontRendererObj.getStringWidth(str)/2F - fontRendererObj.getStringWidth(unbannedLift)/2F - 5, this.height / 2F + this.field_175353_i / 2F + this.fontRendererObj.FONT_HEIGHT + 62, -1);
+        fontRendererObj.drawStringWithShadow(unbannedLift, this.width / 2F - fontRendererObj.getStringWidth(str) / 2F - fontRendererObj.getStringWidth(unbannedLift) / 2F - 5, this.height / 2F + this.field_175353_i / 2F + this.fontRendererObj.FONT_HEIGHT + 62, -1);
 
         if (playTime != -1 && this.message.getUnformattedText().contains("ban")) {
-            String timeDiff = "Playtime: " + getTimeLength(playTime) + " / " + getTimeLength(totalTime);
+            String timeDiff = "Playtime: " + getTimeLength(playTime, true) + " / " + getTimeLength(totalTime, true);
             fontRendererObj.drawStringWithShadow(timeDiff, width / 2D - fontRendererObj.getStringWidth(timeDiff) / 2D, 12, -1);
         }
 
         BanStats banStats = Client.getModuleManager().get(BanStats.class);
 
-        if(banStats.isEnabled() && playTime != -1) {
+        if (banStats.isEnabled() && playTime != -1) {
             String s = "Bans since connect: " + banStats.bansSinceConnect;
             fontRendererObj.drawStringWithShadow(s, width / 2D - fontRendererObj.getStringWidth(s) / 2D, 22, -1);
         }
@@ -319,15 +328,15 @@ public class GuiDisconnected extends GuiScreen {
         super.drawScreen(mouseX, mouseY, partialTicks);
     }
 
-    private String getTimeLength(long timeDifference) {
+    private String getTimeLength(long timeDifference, boolean spaces) {
         long seconds = (timeDifference / 1000) % 60;
         long minutes = (timeDifference / 60000) % 60;
         long hours = (timeDifference / 3600000) % 24;
         long days = timeDifference / 86400000;
         StringBuilder stringBuilder = new StringBuilder();
-        if (days > 0) stringBuilder.append(days).append("d ");
-        if (hours > 0) stringBuilder.append(hours).append("h ");
-        if (minutes > 0) stringBuilder.append(minutes).append("m ");
+        if (days > 0) stringBuilder.append(days).append("d").append(spaces ? " " : "");
+        if (hours > 0) stringBuilder.append(hours).append("h").append(spaces ? " " : "");
+        if (minutes > 0) stringBuilder.append(minutes).append("m").append(spaces ? " " : "");
         if (seconds >= 0) stringBuilder.append(seconds).append("s");
 
         return stringBuilder.toString();

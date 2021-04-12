@@ -32,6 +32,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemFishingRod;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S02PacketChat;
@@ -172,7 +173,7 @@ public class HackerDetect extends Module {
 //                            if (unformatted.contains(ent.getName()) && !PriorityManager.isPriority(ent)) {
 //                                Notifications.getManager().post("Hacker Detected", ent.getName() + " may be using Chat Bypass.", 7500, Notifications.Type.WARNING);
 //                                if ((boolean) settings.get("REPORT").getValue())
-//                                    ChatUtil.sendChat("/wdr " + ent.getName() + " fly");
+//                                    ChatUtil.sendChat("/wdr " + ent.getName() + " bhop");
 //                                PriorityManager.setAsPriority(ent);
 //                                break;
 //                            }
@@ -204,7 +205,7 @@ public class HackerDetect extends Module {
                                             Notifications.getManager().post("Hacker Detected", ent.getName() + " may be using " + (character == '\u05fc' ? "Novoline (CB)." : "Chat Bypass."), 7500, Notifications.Type.WARNING);
                                             PriorityManager.setAsPriority(ent);
                                             if ((boolean) settings.get("REPORT").getValue()) {
-                                                ChatUtil.sendChat_NoFilter("/wdr " + ent.getName() + " fly");
+                                                ChatUtil.sendChat_NoFilter("/wdr " + ent.getName() + " bhop");
                                             }
                                             break;
                                         }
@@ -251,7 +252,7 @@ public class HackerDetect extends Module {
                                     if (player.invWalkTicks > 10) {
                                         Notifications.getManager().post("Hacker Detected", player.getName() + " may be using InventoryCleaner.", 7500, Notifications.Type.WARNING);
                                         if ((boolean) settings.get("REPORT").getValue())
-                                            ChatUtil.sendChat_NoFilter("/wdr " + ent.getName() + " fly");
+                                            ChatUtil.sendChat_NoFilter("/wdr " + ent.getName() + " bhop");
                                         PriorityManager.setAsPriority(player);
                                     }
                                     player.lastDroppedTick = player.ticksExisted;
@@ -313,7 +314,7 @@ public class HackerDetect extends Module {
                         if (ent.speedFlags > 25) {
                             Notifications.getManager().post("Hacker Detected", ent.getName() + " is using " + (ent.isBlocking() ? "AutoBlock!" : "NoSlowdown!"), 7500, Notifications.Type.WARNING);
                             if ((boolean) settings.get("REPORT").getValue())
-                                ChatUtil.sendChat_NoFilter("/wdr " + ent.getName() + " fly");
+                                ChatUtil.sendChat_NoFilter("/wdr " + ent.getName() + " bhop");
                             PriorityManager.setAsPriority(ent);
                         }
                     }
@@ -350,7 +351,7 @@ public class HackerDetect extends Module {
                             if ((ent.ticksExisted - ent.lastMovedTick) > 20) {
                                 Notifications.getManager().post("Hacker Detected", ent.getName() + " has irregular movements (Blink Fly).", 7500, Notifications.Type.WARNING);
                                 if ((boolean) settings.get("REPORT").getValue())
-                                    ChatUtil.sendChat_NoFilter("/wdr " + ent.getName() + " fly");
+                                    ChatUtil.sendChat_NoFilter("/wdr " + ent.getName() + " bhop");
                                 PriorityManager.setAsPriority(ent);
 
                             }
@@ -364,7 +365,7 @@ public class HackerDetect extends Module {
                     double motionZ = Math.abs(ent.posZ - ent.lastTickPosZ);
                     double motionY = Math.abs(ent.posY - ent.lastTickPosY);
 
-                    if ((Math.sqrt(motionX * motionX + motionZ * motionZ) > 0.23) && motionY <= 0.005 && !ent.isInvisible() && !ent.isRiding() && !ent.isSneaking())
+                    if ((Math.sqrt(motionX * motionX + motionZ * motionZ) > 0.23) && motionY <= 0.005 && !ent.isInvisible() && !ent.isRiding() && !ent.isSneaking() && ent.isSprinting()) {
                         if (mc.theWorld.getBlockState(new BlockPos(ent.posX, ent.posY - 0.45, ent.posZ)).getBlock() == Blocks.air && mc.theWorld.getBlockState(new BlockPos(ent.posX, ent.posY - 1.35, ent.posZ)).getBlock() == Blocks.air) {
                             ent.flags += ent.onGround ? 4 : 1;
                             if (Math.sqrt(motionX * motionX + motionZ * motionZ) > defaultSpeed(ent))
@@ -372,11 +373,26 @@ public class HackerDetect extends Module {
                             if (ent.flags >= 35 && !PriorityManager.isPriority(ent)) {
                                 Notifications.getManager().post("Hacker Detected", ent.getName() + " has irregular movements (Fly/Scaffold).", 7500, Notifications.Type.WARNING);
                                 if ((boolean) settings.get("REPORT").getValue())
-                                    ChatUtil.sendChat_NoFilter("/wdr " + ent.getName() + " fly");
+                                    ChatUtil.sendChat_NoFilter("/wdr " + ent.getName() + " bhop");
                                 PriorityManager.setAsPriority(ent);
                             }
                             //DevNotifications.getManager().post(ent.getName() + " is flying?");
                         }
+
+                        if(ent.getHeldItem() != null && ent.getHeldItem().getItem() instanceof ItemBlock) {
+                            // Taken from novoline: Z2.b((a4S)a4S2, (float)(ew.b((int)aRc.d((Mg)this.a.q.bJ)) && !Vl.q((Z5)this.a.F) ? 87.0f : 78.0f));
+                            if(Math.abs(ent.rotationPitch - 78.0F) <= 1 || Math.abs(ent.rotationPitch - 87.0f) <= 1) {
+                                ent.flags += 5;
+                                if (ent.flags >= 30 && !PriorityManager.isPriority(ent)) {
+                                    Notifications.getManager().post("Hacker Detected", ent.getName() + " is using Scaffold (Novoline).", 7500, Notifications.Type.WARNING);
+                                    if ((boolean) settings.get("REPORT").getValue())
+                                        ChatUtil.sendChat_NoFilter("/wdr " + ent.getName() + " bhop");
+                                    PriorityManager.setAsPriority(ent);
+                                }
+                            }
+                        }
+                    }
+
 
                     if (!PriorityManager.isPriority(ent) && ent.flags != 0 && ent.flags < 10 && ent.lastTickPosY > ent.posY && ent.onGround && mc.theWorld.getBlockState(new BlockPos(ent.posX, ent.posY - 0.5, ent.posZ)).getBlock() != Blocks.air) {
                         ent.flags = 0;
@@ -475,7 +491,7 @@ public class HackerDetect extends Module {
                             ent.lowhopFlags--;
                     }
 
-                    if (ent.speedFlags >= 25 && (ent.ticksExisted - ent.lastFlaggedTick) < 5 && !PriorityManager.isPriority(ent)) {
+                    if (ent.speedFlags >= 25 && (ent.ticksExisted - ent.lastFlaggedTick) < 5 && !PriorityManager.isPriority(ent) && isBlockUnder(ent)) {
                         Notifications.getManager().post("Hacker Detected", ent.getName() + " is using Speed.", 7500, Notifications.Type.WARNING);
                         if ((boolean) settings.get("REPORT").getValue())
                             ChatUtil.sendChat_NoFilter("/wdr " + ent.getName() + " killaura fly speed scaffold");

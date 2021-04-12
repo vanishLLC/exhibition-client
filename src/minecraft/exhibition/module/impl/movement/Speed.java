@@ -51,6 +51,7 @@ public class Speed extends Module {
     private Setting<Boolean> firstSlow = new Setting<>("FIRST-SLOW", false, "Makes the first jump slightly slower.");
     private Setting<Boolean> scaffold = new Setting<>("SCAFFOLD", true, "Disables Scaffold when Speed is Enabled.");
     private Setting<Boolean> strafeFix = new Setting<>("STRAFE-FIX", true, "Strafing fix for Hypixel. Use low steps if disabled.");
+    private Setting<Boolean> fastFall = new Setting<>("FAST-FALL", false, "Speeds up falling to make you jump sooner.");
     private Setting<Number> retard = new Setting<>("STEPS", 40.3, "Allows you to smooth strafing. (Higher values require Strafe Fix)", 0.1, 1, 180);
     private Setting<Number> boostScale = new Setting<>("VEL-BOOST", 0.5, "Boosts your speed when you take KB.", 0.01, 0, 1);
 
@@ -69,6 +70,7 @@ public class Speed extends Module {
         addSetting(retard);
         addSetting(boostScale);
         addSetting(strafeFix);
+        addSetting(fastFall);
         addSetting(firstSlow);
 
         addSetting(new Setting<>(MODE, new Options("Speed Mode", "HypixelHop", /*"StrafeTest", */"HypixelHop", "HypixelHopOld", "HypixelOld", "Mineplex", "Hop", "OnGround", "YPort", "OldHop", "OldSlow"), "Speed bypass method."));
@@ -321,6 +323,9 @@ public class Speed extends Module {
 //                        speed = lastDist * (ticks == 1 ? 0.59989892348 : 0.587622177);
 
                     } else {
+                        if(stage == 7 && fastFall.getValue()) {
+                            em.setY(mc.thePlayer.motionY += -(0.18999F + (0.00000004F * Math.random())));
+                        }
 
                         final List collidingList = mc.theWorld.getCollidingBlockBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(0.0, mc.thePlayer.motionY, 0.0));
                         if ((collidingList.size() > 0 || mc.thePlayer.isCollidedVertically) && stage > 0) {

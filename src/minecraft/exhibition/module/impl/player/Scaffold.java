@@ -116,9 +116,9 @@ public class Scaffold extends Module {
             mc.timer.timerSpeed = 1F;
         }
 
-        if(mc.thePlayer.isSprinting()) {
+        if (mc.thePlayer.isSprinting()) {
             mc.thePlayer.setSprinting(false);
-            if(mc.gameSettings.keyBindSprint.getIsKeyPressed()) {
+            if (mc.gameSettings.keyBindSprint.getIsKeyPressed()) {
                 KeyBinding.setKeyBindState(mc.gameSettings.keyBindSprint.getKeyCode(), false);
                 KeyBinding.onTick(mc.gameSettings.keyBindSprint.getKeyCode());
             }
@@ -139,10 +139,6 @@ public class Scaffold extends Module {
                 lastHeldSlot = -1;
             }
 
-            if(shouldReSprint && mc.thePlayer.isSprinting()) {
-                NetUtil.sendPacketNoEvents(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.START_SPRINTING));
-                shouldReSprint = false;
-            }
         }
         if (fastTower.getValue()) {
             mc.timer.timerSpeed = 1F;
@@ -408,17 +404,17 @@ public class Scaffold extends Module {
                         ((((height < 0.24919 && (height > 0.105 || MathUtils.roundToPlace(height, 4) == 0.0993)) || MathUtils.roundToPlace(height, 4) == 0.0013 ||
                                 MathUtils.roundToPlace(height, 4) == 0.0156 || MathUtils.roundToPlace(height, 4) == 0.0479 ||
                                 MathUtils.roundToPlace(height, 4) == 0.01553 || MathUtils.roundToPlace(height, 4) == 0.0902 ||
-                                MathUtils.roundToPlace(height, 4) == 0.2734) && Math.abs(mc.thePlayer.motionY) < 0.45) ? 1.25 : 1.08) : 0.8);
+                                MathUtils.roundToPlace(height, 4) == 0.2734) && Math.abs(mc.thePlayer.motionY) < 0.45) ? 1.25 : HypixelUtil.isVerifiedHypixel() ? 1.08 : 1) : 0.8);
 
-                if(height > 0.27 && mc.thePlayer.motionY < 0.01 && height < 0.42) {
+                if (height > 0.27 && mc.thePlayer.motionY < 0.01 && height < 0.42) {
                     y -= 0.5;
                 }
 
-                if(MathUtils.roundToPlace(height, 4) == 0.005) {
+                if (MathUtils.roundToPlace(height, 4) == 0.005) {
                     y = 0.8;
                 }
 
-                if(MathUtils.roundToPlace(height, 4) == 0.1662) {
+                if (MathUtils.roundToPlace(height, 4) == 0.1662) {
                     y += 1.0;
                 }
 
@@ -445,7 +441,7 @@ public class Scaffold extends Module {
                 BlockPos pos = new BlockPos(x, y, z);
 
                 if (em.isPre()) {
-                    if(shouldReSprint && mc.thePlayer.isSprinting()) {
+                    if (shouldReSprint && mc.thePlayer.isSprinting()) {
                         NetUtil.sendPacketNoEvents(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.START_SPRINTING));
                         shouldReSprint = false;
                     }
@@ -453,8 +449,9 @@ public class Scaffold extends Module {
                     Vec3 vec = getBlockLook(pos);
 
                     if (lastAngles.x == -1337) {
-                        em.setYaw(targetYaw = lastAngles.x = mc.thePlayer.rotationYaw - 180);
-                        em.setPitch(lastAngles.y = 90F);
+                        float newAngle = RotationUtils.getNewAngle(mc.thePlayer.rotationYaw);
+                        em.setYaw(targetYaw = lastAngles.x = mc.thePlayer.rotationYaw + (newAngle > 0 ? 180 : -180));
+                        em.setPitch(lastAngles.y = 70F);
                     }
 
                     int var1 = getBlockSlot();
@@ -463,7 +460,7 @@ public class Scaffold extends Module {
                         //Face in the center of the block
                         float[] rotations = look(vec);
                         targetYaw = rotations[0];
-                        em.setPitch(Math.min(rotations[1], mc.gameSettings.keyBindJump.getIsKeyPressed() ? 90 : 69.95F));
+                        em.setPitch(Math.min(rotations[1], mc.gameSettings.keyBindJump.getIsKeyPressed() ? 90 : 70F));
 
                         lastAngles.y = em.getPitch();
                         placeTimer.reset();
@@ -625,7 +622,7 @@ public class Scaffold extends Module {
                     mc.thePlayer.movementInput.sneak = true;
                 }
 
-                if(mc.thePlayer.isSprinting() && !Client.getModuleManager().isEnabled(Speed.class)) {
+                if (mc.thePlayer.isSprinting() && !Client.getModuleManager().isEnabled(Speed.class)) {
                     mc.thePlayer.setSprinting(false);
                 }
 
@@ -643,10 +640,6 @@ public class Scaffold extends Module {
                         }
                     }
 
-                }
-
-                if(mc.thePlayer.isSprinting()) {
-                    shouldReSprint = true;
                 }
 
                 if (needToSneak) {

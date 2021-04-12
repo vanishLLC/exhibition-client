@@ -5,13 +5,16 @@ import exhibition.event.Event;
 import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventMotionUpdate;
 import exhibition.event.impl.EventMove;
+import exhibition.event.impl.EventPacket;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.combat.Bypass;
 import exhibition.util.*;
+import exhibition.util.security.BypassValues;
 import net.minecraft.block.BlockAir;
 import net.minecraft.network.play.client.C03PacketPlayer;
+import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.util.BlockPos;
 
 public class NoFall extends Module {
@@ -22,6 +25,8 @@ public class NoFall extends Module {
     private float dist;
 
     private Timer timer = new Timer();
+
+    private Timer lagbackTimer = new Timer();
 
     public NoFall(ModuleData data) {
         super(data);
@@ -34,12 +39,25 @@ public class NoFall extends Module {
         return Priority.LAST;
     }
 
-    @RegisterEvent(events = {EventMotionUpdate.class, EventMove.class})
+    @RegisterEvent(events = {EventPacket.class, EventMotionUpdate.class, EventMove.class})
     public void onEvent(Event event) {
-        if (PlayerUtil.isInLiquid() || PlayerUtil.isOnLiquid() || !mc.thePlayer.capabilities.allowEdit || mc.thePlayer.capabilities.allowFlying || mc.thePlayer.isSpectator())
+        if (mc.thePlayer == null || mc.theWorld == null || PlayerUtil.isInLiquid() || PlayerUtil.isOnLiquid() || !mc.thePlayer.capabilities.allowEdit || mc.thePlayer.capabilities.allowFlying || mc.thePlayer.isSpectator())
             return;
+
+        if (event instanceof EventPacket) {
+            EventPacket ep = event.cast();
+            if (ep.getPacket() instanceof S08PacketPlayerPosLook) {
+                this.lagbackTimer.reset();
+            }
+        }
+
         if (event instanceof EventMotionUpdate) {
             EventMotionUpdate em = (EventMotionUpdate) event;
+            if (!lagbackTimer.delay(1000) || HypixelUtil.isVerifiedHypixel() && HypixelUtil.isInGame("PIT")) {
+                dist = 0;
+                return;
+            }
+
             double distanceToGround = -1;
             for (int i = (int) (mc.thePlayer.posY - 1); i >= 0; i--) {
                 BlockPos pos = new BlockPos(mc.thePlayer.posX, i, mc.thePlayer.posZ);
@@ -63,7 +81,7 @@ public class NoFall extends Module {
 
                     boolean preModification = !HypixelUtil.isVerifiedHypixel() || (vanilla.getValue() && allowVanilla);
 
-                    if (isBlockUnder()) {
+                    if (isBlockUnder() && fallY > -4) {
                         if (em.isPre()) {
                             if (preModification) {
                                 if (bypass.bruh > 10) {
@@ -79,13 +97,11 @@ public class NoFall extends Module {
                                 }
                             }
                         } else if (em.isPost() && HypixelUtil.isVerifiedHypixel()) {
-                            NetUtil.sendPacketNoEvents(new C03PacketPlayer(true));
+                            NetUtil.sendPacketNoEvents(BypassValues.getNoFallPacket(em));
                         }
                     }
                 }
-
             }
-
         }
     }
 
