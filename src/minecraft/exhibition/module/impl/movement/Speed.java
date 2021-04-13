@@ -46,14 +46,14 @@ public class Speed extends Module {
     private double lastDist;
     private double velocityBoost;
     public static int stage;
-    private Setting<Boolean> step = new Setting<>("STEP", false, "Disables speed while stepping up multiple stairs/slabs.");
-    private Setting<Boolean> water = new Setting<>("WATER", false, "Disables Speed while in water.");
-    private Setting<Boolean> firstSlow = new Setting<>("FIRST-SLOW", false, "Makes the first jump slightly slower.");
-    private Setting<Boolean> scaffold = new Setting<>("SCAFFOLD", true, "Disables Scaffold when Speed is Enabled.");
-    private Setting<Boolean> strafeFix = new Setting<>("STRAFE-FIX", true, "Strafing fix for Hypixel. Use low steps if disabled.");
-    private Setting<Boolean> fastFall = new Setting<>("FAST-FALL", false, "Speeds up falling to make you jump sooner.");
-    private Setting<Number> retard = new Setting<>("STEPS", 40.3, "Allows you to smooth strafing. (Higher values require Strafe Fix)", 0.1, 1, 180);
-    private Setting<Number> boostScale = new Setting<>("VEL-BOOST", 0.5, "Boosts your speed when you take KB.", 0.01, 0, 1);
+    public Setting<Boolean> step = new Setting<>("STEP", false, "Disables speed while stepping up multiple stairs/slabs.");
+    public Setting<Boolean> water = new Setting<>("WATER", false, "Disables Speed while in water.");
+    public Setting<Boolean> firstSlow = new Setting<>("FIRST-SLOW", false, "Makes the first jump slightly slower.");
+    public Setting<Boolean> scaffold = new Setting<>("SCAFFOLD", true, "Disables Scaffold when Speed is Enabled.");
+    public Setting<Boolean> strafeFix = new Setting<>("STRAFE-FIX", true, "Strafing fix for Hypixel. Use low steps if disabled.");
+    public Setting<Boolean> fastFall = new Setting<>("FAST-FALL", false, "Speeds up falling to make you jump sooner.");
+    public Setting<Number> retard = new Setting<>("STEPS", 40.3, "Allows you to smooth strafing. (Higher values require Strafe Fix)", 0.1, 1, 180);
+    public Setting<Number> boostScale = new Setting<>("VEL-BOOST", 0.5, "Boosts your speed when you take KB.", 0.01, 0, 1);
 
     private int hops = 0;
     private int ticks = 0;
@@ -241,11 +241,12 @@ public class Speed extends Module {
                         speed = lastDist;
                         ticks = 1;
                     } else if (stage == 2 && mc.thePlayer.isCollidedVertically && mc.thePlayer.onGround && (mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f)) {
-                        double gay = strafeFix.getValue() && HypixelUtil.isVerifiedHypixel() ? BypassValues.getJumpValue() : 0.42F;
+                        double gay = 0;
+                        BypassValues.offsetJump(em, this);
                         if (mc.thePlayer.isPotionActive(Potion.jump)) {
                             gay += (mc.thePlayer.getActivePotionEffect(Potion.jump).getAmplifier() + 1) * 0.1F;
                         }
-                        em.setY(mc.thePlayer.motionY = gay);
+                        em.setY(mc.thePlayer.motionY = (em.getY() + gay));
                         velocityBoost /= 5;
 
                         speed = moveSpeed * 2.13050398;
@@ -442,9 +443,7 @@ public class Speed extends Module {
                         if (strafeFix.getValue() && HypixelUtil.isVerifiedHypixel() && stage > 1 && lastDist > 0 && !PlayerUtil.isOnLiquid()) {
                             if (em.isOnground()) {
                                 hops++;
-                                double offset = BypassValues.getOffsetValue();
-                                em.setY(em.getY() + offset);
-                                mc.thePlayer.setPosition(mc.thePlayer.posX, em.getY(), mc.thePlayer.posZ);
+                                BypassValues.offsetGround(em, mc.thePlayer);
                             }
                         }
 
@@ -494,11 +493,12 @@ public class Speed extends Module {
                         speed = lastDist;
                         ticks = 1;
                     } else if (stage == 2 && mc.thePlayer.isCollidedVertically && mc.thePlayer.onGround && (mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f)) {
-                        double gay = ((double) 0.42F) + (strafeFix.getValue() && HypixelUtil.isVerifiedHypixel() ? 0.004625F + (0.0000000325 * Math.random()) : 0);
+                        double gay = 0;
+                        BypassValues.offsetJump(em, this);
                         if (mc.thePlayer.isPotionActive(Potion.jump)) {
                             gay += (mc.thePlayer.getActivePotionEffect(Potion.jump).getAmplifier() + 1) * 0.1F;
                         }
-                        em.setY(mc.thePlayer.motionY = gay);
+                        em.setY(mc.thePlayer.motionY = (em.getY() + gay));
                         velocityBoost /= 5;
 
                         speed = moveSpeed * 2.19959724;
@@ -683,11 +683,8 @@ public class Speed extends Module {
 
                         if (strafeFix.getValue() && HypixelUtil.isVerifiedHypixel() && stage > 0 && lastDist > 0 && !PlayerUtil.isOnLiquid()) {
                             if (em.isOnground()) {
-                                em.setY(em.getY() + (0.0625943 / 100000000));
                                 hops++;
-//                                if(hops > 0 && hops % 2 == 0) {
-//                                    em.setGround(false);
-//                                }
+                                BypassValues.offsetGround(em, mc.thePlayer);
                             }
                         }
                     }

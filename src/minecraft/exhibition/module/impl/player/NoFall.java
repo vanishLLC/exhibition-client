@@ -97,7 +97,7 @@ public class NoFall extends Module {
                                 }
                             }
                         } else if (em.isPost() && HypixelUtil.isVerifiedHypixel()) {
-                            NetUtil.sendPacketNoEvents(BypassValues.getNoFallPacket(em));
+                            BypassValues.sendNoFallPacket(em);
                         }
                     }
                 }
