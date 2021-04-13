@@ -424,7 +424,7 @@ public class Killaura extends Module {
         Scaffold scaffold = Client.getModuleManager().get(Scaffold.class);
         LongJump longjump = Client.getModuleManager().get(LongJump.class);
         boolean disable = false;
-        if ((AutoPot.potting || AutoPot.haltTicks > 0) || scaffold.isEnabled() || scaffold.isPlacing() || longjump.allowAttack() || longjump.isUsingBow() || (Client.getModuleManager().get(FreecamTP.class).stage == 1)) {
+        if ((AutoPot.potting || AutoPot.haltTicks > 0) || longjump.allowAttack() || longjump.isUsingBow()/* || (Client.getModuleManager().get(FreecamTP.class).stage == 1)*/) {
             disable = true;
         }
 
@@ -548,7 +548,7 @@ public class Killaura extends Module {
                             if (targetYaw > maxAngleStep) targetYaw = maxAngleStep;
                             else if (targetYaw < -maxAngleStep) targetYaw = -maxAngleStep;
 
-                            if(maxAngleStep > -1)
+                            if(maxAngleStep > -1 && !scaffold.isEnabled())
                             if (shouldReduce) {
                                 float pitch = (float) -(Math.atan2(yDiff - (distance > 2.1 ? 1.25 : 1.5), dist) * 180.0D / 3.141592653589793D);
                                 float newYaw = 0F;
@@ -843,6 +843,11 @@ public class Killaura extends Module {
                 boolean isAttacking = distance <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && delay.roundDelay(50 * nextRandom);
 
                 boolean canAttackRightNow = attack.equals("Always") || (attack.equals("Precise") ? target.waitTicks <= 0 : target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
+
+                if(scaffold.isEnabled()) {
+                    lastAngles.x = em.getYaw();
+                    lastAngles.y = em.getPitch();
+                }
 
                 boolean dontCrit = antiCritFunky.getValue() && hasEnchant(target, "Crit", "Funk");
                 if(Client.getModuleManager().isEnabled(Speed.class) && dontCrit && !allowInvalidAngles) {

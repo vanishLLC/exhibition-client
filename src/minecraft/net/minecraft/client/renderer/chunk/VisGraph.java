@@ -29,8 +29,8 @@ public class VisGraph {
     public void func_178606_a(BlockPos pos) {
         if (Client.getModuleManager().isEnabled(Xray.class) ||
                 Client.getModuleManager().get(Phase.class).isEnabled() ||
-                Client.getModuleManager().get(Freecam.class).isEnabled() ||
-                Client.getModuleManager().isEnabled(FreecamTP.class)) {
+                Client.getModuleManager().get(Freecam.class).isEnabled()/* ||
+                Client.getModuleManager().isEnabled(FreecamTP.class)*/) {
             return;
         }
         Module module = Client.getModuleManager().get(Aimbot.class);

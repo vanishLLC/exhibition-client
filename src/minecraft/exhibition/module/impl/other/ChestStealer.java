@@ -332,6 +332,7 @@ public class ChestStealer extends Module {
                         (item.getItem().getUnlocalizedName().contains("bucket")) ||
                         (item.getItem().getUnlocalizedName().contains("chest") && !item.getDisplayName().toLowerCase().contains("collect")) ||
                         (item.getItem().getUnlocalizedName().contains("snow")) ||
+                        (item.getItem().getUnlocalizedName().contains("rod")) ||
                         (item.getItem().getUnlocalizedName().contains("enchant")) ||
                         (item.getItem().getUnlocalizedName().contains("exp")) ||
                         (item.getItem().getUnlocalizedName().contains("shears")) ||

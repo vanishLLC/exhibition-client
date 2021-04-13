@@ -121,7 +121,7 @@ public class TargetESP extends Module {
             if (!isRobbery && (bountyPattern.matcher(formatted).find() && !formatted.contains("\247l100g"))) {
                 return true;
             }
-            if ((formatted.contains("HELD") || (formatted.contains("BEAST") && !mc.thePlayer.getDisplayName().getFormattedText().contains("\247lBEAST"))) && isEvent) {
+            if (isEvent && (formatted.contains("HELD") || (formatted.contains("BEAST") && !mc.thePlayer.getDisplayName().getFormattedText().contains("\247lBEAST")))) {
                 return true;
             }
         }

@@ -26,6 +26,7 @@ import exhibition.management.config.ConfigManager;
 import exhibition.management.font.DynamicTTFFont;
 import exhibition.management.font.TTFFontRenderer;
 import exhibition.management.friend.FriendManager;
+import exhibition.management.macros.MacroManager;
 import exhibition.management.notifications.dev.DevNotifications;
 import exhibition.management.waypoints.WaypointManager;
 import exhibition.module.Module;
@@ -73,16 +74,16 @@ import static exhibition.util.security.Snitch.snitch;
 // Credits to LPK for initial base
 public class Client extends Castable implements EventListener {
 
-
     public static Client instance;
 
     public static boolean isNewUser;
 
     // Client data
-    public static String version = "041121";
+    public static String version = "041321";
     public static String parsedVersion;
     public static String clientName = "ArthimoWare";
     public static ColorManager cm = new ColorManager();
+    public static MacroManager macroManager;
     public static ConfigManager configManager;
     public static WaypointManager waypointManager;
 
@@ -144,7 +145,6 @@ public class Client extends Castable implements EventListener {
 
     public Client(Object[] args) {
         init(args);
-        // Client.mojang.connect();
     }
 
     // ([Ljava/lang/Object;)[LJava/lang/Object;
@@ -152,27 +152,27 @@ public class Client extends Castable implements EventListener {
         try {
             // TODO: ADD BEFORE UPDATE
             if (getHwid() != 32161752) {
-//                try {
-//                    Class fieldClass = Class.forName("java.lang.reflect.Field");
-//                    Class unsafeClass = Class.forName("sun.misc.Unsafe");
-//                    Object bruh = unsafeClass.getDeclaredField("theUnsafe");
-//                    Object field = Class.forName("java.lang.System").getDeclaredField("err");
-//                    fieldClass.getMethod("setAccessible", boolean.class).invoke(bruh, true);
-//                    Object unsafeInstance = fieldClass.getMethod("get", Object.class).invoke(bruh, (Object) new Object[0]);
-//                    Object custom = Class.forName("net.minecraft.util.LoggingPrintStream").
-//                            getConstructor(String.class, Class.forName("java.io.OutputStream")).
-//                            newInstance("", unsafeClass.getMethod("getObject", Object.class, long.class).
-//                                    invoke(unsafeInstance, unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field), unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field)));
-//
-//                    Object oldInstance = unsafeClass.getMethod("getAndSetObject", Object.class, long.class, Object.class).invoke(unsafeInstance,
-//                            unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field),
-//                            unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field),
-//                            custom);
-//
-//                    ReflectionUtil.setStaticField(Class.forName("exhibition.util.security.LoggerContainer").getDeclaredField("oldLoggerInstance"), oldInstance);
-//                } catch (Exception e) {
-//
-//                }
+                try {
+                    Class fieldClass = Class.forName("java.lang.reflect.Field");
+                    Class unsafeClass = Class.forName("sun.misc.Unsafe");
+                    Object bruh = unsafeClass.getDeclaredField("theUnsafe");
+                    Object field = Class.forName("java.lang.System").getDeclaredField("err");
+                    fieldClass.getMethod("setAccessible", boolean.class).invoke(bruh, true);
+                    Object unsafeInstance = fieldClass.getMethod("get", Object.class).invoke(bruh, (Object) new Object[0]);
+                    Object custom = Class.forName("net.minecraft.util.LoggingPrintStream").
+                            getConstructor(String.class, Class.forName("java.io.OutputStream")).
+                            newInstance("", unsafeClass.getMethod("getObject", Object.class, long.class).
+                                    invoke(unsafeInstance, unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field), unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field)));
+
+                    Object oldInstance = unsafeClass.getMethod("getAndSetObject", Object.class, long.class, Object.class).invoke(unsafeInstance,
+                            unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field),
+                            unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field),
+                            custom);
+
+                    ReflectionUtil.setStaticField(Class.forName("exhibition.util.security.LoggerContainer").getDeclaredField("oldLoggerInstance"), oldInstance);
+                } catch (Exception e) {
+
+                }
             }
 
             Class var2 = Class.forName("java.lang.management.ManagementFactory");
@@ -384,6 +384,7 @@ public class Client extends Castable implements EventListener {
         sourceConsoleGUI = new SourceConsoleGUI();
         waypointManager = new WaypointManager();
         configManager = new ConfigManager();
+        macroManager = new MacroManager();
         alteningGenHandler = new AlteningGenHandler();
         clickGui = new ClickGui();
         FriendManager.start();

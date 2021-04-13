@@ -1812,7 +1812,7 @@ public abstract class Entity implements ICommandSender
      */
     public boolean isEntityInsideOpaqueBlock()
     {
-        if (this.noClip || Client.getModuleManager().isEnabled(Freecam.class) || Client.getModuleManager().isEnabled(FreecamTP.class) || Client.getModuleManager().isEnabled(AntiObby.class))
+        if (this.noClip || Client.getModuleManager().isEnabled(Freecam.class)/* || Client.getModuleManager().isEnabled(FreecamTP.class)*/ || Client.getModuleManager().isEnabled(AntiObby.class))
         {
             return false;
         }

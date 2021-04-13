@@ -108,15 +108,15 @@ public class TargetStrafe extends Module {
                     float factor = 30;
                     GlStateManager.pushMatrix();
                     for (float i = 0; i < (360F / factor); i += 1) {
-                        double cos = Math.cos((i * factor) * (Math.PI * 2 / 360));
-                        double sin = Math.sin((i * factor) * (Math.PI * 2 / 360));
-                        double rotY = (rad * cos);
-                        double rotX = (rad * sin);
+                        double cos = Math.cos(((i * factor)) * (Math.PI * 2 / 360));
+                        double sin = Math.sin(((i * factor)) * (Math.PI * 2 / 360));
+                        double rotX = (rad * cos);
+                        double rotY = (rad * sin);
 
                         double cos2 = Math.cos(((i + 1) * factor) * (Math.PI * 2 / 360));
                         double sin2 = Math.sin(((i + 1) * factor) * (Math.PI * 2 / 360));
-                        double rotY2 = (rad * cos2);
-                        double rotX2 = (rad * sin2);
+                        double rotX2 = (rad * cos2);
+                        double rotY2 = (rad * sin2);
 
                         GL11.glLineWidth(8);
                         RenderingUtil.draw3DLine(x + rotX, y, z + rotY, x + rotX2, y, z + rotY2, Colors.getColor(0, 150));
@@ -145,11 +145,16 @@ public class TargetStrafe extends Module {
 //
 //                    double lowestDist = Double.MAX_VALUE;
 //
+//                    double diff = MathUtils.getIncremental(MathHelper.wrapAngleTo180_float(RotationUtils.getRotations(target)[0] - 90F), 10);
+//
 //                    for (int i = 0; i < (360F / factor); i++) {
-//                        double cos = Math.cos((i * factor) * (Math.PI * 2 / 360));
-//                        double sin = Math.sin((i * factor) * (Math.PI * 2 / 360));
-//                        double rotY = (rad * cos);
-//                        double rotX = (rad * sin);
+//
+//                        int i1 = i * (reverse ? -1 : 1);
+//
+//                        double cos = Math.cos(((i1 * factor) + diff) * (Math.PI * 2 / 360));
+//                        double sin = Math.sin(((i1 * factor) + diff) * (Math.PI * 2 / 360));
+//                        double rotX = (rad * cos);
+//                        double rotY = (rad * sin);
 //
 //                        double diffX = (target.posX + rotX) - mc.thePlayer.posX;
 //                        double diffZ = (target.posZ + rotY) - mc.thePlayer.posZ;
@@ -438,11 +443,18 @@ public class TargetStrafe extends Module {
 
             List<Vec3> posList = new ArrayList<>();
 
+            double diff = MathUtils.getIncremental(MathHelper.wrapAngleTo180_float(RotationUtils.getRotations(target)[0] - 90F), 10);
+
             for (int i = 0; i < (360 / factor); i++) {
-                double cos = Math.cos((i * factor) * (Math.PI * 2 / 360));
-                double sin = Math.sin((i * factor) * (Math.PI * 2 / 360));
-                double rotY = (rad * cos);
-                double rotX = (rad * sin);
+                int i1 = i * (reverse ? -1 : 1);
+
+                if(i > (behind.getValue() ? 10 : 2))
+                    break;
+
+                double cos = Math.cos(((i1 * factor) + diff) * (Math.PI * 2 / 360));
+                double sin = Math.sin(((i1 * factor) + diff) * (Math.PI * 2 / 360));
+                double rotX = (rad * cos);
+                double rotY = (rad * sin);
 
                 double diffX = (target.posX + rotX) - mc.thePlayer.posX;
                 double diffZ = (target.posZ + rotY) - mc.thePlayer.posZ;
@@ -640,15 +652,15 @@ public class TargetStrafe extends Module {
                 }
             }
 
-            int currentStep = (reverse ? -2 : 2);
+            int currentStep = (1);
 
             if (closest == 0) {
-                closest = 36;
+                closest = posList.size();
             }
 
-            int closestPos = (36 + closest + currentStep) % 36;
+            int closestPos = (36 + closest + currentStep) % posList.size();
 
-            Vec3 vestPos = posList.get(closestPos);
+            Vec3 vestPos = posList.get(Math.max(closestPos, posList.size() - 1));
 
             newYaw += RotationUtils.getYawChangeGiven(x + vestPos.getX(), z + vestPos.getZ(), speedYaw);
 

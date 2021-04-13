@@ -24,7 +24,7 @@ public class AntiObby extends Module {
     @RegisterEvent(events = EventMotionUpdate.class)
     public void onEvent(Event event) {
         EventMotionUpdate em = event.cast();
-        if (!mc.thePlayer.isAllowEdit() || Client.getModuleManager().isEnabled(Phase.class) || Client.getModuleManager().isEnabled(Freecam.class) || Client.getModuleManager().isEnabled(FreecamTP.class))
+        if (!mc.thePlayer.isAllowEdit() || Client.getModuleManager().isEnabled(Phase.class) || Client.getModuleManager().isEnabled(Freecam.class)/* || Client.getModuleManager().isEnabled(FreecamTP.class)*/)
             return;
 
         IBlockState headblock = mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY + mc.thePlayer.getEyeHeight(), mc.thePlayer.posZ));

@@ -278,7 +278,30 @@ public class InventoryCleaner extends Module {
             return true;
         }
 
-        return (item.getItem().getUnlocalizedName().contains("tnt") || item.getItem().getUnlocalizedName().contains("stick") || item.getItem().getUnlocalizedName().contains("egg") || item.getItem().getUnlocalizedName().contains("string") || item.getItem().getUnlocalizedName().contains("flint") || item.getItem().getUnlocalizedName().contains("compass") || item.getItem().getUnlocalizedName().contains("feather") || item.getItem().getUnlocalizedName().contains("bucket") || item.getItem().getUnlocalizedName().contains("chest") && !item.getDisplayName().toLowerCase().contains("collect") || item.getItem().getUnlocalizedName().contains("snow") || item.getItem().getUnlocalizedName().contains("enchant") || item.getItem().getUnlocalizedName().contains("exp") || item.getItem().getUnlocalizedName().contains("shears") || item.getItem().getUnlocalizedName().contains("anvil") || item.getItem().getUnlocalizedName().contains("torch") || item.getItem().getUnlocalizedName().contains("seeds") || item.getItem().getUnlocalizedName().contains("leather") || item.getItem() instanceof ItemGlassBottle || item.getItem().getUnlocalizedName().contains("piston") || item.getItem().getUnlocalizedName().contains("potion") && isBadPotion(item) || item.getItem() instanceof ItemBlock && getBlockCount() > ((Number) settings.get(BLOCKCAP).getValue()).intValue() || (item.getItem() instanceof ItemFood && food.getValue() && !(item.getItem() instanceof ItemAppleGold)) || ((item.getItem() instanceof ItemBow || item.getItem().getUnlocalizedName().contains("arrow")) && archery.getValue()));
+        return (item.getItem().getUnlocalizedName().contains("tnt") ||
+                item.getItem().getUnlocalizedName().contains("stick") ||
+                item.getItem().getUnlocalizedName().contains("rod") ||
+                item.getItem().getUnlocalizedName().contains("egg") ||
+                item.getItem().getUnlocalizedName().contains("string") ||
+                item.getItem().getUnlocalizedName().contains("flint") ||
+                item.getItem().getUnlocalizedName().contains("compass") ||
+                item.getItem().getUnlocalizedName().contains("feather") ||
+                item.getItem().getUnlocalizedName().contains("bucket") ||
+                (item.getItem().getUnlocalizedName().contains("chest") && !item.getDisplayName().toLowerCase().contains("collect")) ||
+                item.getItem().getUnlocalizedName().contains("snow") ||
+                item.getItem().getUnlocalizedName().contains("enchant") ||
+                item.getItem().getUnlocalizedName().contains("exp") ||
+                item.getItem().getUnlocalizedName().contains("shears") ||
+                item.getItem().getUnlocalizedName().contains("anvil") ||
+                item.getItem().getUnlocalizedName().contains("torch") ||
+                item.getItem().getUnlocalizedName().contains("seeds") ||
+                item.getItem().getUnlocalizedName().contains("leather") ||
+                item.getItem() instanceof ItemGlassBottle ||
+                item.getItem().getUnlocalizedName().contains("piston") ||
+                (item.getItem().getUnlocalizedName().contains("potion") && isBadPotion(item)) ||
+                item.getItem() instanceof ItemBlock && getBlockCount() > ((Number) settings.get(BLOCKCAP).getValue()).intValue() || (
+                        item.getItem() instanceof ItemFood && food.getValue() && !(item.getItem() instanceof ItemAppleGold)) ||
+                ((item.getItem() instanceof ItemBow || item.getItem().getUnlocalizedName().contains("arrow")) && archery.getValue()));
     }
 
     private double getProtectionValue(ItemStack stack) {
