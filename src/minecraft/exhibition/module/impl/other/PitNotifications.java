@@ -46,6 +46,9 @@ public class PitNotifications extends Module {
         if (packet instanceof S02PacketChat) {
             S02PacketChat packetChat = (S02PacketChat) packet;
             String formatted = packetChat.getChatComponent().getFormattedText();
+            if (mc.thePlayer == null || mc.theWorld == null) {
+                return;
+            }
             if (formatted.contains("\247r\247d\247lMINOR EVENT!") && options.getValue("MINOR EVENT")) {
                 try {
                     formatted = formatted.replace("\247r\247d\247lMINOR EVENT! ", "");
