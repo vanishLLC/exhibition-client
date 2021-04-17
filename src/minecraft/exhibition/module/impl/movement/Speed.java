@@ -21,6 +21,7 @@ import exhibition.module.impl.player.Scaffold;
 import exhibition.util.HypixelUtil;
 import exhibition.util.MathUtils;
 import exhibition.util.PlayerUtil;
+import exhibition.util.misc.ChatUtil;
 import exhibition.util.render.Colors;
 import exhibition.util.render.Depth;
 import exhibition.util.security.BypassValues;
@@ -55,7 +56,7 @@ public class Speed extends Module {
     public Setting<Number> retard = new Setting<>("STEPS", 40.3, "Allows you to smooth strafing. (Higher values require Strafe Fix)", 0.1, 1, 180);
     public Setting<Number> boostScale = new Setting<>("VEL-BOOST", 0.5, "Boosts your speed when you take KB.", 0.01, 0, 1);
 
-    private int hops = 0;
+    public int hops = 0;
     private int ticks = 0;
     private boolean reset = false;
 
@@ -209,6 +210,7 @@ public class Speed extends Module {
                         stage++;
                         lastDist = 0;
                         velocityBoost = 0;
+                        hops = 0;
                         break;
                     }
 
@@ -225,6 +227,7 @@ public class Speed extends Module {
 
                     if (AutoPot.wantsToPot) {
                         stage = 0;
+                        hops = 0;
                         return;
                     }
 
@@ -240,6 +243,7 @@ public class Speed extends Module {
                     if (stage == 1 && mc.thePlayer.isCollidedVertically && (mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f)) {
                         speed = lastDist;
                         ticks = 1;
+                        hops = 0;
                     } else if (stage == 2 && mc.thePlayer.isCollidedVertically && mc.thePlayer.onGround && (mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f)) {
                         double gay = 0;
                         BypassValues.offsetJump(em, this);
@@ -443,7 +447,9 @@ public class Speed extends Module {
                         if (strafeFix.getValue() && HypixelUtil.isVerifiedHypixel() && stage > 1 && lastDist > 0 && !PlayerUtil.isOnLiquid()) {
                             if (em.isOnground()) {
                                 hops++;
-                                BypassValues.offsetGround(em, mc.thePlayer);
+                                if(hops > 1) {
+                                    BypassValues.offsetGround(em, mc.thePlayer);
+                                }
                             }
                         }
 

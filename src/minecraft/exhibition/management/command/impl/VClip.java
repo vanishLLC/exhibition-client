@@ -8,7 +8,6 @@ package exhibition.management.command.impl;
 import exhibition.management.command.Command;
 import exhibition.util.StringConversions;
 import exhibition.util.misc.ChatUtil;
-import net.minecraft.util.MathHelper;
 
 import java.util.List;
 

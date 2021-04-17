@@ -5,11 +5,11 @@ import oshi.hardware.HWDiskStore;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DiskIdentifiers {
+public class DiskIdentifiers implements Identifier {
 
     private final DiskContainer[] diskContainers;
 
-    public DiskIdentifiers(HWDiskStore[] diskStores) {
+    public DiskIdentifiers(List<HWDiskStore> diskStores) {
 
         List<HWDiskStore> validDrives = new ArrayList<>();
 
@@ -24,7 +24,7 @@ public class DiskIdentifiers {
 
         for (int i = 0; i < validDrives.size(); i++) {
             HWDiskStore disk = validDrives.get(i);
-            this.diskContainers[i] = new DiskContainer(disk.getModel().trim().split(" \\(")[0], disk.getSerial().trim().replace(" ",""));
+            this.diskContainers[i] = new DiskContainer(trim(disk.getModel()).split(" \\(")[0], trim(disk.getSerial()).replace(" ",""));
         }
 
     }

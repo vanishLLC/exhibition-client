@@ -2,19 +2,21 @@ package exhibition.util.security.hwid;
 
 import oshi.hardware.NetworkIF;
 
-public class NetworkAdapterIdentifiers {
+import java.util.List;
+
+public class NetworkAdapterIdentifiers implements Identifier {
 
     private final NetworkAdapter[] networkAdapters;
 
-    public NetworkAdapterIdentifiers(NetworkIF[] networkIFs) {
-        this.networkAdapters = new NetworkAdapter[networkIFs.length];
+    public NetworkAdapterIdentifiers(List<NetworkIF> networkIFs) {
+        this.networkAdapters = new NetworkAdapter[networkIFs.size()];
 
-        for (int i = 0; i < networkIFs.length; i++) {
-            NetworkIF networkIF = networkIFs[i];
+        for (int i = 0; i < networkIFs.size(); i++) {
+            NetworkIF networkIF = networkIFs.get(i);
             String displayName = networkIF.getDisplayName().trim();
             boolean vpnAdapter = displayName.toLowerCase().contains("virtual") || displayName.toLowerCase().contains("adapter");
 
-            this.networkAdapters[i] = new NetworkAdapter(vpnAdapter, displayName.trim(), networkIF.getMacaddr().trim());
+            this.networkAdapters[i] = new NetworkAdapter(vpnAdapter, trim(displayName), trim(networkIF.getMacaddr()));
         }
     }
 

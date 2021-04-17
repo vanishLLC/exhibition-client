@@ -47,8 +47,8 @@ public class AutoClicker extends Module {
                     KeyBinding.onTick(mc.gameSettings.keyBindAttack.getKeyCode());
                     KeyBinding.setKeyBindState(mc.gameSettings.keyBindAttack.getKeyCode(), false);
 
-                    long minimumDelay = 1000 / minDelay.getValue().longValue();
-                    long maximumDelay = 1000 / maxDelay.getValue().longValue();
+                    long minimumDelay = 1000 / Math.max(minDelay.getValue().longValue(), 1);
+                    long maximumDelay = 1000 / Math.max(maxDelay.getValue().longValue(), 1);
 
                     nextDelay = randomNumber(maximumDelay, minimumDelay);
 

@@ -60,7 +60,7 @@ public class AutoOOF extends Module {
                 if (unformatted.contains("[WATCHDOG CHEAT DETECTION]")) {
                     watchdogTimer.reset();
                 }
-                if (watchdogTimer.delay(1000) && unformatted.contains("Thanks for reporting it!")) {
+                if (watchdogTimer.delay(1000) && unformatted.contains("A player has been removed")) {
                     Notifications.getManager().post("Staff Ban Detected", "Disabled some modules and /oof'd", 5000, Notifications.Type.WARNING);
                     boolean canSpawn = HypixelUtil.scoreboardContains("Status: Idling") || HypixelUtil.scoreboardContains("Status: Bountied");
 

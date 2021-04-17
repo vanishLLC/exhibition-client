@@ -262,8 +262,6 @@ public class Killaura extends Module {
         if (event instanceof EventPacket) {
             EventPacket e = event.cast();
             Packet packet = e.getPacket();
-            boolean attacking = target != null && (boolean) getSetting("AUTOBLOCK").getValue();
-            if (attacking) {
 //                if (packet instanceof S2FPacketSetSlot) {
 //                    try {
 //                        S2FPacketSetSlot packetSetSlot = (S2FPacketSetSlot) packet;
@@ -273,10 +271,10 @@ public class Killaura extends Module {
 //                    } catch (Exception ignored) {
 //                    }
 //                }
-                if (packet instanceof S08PacketPlayerPosLook) {
-                    critWaitTicks = critModule.isPacket() ? 20 : 6;
-                    setupTick = 0;
-                }
+            if (packet instanceof S08PacketPlayerPosLook) {
+                critWaitTicks = critModule.isPacket() ? 20 : 6;
+                setupTick = 0;
+            }
 
 //                if(packet instanceof C07PacketPlayerDigging) {
 //                    ChatUtil.debug("Unblocked " + mc.thePlayer.ticksExisted + " " + isBlocking);
@@ -292,14 +290,13 @@ public class Killaura extends Module {
 //                    }
 //                }
 
-                if (packet instanceof S45PacketTitle && (boolean) settings.get(DEATH).getValue()) {
-                    S45PacketTitle titlePacket = ((S45PacketTitle) packet);
-                    if (titlePacket.getType().equals(S45PacketTitle.Type.TITLE)) {
-                        String text = StringUtils.stripControlCodes(titlePacket.getMessage().getUnformattedText());
-                        if ((text.contains("DIED") || text.contains("GAME OVER")) && isEnabled()) {
-                            shouldToggle = true;
-                            Notifications.getManager().post("Aura Death", "Aura disabled due to death.");
-                        }
+            if (packet instanceof S45PacketTitle && (boolean) settings.get(DEATH).getValue()) {
+                S45PacketTitle titlePacket = ((S45PacketTitle) packet);
+                if (titlePacket.getType().equals(S45PacketTitle.Type.TITLE)) {
+                    String text = StringUtils.stripControlCodes(titlePacket.getMessage().getFormattedText());
+                    if ((text.toLowerCase().contains("died") || text.toLowerCase().contains("game over")) && isEnabled()) {
+                        shouldToggle = true;
+                        Notifications.getManager().post("Aura Death", "Aura disabled due to death.");
                     }
                 }
             }
@@ -548,112 +545,112 @@ public class Killaura extends Module {
                             if (targetYaw > maxAngleStep) targetYaw = maxAngleStep;
                             else if (targetYaw < -maxAngleStep) targetYaw = -maxAngleStep;
 
-                            if(maxAngleStep > -1 && !scaffold.isEnabled())
-                            if (shouldReduce) {
-                                float pitch = (float) -(Math.atan2(yDiff - (distance > 2.1 ? 1.25 : 1.5), dist) * 180.0D / 3.141592653589793D);
-                                float newYaw = 0F;
+                            if (maxAngleStep > -1 && !scaffold.isEnabled())
+                                if (shouldReduce) {
+                                    float pitch = (float) -(Math.atan2(yDiff - (distance > 2.1 ? 1.25 : 1.5), dist) * 180.0D / 3.141592653589793D);
+                                    float newYaw = 0F;
 
-                                if (distance <= (HypixelUtil.isInGame("DUEL") ? 1.12 : 0.75) && yDifference <= 1.5) {
-                                    em.setYaw(lastAngles.x);
-                                    em.setPitch(MathHelper.clamp_float(88.9F + (float) (0.5F * Math.random()), -89.5F, 89.5F));
-                                } else {
-                                    em.setPitch(MathHelper.clamp_float(pitch / 1.1F, -89.5F, 89.5F));
-
-                                    if (lastAngles.y > 90 || lastAngles.y < -90) {
-                                        //em.setPitch(180 - em.getPitch());
-                                    }
-
-                                    Vec3 v = getDirection(lastAngles.x, em.getPitch());
-                                    double off = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), v,
-                                            target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height,
-                                            HypixelUtil.isInGame("DUEL") ? 1.2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1);
-
-                                    Vec3 backwardsBruh = getDirection(lastAngles.x, 180 - em.getPitch());
-                                    double backwardsOff = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), backwardsBruh,
-                                            target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height,
-                                            HypixelUtil.isInGame("DUEL") ? 1.2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1);
-
-                                    if (allowInvalidAngles && em.getPitch() >= 0 && off >= 0.1 && backwardsOff < 0.1) {
-                                        boolean isAttacking = mc.thePlayer.getDistanceToEntity(target) <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && delay.roundDelay(50 * nextRandom);
-                                        boolean canAttackRightNow = (attack.equals("Always")) ||
-                                                (attack.equals("Precise") ? target.waitTicks <= 0 :
-                                                        target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
-
-                                        if (isAttacking && canAttackRightNow) {
-                                            em.setPitch(MathHelper.wrapAngleTo180_float(180 - em.getPitch()));
-                                        } else {
-                                            em.setPitch(em.getPitch() + 360);
-                                        }
+                                    if (distance <= (HypixelUtil.isInGame("DUEL") ? 1.12 : 0.75) && yDifference <= 1.5) {
+                                        em.setYaw(lastAngles.x);
+                                        em.setPitch(MathHelper.clamp_float(88.9F + (float) (0.5F * Math.random()), -89.5F, 89.5F));
                                     } else {
+                                        em.setPitch(MathHelper.clamp_float(pitch / 1.1F, -89.5F, 89.5F));
 
-                                        float tempNewYaw = (float) MathUtils.getIncremental(lastAngles.x + (targetYaw / 1.1F), 20);
+                                        if (lastAngles.y > 90 || lastAngles.y < -90) {
+                                            //em.setPitch(180 - em.getPitch());
+                                        }
 
-                                        boolean willViolate = maxAngleStep > 0 && target.waitTicks <= 0 && Angle.INSTANCE.willViolateYaw(new Location(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, tempNewYaw, 0), target);
+                                        Vec3 v = getDirection(lastAngles.x, em.getPitch());
+                                        double off = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), v,
+                                                target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height,
+                                                HypixelUtil.isInGame("DUEL") ? 1.2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1);
 
-                                        if ((angleTimer.roundDelay(1000) && off >= 0.11 && !willViolate) || (angleTimer.roundDelay(200) && !willViolate && off >= 0.2)) {
-                                            newYaw += targetYaw;
+                                        Vec3 backwardsBruh = getDirection(lastAngles.x, 180 - em.getPitch());
+                                        double backwardsOff = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), backwardsBruh,
+                                                target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height,
+                                                HypixelUtil.isInGame("DUEL") ? 1.2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1);
 
-                                            float normalDiff = Math.abs(newYaw);
-                                            float backwardsDiff = Math.abs(MathHelper.wrapAngleTo180_float(newYaw + 180));
+                                        if (allowInvalidAngles && em.getPitch() >= 0 && off >= 0.1 && backwardsOff < 0.1) {
+                                            boolean isAttacking = mc.thePlayer.getDistanceToEntity(target) <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && delay.roundDelay(50 * nextRandom);
+                                            boolean canAttackRightNow = (attack.equals("Always")) ||
+                                                    (attack.equals("Precise") ? target.waitTicks <= 0 :
+                                                            target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
 
-                                            Vec3 vecReverse = getDirection((float) MathUtils.getIncremental(lastAngles.x + MathHelper.wrapAngleTo180_float((newYaw + 180)), 20), 180 - em.getPitch());
-                                            double newOffReverse = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), vecReverse,
-                                                    target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height,
-                                                    HypixelUtil.isInGame("DUEL") ? 1.2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1);
-
-                                            if (allowInvalidAngles && em.getPitch() >= 0 && backwardsDiff < normalDiff && newOffReverse < 0.1 && normalDiff > 90) {
-                                                angleTimer.reset();
-                                                em.setYaw(lastAngles.x = ((float) MathUtils.getIncremental(lastAngles.x += MathHelper.wrapAngleTo180_float((newYaw + 180)), 20) + randomNumber(1, -1)));
-                                                em.setPitch(180 - em.getPitch());
+                                            if (isAttacking && canAttackRightNow) {
+                                                em.setPitch(MathHelper.wrapAngleTo180_float(180 - em.getPitch()));
                                             } else {
-                                                angleTimer.reset();
-                                                em.setYaw(lastAngles.x = ((float) MathUtils.getIncremental(lastAngles.x += (newYaw), 20) + randomNumber(1, -1)));
+                                                em.setPitch(em.getPitch() + 360);
+                                            }
+                                        } else {
+
+                                            float tempNewYaw = (float) MathUtils.getIncremental(lastAngles.x + (targetYaw / 1.1F), 20);
+
+                                            boolean willViolate = maxAngleStep > 0 && target.waitTicks <= 0 && Angle.INSTANCE.willViolateYaw(new Location(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, tempNewYaw, 0), target);
+
+                                            if ((angleTimer.roundDelay(1000) && off >= 0.11 && !willViolate) || (angleTimer.roundDelay(200) && !willViolate && off >= 0.2)) {
+                                                newYaw += targetYaw;
+
+                                                float normalDiff = Math.abs(newYaw);
+                                                float backwardsDiff = Math.abs(MathHelper.wrapAngleTo180_float(newYaw + 180));
+
+                                                Vec3 vecReverse = getDirection((float) MathUtils.getIncremental(lastAngles.x + MathHelper.wrapAngleTo180_float((newYaw + 180)), 20), 180 - em.getPitch());
+                                                double newOffReverse = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), vecReverse,
+                                                        target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height,
+                                                        HypixelUtil.isInGame("DUEL") ? 1.2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1);
+
+                                                if (allowInvalidAngles && em.getPitch() >= 0 && backwardsDiff < normalDiff && newOffReverse < 0.1 && normalDiff > 90) {
+                                                    angleTimer.reset();
+                                                    em.setYaw(lastAngles.x = ((float) MathUtils.getIncremental(lastAngles.x += MathHelper.wrapAngleTo180_float((newYaw + 180)), 20) + randomNumber(1, -1)));
+                                                    em.setPitch(180 - em.getPitch());
+                                                } else {
+                                                    angleTimer.reset();
+                                                    em.setYaw(lastAngles.x = ((float) MathUtils.getIncremental(lastAngles.x += (newYaw), 20) + randomNumber(1, -1)));
+                                                }
                                             }
                                         }
-                                    }
 
-                                    em.setYaw(lastAngles.x);
+                                        em.setYaw(lastAngles.x);
 
-                                }
-                            } else {
-                                // Allow reduced to still have your heads backwards
-                                if (reduce.getValue() && allowInvalidAngles) {
-                                    float pitch = (float) -(Math.atan2(yDiff, dist) * 180.0D / 3.141592653589793D);
-                                    em.setPitch(MathHelper.clamp_float(pitch / 1.1F, -89.5F, 89.5F));
-
-                                    float normalDiff = Math.abs(targetYaw);
-                                    float backwardsDiff = Math.abs(MathHelper.wrapAngleTo180_float(targetYaw + 180));
-
-                                    Vec3 vecReverse = getDirection((float) MathUtils.getIncremental(lastAngles.x + MathHelper.wrapAngleTo180_float((targetYaw + 180)), 20), 180 - em.getPitch());
-                                    double newOffReverse = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), vecReverse,
-                                            target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height,
-                                            HypixelUtil.isInGame("DUEL") ? 1.2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1);
-
-                                    if (pitch >= 0 && backwardsDiff < normalDiff && newOffReverse < 0.1 && normalDiff > 120) {
-                                        em.setYaw(lastAngles.x += MathHelper.wrapAngleTo180_float(targetYaw + 180) / 1.1F);
-
-                                        boolean isAttacking = mc.thePlayer.getDistanceToEntity(target) <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && delay.roundDelay(50 * nextRandom);
-                                        boolean canAttackRightNow = (attack.equals("Always")) ||
-                                                (attack.equals("Precise") ? target.waitTicks <= 0 :
-                                                        target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
-
-                                        // Only headsnap when attacking to reduce others figuring this out
-                                        if (isAttacking && canAttackRightNow) {
-                                            em.setPitch(MathHelper.wrapAngleTo180_float(180 - em.getPitch()));
-                                        } else {
-                                            em.setPitch(em.getPitch() + 360);
-                                        }
-                                    } else {
-                                        angleTimer.reset();
-                                        em.setYaw((lastAngles.x += targetYaw / 1.1F) + (float) randomNumber(2, -2));
                                     }
                                 } else {
-                                    float pitch = (float) -(Math.atan2(yDiff, dist) * 180.0D / 3.141592653589793D);
+                                    // Allow reduced to still have your heads backwards
+                                    if (reduce.getValue() && allowInvalidAngles) {
+                                        float pitch = (float) -(Math.atan2(yDiff, dist) * 180.0D / 3.141592653589793D);
+                                        em.setPitch(MathHelper.clamp_float(pitch / 1.1F, -89.5F, 89.5F));
 
-                                    em.setYaw((lastAngles.x += targetYaw / 1.1F));
-                                    em.setPitch(MathHelper.clamp_float(pitch / 1.1F, -89.5F, 89.5F));
+                                        float normalDiff = Math.abs(targetYaw);
+                                        float backwardsDiff = Math.abs(MathHelper.wrapAngleTo180_float(targetYaw + 180));
+
+                                        Vec3 vecReverse = getDirection((float) MathUtils.getIncremental(lastAngles.x + MathHelper.wrapAngleTo180_float((targetYaw + 180)), 20), 180 - em.getPitch());
+                                        double newOffReverse = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), vecReverse,
+                                                target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height,
+                                                HypixelUtil.isInGame("DUEL") ? 1.2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1);
+
+                                        if (pitch >= 0 && backwardsDiff < normalDiff && newOffReverse < 0.1 && normalDiff > 120) {
+                                            em.setYaw(lastAngles.x += MathHelper.wrapAngleTo180_float(targetYaw + 180) / 1.1F);
+
+                                            boolean isAttacking = mc.thePlayer.getDistanceToEntity(target) <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && delay.roundDelay(50 * nextRandom);
+                                            boolean canAttackRightNow = (attack.equals("Always")) ||
+                                                    (attack.equals("Precise") ? target.waitTicks <= 0 :
+                                                            target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
+
+                                            // Only headsnap when attacking to reduce others figuring this out
+                                            if (isAttacking && canAttackRightNow) {
+                                                em.setPitch(MathHelper.wrapAngleTo180_float(180 - em.getPitch()));
+                                            } else {
+                                                em.setPitch(em.getPitch() + 360);
+                                            }
+                                        } else {
+                                            angleTimer.reset();
+                                            em.setYaw((lastAngles.x += targetYaw / 1.1F) + (float) randomNumber(2, -2));
+                                        }
+                                    } else {
+                                        float pitch = (float) -(Math.atan2(yDiff, dist) * 180.0D / 3.141592653589793D);
+
+                                        em.setYaw((lastAngles.x += targetYaw / 1.1F));
+                                        em.setPitch(MathHelper.clamp_float(pitch / 1.1F, -89.5F, 89.5F));
+                                    }
                                 }
-                            }
 
                             lastAngles.y = em.getPitch();
 
@@ -775,6 +772,11 @@ public class Killaura extends Module {
                                 }
                             }
 
+                            if(!block && !mc.thePlayer.isBlocking() && isBlocking) {
+                                isBlocking = false;
+                                NetUtil.sendPacketNoEvents(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
+                            }
+
                             if ((block) && (mc.thePlayer.inventory.getCurrentItem() != null) && ((mc.thePlayer.inventory.getCurrentItem().getItem() instanceof ItemSword))) {
                                 mc.thePlayer.setItemInUse(mc.thePlayer.getCurrentEquippedItem(), 0x11938);
                             }
@@ -844,14 +846,14 @@ public class Killaura extends Module {
 
                 boolean canAttackRightNow = attack.equals("Always") || (attack.equals("Precise") ? target.waitTicks <= 0 : target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
 
-                if(scaffold.isEnabled()) {
+                if (scaffold.isEnabled()) {
                     lastAngles.x = em.getYaw();
                     lastAngles.y = em.getPitch();
                 }
 
                 boolean dontCrit = antiCritFunky.getValue() && hasEnchant(target, "Crit", "Funk");
-                if(Client.getModuleManager().isEnabled(Speed.class) && dontCrit && !allowInvalidAngles) {
-                    if(!mc.thePlayer.onGround && mc.thePlayer.motionY < 0) {
+                if (Client.getModuleManager().isEnabled(Speed.class) && dontCrit && !allowInvalidAngles) {
+                    if (!mc.thePlayer.onGround && mc.thePlayer.motionY < 0) {
                         isAttacking = false;
                     }
                 }
@@ -874,10 +876,7 @@ public class Killaura extends Module {
 
                         if (crits && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically && (((critModule.isPacket() && setupCrits)) && isCritSetup) && !em.isOnground()) {
                             if (HypixelUtil.isVerifiedHypixel() && mc.getCurrentServerData() != null && (mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net"))) {
-
-                                double bruh = (mc.thePlayer.posY + 0.125F) + (-0.08D * 0.9800000190734863D);
-
-                                NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, bruh, mc.thePlayer.posZ, false));
+                                NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.046599998474120774, mc.thePlayer.posZ, false));
                             } else {
                                 Criticals.doCrits();
                             }
@@ -1344,7 +1343,7 @@ public class Killaura extends Module {
                 weight += 10;
             }
 
-            if(maxAngleStep > 0) {
+            if (maxAngleStep > 0) {
                 float yawDiff = MathHelper.clamp_float(RotationUtils.getYawChangeGiven(entityLivingBase.posX, entityLivingBase.posZ, lastAngles.x), -180, 180);
 
                 float estimatedYawChange;
@@ -1394,7 +1393,7 @@ public class Killaura extends Module {
                 weight += 10;
             }
 
-            if(maxAngleStep > 0) {
+            if (maxAngleStep > 0) {
                 float yawDiff = MathHelper.clamp_float(RotationUtils.getYawChangeGiven(entityLivingBase.posX, entityLivingBase.posZ, lastAngles.x), -180, 180);
 
                 float estimatedYawChange;

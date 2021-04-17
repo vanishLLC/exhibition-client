@@ -11,6 +11,7 @@ import net.minecraft.util.IChatComponent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static net.minecraft.client.gui.GuiPlayerTabOverlay.playerInfoMap;
 
@@ -22,11 +23,22 @@ public class Nicks extends Command {
 
     @Override
     public String getUsage() {
-        return "nicks [all] (shows all nicks)";
+        return "nicks [list] (shows resolved nicks)";
     }
 
     @Override
     public void fire(String[] args) {
+
+        if(args != null && args.length > 0 && args[0].equalsIgnoreCase("list")) {
+            printChat("\247aResolved Nicks \2477[\247e" + UUIDResolver.instance.resolvedMap.size() + "\2477]");
+
+            for (Map.Entry<String, String> entry : UUIDResolver.instance.resolvedMap.entrySet()) {
+                String username = entry.getKey();
+                    ChatUtil.printChat("\2477- \247e" + username + " \2477=> \247d" + entry.getValue());
+            }
+            return;
+        }
+
         final NetHandlerPlayClient netHandler = mc.thePlayer.sendQueue;
         List<NetworkPlayerInfo> list = new ArrayList<>();
         for (NetworkPlayerInfo playerInfo : playerInfoMap.sortedCopy(netHandler.getPlayerInfoMap())) {
@@ -58,7 +70,5 @@ public class Nicks extends Command {
                 ChatUtil.printChat("\2477- \247e" + username);
             }
         }
-
-
     }
 }

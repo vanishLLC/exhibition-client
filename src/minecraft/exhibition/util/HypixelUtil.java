@@ -52,7 +52,7 @@ public class HypixelUtil {
                                     !tag.replaceFirst("\2477", "").contains("\2477") &&
                                     !tag.endsWith("Attack Damage") && !tag.endsWith("Unbreakable") && !tag.toLowerCase().contains("fashion") && !tag.toLowerCase().contains("mystic") &&
                                     !tag.contains("As strong") && !tag.contains("Gotta go") && !tag.contains("Purple Gold")) {
-                                list.add(tag);
+                                list.add(StringUtils.stripControlCodes(tag));
                             }
                         }
                     }
@@ -175,6 +175,14 @@ public class HypixelUtil {
             return false;
         }
 
+        if(scoreboardCache != null) {
+            for (String s : scoreboardCache) {
+                if (s.toLowerCase().contains(str.toLowerCase())) {
+                    return true;
+                }
+            }
+        }
+
         ScoreObjective scoreobjective = null;
         ScorePlayerTeam scoreboardPlayersTeam = scoreboard.getPlayersTeam(Minecraft.getMinecraft().thePlayer.getName());
 
@@ -212,16 +220,10 @@ public class HypixelUtil {
                     scoreboardCache = new ArrayList<>();
                     for (Score score : arraylist1) {
                         ScorePlayerTeam scoreplayerteam1 = scoreboard.getPlayersTeam(score.getPlayerName());
-                        String s1 = StringUtils.stripHypixelControlCodes(ScorePlayerTeam.formatPlayerName(scoreplayerteam1, score.getPlayerName()).replace("\uD83D\uDC7D", "").replace("\uD83C\uDF82", ""));
+                        String s1 = StringUtils.stripHypixelControlCodes(ScorePlayerTeam.formatPlayerName(scoreplayerteam1, score.getPlayerName()).replaceAll("[^\247^\\x00-\\x7F]", ""));
                         scoreboardCache.add(s1);
                         if (s1.toLowerCase().contains(str.toLowerCase())) {
                             found = true;
-                        }
-                    }
-                } else {
-                    for (String s : scoreboardCache) {
-                        if (s.toLowerCase().contains(str.toLowerCase())) {
-                           return true;
                         }
                     }
                 }

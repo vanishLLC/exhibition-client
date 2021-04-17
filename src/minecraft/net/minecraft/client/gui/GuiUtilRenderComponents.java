@@ -2,6 +2,11 @@ package net.minecraft.client.gui;
 
 import com.google.common.collect.Lists;
 import java.util.List;
+import java.util.Map;
+
+import exhibition.Client;
+import exhibition.management.friend.FriendManager;
+import exhibition.module.impl.other.StreamerMode;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
@@ -25,6 +30,21 @@ public class GuiUtilRenderComponents
         {
             IChatComponent ichatcomponent1 = (IChatComponent)list1.get(j);
             String s = ichatcomponent1.getUnformattedTextForChat();
+
+            if (Client.getModuleManager().isEnabled(StreamerMode.class) && (boolean) Client.getModuleManager().get(StreamerMode.class).getSetting("PROTECT").getValue() && Minecraft.getMinecraft().thePlayer != null) {
+                if (s.contains(Minecraft.getMinecraft().session.getProfile().getName())) {
+                    s = s.replace(Minecraft.getMinecraft().session.getProfile().getName(), "\247d\247l" + Client.getAuthUser().getForumUsername() + "\247r");
+                }
+
+                for (Map.Entry<String, String> friend : FriendManager.friendsMap.entrySet()) {
+                    String name = friend.getKey();
+                    String alias = friend.getValue();
+                    if (s.contains(name) && name.length() >= 3) {
+                        s = s.replace(name, "\247d\247l" + alias + "\247r");
+                    }
+                }
+            }
+
             boolean flag = false;
 
             if (s.contains("\n"))

@@ -6,7 +6,6 @@ import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventMotionUpdate;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
-import exhibition.module.impl.movement.FreecamTP;
 import exhibition.module.impl.movement.Phase;
 import exhibition.module.impl.render.Freecam;
 import net.minecraft.block.BlockObsidian;

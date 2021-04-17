@@ -201,9 +201,10 @@ public class AuthenticatedUser extends Castable {
                 check += displayContainer.getSerial();
             }
 
-            for (DiskIdentifiers.DiskContainer diskContainer : hardwareIdentification.diskIdentifiers.getDiskContainers()) {
-                check += diskContainer.getSerial();
-            }
+            if (hardwareIdentification.diskIdentifiers != null)
+                for (DiskIdentifiers.DiskContainer diskContainer : hardwareIdentification.diskIdentifiers.getDiskContainers()) {
+                    check += diskContainer.getSerial();
+                }
 
             if (isEverythingOk() && BCrypt.checkpw(check, hwidHash).detected)
                 return;

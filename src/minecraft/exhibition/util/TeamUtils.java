@@ -14,7 +14,8 @@ public class TeamUtils {
         // ChatUtil.printChat(e2.getDisplayName().getFormattedText().contains("§" + isTeam(e)) + " " + isTeam(e));
         boolean pitMode = HypixelUtil.isInGame("THE HYPIXEL PIT");
         if (pitMode) {
-            if ((!HypixelUtil.scoreboardContains("event:") || HypixelUtil.scoreboardContains("SPIRE") || HypixelUtil.scoreboardContains("ROBBERY") || HypixelUtil.scoreboardContains("BLOCKHEAD") || HypixelUtil.scoreboardContains("RAFFLE") || HypixelUtil.scoreboardContains("PIZZA")))
+            if ((!HypixelUtil.scoreboardContains("event:") || HypixelUtil.scoreboardContains("SPIRE") || HypixelUtil.scoreboardContains("ROBBERY") ||
+                    HypixelUtil.scoreboardContains("BLOCK") || HypixelUtil.scoreboardContains("RAFFLE") || HypixelUtil.scoreboardContains("PIZZA")))
                 return e == e2;
             if(HypixelUtil.scoreboardContains("event:") && HypixelUtil.scoreboardContains("SQUAD")) {
                 String first = e.getDisplayName().getFormattedText();
@@ -38,6 +39,12 @@ public class TeamUtils {
         String nameFormated = player.getDisplayName().getFormattedText();
         if (pitMode)
             if (HypixelUtil.scoreboardContains("TDM")) {
+                if (nameFormated.contains("] ")) {
+                    nameFormated = nameFormated.split("] ")[1];
+                }
+                if (nameFormated.contains("]§7")) {
+                    nameFormated = nameFormated.split("]§7")[1];
+                }
                 if (nameFormated.contains("]")) {
                     nameFormated = nameFormated.split("]")[1];
                 }

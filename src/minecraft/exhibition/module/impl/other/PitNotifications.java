@@ -1,64 +1,43 @@
-/**
- * Time: 8:22:36 PM
- * Date: Jan 5, 2017
- * Creator: cool1
- */
 package exhibition.module.impl.other;
 
-import com.google.common.collect.Lists;
-import exhibition.Client;
 import exhibition.event.Event;
 import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventPacket;
 import exhibition.event.impl.EventRender3D;
-import exhibition.event.impl.EventRenderGui;
-import exhibition.management.ColorManager;
-import exhibition.management.ColorObject;
-import exhibition.management.font.TTFFontRenderer;
-import exhibition.management.friend.FriendManager;
+import exhibition.event.impl.EventSpawnEntity;
+import exhibition.event.impl.EventTick;
 import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.MultiBool;
 import exhibition.module.data.settings.Setting;
-import exhibition.module.impl.combat.AntiBot;
-import exhibition.module.impl.render.ESP2D;
-import exhibition.module.impl.render.Nametags;
-import exhibition.module.impl.render.Tags;
-import exhibition.module.impl.render.TargetESP;
 import exhibition.util.HypixelUtil;
-import exhibition.util.MathUtils;
 import exhibition.util.RenderingUtil;
-import exhibition.util.TeamUtils;
 import exhibition.util.render.Colors;
-import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.monster.EntityGolem;
-import net.minecraft.entity.monster.IMob;
-import net.minecraft.entity.passive.EntityVillager;
-import net.minecraft.entity.passive.IAnimals;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S02PacketChat;
-import net.minecraft.util.MathHelper;
+import net.minecraft.network.play.server.S1CPacketEntityMetadata;
 import org.lwjgl.opengl.GL11;
 
-import java.awt.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class PitNotifications extends Module {
 
     private final MultiBool options;
-
-    private final List<Entity> bruhList = Lists.<Entity>newArrayList();
-
     private final Setting<Boolean> sewers = new Setting<>("SEWER CHEST", true);
+
+    // Containers could be further optimized, however this is way better than per-frame iteration
+    private final List<EntityItem> updatedItems = new CopyOnWriteArrayList<>();
+    private final List<EntityItem> trackedItems = new CopyOnWriteArrayList<>();
 
     public PitNotifications(ModuleData data) {
         super(data);
@@ -78,68 +57,82 @@ public class PitNotifications extends Module {
     }
 
     @Override
-    @RegisterEvent(events = {EventPacket.class, EventRender3D.class})
+    @RegisterEvent(events = {EventPacket.class, EventTick.class, EventRender3D.class})
     public void onEvent(Event event) {
-        if (event instanceof EventRender3D) {
-            EventRender3D er = (EventRender3D) event;
+        if (event instanceof EventRender3D && options.getValue("MYSTIC DROP")) {
+            if (trackedItems.size() == 0)
+                return;
+
+            EventRender3D er = event.cast();
             final boolean bobbing = mc.gameSettings.viewBobbing;
             GL11.glLoadIdentity();
             mc.gameSettings.viewBobbing = false;
-            mc.entityRenderer.orientCamera(mc.timer.renderPartialTicks);
-
-            for (Entity ent : mc.theWorld.getLoadedEntityList()) {
-                if (!(ent instanceof EntityItem && options.getValue("MYSTIC DROP")))
-                    continue;
-                try {
-                    if (ent instanceof EntityItem) {
-                        ItemStack itemStack = ((EntityItem) ent).getEntityItem();
-                        if (itemStack.getTagCompound().hasKey("ExtraAttributes", 10)){
-                            if (!bruhList.isEmpty()){
-                                if (bruhList.contains(ent)){
-                                    float posX = (float) ((float) ent.getPosition().getX() + 0.5 - RenderManager.renderPosX);
-                                    float posY = (float) ((float) ent.getPosition().getY() + 0.5 - RenderManager.renderPosY);
-                                    float posZ = (float) ((float) ent.getPosition().getZ() + 0.5 - RenderManager.renderPosZ);
-                                    RenderingUtil.draw3DLine(posX, posY, posZ, Colors.getColor(255, 156, 0));
-                                    return;
-                                }
-                            }
-                            String enchant = HypixelUtil.getPitEnchants(itemStack).toString().replaceAll("\\[([^\\]]+)\\]", "[$1\247r]");
-
-                            double ex = ent.lastTickPosX + (ent.posX - ent.lastTickPosX) * mc.timer.renderPartialTicks;
-                            double ey = ent.lastTickPosY + (ent.posY - ent.lastTickPosY) * mc.timer.renderPartialTicks;
-                            double ez = ent.lastTickPosZ + (ent.posZ - ent.lastTickPosZ) * mc.timer.renderPartialTicks;
-
-                            double px = mc.thePlayer.lastTickPosX + (mc.thePlayer.posX - mc.thePlayer.lastTickPosX) * mc.timer.renderPartialTicks;
-                            double py = mc.thePlayer.lastTickPosY + (mc.thePlayer.posY - mc.thePlayer.lastTickPosY) * mc.timer.renderPartialTicks;
-                            double pz = mc.thePlayer.lastTickPosZ + (mc.thePlayer.posZ - mc.thePlayer.lastTickPosZ) * mc.timer.renderPartialTicks;
-
-                            double d0 = px - ex;
-                            double d1 = py - ey;
-                            double d2 = pz - ez;
-
-                            double distance = MathHelper.sqrt_double(d0 * d0 + d1 * d1 + d2 * d2);
-
-                            Notifications.getManager().post(itemStack.getDisplayName() + " \247rhas dropped!"  + " (" + ((int) distance) + "m)", enchant, 5000L, Notifications.Type.NOTIFY);
-                            System.out.println(HypixelUtil.getPitEnchants(itemStack).toString());
-
-                            bruhList.add(ent);
-                        }
-                    }
-                } catch (Exception e){
-
-                }
-                mc.gameSettings.viewBobbing = bobbing;
+            mc.entityRenderer.orientCamera(er.renderPartialTicks);
+            // Cache the entity instead? Avoid doing loops on *all* entities every frame.
+            GlStateManager.pushMatrix();
+            for (EntityItem ent : trackedItems) {
+                double posX = ent.lastTickPosX + ((ent.posX - ent.lastTickPosX) * er.renderPartialTicks) - RenderManager.renderPosX;
+                double posY = ent.lastTickPosY + ((ent.posY - ent.lastTickPosY) * er.renderPartialTicks) - RenderManager.renderPosY;
+                double posZ = ent.lastTickPosZ + ((ent.posZ - ent.lastTickPosZ) * er.renderPartialTicks) - RenderManager.renderPosZ;
+                RenderingUtil.draw3DLine(posX, posY, posZ, Colors.getColor(255, 156, 0));
             }
+            GlStateManager.popMatrix();
+            mc.gameSettings.viewBobbing = bobbing;
+
         }
-        if (event instanceof EventPacket){
+        if (event instanceof EventTick) {
+            //ChatUtil.printChat(trackedItems.size() + " " + spawnedItems.size() + " " + trackedItems.size());
+
+            trackedItems.removeIf(trackedItem -> !mc.theWorld.getLoadedEntityList().contains(trackedItem));
+
+            for (EntityItem updatedItem : new ArrayList<>(updatedItems)) {
+                if (mc.theWorld.getLoadedEntityList().contains(updatedItem)) {
+                    ItemStack itemStack = updatedItem.getEntityItem();
+                    if (itemStack.hasTagCompound() && itemStack.getTagCompound().hasKey("ExtraAttributes", 10)) {
+                        long nonce = -1;
+                        NBTTagCompound nbttagcompound = itemStack.getTagCompound().getCompoundTag("ExtraAttributes");
+                        if (nbttagcompound.hasKey("Nonce", 3)) {
+                            try {
+                                nonce = nbttagcompound.getLong("Nonce");
+                            } catch (Exception e) {
+
+                            }
+                        }
+
+                        List<String> enchantList = HypixelUtil.getPitEnchants(itemStack);
+
+                        String enchant =  enchantList.size() == 0 ? "" : Arrays.toString(enchantList.toArray());
+
+                        Notifications.getManager().post(itemStack.getDisplayName() + " \247rhas dropped! (" + (int) mc.thePlayer.getDistanceToEntity(updatedItem) + "m)", enchant + (nonce > 1000 ? " (" + nonce + ")" : ""), 5000L, Notifications.Type.NOTIFY);
+                        System.out.println(enchant);
+
+                        trackedItems.add(updatedItem);
+                        updatedItems.remove(updatedItem);
+                    }
+                } else {
+                    updatedItems.remove(updatedItem);
+                }
+            }
+
+        }
+        if (event instanceof EventPacket) {
             EventPacket ep = event.cast();
+            if (mc.thePlayer == null || mc.theWorld == null) {
+                return;
+            }
+
             Packet packet = ep.getPacket();
+            if (packet instanceof S1CPacketEntityMetadata) {
+                S1CPacketEntityMetadata entityMetadata = (S1CPacketEntityMetadata) packet;
+                Entity entity = mc.theWorld.getEntityByID(entityMetadata.getEntityId());
+                if (entity instanceof EntityItem) {
+                    if (!updatedItems.contains(entity))
+                        updatedItems.add((EntityItem) entity);
+                }
+            }
             if (packet instanceof S02PacketChat) {
                 S02PacketChat packetChat = (S02PacketChat) packet;
                 String formatted = packetChat.getChatComponent().getFormattedText();
-                if (mc.thePlayer == null || mc.theWorld == null) {
-                    return;
-                }
                 if (formatted.contains("\247r\247d\247lMINOR EVENT!") && options.getValue("MINOR EVENT")) {
                     try {
                         formatted = formatted.replace("\247r\247d\247lMINOR EVENT! ", "");

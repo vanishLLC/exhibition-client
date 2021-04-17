@@ -200,7 +200,7 @@ public class Nametags extends Module {
                     borderColor = Colors.getColor(255, 255, 0, (int) (200 * percentage));
                 }
 
-                String playerName = ent.getDisplayName().getFormattedText();
+                String playerName = ent.getDisplayName().getFormattedText().replaceAll("[^\247^\\x00-\\x7F]", "?");
 
                 String str = ((boolean) this.distance.getValue() ? "\247a" + (int) mc.thePlayer.getDistanceToEntity(ent) + "m\247r " : "") + playerName;
                 str = str.replace(playerName, FriendManager.isFriend(ent.getName()) ? FriendManager.getAlias(ent.getName()) : "\247f\247l" + playerName);

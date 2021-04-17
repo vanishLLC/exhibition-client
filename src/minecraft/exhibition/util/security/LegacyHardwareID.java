@@ -41,10 +41,10 @@ public class LegacyHardwareID {
 
             osFamily = os.getFamily().trim();
 
-            cpuName = processor.getName().trim();
-            cpuIdentifier = processor.getIdentifier().trim();
-            processorID = processor.getProcessorID().trim();
-            cpuVendor = processor.getVendor().trim();
+            cpuName = processor.getProcessorIdentifier().getName().trim();
+            cpuIdentifier = processor.getProcessorIdentifier().getIdentifier().trim();
+            processorID = processor.getProcessorIdentifier().getProcessorID().trim();
+            cpuVendor = processor.getProcessorIdentifier().getVendor().trim();
 
             moboManufacturer = computerSystem.getManufacturer().trim();
             moboModel = computerSystem.getModel().trim();

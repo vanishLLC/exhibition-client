@@ -53,7 +53,7 @@ public class CommandManager {
         new Teleport(new String[]{"Teleport", "tp", "tpto"}, "Teleports you to a certain player/position.").register(this);
         new Name(new String[]{"Name", "username", "copy"}, "Copies your name to your clipboard.").register(this);
         new View(new String[]{"View", "inspect", "v"}, "Lets you view information on a players armor/held item.").register(this);
-        new Nicks(new String[]{"Nicks", "n"}, "Lists all nicked players in your lobby + denicked names.").register(this);
+        new Nicks(new String[]{"Nicks","nick", "n"}, "Lists all nicked players in your lobby + denicked names.").register(this);
         new Macro(new String[]{"Macro", "macros"}, "Binds a chat message/command to a key.").register(this);
 
     }

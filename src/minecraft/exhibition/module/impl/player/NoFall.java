@@ -13,7 +13,6 @@ import exhibition.module.impl.combat.Bypass;
 import exhibition.util.*;
 import exhibition.util.security.BypassValues;
 import net.minecraft.block.BlockAir;
-import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.util.BlockPos;
 

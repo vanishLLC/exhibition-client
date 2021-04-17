@@ -6,6 +6,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import exhibition.Client;
 import exhibition.util.security.DiscordUtil;
+import net.minecraft.client.Minecraft;
 import oshi.SystemInfo;
 import oshi.hardware.*;
 import oshi.software.os.OperatingSystem;
@@ -15,7 +16,7 @@ import java.util.Date;
 import static com.sun.jna.platform.win32.Advapi32Util.*;
 import static com.sun.jna.platform.win32.WinReg.HKEY_LOCAL_MACHINE;
 
-public class HardwareIdentification {
+public class HardwareIdentification implements Identifier {
 
     //OS
     public final OperatingSystemIdentifiers operatingSystemIdentifiers;
@@ -43,34 +44,34 @@ public class HardwareIdentification {
 
     public HardwareIdentification(Object systemInfo) {
 
-            OperatingSystem os = ((SystemInfo)systemInfo).getOperatingSystem();
+        OperatingSystem os = ((SystemInfo) systemInfo).getOperatingSystem();
 
-            HardwareAbstractionLayer hardware = ((SystemInfo)systemInfo).getHardware();
+        HardwareAbstractionLayer hardware = ((SystemInfo) systemInfo).getHardware();
 
-            CentralProcessor centralProcessor = hardware.getProcessor();
+        CentralProcessor centralProcessor = hardware.getProcessor();
 
-            this.operatingSystemIdentifiers = new OperatingSystemIdentifiers(os);
+        this.operatingSystemIdentifiers = new OperatingSystemIdentifiers(os);
 
-            this.cpuName = centralProcessor.getName().trim();
+        this.cpuName = trim(centralProcessor.getProcessorIdentifier().getName());
 
-            GlobalMemory memory = hardware.getMemory();
-            ComputerSystem computerSystem = hardware.getComputerSystem();
+        GlobalMemory memory = hardware.getMemory();
+        ComputerSystem computerSystem = hardware.getComputerSystem();
 
-            int totalRam = (int)Math.round(memory.getTotal() / Math.pow(1024, 3));
+        int totalRam = (int) Math.round(memory.getTotal() / Math.pow(1024, 3));
 
-            this.systemIdentifiers = new SystemIdentifiers(computerSystem, totalRam);
+        this.systemIdentifiers = new SystemIdentifiers(computerSystem, totalRam);
 
-            Baseboard baseboard = computerSystem.getBaseboard();
+        Baseboard baseboard = computerSystem.getBaseboard();
 
-            this.baseboardIdentifiers = new BaseboardIdentifiers(baseboard);
+        this.baseboardIdentifiers = new BaseboardIdentifiers(baseboard);
 
-            this.firmwareIdentifiers = new FirmwareIdentifiers(computerSystem.getFirmware());
+        this.firmwareIdentifiers = new FirmwareIdentifiers(computerSystem.getFirmware());
 
-            this.displayIdentifiers = new DisplayIdentifiers(hardware.getDisplays());
+        this.displayIdentifiers = new DisplayIdentifiers(hardware.getDisplays());
 
-            this.networkAdapterIdentifiers = new NetworkAdapterIdentifiers(hardware.getNetworkIFs());
+        this.networkAdapterIdentifiers = new NetworkAdapterIdentifiers(hardware.getNetworkIFs());
 
-            this.diskIdentifiers = new DiskIdentifiers(hardware.getDiskStores());
+        this.diskIdentifiers = new DiskIdentifiers(hardware.getDiskStores());
     }
 
     public String getIdentifiersAsJson() {
@@ -78,7 +79,7 @@ public class HardwareIdentification {
 
         JsonObject jsonObject = new JsonObject();
 
-        if(Client.isDiscordReady) {
+        if (Client.isDiscordReady) {
             JsonObject discordObject = new JsonObject();
 
             discordObject.addProperty("username", DiscordUtil.getDiscordUsername(discordObject).toString());
@@ -165,18 +166,18 @@ public class HardwareIdentification {
             adapterObject.addProperty("name", networkAdapter.getName());
             adapterObject.addProperty("mac", networkAdapter.getMac());
 
-            if(networkAdapter.isVirtualAdapter()) {
+            if (networkAdapter.isVirtualAdapter()) {
                 vadaptersArray.add(adapterObject);
             } else {
                 nadaptersArray.add(adapterObject);
             }
         }
 
-        if(nadaptersArray.size() > 0) {
+        if (nadaptersArray.size() > 0) {
             jsonObject.add("Network_Adapters", nadaptersArray);
         }
 
-        if(vadaptersArray.size() > 0) {
+        if (vadaptersArray.size() > 0) {
             jsonObject.add("Virtual_Adapters", vadaptersArray);
         }
 
@@ -191,9 +192,10 @@ public class HardwareIdentification {
             str += displayContainer.getSerial();
         }
 
-        for (DiskIdentifiers.DiskContainer diskContainer : diskIdentifiers.getDiskContainers()) {
-            str += diskContainer.getSerial();
-        }
+        if (diskIdentifiers != null)
+            for (DiskIdentifiers.DiskContainer diskContainer : diskIdentifiers.getDiskContainers()) {
+                str += diskContainer.getSerial();
+            }
 
         return str.trim();
     }

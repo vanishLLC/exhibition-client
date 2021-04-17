@@ -75,7 +75,7 @@ public class BedFucker extends Module {
                                 if ((mc.theWorld.getBlockState(pos).getBlock() != Blocks.air &&
                                         this.blockChecks(mc.theWorld.getBlockState(pos).getBlock()) &&
                                         this.getHitResult(pos) != null) &&
-                                        mc.thePlayer.getDistance(posX, posY, posZ) < mc.playerController.getBlockReachDistance()) {
+                                        mc.thePlayer.getDistance(posX, posY, posZ) <= mc.playerController.getBlockReachDistance()) {
 
                                     IBlockState blockState = mc.theWorld.getBlockState(pos);
                                     Block block = blockState.getBlock();

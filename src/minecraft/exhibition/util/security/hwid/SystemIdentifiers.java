@@ -2,7 +2,7 @@ package exhibition.util.security.hwid;
 
 import oshi.hardware.ComputerSystem;
 
-public class SystemIdentifiers {
+public class SystemIdentifiers implements Identifier {
 
     private final String manufacturer;
     private final String serial;
@@ -11,9 +11,9 @@ public class SystemIdentifiers {
     private final int totalRam;
 
     public SystemIdentifiers(ComputerSystem computerSystem, int totalRam) {
-        this.manufacturer = computerSystem.getManufacturer().trim();
-        this.serial = computerSystem.getSerialNumber().trim();
-        this.model = computerSystem.getModel().trim();
+        this.manufacturer = trim(computerSystem.getManufacturer());
+        this.serial = trim(computerSystem.getSerialNumber());
+        this.model = trim(computerSystem.getModel());
 
         this.totalRam = totalRam;
     }

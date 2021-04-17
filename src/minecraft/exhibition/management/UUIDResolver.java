@@ -26,8 +26,8 @@ public class UUIDResolver {
     public HashMap<String, String> resolvedMap = new HashMap<>();
     public HashMap<String, UUID> checkedUsernames = new HashMap<>();
 
-    private final HashMap<String, Long> responseMap = new HashMap<>();
-    private final HashMap<String, Long> hypixelResponseMap = new HashMap<>();
+    private final HashMap<Integer, Long> responseMap = new HashMap<>();
+    private final HashMap<Integer, Long> hypixelResponseMap = new HashMap<>();
     private boolean isRateLimited;
 
     public boolean isInvalidName(String username) {
@@ -71,16 +71,16 @@ public class UUIDResolver {
                     validMapIter.remove();
                 }
             }
-            Iterator<Map.Entry<String, Long>> responses = responseMap.entrySet().iterator();
+            Iterator<Map.Entry<Integer, Long>> responses = responseMap.entrySet().iterator();
             while (responses.hasNext()) {
-                Map.Entry<String, Long> map = responses.next();
+                Map.Entry<Integer, Long> map = responses.next();
                 if (map.getValue() + 600_000 < System.currentTimeMillis()) {
                     responses.remove();
                 }
             }
-            Iterator<Map.Entry<String, Long>> hypixelRespones = hypixelResponseMap.entrySet().iterator();
+            Iterator<Map.Entry<Integer, Long>> hypixelRespones = hypixelResponseMap.entrySet().iterator();
             while (hypixelRespones.hasNext()) {
-                Map.Entry<String, Long> map = hypixelRespones.next();
+                Map.Entry<Integer, Long> map = hypixelRespones.next();
                 if (map.getValue() + 60_000 < System.currentTimeMillis()) {
                     hypixelRespones.remove();
                 }
@@ -128,7 +128,7 @@ public class UUIDResolver {
                 validMap.put(name, current);
             }
 
-            responseMap.put(names.toString(), current);
+            responseMap.put(names.toString().hashCode(), current);
 
             for (Map.Entry<String, UUID> entry : names.entrySet()) {
                 if (!validMap.containsKey(entry.getKey()) && !checkedUsernames.containsKey(entry.getKey())) {
@@ -163,6 +163,9 @@ public class UUIDResolver {
                     for (Iterator<NickDetector.ResolvePair> it = nickDetector.resolvePairList.iterator(); it.hasNext(); ) {
                         NickDetector.ResolvePair pair = it.next();
 
+                        if(resolvedMap.containsKey(pair.getUsername()))
+                            continue;
+
                         ItemStack stack = pair.getStack();
                         if (stack != null && stack.hasTagCompound()) {
                             if (stack.getTagCompound().hasKey("ExtraAttributes", 10)) {
@@ -192,7 +195,7 @@ public class UUIDResolver {
                                                         Connection profileConnection = new Connection("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid);
                                                         Connector.get(profileConnection);
                                                         JsonObject profileJsonObject = (JsonObject) JsonParser.parseString(profileConnection.getResponse());
-                                                        responseMap.put(profileConnection.getResponse(), System.currentTimeMillis());
+                                                        responseMap.put(profileConnection.getResponse().hashCode(), System.currentTimeMillis());
 
                                                         if (profileJsonObject.has("name")) {
                                                             String resolvedName = profileJsonObject.get("name").getAsString();
@@ -282,7 +285,7 @@ public class UUIDResolver {
                                                                     Connection profileConnection = new Connection("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid);
                                                                     Connector.get(profileConnection);
                                                                     JsonObject profileJsonObject = (JsonObject) JsonParser.parseString(profileConnection.getResponse());
-                                                                    responseMap.put(profileConnection.getResponse(), System.currentTimeMillis());
+                                                                    responseMap.put(profileConnection.getResponse().hashCode(), System.currentTimeMillis());
 
                                                                     if (profileJsonObject.has("name")) {
                                                                         String resolvedName = profileJsonObject.get("name").getAsString();
@@ -340,7 +343,7 @@ public class UUIDResolver {
                                     }
                                 }
 
-                                hypixelResponseMap.put(username, System.currentTimeMillis());
+                                hypixelResponseMap.put(username.hashCode(), System.currentTimeMillis());
                             }
                         }
                     }
@@ -392,7 +395,7 @@ public class UUIDResolver {
                                                                     Connection profileConnection = new Connection("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid);
                                                                     Connector.get(profileConnection);
                                                                     JsonObject profileJsonObject = (JsonObject) JsonParser.parseString(profileConnection.getResponse());
-                                                                    responseMap.put(username, System.currentTimeMillis());
+                                                                    responseMap.put(username.hashCode(), System.currentTimeMillis());
 
                                                                     if (profileJsonObject.has("name")) {
                                                                         String resolvedName = profileJsonObject.get("name").getAsString();

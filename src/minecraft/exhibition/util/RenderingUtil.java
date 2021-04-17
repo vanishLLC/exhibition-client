@@ -600,7 +600,7 @@ public class RenderingUtil {
         post3D();
     }
 
-    public static void draw3DLine(float x, float y, float z, int color) {
+    public static void draw3DLine(double x, double y, double z, int color) {
         pre3D();
         float var11 = (color >> 24 & 0xFF) / 255.0F;
         float var6 = (color >> 16 & 0xFF) / 255.0F;

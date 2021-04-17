@@ -16,6 +16,8 @@ import java.util.List;
 
 public class LibraryIntegrityChecker {
 
+    private static Object instance;
+
     // Returns the instance of SystemInfo
     public static Object checkOSHIIntegrity() {
         try {
@@ -34,7 +36,7 @@ public class LibraryIntegrityChecker {
 
             Class md = Class.forName("java.security.MessageDigest");
 
-            String expectedPath = "libraries/com/github/oshi/oshi-core/3.12.0/oshi-core-3.12.0.jar";
+            String expectedPath = "libraries/com/github/oshi/oshi-core/5.7.0/oshi-core-5.7.0.jar";
 
             Object mdInstance = md.getMethod("getInstance", String.class).invoke(null, "SHA-256");
 
@@ -51,7 +53,7 @@ public class LibraryIntegrityChecker {
 
             String checkSum = (String) Class.forName("javax.xml.bind.DatatypeConverter").getMethod("printHexBinary", byte[].class).invoke(null, (byte[]) md.getMethod("digest").invoke(mdInstance));
             if (new File(expectedPath).exists() && oshiJar.getAbsolutePath().equals(new File(expectedPath).getAbsolutePath())) {
-                if (Integer.valueOf("-988826486").equals(checkSum.hashCode())) {
+                if (Integer.valueOf("1656719637").equals(checkSum.hashCode())) {
                     Class runtimeClazz = Class.forName("sun.management.ManagementFactoryHelper");
                     Field vmInstance = runtimeClazz.getDeclaredField("jvm");
                     vmInstance.setAccessible(true);
@@ -69,7 +71,7 @@ public class LibraryIntegrityChecker {
 
                     for (String arg : list) {
                         if (arg.equalsIgnoreCase("-XX:+DisableAttachMechanism")) {
-                            return Class.forName("java.lang.Class").getMethod("newInstance").invoke(Class.forName("oshi.SystemInfo"));
+                            return instance == null ? instance = Class.forName("java.lang.Class").getMethod("newInstance").invoke(Class.forName("oshi.SystemInfo")) : instance;
                         }
                     }
 

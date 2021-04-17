@@ -21,6 +21,9 @@ import exhibition.util.render.Colors;
 import exhibition.util.render.Depth;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemArmor;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.StringUtils;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
@@ -79,7 +82,7 @@ public class TargetESP extends Module {
         RenderingUtil.rectangle(x + 1.5, y + 3, x + Client.fss.getWidth(string) + 2, y + 3.5, -1);
         RenderingUtil.rectangle(x + 2, y + 3.5, x + Client.fss.getWidth(string) + 1.5, y + 4, -1);
         Depth.render(GL11.GL_LESS);
-        RenderingUtil.rectangleBordered(x, y + 3, x + width, y + height, 0.5, Colors.getColor(0,0), Colors.getColor(10));
+        RenderingUtil.rectangleBordered(x, y + 3, x + width, y + height, 0.5, Colors.getColor(0, 0), Colors.getColor(10));
         RenderingUtil.rectangleBordered(x + 0.5, y + 3.5, x + width - 0.5, y + height - 0.5, 0.5, Colors.getColor(17), Colors.getColor(48));
         Depth.post();
 
@@ -102,17 +105,27 @@ public class TargetESP extends Module {
         if (PriorityManager.isPriority(player))
             return true;
 
-        if(HypixelUtil.scoreboardCache != null && Client.getModuleManager().isEnabled(TargetESP.class) ) {
+        if (HypixelUtil.scoreboardCache != null && Client.getModuleManager().isEnabled(TargetESP.class)) {
             boolean isRobbery = false;
             boolean isEvent = false;
+            boolean isPizza = false;
+            boolean isRagePit = false;
 
-            for(String s : HypixelUtil.scoreboardCache) {
-                if(s == null || s.equals(""))
+            for (String s : HypixelUtil.scoreboardCache) {
+                if (s == null || s.equals(""))
                     continue;
-
-                if(s.toLowerCase().contains("ROBBERY".toLowerCase())) {
+                if (s.toLowerCase().contains("RAGE".toLowerCase())) {
+                    isRagePit = true;
+                    isEvent = true;
+                } else if (s.toLowerCase().contains("PIZZA".toLowerCase())) {
+                    isPizza = true;
+                    isEvent = true;
+                    break;
+                } else if (s.toLowerCase().contains("ROBBERY".toLowerCase())) {
                     isRobbery = true;
-                } else if(s.toLowerCase().contains("Event".toLowerCase())) {
+                    isEvent = true;
+                    break;
+                } else if (s.toLowerCase().contains("Event".toLowerCase())) {
                     isEvent = true;
                 }
             }
@@ -120,6 +133,32 @@ public class TargetESP extends Module {
             String formatted = player.getDisplayName().getFormattedText();
             if (!isRobbery && (bountyPattern.matcher(formatted).find() && !formatted.contains("\247l100g"))) {
                 return true;
+            }
+            if (isPizza) {
+                String unformatted = StringUtils.stripControlCodes(player.getDisplayName().getUnformattedText());
+                if (unformatted.contains("/$") && unformatted.split("/\\$").length > 1) {
+                    String amount = unformatted.split("/\\$")[1];
+                    try {
+                        double parsed = Double.parseDouble(amount.trim());
+                        if (parsed > 100) {
+                            return true;
+                        }
+                    } catch (Exception e) {
+                    }
+                }
+                return false;
+            } else if (isRagePit) {
+                ItemStack pants = player.getEquipmentInSlot(2);
+                if (pants != null && pants.getItem() instanceof ItemArmor) {
+                    ItemArmor itemArmor = (ItemArmor) pants.getItem();
+                    if(itemArmor.getArmorMaterial() == ItemArmor.ArmorMaterial.LEATHER) {
+                        for (String pitEnchant : HypixelUtil.getPitEnchants(pants)) {
+                            if (pitEnchant.contains("Mind")) {
+                                return true;
+                            }
+                        }
+                    }
+                }
             }
             if (isEvent && (formatted.contains("HELD") || (formatted.contains("BEAST") && !mc.thePlayer.getDisplayName().getFormattedText().contains("\247lBEAST")))) {
                 return true;

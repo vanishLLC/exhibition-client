@@ -25,8 +25,6 @@ import org.lwjgl.opengl.GLContext;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 
-import javax.annotation.processing.Processor;
-
 public class OpenGlHelper
 {
     public static boolean nvidia;
@@ -303,7 +301,7 @@ public class OpenGlHelper
         try
         {
             CentralProcessor processor = (new SystemInfo()).getHardware().getProcessor();
-            field_183030_aa = processor.getName();
+            field_183030_aa = processor.getProcessorIdentifier().getName();
         }
         catch (Throwable var3)
         {

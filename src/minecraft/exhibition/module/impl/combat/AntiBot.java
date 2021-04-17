@@ -353,7 +353,7 @@ public class AntiBot extends Module {
                                         if (((str.equals(ent.getName() + "\247r") || str.equals("\247r" + ent.getName()) || str.equals("\247r" + ent.getName() + "\247r")) && !isInTabList) || str.contains("[NPC]")) {
                                             invalid.add(ent);
                                             shouldUpdateTOG = false;
-                                            if (remove && ent.isInvisible() && ticksOnGroundMap.getOrDefault(ent.getEntityId(), 0) < -20) {
+                                            if (remove && ((ent.isInvisible() && ticksOnGroundMap.getOrDefault(ent.getEntityId(), 0) < -20) || !ent.canBeCollidedWith())) {
                                                 playersToRemove.add(ent);
                                                 continue;
                                             }
@@ -431,7 +431,7 @@ public class AntiBot extends Module {
                                     if (((str.equals(ent.getName() + "\247r") || str.equals("\247r" + ent.getName()) || str.equals("\247r" + ent.getName() + "\247r")) && !isInTabList) || str.contains("[NPC]")) {
                                         invalid.add(ent);
                                         shouldUpdateTOG = false;
-                                        if (remove && ent.isInvisible() && ticksOnGroundMap.getOrDefault(ent.getEntityId(), 0) < -20) {
+                                        if (remove && ((ent.isInvisible() && ticksOnGroundMap.getOrDefault(ent.getEntityId(), 0) < -20) || !ent.canBeCollidedWith())) {
                                             playersToRemove.add(ent);
                                             continue;
                                         }

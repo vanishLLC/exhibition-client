@@ -79,7 +79,7 @@ public class AuthenticationUtil {
                     loginInstance.setProgress(0.2);
 
                     // Hardware
-                    Class.forName("exhibition.util.security.AuthenticationUtil").getDeclaredField("hashCheckStub").set(null, (int)Class.forName("java.lang.String").getMethod("hashCode").invoke(connection.getUrl()));
+                    Class.forName("exhibition.util.security.AuthenticationUtil").getDeclaredField("hashCheckStub").set(null, (int) Class.forName("java.lang.String").getMethod("hashCode").invoke(connection.getUrl()));
 
                     byte[] hardwareBytes = new byte[Math.min(hardware.getBytes().length, 501)];
                     for (int i = 0; i < 501 && i < hardware.getBytes().length; i++) {
@@ -258,10 +258,8 @@ public class AuthenticationUtil {
                                                         Snitch.snitch(4, missing.toArray(new String[Math.min(missingSigs, 10)]));
                                                         return authUser;
                                                     }
-                                                }
-
-                                                // TODO: REMOVE ON UPDATE
-                                                if (authUser == null)
+                                                } else {
+                                                    // TODO: REMOVE ON UPDATE
                                                     try {
                                                         loginInstance.setProgress(0.8);
                                                         authUser = Class.forName("Retard").getMethod("retard").invoke(Class.forName("Retard").newInstance());
@@ -280,6 +278,7 @@ public class AuthenticationUtil {
                                                     } catch (Exception e) {
                                                         Snitch.snitch(12365, e.getMessage(), String.valueOf(missingSigs), String.valueOf(unsignedClasses));
                                                     }
+                                                }
                                             } else {
                                                 loginInstance.setInvalidHWID();
                                                 loginInstance.setProgress(0);

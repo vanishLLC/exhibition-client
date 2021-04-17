@@ -3,17 +3,19 @@ package exhibition.util.security.hwid;
 import oshi.hardware.Display;
 import oshi.util.EdidUtil;
 
-public class DisplayIdentifiers {
+import java.util.List;
+
+public class DisplayIdentifiers implements Identifier {
 
     private final DisplayContainer[] displayContainers;
 
-    public DisplayIdentifiers(Display[] displays) {
-        this.displayContainers = new DisplayContainer[displays.length];
+    public DisplayIdentifiers(List<Display> displays) {
+        this.displayContainers = new DisplayContainer[displays.size()];
 
-        for (int i = 0; i < displays.length; i++) {
-            Display display = displays[i];
+        for (int i = 0; i < displays.size(); i++) {
+            Display display = displays.get(i);
             byte[] edid = display.getEdid();
-            this.displayContainers[i] = new DisplayContainer(getMonitorName(edid).trim(), getMonitorSerial(edid).trim());
+            this.displayContainers[i] = new DisplayContainer(trim(getMonitorName(edid)), trim(getMonitorSerial(edid)));
         }
 
     }

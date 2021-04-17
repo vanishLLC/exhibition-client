@@ -56,6 +56,7 @@ public class GuiAltManager extends PanoramaScreen {
                 List<Alt> banned = registry.stream().filter(alt -> alt.getStatus() == Alt.Status.NotWorking).collect(Collectors.toList());
                 banned.forEach(alt -> AltManager.registry.remove(alt));
                 this.status = "Removed \247c" + banned.size() + "\247f NW alts.";
+                Notifications.getManager().post("Removed Alts", "Removed \247c" + banned.size() + "\247r Not Working alts.", Notifications.Type.INFO);
                 try {
                     Client.getFileManager().getFile(Alts.class).saveFile();
                 } catch (Exception ignored) {
@@ -70,6 +71,7 @@ public class GuiAltManager extends PanoramaScreen {
                 registry.stream().filter(alt -> alt.getUnbanDate() > System.currentTimeMillis() && TimeUnit.MILLISECONDS.toDays((alt.getUnbanDate() - System.currentTimeMillis())) > 180).forEach(banned::add);
                 banned.forEach(alt -> AltManager.registry.remove(alt));
                 this.status = "Removed \247c" + banned.size() + "\247f Banned alts.";
+                Notifications.getManager().post("Removed Alts", "Removed \247c" + banned.size() + "\247r Banned alts.", Notifications.Type.INFO);
                 try {
                     Client.getFileManager().getFile(Alts.class).saveFile();
                 } catch (Exception ignored) {

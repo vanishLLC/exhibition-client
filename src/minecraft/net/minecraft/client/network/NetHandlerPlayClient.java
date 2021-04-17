@@ -507,7 +507,7 @@ public class NetHandlerPlayClient implements INetHandlerPlayClient {
         } catch (Exception e) {
             //e.printStackTrace();
             if(Minecraft.getMinecraft().thePlayer != null) {
-                //ChatUtil.debug("???");
+                ChatUtil.debug("???");
             }
         }
     }

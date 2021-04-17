@@ -64,10 +64,13 @@ public class NickDetector extends Module {
 
     @RegisterEvent(events = {EventTick.class, EventPacket.class})
     public void onEvent(Event event) {
-        if (event instanceof EventPacket && disconnect.getValue()) {
+        if(mc.thePlayer == null || mc.theWorld == null)
+            return;
+
+        if (event instanceof EventPacket) {
             EventPacket ep = event.cast();
             Packet packet = ep.getPacket();
-            if (packet instanceof S38PacketPlayerListItem) {
+            if (packet instanceof S38PacketPlayerListItem && disconnect.getValue()) {
                 S38PacketPlayerListItem packetPlayerListItem = (S38PacketPlayerListItem) packet;
                 for (S38PacketPlayerListItem.AddPlayerData addPlayerData : packetPlayerListItem.getPlayerList()) {
                     if (packetPlayerListItem.getAction() == S38PacketPlayerListItem.Action.REMOVE_PLAYER) {
@@ -79,6 +82,7 @@ public class NickDetector extends Module {
                         }
                     }
                 }
+                return;
             }
             if (packet instanceof S04PacketEntityEquipment) {
                 S04PacketEntityEquipment packetIn = (S04PacketEntityEquipment) packet;
@@ -86,7 +90,7 @@ public class NickDetector extends Module {
 
                 if (entity instanceof EntityPlayer) {
                     EntityPlayer player = (EntityPlayer) entity;
-                    if (UUIDResolver.instance.checkedUsernames.containsKey(player.getName()) && UUIDResolver.instance.isInvalidUUID(player.getGameProfile().getId())) {
+                    if (UUIDResolver.instance.checkedUsernames.containsKey(player.getName()) && UUIDResolver.instance.isInvalidUUID(player.getGameProfile().getId()) && !UUIDResolver.instance.resolvedMap.containsKey(player.getName())) {
                         ItemStack stack = packetIn.getItemStack();
                         if (stack != null && stack.hasTagCompound()) {
                             if (stack.getTagCompound().hasKey("ExtraAttributes", 10)) {
@@ -112,10 +116,7 @@ public class NickDetector extends Module {
             return;
         }
 
-        if (UUIDResolver.instance.isChecking || mc.thePlayer == null || !mc.thePlayer.isAllowEdit() || mc.thePlayer.ticksExisted < 100)
-            return;
-
-        if (!timer.delay(10_000)) {
+        if (event instanceof EventTick) {
             if (mc.currentScreen instanceof GuiChest) {
                 GuiChest guiChest = ((GuiChest) mc.currentScreen);
                 String name = guiChest.lowerChestInventory.getDisplayName().getUnformattedText();
@@ -127,12 +128,11 @@ public class NickDetector extends Module {
                                 String headName = stack.getDisplayName();
 
                                 if (headName.contains(" ") && headName.endsWith("\247f")) {
-                                    headName = headName.split(" ")[1];
+                                    headName = headName.split(" ")[1].replace("\247f", "");
                                 }
 
                                 if (UUIDResolver.instance.isInvalidName(headName) && !UUIDResolver.instance.resolvedMap.containsKey(StringUtils.stripControlCodes(headName))) {
                                     GameProfile gameprofile = null;
-
                                     if (stack.hasTagCompound()) {
                                         NBTTagCompound nbttagcompound = stack.getTagCompound();
 
@@ -145,7 +145,6 @@ public class NickDetector extends Module {
 
                                     if (gameprofile != null && gameprofile.getId() != null) {
                                         String uuid = String.valueOf(gameprofile.getId());
-
                                         Connection profileConnection = new Connection("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid);
                                         Connector.get(profileConnection);
                                         JsonObject profileJsonObject = (JsonObject) JsonParser.parseString(profileConnection.getResponse());
@@ -159,41 +158,43 @@ public class NickDetector extends Module {
                                         }
                                     }
                                 }
-
                             }
                         }
                     }
                 }
             }
-            return;
-        }
 
-        HashMap<String, UUID> usernameList = new HashMap<>();
+            HashMap<String, UUID> usernameList = new HashMap<>();
 
-        try {
-            final NetHandlerPlayClient netHandler = mc.thePlayer.sendQueue;
-            List<NetworkPlayerInfo> list = playerInfoMap.sortedCopy(netHandler.getPlayerInfoMap());
-            for (NetworkPlayerInfo playerInfo : list) {
-                if (playerInfo.getGameProfile() != null && !playerInfo.getGameProfile().equals(mc.thePlayer.getGameProfile())) {
-                    IChatComponent e = new ChatComponentText(ScorePlayerTeam.formatPlayerName(playerInfo.getPlayerTeam(), playerInfo.getGameProfile().getName()));
-                    String displayName = e.getFormattedText();
-                    String name = playerInfo.getGameProfile().getName();
-                    if (displayName.equals("\247r" + name) || displayName.equals(name) || displayName.equals("\247r" + name + "\247r") || displayName.equals(name + "\247r")) {
-                        continue;
-                    }
-                    if (UUIDResolver.instance.checkedUsernames.containsKey(name) && (!denick.getValue() || (!UUIDResolver.instance.isInvalidName(name)) && (!UUIDResolver.instance.resolvedMap.containsKey(name)))) {
-                        continue;
-                    }
-                    usernameList.put(name, playerInfo.getGameProfile().getId());
-                }
+            if (UUIDResolver.instance.isChecking || mc.thePlayer == null || !mc.thePlayer.isAllowEdit() || mc.thePlayer.ticksExisted < 100) {
+                return;
             }
-        } catch (Exception e) {
 
-        }
+            try {
+                final NetHandlerPlayClient netHandler = mc.thePlayer.sendQueue;
+                List<NetworkPlayerInfo> list = playerInfoMap.sortedCopy(netHandler.getPlayerInfoMap());
+                for (NetworkPlayerInfo playerInfo : list) {
+                    if (playerInfo.getGameProfile() != null && !playerInfo.getGameProfile().equals(mc.thePlayer.getGameProfile())) {
+                        IChatComponent e = new ChatComponentText(ScorePlayerTeam.formatPlayerName(playerInfo.getPlayerTeam(), playerInfo.getGameProfile().getName()));
+                        String displayName = e.getFormattedText();
+                        String name = playerInfo.getGameProfile().getName();
+                        if (displayName.equals("\247r" + name) || displayName.equals(name) || displayName.equals("\247r" + name + "\247r") || displayName.equals(name + "\247r")) {
+                            continue;
+                        }
+                        if (UUIDResolver.instance.checkedUsernames.containsKey(name) && (!denick.getValue() || (!UUIDResolver.instance.isInvalidName(name)) && (!UUIDResolver.instance.resolvedMap.containsKey(name)))) {
+                            continue;
+                        }
+                        usernameList.put(name, playerInfo.getGameProfile().getId());
+                    }
+                }
+            } catch (Exception e) {
 
-        if (!usernameList.isEmpty()) {
-            timer.reset();
-            UUIDResolver.instance.checkNames(usernameList);
+            }
+
+            if (!usernameList.isEmpty()) {
+                timer.reset();
+                UUIDResolver.instance.checkNames(usernameList);
+            }
         }
     }
 
