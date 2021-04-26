@@ -3,9 +3,15 @@ package exhibition.gui.screen;
 import com.google.common.collect.Sets;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
 
+import exhibition.Client;
 import exhibition.management.notifications.usernotification.Notifications;
+import exhibition.util.HypixelUtil;
+import exhibition.util.render.Colors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.*;
@@ -21,7 +27,10 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.StringUtils;
 import org.lwjgl.input.Mouse;
+
+import static exhibition.module.impl.hud.ArmorStatus.getColor;
 
 public class GuiView extends GuiScreen {
     /**
@@ -330,6 +339,7 @@ public class GuiView extends GuiScreen {
                 GlStateManager.disableLighting();
                 this.mc.getTextureManager().bindTexture(TextureMap.locationBlocksTexture);
                 this.drawTexturedModalRect(i, j, textureatlassprite, 16, 16);
+
                 GlStateManager.enableLighting();
                 flag1 = true;
             }
@@ -343,6 +353,61 @@ public class GuiView extends GuiScreen {
             GlStateManager.enableDepth();
             this.itemRender.renderItemAndEffectIntoGUI(itemstack, i, j);
             this.itemRender.renderItemOverlayIntoGUI(this.fontRendererObj, itemstack, i, j, s);
+
+            boolean showPitEnchants = HypixelUtil.isInGame("THE HYPIXEL PIT");
+            if (itemstack != null && showPitEnchants && itemstack.hasTagCompound()) {
+                List<String> enchants = HypixelUtil.getPitEnchants(itemstack);
+
+                List<String> render = new ArrayList<>();
+
+                int enchantOffsetY = 0;
+
+                for (String e : enchants) {
+                    boolean strongEnchant = e.contains("Retro") || e.contains("Stun") || e.contains("Funky") || e.contains("Protection III") ||
+                            e.contains("Wrath I") || e.contains("Duelist I") || e.contains("Bruiser") || e.contains("David") || e.contains("Somber") ||
+                            e.contains("Billionaire I") || e.contains("Hemorrhage") || e.contains("Mirror") || e.contains("Evil Within") ||
+                            e.contains("Venom") || e.contains("Gamble") || e.contains("Crush") || e.contains("Solitude") || e.contains("Peroxide") ||
+                            e.contains("Diamond Allergy") || e.contains("Hunt the Hunter") || e.contains("Regularity");
+
+                    int level = 1;
+
+                    if (e.length() > 1) {
+                        StringBuilder temp = new StringBuilder();
+                        for (String enchant : StringUtils.stripHypixelControlCodes(e)
+                                .replace("\247f\2477\2479", "")
+                                .replace("“", "")
+                                .replace("”","")
+                                .replace("\"","")
+                                .replace("(", "").split(" ")) {
+                            if (enchant.contains("RARE") || enchant.length() < 1) {
+                                continue;
+                            }
+
+                            if (!enchant.startsWith("II")) {
+                                temp.append(enchant.charAt(0));
+                            } else {
+                                level += enchant.equals("II") ? 1 : 2;
+                            }
+                        }
+                        if(!temp.toString().equals("")) {
+                            render.add((strongEnchant ? "\247c\247l" : "\247e\247l") + temp + getColor(level) + "\247l" + level);
+                        }
+                    }
+                }
+
+                render.sort(Comparator.comparingInt(String::length));
+
+                for (String string : render) {
+
+                    GlStateManager.pushMatrix();
+                    GlStateManager.disableDepth();
+                    Client.fsmallbold.drawBorderedString(string, i, j + enchantOffsetY, -1, Colors.getColor(0, 255));
+                    GlStateManager.enableDepth();
+                    GlStateManager.popMatrix();
+
+                    enchantOffsetY += 5;
+                }
+            }
         }
 
         this.itemRender.zLevel = 0.0F;
