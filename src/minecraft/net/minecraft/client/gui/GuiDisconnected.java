@@ -49,7 +49,7 @@ public class GuiDisconnected extends GuiScreen {
         if (Client.joinTime != -1) {
             this.totalTime = System.currentTimeMillis() - Client.joinTime;
             Client.joinTime = -1;
-            details += "/" + getTimeLength(this.playTime, false);
+            details += "/" + getTimeLength(this.totalTime, false);
         } else {
             this.totalTime = -1;
         }
@@ -337,7 +337,7 @@ public class GuiDisconnected extends GuiScreen {
         if (days > 0) stringBuilder.append(days).append("d").append(spaces ? " " : "");
         if (hours > 0) stringBuilder.append(hours).append("h").append(spaces ? " " : "");
         if (minutes > 0) stringBuilder.append(minutes).append("m").append(spaces ? " " : "");
-        if (seconds >= 0) stringBuilder.append(seconds).append("s");
+        if (seconds >= 0 && (spaces || hours == 0)) stringBuilder.append(seconds).append("s");
 
         return stringBuilder.toString();
     }

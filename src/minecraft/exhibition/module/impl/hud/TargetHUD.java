@@ -271,7 +271,7 @@ public class TargetHUD extends Module {
                             int enchantOffsetY = 0;
 
                             for (String e : enchants) {
-                                boolean strongEnchant = e.contains("Retro") || e.contains("Stun") || e.contains("Funky") || e.contains("Protection III") ||
+                                boolean strongEnchant = e.contains("Mind Assault") || e.contains("Retro") || e.contains("Stun") || e.contains("Funky") || e.contains("Protection III") ||
                                         e.contains("Wrath I") || e.contains("Duelist I") || e.contains("Bruiser") || e.contains("David") || e.contains("Somber") ||
                                         e.contains("Billionaire I") || e.contains("Hemorrhage") || e.contains("Mirror") || e.contains("Evil Within") ||
                                         e.contains("Venom") || e.contains("Gamble") || e.contains("Crush") || e.contains("Solitude") || e.contains("Peroxide") ||

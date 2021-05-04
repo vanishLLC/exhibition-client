@@ -13,6 +13,8 @@ import exhibition.module.impl.combat.Bypass;
 import exhibition.util.*;
 import exhibition.util.security.BypassValues;
 import net.minecraft.block.BlockAir;
+import net.minecraft.network.play.client.C02PacketUseEntity;
+import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.util.BlockPos;
 
@@ -38,6 +40,8 @@ public class NoFall extends Module {
         return Priority.LAST;
     }
 
+    boolean sentLastTick = false;
+
     @RegisterEvent(events = {EventPacket.class, EventMotionUpdate.class, EventMove.class})
     public void onEvent(Event event) {
         if (mc.thePlayer == null || mc.theWorld == null || PlayerUtil.isInLiquid() || PlayerUtil.isOnLiquid() || !mc.thePlayer.capabilities.allowEdit || mc.thePlayer.capabilities.allowFlying || mc.thePlayer.isSpectator())
@@ -47,6 +51,20 @@ public class NoFall extends Module {
             EventPacket ep = event.cast();
             if (ep.getPacket() instanceof S08PacketPlayerPosLook) {
                 this.lagbackTimer.reset();
+            }
+
+            if (HypixelUtil.isVerifiedHypixel() && mc.thePlayer.motionY < 0 && mc.thePlayer.fallDistance > 2.124) {
+                if (ep.getPacket() instanceof C03PacketPlayer) {
+                    C03PacketPlayer c03PacketPlayer = (C03PacketPlayer) ep.getPacket();
+                    if (c03PacketPlayer.isMoving() && c03PacketPlayer.getRotating()) {
+                        ep.setPacket(new C03PacketPlayer.C04PacketPlayerPosition(c03PacketPlayer.x, c03PacketPlayer.y, c03PacketPlayer.z, c03PacketPlayer.onGround));
+                    }
+                } else if (ep.getPacket() instanceof C02PacketUseEntity) {
+                    C02PacketUseEntity c02PacketUseEntity = (C02PacketUseEntity) ep.getPacket();
+                    if (c02PacketUseEntity.getAction().equals(C02PacketUseEntity.Action.ATTACK)) {
+                        ep.setCancelled(true);
+                    }
+                }
             }
         }
 
@@ -74,7 +92,7 @@ public class NoFall extends Module {
                 double fallY = mc.thePlayer.motionY;
                 double fallen = mc.thePlayer.fallDistance - dist;
                 double predictedFallen = fallen + -((fallY - 0.08D) * 0.9800000190734863D);
-                if (predictedFallen >= 3.0 && mc.thePlayer.posY > 0) {
+                if (predictedFallen >= 3.0 && mc.thePlayer.posY > 50 && mc.thePlayer.posY < 255) {
                     Bypass bypass = Client.getModuleManager().get(Bypass.class);
                     boolean allowVanilla = bypass.allowBypassing() && (bypass.option.getSelected().equals("Watchdog Off") || (bypass.bruh == 0 || bypass.bruh > 10));
 
@@ -96,10 +114,23 @@ public class NoFall extends Module {
                                 }
                             }
                         } else if (em.isPost() && HypixelUtil.isVerifiedHypixel()) {
-                            BypassValues.sendNoFallPacket(em);
+                            if (!sentLastTick) {
+                                dist = mc.thePlayer.fallDistance;
+                                BypassValues.sendNoFallPacket(em);
+                                sentLastTick = true;
+                                return;
+                            } else {
+                                sentLastTick = false;
+                            }
                         }
                     }
+
+                    if(em.isPost() && sentLastTick) {
+                        sentLastTick = false;
+                    }
                 }
+            } else {
+                sentLastTick = false;
             }
         }
     }

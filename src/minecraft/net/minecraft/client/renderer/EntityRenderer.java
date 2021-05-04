@@ -1,6 +1,5 @@
 package net.minecraft.client.renderer;
 
-import com.google.common.base.Predicates;
 import com.google.gson.JsonSyntaxException;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -14,14 +13,12 @@ import java.util.concurrent.Callable;
 import exhibition.Client;
 import exhibition.event.EventSystem;
 import exhibition.event.impl.EventRender3D;
-import exhibition.event.impl.EventRenderGui;
 import exhibition.event.impl.EventRenderGuiLast;
-import exhibition.event.impl.EventRenderGuiPre;
+import exhibition.event.impl.EventRenderPreScreen;
 import exhibition.gui.click.ClickGui;
 import exhibition.gui.console.SourceConsoleGUI;
 import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.impl.movement.LongJump;
-import exhibition.module.impl.movement.Speed;
 import exhibition.module.impl.render.NoHurtCam;
 import exhibition.module.impl.render.ViewClip;
 import net.minecraft.block.Block;
@@ -68,7 +65,6 @@ import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.EnumWorldBlockLayer;
@@ -510,9 +506,6 @@ public class EntityRenderer implements IResourceManagerReloadListener
                         final double var20 = attackerVec.distanceTo(var19.hitVec);
                         if (var20 < reachTemp || reachTemp == 0.0) {
                             boolean canRiderInteract = false;
-                            if (Reflector.ForgeEntity_canRiderInteract.exists()) {
-                                canRiderInteract = Reflector.callBoolean(entityInBox, Reflector.ForgeEntity_canRiderInteract);
-                            }
                             if (entityInBox == mcRenderEntity.ridingEntity && !canRiderInteract) {
                                 if (reachTemp == 0.0) {
                                     this.pointedEntity = entityInBox;
@@ -1373,7 +1366,7 @@ public class EntityRenderer implements IResourceManagerReloadListener
                 TileEntityRendererDispatcher.instance.renderEngine = this.mc.getTextureManager();
             }
 
-            EventSystem.getInstance(EventRenderGuiPre.class).fire(scaledresolution);
+            EventSystem.getInstance(EventRenderPreScreen.class).fire(scaledresolution);
 
             if (this.mc.currentScreen != null)
             {

@@ -48,7 +48,7 @@ public class ChatFilter extends Module {
 
             if (chatMessage.startsWith("\247a\247l")) {
                 String message = chatMessage.substring(4);
-                if (kills.getValue() && (message.contains("KILL!") || message.contains("PUNCH!") || message.contains("\247lPENTA"))) {
+                if (kills.getValue() && (message.contains("KILL!") || message.contains("PUNCH!") || message.contains("PENTA KILL"))) {
                     event.setCancelled(true);
                     return;
                 }

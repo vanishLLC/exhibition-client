@@ -4,6 +4,7 @@ import java.util.List;
 
 import exhibition.Client;
 import exhibition.module.impl.other.AntiDesync;
+import exhibition.module.impl.render.Freecam;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
@@ -58,7 +59,7 @@ public class ItemBlock extends Item
         }
         else if (worldIn.canBlockBePlaced(this.block, pos, false, side, (Entity)null, stack))
         {
-            if(!Client.getModuleManager().isEnabled(AntiDesync.class)) {
+            if(!Client.getModuleManager().isEnabled(AntiDesync.class) && !Client.getModuleManager().isEnabled(Freecam.class)) {
 
                 int i = this.getMetadata(stack.getMetadata());
                 IBlockState iblockstate1 = this.block.onBlockPlaced(worldIn, pos, side, hitX, hitY, hitZ, i, playerIn);

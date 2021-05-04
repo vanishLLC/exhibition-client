@@ -191,6 +191,7 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
                     //add(new AutoPaper(new ModuleData(Other, "AutoPaper", "Automatically enables Paper Challenge on Skywars.")));
                     add(new PitNotifications(new ModuleData(Other, "PitNotifications", "Notifications for events in the pit.")));
                     add(new MCV(new ModuleData(Other, "MCV", "View others inventories with a middle click.")));
+                    add(new BetterHotbar(new ModuleData(Visuals, "BetterHotbar", "Shows your armor/inventory right under your hotbar.")));
 
                     if (Boolean.parseBoolean((String) (Class.forName("java.lang.System").getMethod("getProperty", String.class)).invoke(null, "NEoBuMASs"))) {
                         add(new Aimbot(new ModuleData(Minigames, "Aimbot", "Cops n Crims aimbot.")));

@@ -423,6 +423,7 @@ public class Killaura extends Module {
         boolean disable = false;
         if ((AutoPot.potting || AutoPot.haltTicks > 0) || longjump.allowAttack() || longjump.isUsingBow()/* || (Client.getModuleManager().get(FreecamTP.class).stage == 1)*/) {
             disable = true;
+            setupTick = 0;
         }
 
         boolean ignorePit = HypixelUtil.isInGame("THE HYPIXEL PIT") && pitSpawn.getValue();
@@ -716,22 +717,37 @@ public class Killaura extends Module {
                                         if (isNextTickGround() && !Client.instance.isLagging()) {
                                             if (setupCrits && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {
                                                 if (canAttackRightNow && setupTick == 0) {
-                                                    stepDelay = 2;
+                                                    stepDelay = 5;
                                                     blockJump = true;
-                                                    em.setY(em.getY() + 0.07234F + (0.0000023F) * Math.random());
+                                                    em.setY(em.getY() + 0.125F);
                                                     em.setGround(false);
                                                     em.setForcePos(true);
                                                     isCritSetup = false;
-                                                    setupTick = 1;
-                                                } else if (setupTick == 1) {
+                                                } else if (setupTick >= 1) {
                                                     isCritSetup = true;
-                                                    if (HypixelUtil.isInGame("HYPIXEL PIT"))
-                                                        em.setY(em.getY() + 0.0076092939542 - (0.0000000002475776F) * Math.random());
+                                                    em.setY(em.getY() + 0.125F);
+                                                    switch (setupTick) {
+                                                        case 1: {
+                                                            em.setY(em.getY() + 0.046599998474120774);
+                                                            break;
+                                                        }
+                                                        case 2: {
+                                                            em.setY(em.getY() + (0.026599998474120774 - 0.0076092939542));
+                                                            break;
+                                                        }
+                                                        case 3: {
+                                                            em.setY(em.getY() + (0.0076092939542));
+                                                            break;
+                                                        }
+                                                    }
                                                     em.setGround(false);
                                                     em.setForcePos(true);
-                                                    setupTick = 0;
-                                                } else {
-                                                    setupTick = 0;
+
+                                                    ChatUtil.printChat((em.getY() - mc.thePlayer.posY) + "");
+                                                }
+                                                setupTick++;
+                                                if (setupTick >= 4) {
+                                                    setupTick = -1;
                                                 }
                                             } else {
                                                 setupTick = 0;
@@ -772,9 +788,9 @@ public class Killaura extends Module {
                                 }
                             }
 
-                            if(!block && !mc.thePlayer.isBlocking() && isBlocking) {
+                            if (!block && !mc.thePlayer.isBlocking() && isBlocking) {
                                 isBlocking = false;
-                                NetUtil.sendPacketNoEvents(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
+                                NetUtil.sendPacket(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, C08PacketPlayerBlockPlacement.USE_ITEM_POS, EnumFacing.DOWN));
                             }
 
                             if ((block) && (mc.thePlayer.inventory.getCurrentItem() != null) && ((mc.thePlayer.inventory.getCurrentItem().getItem() instanceof ItemSword))) {
@@ -813,7 +829,7 @@ public class Killaura extends Module {
                 boolean packetMode = Client.getModuleManager().isEnabled(NoSlowdown.class);
                 if (mc.thePlayer.isBlocking() && (isBlocking) && packetMode && PlayerUtil.isMoving() && mc.thePlayer.ticksExisted % 2 == 0 && !AutoSoup.isHealing) {
                     isBlocking = false;
-                    NetUtil.sendPacketNoEvents(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
+                    NetUtil.sendPacket(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, C08PacketPlayerBlockPlacement.USE_ITEM_POS, EnumFacing.DOWN));
                     blockTimer.reset();
                 }
 
@@ -901,7 +917,7 @@ public class Killaura extends Module {
                             }
 
                             if (!whitelisted) {
-                                NetUtil.sendPacketNoEvents(new C02PacketUseEntity(target, C02PacketUseEntity.Action.ATTACK));
+                                NetUtil.sendPacket(new C02PacketUseEntity(target, C02PacketUseEntity.Action.ATTACK));
                             } else {
                                 ChatUtil.printChat("No.");
                             }

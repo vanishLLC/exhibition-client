@@ -15,6 +15,7 @@ import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.combat.AntiVelocity;
 import exhibition.util.NetUtil;
+import exhibition.util.misc.ChatUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityOtherPlayerMP;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -63,9 +64,18 @@ public class Freecam extends Module {
                 mc.thePlayer.setPositionAndRotation(oldPos.getX(), oldPos.getY(), oldPos.getZ(), mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch);
             return;
         }
+
+        mc.thePlayer.positionUpdateTicks = ticks;
+        mc.thePlayer.lastReportedYaw = lastReportedYaw;
+        mc.thePlayer.lastReportedPitch = lastReportedPitch;
+        mc.thePlayer.lastReportedPosX = lastReportedPosX;
+        mc.thePlayer.lastReportedPosY = lastReportedPosY;
+        mc.thePlayer.lastReportedPosZ = lastReportedPosZ;
+
         mc.thePlayer.lastTickPosX = this.freecamEntity.posX;
         mc.thePlayer.lastTickPosY = this.freecamEntity.posY;
         mc.thePlayer.lastTickPosZ = this.freecamEntity.posZ;
+
         mc.thePlayer.setPositionAndRotation(this.freecamEntity.posX, this.freecamEntity.posY, this.freecamEntity.posZ, this.freecamEntity.rotationYaw, this.freecamEntity.rotationPitch);
         mc.thePlayer.setVelocity(this.freecamEntity.motionX, this.freecamEntity.motionY, this.freecamEntity.motionZ);
         mc.theWorld.removeEntityFromWorld(69420);
@@ -82,9 +92,12 @@ public class Freecam extends Module {
             return;
         }
         this.freecamEntity = new EntityOtherPlayerMP(mc.theWorld, new GameProfile(new UUID(69L, 96L), mc.thePlayer.getName() + " [Bot]"));
+        mc.theWorld.addEntityToWorld(69420, this.freecamEntity);
+
         this.freecamEntity.inventory = mc.thePlayer.inventory;
         this.freecamEntity.inventoryContainer = mc.thePlayer.inventoryContainer;
         this.freecamEntity.setPositionAndRotation(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch);
+        this.freecamEntity.setPositionAndUpdate(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ);
         this.freecamEntity.rotationYawHead = mc.thePlayer.rotationYawHead;
         this.freecamEntity.onGround = mc.thePlayer.onGround;
         this.freecamEntity.motionX = mc.thePlayer.motionX;
@@ -92,10 +105,15 @@ public class Freecam extends Module {
         this.freecamEntity.motionZ = mc.thePlayer.motionZ;
         this.freecamEntity.capabilities = mc.thePlayer.capabilities;
 
-        oldPos = mc.thePlayer.getPositionVector();
-        mc.theWorld.addEntityToWorld(69420, this.freecamEntity);
-        mc.renderGlobal.loadRenderers();
         ticks = mc.thePlayer.positionUpdateTicks;
+        lastReportedYaw = mc.thePlayer.lastReportedYaw;
+        lastReportedPitch = mc.thePlayer.lastReportedPitch;
+        lastReportedPosX = mc.thePlayer.lastReportedPosX;
+        lastReportedPosY = mc.thePlayer.lastReportedPosY;
+        lastReportedPosZ = mc.thePlayer.lastReportedPosZ;
+
+        oldPos = mc.thePlayer.getPositionVector();
+        mc.renderGlobal.loadRenderers();
     }
 
     public static double getBaseMoveSpeed() {
@@ -202,8 +220,7 @@ public class Freecam extends Module {
 
             if (getPacket instanceof C03PacketPlayer || getPacket.getClass().isAssignableFrom(C03PacketPlayer.class) || getPacket.getClass().isAssignableFrom(C03PacketPlayer.C04PacketPlayerPosition.class) ||
                     getPacket.getClass().isAssignableFrom(C03PacketPlayer.C05PacketPlayerLook.class) || getPacket.getClass().isAssignableFrom(C03PacketPlayer.C06PacketPlayerPosLook.class)) {
-                event.setCancelled(true);
-                onUpdateWalkingPlayer(freecamEntity);
+                onUpdateWalkingPlayer(ep, freecamEntity);
             }
 
             if (getPacket instanceof C0BPacketEntityAction || getPacket instanceof C08PacketPlayerBlockPlacement || getPacket instanceof C07PacketPlayerDigging) {
@@ -261,9 +278,10 @@ public class Freecam extends Module {
         }
     }
 
-    double lastReportedPosX, lastReportedPosY, lastReportedPosZ, lastReportedYaw, lastReportedPitch;
+    float lastReportedYaw, lastReportedPitch;
+    double lastReportedPosX, lastReportedPosY, lastReportedPosZ;
 
-    public void onUpdateWalkingPlayer(EntityPlayer player) {
+    public void onUpdateWalkingPlayer(EventPacket ep, EntityPlayer player) {
         double var3 = player.posX - lastReportedPosX;
         double var5 = player.getEntityBoundingBox().minY - lastReportedPosY;
         double var7 = player.posZ - lastReportedPosZ;
@@ -273,16 +291,16 @@ public class Freecam extends Module {
         boolean var14 = var9 != 0.0D || var11 != 0.0D;
         if (player.ridingEntity == null) {
             if (var13 && var14) {
-                NetUtil.sendPacketNoEvents(new C03PacketPlayer.C06PacketPlayerPosLook(player.posX, player.getEntityBoundingBox().minY, player.posZ, player.rotationYaw, player.rotationPitch, player.onGround));
+                ep.setPacket(new C03PacketPlayer.C06PacketPlayerPosLook(player.posX, player.getEntityBoundingBox().minY, player.posZ, player.rotationYaw, player.rotationPitch, player.onGround));
             } else if (var13) {
-                NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(player.posX, player.getEntityBoundingBox().minY, player.posZ, player.onGround));
+                ep.setPacket(new C03PacketPlayer.C04PacketPlayerPosition(player.posX, player.getEntityBoundingBox().minY, player.posZ, player.onGround));
             } else if (var14) {
-                NetUtil.sendPacketNoEvents(new C03PacketPlayer.C05PacketPlayerLook(player.rotationYaw, player.rotationPitch, player.onGround));
+                ep.setPacket(new C03PacketPlayer.C05PacketPlayerLook(player.rotationYaw, player.rotationPitch, player.onGround));
             } else {
-                NetUtil.sendPacketNoEvents(new C03PacketPlayer(player.onGround));
+                ep.setPacket(new C03PacketPlayer(player.onGround));
             }
         } else {
-            NetUtil.sendPacketNoEvents(new C03PacketPlayer.C06PacketPlayerPosLook(player.motionX, -999.0D, player.motionZ, player.rotationYaw, player.rotationPitch, player.onGround));
+            ep.setPacket(new C03PacketPlayer.C06PacketPlayerPosLook(player.motionX, -999.0D, player.motionZ, player.rotationYaw, player.rotationPitch, player.onGround));
             var13 = false;
         }
         ++ticks;

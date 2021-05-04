@@ -679,8 +679,10 @@ public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListene
             Iterator iterator1 = this.renderInfosEntities.iterator();
             boolean flag4 = this.mc.gameSettings.fancyGraphics;
             this.mc.gameSettings.fancyGraphics = Config.isDroppedItemsFancy();
-            label920:
 
+            boolean first = true;
+
+            label920:
             while (iterator1.hasNext()) {
                 RenderGlobal.ContainerLocalRenderInformation renderglobal$containerlocalrenderinformation = (RenderGlobal.ContainerLocalRenderInformation) iterator1.next();
                 Chunk chunk = this.theWorld.getChunkFromBlockCoords(renderglobal$containerlocalrenderinformation.renderChunk.getPosition());
@@ -690,6 +692,7 @@ public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListene
                     Iterator iterator = classinheritancemultimap.iterator();
 
                     while (true) {
+
                         Entity entity2;
                         boolean flag5;
 
@@ -700,7 +703,7 @@ public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListene
 
                             entity2 = (Entity) iterator.next();
 
-                            if (!flag || Reflector.callBoolean(entity2, Reflector.ForgeEntity_shouldRenderInPass, new Object[]{Integer.valueOf(i)})) {
+                            if (!flag) {
                                 flag5 = this.renderManager.shouldRender(entity2, camera, d0, d1, d2) || entity2.riddenByEntity == this.mc.thePlayer;
 
                                 if (!flag5) {
@@ -736,6 +739,7 @@ public class RenderGlobal implements IWorldAccess, IResourceManagerReloadListene
 
                             this.mc.getRenderManager().renderWitherSkull(entity2, partialTicks);
                         }
+
                     }
                 }
             }

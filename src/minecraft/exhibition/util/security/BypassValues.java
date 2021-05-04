@@ -30,9 +30,9 @@ public class BypassValues {
 
     public static void sendNoFallPacket(EventMotionUpdate em) {
         if(HypixelUtil.isVerifiedHypixel() && !Bypass.shouldSabotage()) {
-            NetUtil.sendPacketNoEvents(new C03PacketPlayer.C05PacketPlayerLook(em.getYaw() + (MathUtils.randomNumber(1000, -1000) / 1000F), em.getPitch(), true));
+            NetUtil.sendPacketNoEvents(new C03PacketPlayer(true));
         } else {
-            NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(0,em.getY() + 0.42D, 0, true));
+            NetUtil.sendPacket(new C03PacketPlayer.C04PacketPlayerPosition(0,em.getY() + 0.42D, 0, true));
         }
     }
 

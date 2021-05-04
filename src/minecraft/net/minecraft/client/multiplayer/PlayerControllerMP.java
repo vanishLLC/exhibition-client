@@ -259,7 +259,7 @@ public class PlayerControllerMP
 
                 if (flag && block1.getPlayerRelativeBlockHardness(this.mc.thePlayer, this.mc.thePlayer.worldObj, loc) >= 1.0F)
                 {
-                    if(!Client.getModuleManager().isEnabled(AntiDesync.class))
+                    if(!Client.getModuleManager().isEnabled(AntiDesync.class) && !Client.getModuleManager().isEnabled(Freecam.class))
                     this.onPlayerDestroyBlock(loc, face);
                 }
                 else

@@ -13,6 +13,7 @@ import exhibition.event.EventSystem;
 import exhibition.event.impl.EventRenderGui;
 import exhibition.management.font.DynamicTTFFont;
 import exhibition.management.notifications.dev.DevNotifications;
+import exhibition.module.impl.hud.BetterHotbar;
 import exhibition.module.impl.hud.HUD;
 import exhibition.module.impl.other.BanStats;
 import exhibition.module.impl.other.StreamerMode;
@@ -383,6 +384,12 @@ public class GuiIngame extends Gui {
 
     protected void renderTooltip(ScaledResolution sr, float partialTicks) {
         if (this.mc.getRenderViewEntity() instanceof EntityPlayer) {
+            boolean isBetterHotbar = Client.getModuleManager().isEnabled(BetterHotbar.class);
+
+            if(isBetterHotbar) {
+                GlStateManager.translate(0,-90, 0);
+            }
+
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             this.mc.getTextureManager().bindTexture(widgetsTexPath);
             EntityPlayer entityplayer = (EntityPlayer) this.mc.getRenderViewEntity();
@@ -406,6 +413,10 @@ public class GuiIngame extends Gui {
             RenderHelper.disableStandardItemLighting();
             GlStateManager.disableRescaleNormal();
             GlStateManager.disableBlend();
+
+            if(isBetterHotbar) {
+                GlStateManager.translate(0,90, 0);
+            }
         }
     }
 
@@ -426,6 +437,12 @@ public class GuiIngame extends Gui {
     }
 
     public void renderExpBar(ScaledResolution p_175176_1_, int p_175176_2_) {
+        boolean isBetterHotbar = Client.getModuleManager().isEnabled(BetterHotbar.class);
+
+        if(isBetterHotbar) {
+            GlStateManager.translate(0,-90, 0);
+        }
+
         this.mc.mcProfiler.startSection("expBar");
         this.mc.getTextureManager().bindTexture(Gui.icons);
         int i = this.mc.thePlayer.xpBarCap();
@@ -462,10 +479,20 @@ public class GuiIngame extends Gui {
             this.getFontRenderer().drawString(s, i1, l, j1);
             this.mc.mcProfiler.endSection();
         }
+
+        if(isBetterHotbar) {
+            GlStateManager.translate(0,90, 0);
+        }
     }
 
     public void func_181551_a(ScaledResolution p_181551_1_) {
         this.mc.mcProfiler.startSection("selectedItemName");
+
+        boolean isBetterHotbar = Client.getModuleManager().isEnabled(BetterHotbar.class);
+
+        if(isBetterHotbar) {
+            GlStateManager.translate(0,-90, 0);
+        }
 
         if (this.remainingHighlightTicks > 0 && this.highlightingItemStack != null) {
             String s = this.highlightingItemStack.getDisplayName();
@@ -495,6 +522,10 @@ public class GuiIngame extends Gui {
                 GlStateManager.disableBlend();
                 GlStateManager.popMatrix();
             }
+        }
+
+        if(isBetterHotbar) {
+            GlStateManager.translate(0,90, 0);
         }
 
         this.mc.mcProfiler.endSection();
@@ -672,7 +703,7 @@ public class GuiIngame extends Gui {
 
                     String time = "";
                     long roundedTime = (long) MathUtils.getIncremental(banStats.banTimer.getDifference(), 50);
-                    if (banStats.banTimer.getDifference() > 60_000 && banDiff == 0) {
+                    if (banStats.banTimer.getDifference() > 30_000 && banDiff == 0) {
                         time = " \247a(" + StringUtils.ticksToElapsedTime((int) roundedTime / 50) + ")";
                     }
 
@@ -684,6 +715,12 @@ public class GuiIngame extends Gui {
 
     private void renderPlayerStats(ScaledResolution p_180477_1_) {
         if (this.mc.getRenderViewEntity() instanceof EntityPlayer) {
+            boolean isBetterHotbar = Client.getModuleManager().isEnabled(BetterHotbar.class);
+
+            if(isBetterHotbar) {
+                GlStateManager.translate(0,-90, 0);
+            }
+
             EntityPlayer entityplayer = (EntityPlayer) this.mc.getRenderViewEntity();
             int i = MathHelper.ceiling_float_int(entityplayer.getHealth());
             boolean flag = this.healthUpdateCounter > (long) this.updateCounter && (this.healthUpdateCounter - (long) this.updateCounter) / 3L % 2L == 1L;
@@ -914,6 +951,10 @@ public class GuiIngame extends Gui {
             }
 
             this.mc.mcProfiler.endSection();
+
+            if(isBetterHotbar) {
+                GlStateManager.translate(0,90, 0);
+            }
         }
     }
 

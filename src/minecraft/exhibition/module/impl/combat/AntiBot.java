@@ -110,8 +110,6 @@ public class AntiBot extends Module {
             }
 
             spawnedSinceUpdate++;
-
-
         }
 
         if (event instanceof EventPacket) {
@@ -148,7 +146,6 @@ public class AntiBot extends Module {
                     waitTimer.reset();
                 }
 
-                spawnedList.clear();
                 if (mc.getIntegratedServer() == null && mc.getCurrentServerData() != null) {
                     if ((mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net")) && !currentSetting.equals("Hypixel")) {
                         ((Options) settings.get(MODE).getValue()).setSelected("Hypixel");
@@ -182,6 +179,8 @@ public class AntiBot extends Module {
                         ticksOnGroundMap.put(entityPlayer.getEntityId(), -20);
                     }
                 }
+
+                spawnedList.clear();
 
                 final NetHandlerPlayClient var4 = mc.thePlayer.sendQueue;
                 List<NetworkPlayerInfo> list = new ArrayList<>(var4.getPlayerInfoMap());

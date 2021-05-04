@@ -312,7 +312,7 @@ public class HackerDetect extends Module {
                         //ChatUtil.debug(ent.isBlocking() + " " + ent.getItemInUseDuration());
                         ent.speedFlags += speed > 0.45 ? (speed / 0.4 * 3) : 1;
                         if (ent.speedFlags > 25) {
-                            Notifications.getManager().post("Hacker Detected", ent.getName() + " is using " + (ent.isBlocking() ? "AutoBlock!" : "NoSlowdown!"), 7500, Notifications.Type.WARNING);
+                            Notifications.getManager().post("Hacker Detected", ent.getName() + " may be using " + (ent.isBlocking() ? "AutoBlock!" : "NoSlowdown!"), 7500, Notifications.Type.WARNING);
                             if ((boolean) settings.get("REPORT").getValue())
                                 ChatUtil.sendChat_NoFilter("/wdr " + ent.getName() + " bhop");
                             PriorityManager.setAsPriority(ent);
@@ -365,7 +365,7 @@ public class HackerDetect extends Module {
                     double motionZ = Math.abs(ent.posZ - ent.lastTickPosZ);
                     double motionY = Math.abs(ent.posY - ent.lastTickPosY);
 
-                    if ((Math.sqrt(motionX * motionX + motionZ * motionZ) > 0.23) && motionY <= 0.005 && !ent.isInvisible() && !ent.isRiding() && !ent.isSneaking() && ent.isSprinting()) {
+                    if ((Math.sqrt(motionX * motionX + motionZ * motionZ) > 0.23) && motionY <= 0.005 && !ent.isInvisible() && !ent.isRiding() && !ent.isSneaking()) {
                         if (mc.theWorld.getBlockState(new BlockPos(ent.posX, ent.posY - 0.45, ent.posZ)).getBlock() == Blocks.air && mc.theWorld.getBlockState(new BlockPos(ent.posX, ent.posY - 1.35, ent.posZ)).getBlock() == Blocks.air) {
                             ent.flags += ent.onGround ? 4 : 1;
                             if (Math.sqrt(motionX * motionX + motionZ * motionZ) > defaultSpeed(ent))
@@ -492,7 +492,7 @@ public class HackerDetect extends Module {
                     }
 
                     if (ent.speedFlags >= 25 && (ent.ticksExisted - ent.lastFlaggedTick) < 5 && !PriorityManager.isPriority(ent) && isBlockUnder(ent)) {
-                        Notifications.getManager().post("Hacker Detected", ent.getName() + " is using Speed.", 7500, Notifications.Type.WARNING);
+                        Notifications.getManager().post("Hacker Detected", ent.getName() + " may be using Speed.", 7500, Notifications.Type.WARNING);
                         if ((boolean) settings.get("REPORT").getValue())
                             ChatUtil.sendChat_NoFilter("/wdr " + ent.getName() + " killaura fly speed scaffold");
                         PriorityManager.setAsPriority(ent);

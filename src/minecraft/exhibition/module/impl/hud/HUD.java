@@ -366,13 +366,12 @@ public class HUD extends Module {
             }
 
             if (!strings.isEmpty()) {
-                int totalOffset = 65 + strings.size() * 10;
                 int offset = 0;
-                mc.fontRendererObj.drawStringWithShadow("\247nPossible Staff", width - 2 - mc.fontRendererObj.getStringWidth("\247nPossible Staff"), height - totalOffset + offset, -1);
+                mc.fontRendererObj.drawStringWithShadow("\247nPossible Staff", width/2D - mc.fontRendererObj.getStringWidth("\247nPossible Staff")/2D, 70, -1);
                 offset += 12;
 
                 for (String string : strings.stream().sorted().collect(Collectors.toList())) {
-                    mc.fontRendererObj.drawStringWithShadow(string, width - 2 - mc.fontRendererObj.getStringWidth(string), height - totalOffset + offset, -1);
+                    mc.fontRendererObj.drawStringWithShadow(string, width/2D - mc.fontRendererObj.getStringWidth(string)/2D, 70 + offset, -1);
                     offset += 10;
                 }
             }

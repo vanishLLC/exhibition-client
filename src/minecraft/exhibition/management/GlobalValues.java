@@ -23,7 +23,7 @@ public class GlobalValues {
     public static Setting<Boolean> showFlags = new Setting<>("Show Flags", false, "Shows predicted NCP flags in chat.");
 
     public static Setting<Boolean> centerNotifs = new Setting<>("Center Notifs", false, "Centers Notifications under your crosshair.");
-    public static Setting<Boolean> showCursor = new Setting<Boolean>("Show Cursor", false, "Shows your real cursor in ClickGUI.") {
+    public static Setting<Boolean> showCursor = new Setting<Boolean>("Show Cursor", true, "Shows your real cursor in ClickGUI.") {
 
         @Override
         public void setValue(Boolean value) {

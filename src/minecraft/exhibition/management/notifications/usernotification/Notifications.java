@@ -40,7 +40,7 @@ public final class Notifications {
 	}
 
 	public void post(String header, String subtext, long displayTime, Type type) {
-		DevNotifications.getManager().post("[" + type.name() + "]: " + header + " | " + subtext);
+		DevNotifications.getManager().post("[" + type.name() + "]: " + header + " \247r| " + subtext);
 		if(!notifications.isEmpty()) {
 			for (INotification not : notifications) {
 				if(type != Type.WARNING && type != Type.OKAY && not.getHeader().startsWith(header) && not.getType().equals(type)) {

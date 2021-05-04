@@ -34,6 +34,13 @@ public class ArmorStatus extends Module {
     public void onEvent(Event e) {
         EventRenderGui event = (EventRenderGui) e;
         GL11.glPushMatrix();
+
+        boolean isBetterHotbar = Client.getModuleManager().isEnabled(BetterHotbar.class);
+
+        if(isBetterHotbar) {
+            GlStateManager.translate(0,-90, 0);
+        }
+
         final List<ItemStack> items = new ArrayList<ItemStack>();
         final boolean isInWater = mc.thePlayer.isEntityAlive() && mc.thePlayer.isInsideOfMaterial(Material.water);
         int split = -3;
@@ -122,6 +129,12 @@ public class ArmorStatus extends Module {
             GlStateManager.popMatrix();
         }
         RenderHelper.disableStandardItemLighting();
+
+
+        if(isBetterHotbar) {
+            GlStateManager.translate(0,90, 0);
+        }
+
         GL11.glPopMatrix();
     }
 

@@ -12,6 +12,8 @@ import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
+import exhibition.module.impl.combat.AntiBot;
+import exhibition.util.HypixelUtil;
 import exhibition.util.Timer;
 import exhibition.util.security.Connection;
 import exhibition.util.security.Connector;
@@ -32,9 +34,7 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.StringUtils;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static net.minecraft.client.gui.GuiPlayerTabOverlay.playerInfoMap;
@@ -43,6 +43,7 @@ public class NickDetector extends Module {
 
     private final Setting<Boolean> disconnect = new Setting<>("DISCONNECT", false, "Notifies you if a nicked player disconnects. \247e(May help identify Staff)");
     public final Setting<Boolean> denick = new Setting<>("DENICK", true, "Attempts to reveal the name of nicked players.");
+    public final Setting<Boolean> vanish = new Setting<>("VANISH", true, "Attempts to reveal vanished players.");
 
     public final List<ResolvePair> resolvePairList = new CopyOnWriteArrayList<>();
 
@@ -50,9 +51,29 @@ public class NickDetector extends Module {
         super(data);
         addSetting(disconnect);
         addSetting(denick);
+        addSetting(vanish);
     }
 
     private final Timer timer = new Timer();
+    private final Timer vanishTimer = new Timer();
+    private final Timer loadBuffer = new Timer();
+
+    private int secondCounter = 0;
+
+    List<String> vanishPeopleNotRacist = new ArrayList<>();
+    List<String> possibleVanishPeople = new ArrayList<>();
+    List<String> seenEntitiesFuckMe = new ArrayList<>();
+    List<String> purgeEntityList = new ArrayList<>();
+    List<String> purgeBuffer = new ArrayList<>();
+    List<String> temp = new ArrayList<>();
+
+    boolean exitFlag = false;
+    private int i = 0;
+
+    boolean skip = false;
+    int counter = 0;
+    boolean hasChangedOnce = false;
+
 
     @Override
     public void toggle() {
@@ -62,9 +83,100 @@ public class NickDetector extends Module {
         UUIDResolver.instance.validMap.clear();
     }
 
+    @Override
+    public void worldChange() {
+        this.vanishPeopleNotRacist.clear();
+        this.skip = true;
+        this.seenEntitiesFuckMe.clear();
+        this.hasChangedOnce = true;
+        this.loadBuffer.reset();
+    }
+
+    public void vanish() {
+        if (vanish.getValue() && HypixelUtil.isInGame("PIT") && vanishTimer.delay(330)) {
+            this.vanishTimer.reset();
+            this.i = 0;
+            this.temp.clear();
+            try {
+                if (this.secondCounter == 20) {
+                    this.purgeBuffer.clear();
+                    this.secondCounter = 0;
+                    for (String tempPlayer2 : this.seenEntitiesFuckMe) {
+                        this.exitFlag = false;
+                        for (NetworkPlayerInfo tempPlayerNetwork : mc.getNetHandler().getPlayerInfoMap()) {
+                            if (!tempPlayerNetwork.getGameProfile().getName().contains(tempPlayer2)) continue;
+                            this.exitFlag = true;
+                            break;
+                        }
+                        for (EntityPlayer tempPlayerWorld : mc.theWorld.playerEntities) {
+                            if (!tempPlayerWorld.getName().contains(tempPlayer2)) continue;
+                            this.exitFlag = true;
+                            break;
+                        }
+                        if (this.exitFlag || tempPlayer2.length() == 10) continue;
+                        this.purgeBuffer.add(tempPlayer2);
+                    }
+                    for (String tempPlayer2 : this.purgeEntityList) {
+                        this.seenEntitiesFuckMe.remove(tempPlayer2);
+                    }
+                    this.purgeEntityList.clear();
+                    this.purgeEntityList.addAll(this.purgeBuffer);
+                } else {
+                    ++this.secondCounter;
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            Collection<ScorePlayerTeam> teamList = mc.theWorld.getScoreboard().getTeams();
+            for (ScorePlayerTeam tempTeam : teamList) {
+                for (String tempIgn : tempTeam.getMembershipCollection()) {
+                    if (tempTeam.getTeamName().contains("team")) continue;
+                    ++this.i;
+                    this.temp.add(tempIgn);
+                }
+            }
+            for (EntityPlayer tempPlayer3 : mc.theWorld.playerEntities) {
+                String name = tempPlayer3.getName();
+                if (this.seenEntitiesFuckMe.contains(name) || AntiBot.isBot(tempPlayer3)) continue;
+                this.seenEntitiesFuckMe.add(name);
+            }
+            if (this.loadBuffer.getDifference() < 2000L) {
+                this.hasChangedOnce = false;
+                for (NetworkPlayerInfo tempPlayer3 : mc.getNetHandler().getPlayerInfoMap()) {
+                    int index = this.seenEntitiesFuckMe.indexOf(tempPlayer3.getGameProfile().getName());
+                    if (index != -1) continue;
+                    this.seenEntitiesFuckMe.add(tempPlayer3.getGameProfile().getName());
+                }
+            }
+            for (String tempPlayer3 : this.seenEntitiesFuckMe) {
+                int index = this.temp.indexOf(tempPlayer3);
+                if (index == -1) continue;
+                this.temp.remove(index);
+            }
+            if (this.skip) {
+                if (this.counter == 5) {
+                    this.skip = false;
+                    this.counter = 0;
+                    return;
+                }
+                ++this.counter;
+                return;
+            }
+            this.vanishPeopleNotRacist.clear();
+            for (String tempString : this.temp) {
+                if (this.possibleVanishPeople.contains(tempString)) {
+                    this.vanishPeopleNotRacist.add(tempString);
+                    Notifications.getManager().post("Vanished Player", tempString + "\247r may be vanished!", 5000, Notifications.Type.WARNING);
+                    continue;
+                }
+                this.possibleVanishPeople.add(tempString);
+            }
+        }
+    }
+
     @RegisterEvent(events = {EventTick.class, EventPacket.class})
     public void onEvent(Event event) {
-        if(mc.thePlayer == null || mc.theWorld == null)
+        if (mc.thePlayer == null || mc.theWorld == null)
             return;
 
         if (event instanceof EventPacket) {
@@ -90,7 +202,7 @@ public class NickDetector extends Module {
 
                 if (entity instanceof EntityPlayer) {
                     EntityPlayer player = (EntityPlayer) entity;
-                    if (UUIDResolver.instance.checkedUsernames.containsKey(player.getName()) && UUIDResolver.instance.isInvalidUUID(player.getGameProfile().getId()) && !UUIDResolver.instance.resolvedMap.containsKey(player.getName())) {
+                    if (UUIDResolver.instance.isInvalidName(player.getName()) && !UUIDResolver.instance.resolvedMap.containsKey(player.getName())) {
                         ItemStack stack = packetIn.getItemStack();
                         if (stack != null && stack.hasTagCompound()) {
                             if (stack.getTagCompound().hasKey("ExtraAttributes", 10)) {
@@ -117,7 +229,9 @@ public class NickDetector extends Module {
         }
 
         if (event instanceof EventTick) {
-            if (mc.currentScreen instanceof GuiChest) {
+
+            if (mc.currentScreen instanceof GuiChest && timer.delay(1000)) {
+                timer.reset();
                 GuiChest guiChest = ((GuiChest) mc.currentScreen);
                 String name = guiChest.lowerChestInventory.getDisplayName().getUnformattedText();
                 if (guiChest.lowerChestInventory.hasCustomName() && name.contains("Profile Viewer")) {
@@ -128,10 +242,10 @@ public class NickDetector extends Module {
                                 String headName = stack.getDisplayName();
 
                                 if (headName.contains(" ") && headName.endsWith("\247f")) {
-                                    headName = headName.split(" ")[1].replace("\247f", "");
+                                    headName = StringUtils.stripControlCodes(headName.split(" ")[1].replace("\247f", ""));
                                 }
 
-                                if (UUIDResolver.instance.isInvalidName(headName) && !UUIDResolver.instance.resolvedMap.containsKey(StringUtils.stripControlCodes(headName))) {
+                                if (UUIDResolver.instance.checkedUsernames.containsKey(StringUtils.stripControlCodes(headName)) && UUIDResolver.instance.isInvalidName(StringUtils.stripControlCodes(headName)) && !UUIDResolver.instance.resolvedMap.containsKey(StringUtils.stripControlCodes(headName))) {
                                     GameProfile gameprofile = null;
                                     if (stack.hasTagCompound()) {
                                         NBTTagCompound nbttagcompound = stack.getTagCompound();
@@ -174,25 +288,41 @@ public class NickDetector extends Module {
                 final NetHandlerPlayClient netHandler = mc.thePlayer.sendQueue;
                 List<NetworkPlayerInfo> list = playerInfoMap.sortedCopy(netHandler.getPlayerInfoMap());
                 for (NetworkPlayerInfo playerInfo : list) {
-                    if (playerInfo.getGameProfile() != null && !playerInfo.getGameProfile().equals(mc.thePlayer.getGameProfile())) {
-                        IChatComponent e = new ChatComponentText(ScorePlayerTeam.formatPlayerName(playerInfo.getPlayerTeam(), playerInfo.getGameProfile().getName()));
+                    GameProfile gameProfile = playerInfo.getGameProfile();
+                    if (gameProfile != null && !gameProfile.equals(mc.thePlayer.getGameProfile())) {
+                        IChatComponent e = new ChatComponentText(ScorePlayerTeam.formatPlayerName(playerInfo.getPlayerTeam(), gameProfile.getName()));
                         String displayName = e.getFormattedText();
-                        String name = playerInfo.getGameProfile().getName();
+                        String name = gameProfile.getName();
                         if (displayName.equals("\247r" + name) || displayName.equals(name) || displayName.equals("\247r" + name + "\247r") || displayName.equals(name + "\247r")) {
                             continue;
                         }
+                        try {
+                            if (!UUIDResolver.instance.checkedUsernames.containsKey(name) && gameProfile.getId().version() == 1) {
+                                if (!UUIDResolver.instance.isSkinValid(gameProfile)) {
+                                    if (UUIDResolver.instance.resolvedMap.containsKey(name)) {
+                                        Notifications.getManager().post("Nick Detector", name + " may be " + UUIDResolver.instance.resolvedMap.get(name) + "! (S)", 2500, Notifications.Type.NOTIFY);
+                                    } else {
+                                        Notifications.getManager().post("Nick Detector", name + " is in /nick!", 2500, Notifications.Type.NOTIFY);
+                                    }
+                                    UUIDResolver.instance.checkedUsernames.put(name, gameProfile.getId());
+                                }
+                            }
+                        } catch (Exception ee) {
+                            ee.printStackTrace();
+                        }
+
                         if (UUIDResolver.instance.checkedUsernames.containsKey(name) && (!denick.getValue() || (!UUIDResolver.instance.isInvalidName(name)) && (!UUIDResolver.instance.resolvedMap.containsKey(name)))) {
                             continue;
                         }
-                        usernameList.put(name, playerInfo.getGameProfile().getId());
+
+                        usernameList.put(name, gameProfile.getId());
                     }
                 }
             } catch (Exception e) {
-
+                e.printStackTrace();
             }
 
             if (!usernameList.isEmpty()) {
-                timer.reset();
                 UUIDResolver.instance.checkNames(usernameList);
             }
         }

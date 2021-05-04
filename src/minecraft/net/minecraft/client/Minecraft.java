@@ -1009,10 +1009,12 @@ public class Minecraft implements IThreadListener, IPlayerUsage {
         long i = System.nanoTime();
         this.mcProfiler.startSection("root");
 
+        this.mcProfiler.startSection("displayClose");
         if (Display.isCreated() && Display.isCloseRequested()) {
             this.shutdown();
         }
 
+        this.mcProfiler.endStartSection("displayClose");
         if (this.isGamePaused && this.theWorld != null) {
             float f = this.timer.renderPartialTicks;
             this.timer.updateTimer();
@@ -1021,7 +1023,7 @@ public class Minecraft implements IThreadListener, IPlayerUsage {
             this.timer.updateTimer();
         }
 
-        this.mcProfiler.startSection("scheduledExecutables");
+        this.mcProfiler.endStartSection("scheduledExecutables");
 
         synchronized (this.scheduledTasks) {
             while (!this.scheduledTasks.isEmpty()) {
@@ -1064,6 +1066,7 @@ public class Minecraft implements IThreadListener, IPlayerUsage {
 
         this.mcProfiler.endSection();
 
+        this.mcProfiler.startSection("debugInfo");
         if (this.gameSettings.showDebugInfo && this.gameSettings.showDebugProfilerChart && !this.gameSettings.hideGUI) {
             if (!this.mcProfiler.profilingEnabled) {
                 this.mcProfiler.clearProfiling();
@@ -1075,7 +1078,9 @@ public class Minecraft implements IThreadListener, IPlayerUsage {
             this.mcProfiler.profilingEnabled = false;
             this.prevFrameTime = System.nanoTime();
         }
+        this.mcProfiler.endSection();
 
+        this.mcProfiler.startSection("buffers");
         this.guiAchievement.updateAchievementWindow();
         this.framebufferMc.unbindFramebuffer();
         GlStateManager.popMatrix();
@@ -1085,6 +1090,7 @@ public class Minecraft implements IThreadListener, IPlayerUsage {
         GlStateManager.pushMatrix();
         this.entityRenderer.renderStreamIndicator(this.timer.renderPartialTicks);
         GlStateManager.popMatrix();
+        this.mcProfiler.endSection();
         this.mcProfiler.startSection("root");
         this.updateDisplay();
         Thread.yield();

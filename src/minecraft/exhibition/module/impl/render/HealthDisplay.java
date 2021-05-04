@@ -7,7 +7,7 @@ package exhibition.module.impl.render;
 
 import exhibition.event.Event;
 import exhibition.event.RegisterEvent;
-import exhibition.event.impl.EventRenderGuiPre;
+import exhibition.event.impl.EventRenderPreScreen;
 import exhibition.gui.screen.GuiView;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
@@ -29,15 +29,15 @@ public class HealthDisplay extends Module {
         super(data);
     }
 
-    @RegisterEvent(events = {EventRenderGuiPre.class})
+    @RegisterEvent(events = {EventRenderPreScreen.class})
     public void onEvent(Event event) {
         if(mc.thePlayer == null || mc.theWorld == null)
             return;
 
-        if (event instanceof EventRenderGuiPre) {
+        if (event instanceof EventRenderPreScreen) {
 
             int guiOffset = (mc.currentScreen instanceof GuiInventory || mc.currentScreen instanceof GuiView) ? 75 : mc.thePlayer.openContainer != mc.thePlayer.inventoryContainer ? 100 : 0;
-            EventRenderGuiPre er = (EventRenderGuiPre) event;
+            EventRenderPreScreen er = (EventRenderPreScreen) event;
 
             boolean isLighting = GL11.glIsEnabled(GL11.GL_LIGHTING);
 

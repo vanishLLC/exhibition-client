@@ -43,6 +43,7 @@ import java.util.List;
 public class Speed extends Module {
 
     private String MODE = "MODE";
+    private boolean lastGround;
     private double speed;
     private double lastDist;
     private double velocityBoost;
@@ -59,7 +60,6 @@ public class Speed extends Module {
     public int hops = 0;
     private int ticks = 0;
     private boolean reset = false;
-
 
     private float currentYaw;
 
@@ -211,6 +211,7 @@ public class Speed extends Module {
                         lastDist = 0;
                         velocityBoost = 0;
                         hops = 0;
+                        lastGround = mc.thePlayer.onGround;
                         break;
                     }
 
@@ -328,7 +329,7 @@ public class Speed extends Module {
 //                        speed = lastDist * (ticks == 1 ? 0.59989892348 : 0.587622177);
 
                     } else {
-                        if(stage == 7 && fastFall.getValue()) {
+                        if (stage == 7 && fastFall.getValue()) {
                             em.setY(mc.thePlayer.motionY += -(0.18999F + (0.00000004F * Math.random())));
                         }
 
@@ -358,6 +359,8 @@ public class Speed extends Module {
 
 //                        this.speed = list.get(2) - 0.0000125F;
                     }
+
+                    this.lastGround = mc.thePlayer.onGround;
 
                     speed = Math.max(speed, moveSpeed);
 

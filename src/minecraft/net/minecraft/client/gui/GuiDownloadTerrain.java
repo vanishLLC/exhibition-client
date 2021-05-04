@@ -91,6 +91,10 @@ public class GuiDownloadTerrain extends GuiScreen {
         if (!GlobalValues.keepPriority.getValue())
             PriorityManager.clearPriorityList();
 
+        for (Module module : Client.getModuleManager().getArray()) {
+            module.worldChange();
+        }
+
         if (mc.getCurrentServerData() != null) {
             DiscordUtil.setDiscordPresence("In Game", "IP: " + mc.getCurrentServerData().serverIP);
         }

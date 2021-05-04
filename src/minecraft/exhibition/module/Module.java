@@ -75,6 +75,10 @@ public abstract class Module extends Saveable implements EventListener, Bindable
 
     }
 
+    public void worldChange() {
+
+    }
+
     @Override
     public void onBindPress() {
         if (!held) {

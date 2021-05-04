@@ -3,7 +3,7 @@ package exhibition.event.impl;
 import exhibition.event.Event;
 import net.minecraft.client.gui.ScaledResolution;
 
-public class EventRenderGuiPre extends Event {
+public class EventRenderPreScreen extends Event {
     private ScaledResolution resolution;
 
     public void fire(ScaledResolution resolution) {

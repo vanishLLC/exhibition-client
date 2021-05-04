@@ -6,6 +6,7 @@ import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventNametagRender;
 import exhibition.event.impl.EventRender3D;
 import exhibition.event.impl.EventRenderGui;
+import exhibition.event.impl.EventTick;
 import exhibition.management.PriorityManager;
 import exhibition.management.UUIDResolver;
 import exhibition.management.font.TTFFontRenderer;
@@ -15,19 +16,19 @@ import exhibition.module.data.ModuleData;
 import exhibition.module.data.Options;
 import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.combat.AntiBot;
-import exhibition.module.impl.combat.Killaura;
 import exhibition.util.HypixelUtil;
 import exhibition.util.MathUtils;
 import exhibition.util.RenderingUtil;
+import exhibition.util.TeamUtils;
 import exhibition.util.render.Colors;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.*;
 import net.minecraft.util.MathHelper;
@@ -43,6 +44,7 @@ import java.util.*;
 
 public class Nametags extends Module {
 
+    public List<EntityPlayer> playerEntities = new ArrayList<>();
     public Map<EntityPlayer, Bruh> entityPositions = new HashMap<>();
     private String INVISIBLES = "INVISIBLES";
     private String OPACITY = "OPACITY";
@@ -73,12 +75,25 @@ public class Nametags extends Module {
 
     private final Bruh defaultTo = new Bruh(new double[]{-1337, -1337, -1337, -1337});
 
-    @RegisterEvent(events = {EventRender3D.class, EventRenderGui.class, EventNametagRender.class})
+    @RegisterEvent(events = {EventRender3D.class, EventRenderGui.class, EventNametagRender.class, EventTick.class})
     public void onEvent(Event event) {
+        if (event instanceof EventTick) {
+            playerEntities.clear();
+            for (Entity entity : mc.theWorld.getLoadedEntityList()) {
+                if (entity instanceof EntityPlayer) {
+                    this.playerEntities.add((EntityPlayer) entity);
+                }
+            }
+        }
         if (event instanceof EventNametagRender) {
             EventNametagRender er = event.cast();
             if (er.getEntity() instanceof EntityPlayer) {
                 EntityPlayer ent = (EntityPlayer) er.getEntity();
+
+                if (entityPositions.containsKey(ent)) {
+                    event.setCancelled(true);
+                    return;
+                }
 
                 boolean ignorePit = HypixelUtil.isInGame("THE HYPIXEL PIT") && IGNORESPAWN.getValue();
 
@@ -121,6 +136,8 @@ public class Nametags extends Module {
                 }
 
                 boolean prioritized = PriorityManager.isPriority(ent);
+
+                boolean isTeam = TeamUtils.isTeam(mc.thePlayer, ent);
 
                 boolean isPriority = prioritized || TargetESP.isPriority(ent) || FriendManager.isFriend(ent.getName());
 
@@ -190,7 +207,7 @@ public class Nametags extends Module {
                 int backgroundColor = FriendManager.isFriend(ent.getName()) ? Colors.getColor(52, 229, 235, 200) :
                         prioritized ? Colors.getColor(255, 0, 0, 200) :
                                 Colors.getColor(35, (int) (200 * percentage));
-                int borderColor = FriendManager.isFriend(ent.getName()) ? Colors.getColor(52, 98, 235) :
+                int borderColor = FriendManager.isFriend(ent.getName()) || isTeam ? Colors.getColor(52, 98, 235) :
                         prioritized ? Colors.getColor(255) :
                                 isPriority ? Colors.getColor(255, 178, 0, 200) :
                                         Colors.getColor(28, (int) (200 * percentage));
@@ -311,7 +328,7 @@ public class Nametags extends Module {
                             int enchantOffsetY = 0;
 
                             for (String e : enchants) {
-                                boolean strongEnchant = e.contains("Retro") || e.contains("Stun") || e.contains("Funky") || e.contains("Protection III") ||
+                                boolean strongEnchant = e.contains("Mind Assault") || e.contains("Retro") || e.contains("Stun") || e.contains("Funky") || e.contains("Protection III") ||
                                         e.contains("Wrath I") || e.contains("Duelist I") || e.contains("Bruiser") || e.contains("David") || e.contains("Somber") ||
                                         e.contains("Billionaire I") || e.contains("Hemorrhage") || e.contains("Mirror") || e.contains("Evil Within") ||
                                         e.contains("Venom") || e.contains("Gamble") || e.contains("Crush") || e.contains("Solitude") || e.contains("Peroxide") ||
@@ -469,7 +486,7 @@ public class Nametags extends Module {
 
         boolean ignorePit = HypixelUtil.isInGame("THE HYPIXEL PIT") && IGNORESPAWN.getValue();
 
-        for (EntityPlayer ent : mc.theWorld.playerEntities) {
+        for (EntityPlayer ent : playerEntities) {
             if (ent != mc.thePlayer) {
 
                 boolean isPriority = TargetESP.isPriority(ent) || FriendManager.isFriend(ent.getName());

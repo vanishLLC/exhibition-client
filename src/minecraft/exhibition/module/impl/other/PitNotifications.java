@@ -17,11 +17,13 @@ import exhibition.util.render.Colors;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S02PacketChat;
+import net.minecraft.network.play.server.S0DPacketCollectItem;
 import net.minecraft.network.play.server.S1CPacketEntityMetadata;
 import org.lwjgl.opengl.GL11;
 
@@ -101,7 +103,7 @@ public class PitNotifications extends Module {
 
                         List<String> enchantList = HypixelUtil.getPitEnchants(itemStack);
 
-                        String enchant =  enchantList.size() == 0 ? "" : Arrays.toString(enchantList.toArray());
+                        String enchant = enchantList.size() == 0 ? "" : Arrays.toString(enchantList.toArray());
 
                         Notifications.getManager().post(itemStack.getDisplayName() + " \247rhas dropped! (" + (int) mc.thePlayer.getDistanceToEntity(updatedItem) + "m)", enchant + (nonce > 1000 ? " (" + nonce + ")" : ""), 5000L, Notifications.Type.NOTIFY);
                         System.out.println(enchant);
@@ -128,6 +130,16 @@ public class PitNotifications extends Module {
                 if (entity instanceof EntityItem) {
                     if (!updatedItems.contains(entity))
                         updatedItems.add((EntityItem) entity);
+                }
+            }
+            if (packet instanceof S0DPacketCollectItem) {
+                S0DPacketCollectItem collectItem = (S0DPacketCollectItem) packet;
+                Entity entity = mc.theWorld.getEntityByID(collectItem.getCollectedItemEntityID());
+                EntityLivingBase entitylivingbase = (EntityLivingBase) mc.theWorld.getEntityByID(collectItem.getEntityID());
+
+                if (entity instanceof EntityItem && trackedItems.contains(entity) && entitylivingbase != null) {
+                    Notifications.getManager().post(((EntityItem) entity).getEntityItem().getDisplayName(), "Item was picked up by " + entitylivingbase.getName(), 5000L, Notifications.Type.NOTIFY);
+                    trackedItems.remove(entity);
                 }
             }
             if (packet instanceof S02PacketChat) {
