@@ -109,8 +109,8 @@ public class PitNotifications extends Module {
                         System.out.println(enchant);
 
                         trackedItems.add(updatedItem);
-                        updatedItems.remove(updatedItem);
                     }
+                    updatedItems.remove(updatedItem);
                 } else {
                     updatedItems.remove(updatedItem);
                 }
