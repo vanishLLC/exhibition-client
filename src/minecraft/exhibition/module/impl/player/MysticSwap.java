@@ -136,7 +136,22 @@ public class MysticSwap extends Module {
                                 ItemArmor pants = (ItemArmor) leggings.getItem();
 
                                 if (pants.getArmorMaterial() == ItemArmor.ArmorMaterial.LEATHER) {
-                                    if (swapDarks.getValue() && stackHasEnchant(leggings, "Regularity")) {
+
+                                    boolean hasArmaBoots = false;
+
+                                    ItemStack boots = player.getEquipmentInSlot(1);
+
+                                    if (boots != null && boots.getItem() instanceof ItemArmor) {
+                                        ItemArmor item = (ItemArmor) boots.getItem();
+                                        if (item.getArmorMaterial() == ItemArmor.ArmorMaterial.LEATHER && item.hasColor(boots)) {
+                                            int color = item.getColor(boots);
+                                            if (color == 0xFF00000) {
+                                                hasArmaBoots = true;
+                                            }
+                                        }
+                                    }
+
+                                    if (swapDarks.getValue() && !hasArmaBoots && stackHasEnchant(leggings, "Regularity")) {
                                         if (!playerHasEnchant("Somber"))
                                             slotToSwap = findWithEnchant("Somber");
                                         shouldSwap = true;
@@ -163,7 +178,7 @@ public class MysticSwap extends Module {
 
                 if (swapPebble.getValue()) {
                     if (slotToSwap == -1) {
-                        if (mc.thePlayer.ticksExisted < 50) {
+                        if (mc.thePlayer.ticksExisted % 100 == 0) {
                             for (Entity entity : mc.theWorld.getLoadedEntityList()) {
                                 if (entity instanceof EntityItem) {
                                     EntityItem entityItem = (EntityItem) entity;
@@ -245,6 +260,10 @@ public class MysticSwap extends Module {
                         swapped = false;
                         timer.reset();
                     }
+
+                if (!shouldSwap && slotToSwap == -1 && timer.delay(500)) {
+                    bruh = null;
+                }
 //            if (slotToSwap != -1) {
 //                // TODO: Check if the item is in the hotbar or inventory, click accordingly
 //            }
