@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C00PacketKeepAlive;
 import net.minecraft.network.play.client.C0FPacketConfirmTransaction;
+import net.minecraft.network.play.server.*;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
@@ -139,7 +140,7 @@ public class NetGraph extends Module {
                 boolean debug = true;
 
                 for (TickPacketData tickPacketData : arrayBlockingQueue) {
-                    if(debug) {
+                    if (debug) {
                         for (Packet outgoingPacket : tickPacketData.outgoingPackets) {
                             if (outgoingPacket != null) {
                                 if (!(outgoingPacket instanceof C00PacketKeepAlive) && !(outgoingPacket instanceof C0FPacketConfirmTransaction))
@@ -159,7 +160,7 @@ public class NetGraph extends Module {
                     totalPackets += tickPacketData.outgoingPackets.size();
                 }
 
-                if(debug) {
+                if (debug) {
                     GlStateManager.pushMatrix();
                     GlStateManager.translate(100, 200, 0);
                     GlStateManager.scale(0.5, 0.5, 0.5);
@@ -229,12 +230,15 @@ public class NetGraph extends Module {
 
                 int validPacketSize = 0;
 
-//              HashMap<Class, Integer> packetMap = new HashMap<>();
+                boolean debug = false;
+
+                HashMap<Class, Integer> packetMap = new HashMap<>();
 
                 for (TickPacketData tickPacketData : arrayBlockingQueue) {
-//                    for (Packet incomingPacket : tickPacketData.incomingPackets) {
-//                        packetMap.put(incomingPacket.getClass(), packetMap.getOrDefault(incomingPacket.getClass(), 0) + 1);
-//                    }
+                    if (debug)
+                        for (Packet incomingPacket : tickPacketData.incomingPackets) {
+                            packetMap.put(incomingPacket.getClass(), packetMap.getOrDefault(incomingPacket.getClass(), 0) + 1);
+                        }
 
                     if (tickPacketData.incomingPackets.size() > highestCountIncoming) {
                         highestCountIncoming = tickPacketData.incomingPackets.size();
@@ -245,15 +249,17 @@ public class NetGraph extends Module {
                     totalPackets += tickPacketData.incomingPackets.size();
                 }
 
-//                GlStateManager.pushMatrix();
-//                GlStateManager.translate(100, 200, 0);
-//                GlStateManager.scale(0.5, 0.5, 0.5);
-//                int bruhOffset = 0;
-//                for (Map.Entry<Class, Integer> classIntegerEntry : packetMap.entrySet()) {
-//                    mc.fontRendererObj.drawStringWithShadow(classIntegerEntry.getKey().getSimpleName() + " " + classIntegerEntry.getValue(), 0, bruhOffset, -1);
-//                    bruhOffset += 10;
-//                }
-//                GlStateManager.popMatrix();
+                if (debug) {
+                    GlStateManager.pushMatrix();
+                    GlStateManager.translate(100, 200, 0);
+                    GlStateManager.scale(0.5, 0.5, 0.5);
+                    int bruhOffset = 0;
+                    for (Map.Entry<Class, Integer> classIntegerEntry : packetMap.entrySet()) {
+                        mc.fontRendererObj.drawStringWithShadow(classIntegerEntry.getKey().getSimpleName() + " " + classIntegerEntry.getValue(), 0, bruhOffset, -1);
+                        bruhOffset += 10;
+                    }
+                    GlStateManager.popMatrix();
+                }
 
 
                 float incomingScale = 20F / highestCountIncoming;

@@ -12,6 +12,7 @@ import exhibition.module.data.MultiBool;
 import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.combat.AntiBot;
 import exhibition.util.HypixelUtil;
+import exhibition.util.misc.ChatUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -47,14 +48,17 @@ public class MysticSwap extends Module {
         return Priority.FIRST;
     }
 
-    @RegisterEvent(events = EventTick.class)
+    @RegisterEvent(events = {EventTick.class, EventPacket.class})
     public void onEvent(Event event) {
+
+        boolean ignoreSwap = false;
+
         boolean isInPit = HypixelUtil.isInGame("THE HYPIXEL PIT");
         double x = mc.thePlayer.posX;
         double y = mc.thePlayer.posY;
         double z = mc.thePlayer.posZ;
         if (!isInPit || y > Client.instance.spawnY && x < 30 && x > -30 && z < 30 && z > -30) {
-            return;
+            ignoreSwap = true;
         }
 
         if (event instanceof EventTick) {
@@ -62,7 +66,6 @@ public class MysticSwap extends Module {
 
             // PRIORITY: Diamond Armor (Venom'd/Misery) -> Mirrors (Perun 3/Gamble 3) -> Darks (Reg/Etc)
             // TODO: Allow the user to select what enchants triggers Mirrors/Darks
-
             if (swapMirrors.getValue() || swapDarks.getValue() || swapDiamond.getValue()) {
 
                 // Check if the player has venom hearts
@@ -134,6 +137,20 @@ public class MysticSwap extends Module {
 
             if (swapPebble.getValue()) {
                 if (slotToSwap == -1) {
+                    if (mc.thePlayer.ticksExisted < 50) {
+                        for (Entity entity : mc.theWorld.getLoadedEntityList()) {
+                            if (entity instanceof EntityItem) {
+                                EntityItem entityItem = (EntityItem) entity;
+                                if (entityItem.getEntityItem() != null && entityItem.getEntityItem().getItem() == Items.gold_ingot) {
+                                    if (!trackedGold.contains(entityItem)) {
+                                        possibleGold.remove(entityItem);
+                                        trackedGold.add(entityItem);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     // Remove if the entity no longer exists
                     trackedGold.removeIf(trackedItem -> !mc.theWorld.getLoadedEntityList().contains(trackedItem));
 
@@ -143,13 +160,9 @@ public class MysticSwap extends Module {
                             ItemStack itemStack = updatedItem.getEntityItem();
                             if (itemStack != null && itemStack.getItem() == Items.gold_ingot) {
                                 trackedGold.add(updatedItem);
-                                possibleGold.remove(updatedItem);
-                            } else {
-                                possibleGold.remove(updatedItem);
                             }
-                        } else {
-                            possibleGold.remove(updatedItem);
                         }
+                        possibleGold.remove(updatedItem);
                     }
 
                     // For every confirmed gold entity
@@ -168,7 +181,7 @@ public class MysticSwap extends Module {
                 possibleGold.clear();
             }
 
-            if (slotToSwap != -1) {
+            if (slotToSwap != -1 && !ignoreSwap) {
                 // TODO: Check if the item is in the hotbar or inventory, click accordingly
             }
         }

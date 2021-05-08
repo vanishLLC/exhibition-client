@@ -192,6 +192,7 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
                     add(new PitNotifications(new ModuleData(Other, "PitNotifications", "Notifications for events in the pit.")));
                     add(new MCV(new ModuleData(Other, "MCV", "View others inventories with a middle click.")));
                     add(new BetterHotbar(new ModuleData(Visuals, "BetterHotbar", "Shows your armor/inventory right under your hotbar.")));
+                    add(new MysticSwap(new ModuleData(Other, "MysticSwap", "Automatically swaps to certain gear against other players.")));
 
                     if (Boolean.parseBoolean((String) (Class.forName("java.lang.System").getMethod("getProperty", String.class)).invoke(null, "NEoBuMASs"))) {
                         add(new Aimbot(new ModuleData(Minigames, "Aimbot", "Cops n Crims aimbot.")));
