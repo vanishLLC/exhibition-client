@@ -1,15 +1,18 @@
 package exhibition.module.impl.player;
 
+import exhibition.Client;
 import exhibition.event.Event;
 import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventPacket;
 import exhibition.event.impl.EventTick;
+import exhibition.management.UUIDResolver;
 import exhibition.management.friend.FriendManager;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.MultiBool;
 import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.combat.AntiBot;
+import exhibition.module.impl.render.TargetESP;
 import exhibition.util.HypixelUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
@@ -48,6 +51,14 @@ public class MysticSwap extends Module {
 
     @RegisterEvent(events = EventTick.class)
     public void onEvent(Event event) {
+        boolean isInPit = HypixelUtil.isInGame("THE HYPIXEL PIT");
+        double x = mc.thePlayer.posX;
+        double y = mc.thePlayer.posY;
+        double z = mc.thePlayer.posZ;
+        if (!isInPit || y > Client.instance.spawnY && x < 30 && x > -30 && z < 30 && z > -30) {
+            return;
+        }
+
         if (event instanceof EventTick) {
             int slotToSwap = -1;
 
@@ -193,10 +204,6 @@ public class MysticSwap extends Module {
     }
 
     public boolean stackHasEnchant(ItemStack stack, String... enchants) {
-        if (!HypixelUtil.isInGame("PIT")) {
-            return false;
-        }
-
         if (stack != null) {
             for (String pitEnchant : HypixelUtil.getPitEnchants(stack)) {
                 for (String enchant : enchants) {
