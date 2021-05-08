@@ -174,7 +174,7 @@ public class ArmorStatus extends Module {
 
                     GlStateManager.pushMatrix();
                     GlStateManager.disableDepth();
-                    Client.fsmallbold.drawBorderedString(string, split, y + enchantOffsetY, -1, Colors.getColor(0, 255));
+                    Client.fsmallbold.drawBorderedString(string, split + er.getResolution().getScaledWidth() / 2 - 4, y + enchantOffsetY, -1, Colors.getColor(0, 255));
                     GlStateManager.enableDepth();
                     GlStateManager.popMatrix();
 
