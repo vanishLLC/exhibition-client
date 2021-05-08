@@ -138,9 +138,9 @@ public class MysticSwap extends Module {
                                                     break;
                                         }
 
-                                        if (swapDiamond.getValue() && stackHasEnchant(leggings, "Venom", "Misery")) {
+                                        if (swapDiamond.getValue() && stackHasEnchant(leggings, "Venom", "Misery", "Somber")) {
                                             if (!playerHasEnchant("Somber"))
-                                                slotToSwap = findWithEnchant("Somber");
+                                                slotToSwap = findItem(Items.diamond_leggings);
                                                 shouldSwap = true;
                                                 if (slotToSwap != -1)
                                                     break;
