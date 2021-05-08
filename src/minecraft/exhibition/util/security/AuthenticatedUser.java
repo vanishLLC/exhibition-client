@@ -149,19 +149,19 @@ public class AuthenticatedUser extends Castable {
             //Class.forName("exhibition.Client").getMethod("setup").invoke(instance);
 
             if (getHwid() != 32161752) {
-                Class fieldClass = Class.forName("java.lang.reflect.Field");
-                Class unsafeClass = Class.forName("sun.misc.Unsafe");
-                Object bruh = unsafeClass.getDeclaredField("theUnsafe");
-                Object field = Class.forName("java.lang.System").getDeclaredField("err");
-                fieldClass.getMethod("setAccessible", boolean.class).invoke(bruh, true);
-                Object unsafeInstance = fieldClass.getMethod("get", Object.class).invoke(bruh, (Object) new Object[0]);
-
-                Object oldInstance = ReflectionUtil.getField(Class.forName("exhibition.util.security.LoggerContainer").getDeclaredField("oldLoggerInstance"), null);
-
-                unsafeClass.getMethod("getAndSetObject", Object.class, long.class, Object.class).invoke(unsafeInstance,
-                        unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field),
-                        unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field),
-                        oldInstance);
+//                Class fieldClass = Class.forName("java.lang.reflect.Field");
+//                Class unsafeClass = Class.forName("sun.misc.Unsafe");
+//                Object bruh = unsafeClass.getDeclaredField("theUnsafe");
+//                Object field = Class.forName("java.lang.System").getDeclaredField("err");
+//                fieldClass.getMethod("setAccessible", boolean.class).invoke(bruh, true);
+//                Object unsafeInstance = fieldClass.getMethod("get", Object.class).invoke(bruh, (Object) new Object[0]);
+//
+//                Object oldInstance = ReflectionUtil.getField(Class.forName("exhibition.util.security.LoggerContainer").getDeclaredField("oldLoggerInstance"), null);
+//
+//                unsafeClass.getMethod("getAndSetObject", Object.class, long.class, Object.class).invoke(unsafeInstance,
+//                        unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field),
+//                        unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field),
+//                        oldInstance);
             }
         } catch (Exception e) {
             e.printStackTrace();

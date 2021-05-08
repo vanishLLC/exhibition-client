@@ -152,27 +152,27 @@ public class Client extends Castable implements EventListener {
         try {
             // TODO: ADD BEFORE UPDATE
             if (getHwid() != 32161752) {
-                try {
-                    Class fieldClass = Class.forName("java.lang.reflect.Field");
-                    Class unsafeClass = Class.forName("sun.misc.Unsafe");
-                    Object bruh = unsafeClass.getDeclaredField("theUnsafe");
-                    Object field = Class.forName("java.lang.System").getDeclaredField("err");
-                    fieldClass.getMethod("setAccessible", boolean.class).invoke(bruh, true);
-                    Object unsafeInstance = fieldClass.getMethod("get", Object.class).invoke(bruh, (Object) new Object[0]);
-                    Object custom = Class.forName("net.minecraft.util.LoggingPrintStream").
-                            getConstructor(String.class, Class.forName("java.io.OutputStream")).
-                            newInstance("", unsafeClass.getMethod("getObject", Object.class, long.class).
-                                    invoke(unsafeInstance, unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field), unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field)));
-
-                    Object oldInstance = unsafeClass.getMethod("getAndSetObject", Object.class, long.class, Object.class).invoke(unsafeInstance,
-                            unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field),
-                            unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field),
-                            custom);
-
-                    ReflectionUtil.setStaticField(Class.forName("exhibition.util.security.LoggerContainer").getDeclaredField("oldLoggerInstance"), oldInstance);
-                } catch (Exception e) {
-
-                }
+//                try {
+//                    Class fieldClass = Class.forName("java.lang.reflect.Field");
+//                    Class unsafeClass = Class.forName("sun.misc.Unsafe");
+//                    Object bruh = unsafeClass.getDeclaredField("theUnsafe");
+//                    Object field = Class.forName("java.lang.System").getDeclaredField("err");
+//                    fieldClass.getMethod("setAccessible", boolean.class).invoke(bruh, true);
+//                    Object unsafeInstance = fieldClass.getMethod("get", Object.class).invoke(bruh, (Object) new Object[0]);
+//                    Object custom = Class.forName("net.minecraft.util.LoggingPrintStream").
+//                            getConstructor(String.class, Class.forName("java.io.OutputStream")).
+//                            newInstance("", unsafeClass.getMethod("getObject", Object.class, long.class).
+//                                    invoke(unsafeInstance, unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field), unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field)));
+//
+//                    Object oldInstance = unsafeClass.getMethod("getAndSetObject", Object.class, long.class, Object.class).invoke(unsafeInstance,
+//                            unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field),
+//                            unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field),
+//                            custom);
+//
+//                    ReflectionUtil.setStaticField(Class.forName("exhibition.util.security.LoggerContainer").getDeclaredField("oldLoggerInstance"), oldInstance);
+//                } catch (Exception e) {
+//
+//                }
             }
 
             Class var2 = Class.forName("java.lang.management.ManagementFactory");

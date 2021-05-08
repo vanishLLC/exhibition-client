@@ -92,6 +92,7 @@ public class MysticSwap extends Module {
                         if (legs != null && legs.getItem() == Items.diamond_leggings) {
                             wearingDiamond = true;
                         }
+                        shouldSwap = true;
                         if (!wearingDiamond) {
                             slotToSwap = findItem(Items.diamond_leggings);
                         }
@@ -143,7 +144,7 @@ public class MysticSwap extends Module {
                                             break;
                                     }
 
-                                    if (swapDiamond.getValue() && stackHasEnchant(leggings, "Venom", "Misery", "Somber")) {
+                                    if (swapDiamond.getValue() && stackHasEnchant(leggings, "Somber")) {
                                         boolean wearingDiamond = false;
                                         ItemStack legs = mc.thePlayer.getEquipmentInSlot(2);
                                         if (legs != null && legs.getItem() == Items.diamond_leggings) {
