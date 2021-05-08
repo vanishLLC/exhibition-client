@@ -99,9 +99,7 @@ public class MysticSwap extends Module {
                             if (player.canBeCollidedWith() && currentDistance <= 10) {
                                 if (AntiBot.isBot(player) || FriendManager.isFriend(player.getName()))
                                     continue;
-                                double previousDistance = mc.thePlayer.getDistance(player.lastTickPosX, mc.thePlayer.posY, player.lastTickPosZ);
                                 // If not standing still AND is moving towards the player
-                                if (currentDistance != previousDistance && previousDistance > currentDistance) {
                                     // Check held item for Perun/Gamble 3
 
                                     if (swapMirrors.getValue()) {
@@ -148,7 +146,6 @@ public class MysticSwap extends Module {
                                                     break;
                                         }
                                     }
-                                }
                             }
                         }
                 }
@@ -185,7 +182,7 @@ public class MysticSwap extends Module {
 
                         // For every confirmed gold entity
                         for (EntityItem goldItem : trackedGold) {
-                            if (mc.thePlayer.getDistanceToEntity(goldItem) <= 3) {
+                            if (mc.thePlayer.getDistanceToEntity(goldItem) <= 5) {
                                 if (!playerHasEnchant("Pebble"))
                                 slotToSwap = findWithEnchant("Pebble");
                                 shouldSwap = true;
@@ -273,7 +270,7 @@ public class MysticSwap extends Module {
     public int findItem(ItemStack itemStack) {
         for (int i = 9; i < 45; i++) {
             ItemStack stack = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
-            if (stack != null && stack.isItemEqual(itemStack)) {
+            if (stack != null && stack.getIsItemStackEqual(itemStack)) {
                 return i;
             }
         }
