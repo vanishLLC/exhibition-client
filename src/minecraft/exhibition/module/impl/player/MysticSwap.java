@@ -87,9 +87,14 @@ public class MysticSwap extends Module {
                     // Check if the player has venom hearts
                     if (swapDiamond.getValue() && mc.thePlayer.isPotionActive(Potion.poison)) {
                         // You can verify if you want to check for venoms near you or not
-//                    if(notWearingDiamond) {
-//                        slotToSwap = findDiamond;
-//                    }
+                        boolean wearingDiamond = false;
+                        ItemStack legs = mc.thePlayer.getEquipmentInSlot(2);
+                        if (legs != null && legs.getItem() == Items.diamond_leggings) {
+                            wearingDiamond = true;
+                        }
+                        if (!wearingDiamond) {
+                            slotToSwap = findItem(Items.diamond_leggings);
+                        }
                     }
 
                     if (slotToSwap == -1)
@@ -100,52 +105,57 @@ public class MysticSwap extends Module {
                                 if (AntiBot.isBot(player) || FriendManager.isFriend(player.getName()))
                                     continue;
                                 // If not standing still AND is moving towards the player
-                                    // Check held item for Perun/Gamble 3
+                                // Check held item for Perun/Gamble 3
 
-                                    if (swapMirrors.getValue()) {
-                                        ItemStack heldStack = player.getHeldItem();
+                                if (swapMirrors.getValue()) {
+                                    ItemStack heldStack = player.getHeldItem();
 
-                                        if (heldStack != null) {
-                                            if (stackHasEnchant(heldStack, "Gamble III", "Perun")) {
-                                                if (!playerHasEnchant("Mirror"))
-                                                slotToSwap = findWithEnchant("Mirror" );
-                                                shouldSwap = true;
-                                            }
+                                    if (heldStack != null) {
+                                        if (stackHasEnchant(heldStack, "Gamble III", "Perun")) {
+                                            if (!playerHasEnchant("Mirror"))
+                                                slotToSwap = findWithEnchant("Mirror");
+                                            shouldSwap = true;
                                         }
                                     }
+                                }
 
-                                    // If the user doesn't need Mirror, check for Regularity/Misery/Venoms
-                                    if (slotToSwap != -1)
-                                        break;
+                                // If the user doesn't need Mirror, check for Regularity/Misery/Venoms
+                                if (slotToSwap != -1)
+                                    break;
 
-                                    if (!swapDarks.getValue() && !swapDiamond.getValue())
-                                        continue;
+                                if (!swapDarks.getValue() && !swapDiamond.getValue())
+                                    continue;
 
-                                    // Check the players pants
-                                    ItemStack leggings = player.getEquipmentInSlot(2);
+                                // Check the players pants
+                                ItemStack leggings = player.getEquipmentInSlot(2);
 
-                                    if (leggings == null || !(leggings.getItem() instanceof ItemArmor))
-                                        continue;
+                                if (leggings == null || !(leggings.getItem() instanceof ItemArmor))
+                                    continue;
 
-                                    ItemArmor pants = (ItemArmor) leggings.getItem();
+                                ItemArmor pants = (ItemArmor) leggings.getItem();
 
-                                    if (pants.getArmorMaterial() == ItemArmor.ArmorMaterial.LEATHER) {
-                                        if (swapDarks.getValue() && stackHasEnchant(leggings, "Regularity")) {
-                                            if (!playerHasEnchant("Somber"))
-                                                slotToSwap = findWithEnchant("Somber");
-                                                shouldSwap = true;
-                                                if (slotToSwap != -1)
-                                                    break;
-                                        }
-
-                                        if (swapDiamond.getValue() && stackHasEnchant(leggings, "Venom", "Misery", "Somber")) {
-                                            if (!playerHasEnchant("Somber"))
-                                                slotToSwap = findItem(Items.diamond_leggings);
-                                                shouldSwap = true;
-                                                if (slotToSwap != -1)
-                                                    break;
-                                        }
+                                if (pants.getArmorMaterial() == ItemArmor.ArmorMaterial.LEATHER) {
+                                    if (swapDarks.getValue() && stackHasEnchant(leggings, "Regularity")) {
+                                        if (!playerHasEnchant("Somber"))
+                                            slotToSwap = findWithEnchant("Somber");
+                                        shouldSwap = true;
+                                        if (slotToSwap != -1)
+                                            break;
                                     }
+
+                                    if (swapDiamond.getValue() && stackHasEnchant(leggings, "Venom", "Misery", "Somber")) {
+                                        boolean wearingDiamond = false;
+                                        ItemStack legs = mc.thePlayer.getEquipmentInSlot(2);
+                                        if (legs != null && legs.getItem() == Items.diamond_leggings) {
+                                            wearingDiamond = true;
+                                        }
+                                        if (!wearingDiamond)
+                                            slotToSwap = findItem(Items.diamond_leggings);
+                                        shouldSwap = true;
+                                        if (slotToSwap != -1)
+                                            break;
+                                    }
+                                }
                             }
                         }
                 }
@@ -184,7 +194,7 @@ public class MysticSwap extends Module {
                         for (EntityItem goldItem : trackedGold) {
                             if (mc.thePlayer.getDistanceToEntity(goldItem) <= 5) {
                                 if (!playerHasEnchant("Pebble"))
-                                slotToSwap = findWithEnchant("Pebble");
+                                    slotToSwap = findWithEnchant("Pebble");
                                 shouldSwap = true;
                                 // If Enchant is found
                                 if (slotToSwap != -1) {
@@ -199,40 +209,41 @@ public class MysticSwap extends Module {
                 }
 
 
-                if (slotToSwap == -1 && !shouldSwap && bruh != null){
+                if (slotToSwap == -1 && !shouldSwap && bruh != null) {
                     slotToSwap = findItem(bruh);
                 }
                 if (!shouldSwap || !ignoreSwap)
-                if (mc.thePlayer != null && (mc.currentScreen == null || mc.currentScreen instanceof GuiChat || mc.currentScreen instanceof GuiInventory)) {
-                    if (slotToSwap != -1) {
-                        swapped = true;
-                        if (timer.delay((long) (50 + (Math.random() * 200)))) {
-                            if (!isOpen && !(mc.currentScreen instanceof GuiInventory)) {
-                                NetUtil.sendPacket(new C16PacketClientStatus(C16PacketClientStatus.EnumState.OPEN_INVENTORY_ACHIEVEMENT));
-                                isOpen = true;
+                    if (mc.thePlayer != null && (mc.currentScreen == null || mc.currentScreen instanceof GuiChat || mc.currentScreen instanceof GuiInventory)) {
+                        if (slotToSwap != -1) {
+                            swapped = true;
+                            if (timer.delay((long) (50 + (Math.random() * 200)))) {
+                                if (!isOpen && !(mc.currentScreen instanceof GuiInventory)) {
+                                    NetUtil.sendPacket(new C16PacketClientStatus(C16PacketClientStatus.EnumState.OPEN_INVENTORY_ACHIEVEMENT));
+                                    isOpen = true;
+                                }
+                                if (shouldSwap) {
+                                    if (bruh == null)
+                                        bruh = mc.thePlayer.inventoryContainer.getInventory().get(7);
+                                } else {
+                                    bruh = null;
+                                }
+                                mc.playerController.windowClick(mc.thePlayer.inventoryContainer.windowId, 7, 0, 1, mc.thePlayer);
+                                timer.setDifference(-100);
+                                mc.playerController.windowClick(mc.thePlayer.inventoryContainer.windowId, slotToSwap, 0, 1, mc.thePlayer);
+                                timer.reset();
                             }
-                            if (shouldSwap){
-                                bruh = mc.thePlayer.inventoryContainer.getInventory().get(7);
-                            } else {
-                                bruh = null;
+                        } else {
+                            if (isOpen && !(mc.currentScreen instanceof GuiInventory)) {
+                                NetUtil.sendPacket(new C0DPacketCloseWindow(mc.thePlayer.inventoryContainer.windowId));
+                                isOpen = false;
                             }
-                            mc.playerController.windowClick(mc.thePlayer.inventoryContainer.windowId, 7, 0, 1, mc.thePlayer);
-                            timer.setDifference(-100);
-                            mc.playerController.windowClick(mc.thePlayer.inventoryContainer.windowId, slotToSwap, 0, 1, mc.thePlayer);
                             timer.reset();
+                            swapped = false;
                         }
                     } else {
-                        if (isOpen && !(mc.currentScreen instanceof GuiInventory)) {
-                            NetUtil.sendPacket(new C0DPacketCloseWindow(mc.thePlayer.inventoryContainer.windowId));
-                            isOpen = false;
-                        }
-                        timer.reset();
                         swapped = false;
+                        timer.reset();
                     }
-                } else {
-                    swapped = false;
-                    timer.reset();
-                }
 //            if (slotToSwap != -1) {
 //                // TODO: Check if the item is in the hotbar or inventory, click accordingly
 //            }
