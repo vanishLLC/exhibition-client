@@ -384,12 +384,6 @@ public class GuiIngame extends Gui {
 
     protected void renderTooltip(ScaledResolution sr, float partialTicks) {
         if (this.mc.getRenderViewEntity() instanceof EntityPlayer) {
-            boolean isBetterHotbar = Client.getModuleManager().isEnabled(BetterHotbar.class);
-
-            if(isBetterHotbar) {
-                GlStateManager.translate(0,-90, 0);
-            }
-
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             this.mc.getTextureManager().bindTexture(widgetsTexPath);
             EntityPlayer entityplayer = (EntityPlayer) this.mc.getRenderViewEntity();
@@ -413,10 +407,6 @@ public class GuiIngame extends Gui {
             RenderHelper.disableStandardItemLighting();
             GlStateManager.disableRescaleNormal();
             GlStateManager.disableBlend();
-
-            if(isBetterHotbar) {
-                GlStateManager.translate(0,90, 0);
-            }
         }
     }
 
@@ -439,8 +429,10 @@ public class GuiIngame extends Gui {
     public void renderExpBar(ScaledResolution p_175176_1_, int p_175176_2_) {
         boolean isBetterHotbar = Client.getModuleManager().isEnabled(BetterHotbar.class);
 
+        int offset = 65;
+
         if(isBetterHotbar) {
-            GlStateManager.translate(0,-90, 0);
+            GlStateManager.translate(0,-offset, 0);
         }
 
         this.mc.mcProfiler.startSection("expBar");
@@ -481,7 +473,7 @@ public class GuiIngame extends Gui {
         }
 
         if(isBetterHotbar) {
-            GlStateManager.translate(0,90, 0);
+            GlStateManager.translate(0,offset, 0);
         }
     }
 
@@ -490,8 +482,10 @@ public class GuiIngame extends Gui {
 
         boolean isBetterHotbar = Client.getModuleManager().isEnabled(BetterHotbar.class);
 
+        int offset = 65;
+
         if(isBetterHotbar) {
-            GlStateManager.translate(0,-90, 0);
+            GlStateManager.translate(0,-offset, 0);
         }
 
         if (this.remainingHighlightTicks > 0 && this.highlightingItemStack != null) {
@@ -525,7 +519,7 @@ public class GuiIngame extends Gui {
         }
 
         if(isBetterHotbar) {
-            GlStateManager.translate(0,90, 0);
+            GlStateManager.translate(0,offset, 0);
         }
 
         this.mc.mcProfiler.endSection();
@@ -717,8 +711,10 @@ public class GuiIngame extends Gui {
         if (this.mc.getRenderViewEntity() instanceof EntityPlayer) {
             boolean isBetterHotbar = Client.getModuleManager().isEnabled(BetterHotbar.class);
 
+            int offset = 65;
+
             if(isBetterHotbar) {
-                GlStateManager.translate(0,-90, 0);
+                GlStateManager.translate(0,-offset, 0);
             }
 
             EntityPlayer entityplayer = (EntityPlayer) this.mc.getRenderViewEntity();
@@ -953,7 +949,7 @@ public class GuiIngame extends Gui {
             this.mc.mcProfiler.endSection();
 
             if(isBetterHotbar) {
-                GlStateManager.translate(0,90, 0);
+                GlStateManager.translate(0,offset, 0);
             }
         }
     }

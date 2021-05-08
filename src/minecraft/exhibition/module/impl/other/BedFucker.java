@@ -97,7 +97,6 @@ public class BedFucker extends Module {
 
                 if(this.blockBreaking != null) {
                     final float[] rotations = this.getBlockRotations(blockBreaking.getX() + 0.5, blockBreaking.getY() + 0.1, blockBreaking.getZ() + 0.5);
-
                     em.setYaw(rotations[0]);
                     em.setPitch(rotations[1]);
                 }
@@ -112,13 +111,6 @@ public class BedFucker extends Module {
                         IBlockState blockState = mc.theWorld.getBlockState(blockBreaking);
                         Block block = blockState.getBlock();
                         if (block == Blocks.bed || block == Blocks.wheat) {
-                            if (block == Blocks.wheat && block instanceof BlockCrops) {
-                                BlockCrops cropBlock = (BlockCrops) block;
-                                if (cropBlock.canGrow(null, null, blockState, true)) {
-                                    return;
-                                }
-                            }
-
                             if (mc.playerController.onPlayerDamageBlock(this.blockBreaking, hitResult.sideHit)) {
                                 mc.thePlayer.swingItem();
                             }
@@ -276,7 +268,7 @@ public class BedFucker extends Module {
         double centerX = block.getBlockBoundsMinX() + (block.getBlockBoundsMaxX() - block.getBlockBoundsMinX())/2;
         double centerY = block.getBlockBoundsMinY() + (block.getBlockBoundsMaxY() - block.getBlockBoundsMinY())/2;
         double centerZ = block.getBlockBoundsMinZ() + (block.getBlockBoundsMaxZ() - block.getBlockBoundsMinZ())/2;
-        return mc.theWorld.rayTraceBlocksIgnored(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY + mc.thePlayer.getEyeHeight(), mc.thePlayer.posZ), new Vec3(pos.getX() + centerX, pos.getY() + centerY, pos.getZ() + centerZ), pos);
+        return mc.theWorld.rayTraceOnBlockPos(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY + mc.thePlayer.getEyeHeight(), mc.thePlayer.posZ), new Vec3(pos.getX() + centerX, pos.getY() + centerY, pos.getZ() + centerZ), pos);
     }
 
 }

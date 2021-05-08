@@ -867,7 +867,6 @@ public abstract class World implements IBlockAccess {
 
     /**
      * Performs a raycast against all blocks in the world. Args : Vec1, Vec2, stopOnLiquid,
-     * ignoreBlockWithoutBoundingBox, returnLastUncollidableBlock
      */
     public MovingObjectPosition rayTraceBlocksAutoWall(Vec3 start, Vec3 end, int maxPenetrate) {
         boolean stopOnLiquid = false, ignoreBlockWithoutBoundingBox = true;
@@ -1236,8 +1235,8 @@ public abstract class World implements IBlockAccess {
         }
     }
 
-    public MovingObjectPosition rayTraceBlocksIgnored(Vec3 start, Vec3 end, BlockPos valid) {
-        boolean stopOnLiquid = false, ignoreBlockWithoutBoundingBox = true;
+    public MovingObjectPosition rayTraceOnBlockPos(Vec3 start, Vec3 end, BlockPos valid) {
+        boolean stopOnLiquid = false;
         if (!Double.isNaN(start.xCoord) && !Double.isNaN(start.yCoord) && !Double.isNaN(start.zCoord)) {
             if (!Double.isNaN(end.xCoord) && !Double.isNaN(end.yCoord) && !Double.isNaN(end.zCoord)) {
                 int i = MathHelper.floor_double(end.xCoord);
@@ -1250,9 +1249,7 @@ public abstract class World implements IBlockAccess {
                 IBlockState iblockstate = this.getBlockState(blockpos);
                 Block block = iblockstate.getBlock();
 
-                int penetrated = 0;
-
-                if ((!ignoreBlockWithoutBoundingBox || block.getCollisionBoundingBox(this, blockpos, iblockstate) != null) && block.canCollideCheck(iblockstate, stopOnLiquid)) {
+                if (block.canCollideCheck(iblockstate, stopOnLiquid)) {
                     MovingObjectPosition movingobjectposition = block.collisionRayTrace(this, blockpos, start, end);
                     if (movingobjectposition != null) {
                         boolean allowed = true;
@@ -1267,9 +1264,7 @@ public abstract class World implements IBlockAccess {
                     }
                 }
 
-                MovingObjectPosition movingobjectposition2 = null;
                 int k1 = 200;
-
 
                 while (k1-- >= 0) {
                     if (Double.isNaN(start.xCoord) || Double.isNaN(start.yCoord) || Double.isNaN(start.zCoord)) {
@@ -1362,25 +1357,22 @@ public abstract class World implements IBlockAccess {
                     IBlockState iblockstate1 = this.getBlockState(blockpos);
                     Block block1 = iblockstate1.getBlock();
 
-                    if (!ignoreBlockWithoutBoundingBox || block1.getCollisionBoundingBox(this, blockpos, iblockstate1) != null) {
-                        if (block1.canCollideCheck(iblockstate1, stopOnLiquid)) {
-                            MovingObjectPosition movingobjectposition1 = block1.collisionRayTrace(this, blockpos, start, end);
+                    if (block1.canCollideCheck(iblockstate1, stopOnLiquid)) {
+                        MovingObjectPosition movingobjectposition1 = block1.collisionRayTrace(this, blockpos, start, end);
 
-                            boolean allowed = true;
-                            if (movingobjectposition1 != null) {
-                                if (movingobjectposition1.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
-                                    if (!movingobjectposition1.getBlockPos().equals(valid)) {
-                                        allowed = false;
-                                    }
-                                }
-
-                                if (allowed) {
-                                    return movingobjectposition1;
+                        boolean allowed = true;
+                        if (movingobjectposition1 != null) {
+                            if (movingobjectposition1.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
+                                if (!movingobjectposition1.getBlockPos().equals(valid)) {
+                                    allowed = false;
                                 }
                             }
-                        } else {
-                            movingobjectposition2 = new MovingObjectPosition(MovingObjectPosition.MovingObjectType.MISS, start, enumfacing, blockpos);
+
+                            if (allowed) {
+                                return movingobjectposition1;
+                            }
                         }
+                    } else {
                     }
                 }
                 return null;

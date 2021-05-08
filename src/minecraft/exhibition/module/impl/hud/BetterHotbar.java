@@ -5,14 +5,11 @@ import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventRenderPreScreen;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
-import exhibition.util.MathUtils;
 import exhibition.util.RenderingUtil;
 import exhibition.util.render.Colors;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 public class BetterHotbar extends Module {
@@ -26,11 +23,15 @@ public class BetterHotbar extends Module {
         if (event instanceof EventRenderPreScreen) {
             EventRenderPreScreen er = event.cast();
 
+            GlStateManager.pushMatrix();
+
             ScaledResolution sr = er.getResolution();
 
             double halfWidth = sr.getScaledWidth_double() / 2D;
 
             double height = sr.getScaledHeight_double();
+
+            GlStateManager.translate(0, -5.0,0);
 
             RenderingUtil.rectangleBordered(halfWidth - 90.5, height - 80, halfWidth + 90.5, height - 20, 0.5, Colors.getColor(0,50), Colors.getColor(0));
 
@@ -41,6 +42,8 @@ public class BetterHotbar extends Module {
                 int offset = 20 + i * 20;
                 RenderingUtil.rectangle(halfWidth - 90.5 + offset, height - 80, halfWidth - 90.5 + offset + 0.5, height - 20, Colors.getColor(0));
             }
+
+            GlStateManager.translate(0, 20, 0);
 
             RenderingUtil.rectangleBordered(halfWidth - 90.5 - 40, height - 100, halfWidth - 90.5 - 19.5, height - 60, 0.5, Colors.getColor(0,50), Colors.getColor(0));
             RenderingUtil.rectangle(halfWidth - 90.5 - 40, height - 100 + 20, halfWidth - 90.5 - 20, height - 100 + 20 - 0.5, Colors.getColor(0));
@@ -85,6 +88,8 @@ public class BetterHotbar extends Module {
                 }
             }
 
+            GlStateManager.translate(0, -20, 0);
+
             for (int slot = 9; slot < 36; slot++) {
                 if(!mc.thePlayer.inventoryContainer.getSlot(slot).getHasStack())
                     continue;
@@ -120,10 +125,13 @@ public class BetterHotbar extends Module {
                 }
             }
 
+            GlStateManager.translate(0, 5.0,0);
+
             RenderHelper.disableStandardItemLighting();
             GlStateManager.disableRescaleNormal();
             GlStateManager.disableBlend();
 
+            GlStateManager.popMatrix();
         }
     }
 

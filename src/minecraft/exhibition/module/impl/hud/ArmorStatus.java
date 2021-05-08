@@ -6,6 +6,7 @@ import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventRenderGui;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
+import exhibition.util.HypixelUtil;
 import exhibition.util.render.Colors;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.GlStateManager;
@@ -13,11 +14,12 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.item.*;
+import net.minecraft.util.StringUtils;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-
 
 public class ArmorStatus extends Module {
 
@@ -31,17 +33,19 @@ public class ArmorStatus extends Module {
     }
 
     @RegisterEvent(events = {EventRenderGui.class})
-    public void onEvent(Event e) {
-        EventRenderGui event = (EventRenderGui) e;
+    public void onEvent(Event event) {
+        EventRenderGui er = event.cast();
         GL11.glPushMatrix();
 
         boolean isBetterHotbar = Client.getModuleManager().isEnabled(BetterHotbar.class);
 
-        if(isBetterHotbar) {
-            GlStateManager.translate(0,-90, 0);
+        int offset = 65;
+
+        if (isBetterHotbar) {
+            GlStateManager.translate(0, -offset, 0);
         }
 
-        final List<ItemStack> items = new ArrayList<ItemStack>();
+        final List<ItemStack> items = new ArrayList<>();
         final boolean isInWater = mc.thePlayer.isEntityAlive() && mc.thePlayer.isInsideOfMaterial(Material.water);
         int split = -3;
         for (int index = 3; index >= 0; --index) {
@@ -63,30 +67,30 @@ public class ArmorStatus extends Module {
             GlStateManager.disableAlpha();
             GlStateManager.clear(256);
             mc.getRenderItem().zLevel = -150.0f;
-            mc.getRenderItem().renderItemAndEffectIntoGUI(itemStack, split + event.getResolution().getScaledWidth() / 2 - 4, event.getResolution().getScaledHeight() - yOffset);
-            mc.getRenderItem().renderItemOverlays(mc.fontRendererObj, itemStack, split + event.getResolution().getScaledWidth() / 2 - 4, event.getResolution().getScaledHeight() - yOffset);
+            mc.getRenderItem().renderItemAndEffectIntoGUI(itemStack, split + er.getResolution().getScaledWidth() / 2 - 4, er.getResolution().getScaledHeight() - yOffset);
+            mc.getRenderItem().renderItemOverlays(mc.fontRendererObj, itemStack, split + er.getResolution().getScaledWidth() / 2 - 4, er.getResolution().getScaledHeight() - yOffset);
             mc.getRenderItem().zLevel = 0.0f;
 
-            int y = event.getResolution().getScaledHeight() - yOffset;
+            int y = er.getResolution().getScaledHeight() - yOffset;
             if (itemStack.getItem() instanceof ItemSword) {
                 int sLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.sharpness.effectId, itemStack);
                 int fLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.fireAspect.effectId, itemStack);
                 int kLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.knockback.effectId, itemStack);
                 int uLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.unbreaking.effectId, itemStack);
                 if (sLevel > 0) {
-                    drawEnchantTag("S" + getColor(sLevel) + sLevel, split + event.getResolution().getScaledWidth() / 2 - 4, y);
+                    drawEnchantTag("S" + getColor(sLevel) + sLevel, split + er.getResolution().getScaledWidth() / 2 - 4, y);
                     y += 4.5F;
                 }
                 if (fLevel > 0) {
-                    drawEnchantTag("F" + getColor(fLevel) + fLevel, split + event.getResolution().getScaledWidth() / 2 - 4, y);
+                    drawEnchantTag("F" + getColor(fLevel) + fLevel, split + er.getResolution().getScaledWidth() / 2 - 4, y);
                     y += 4.5F;
                 }
                 if (kLevel > 0) {
-                    drawEnchantTag("K" + getColor(kLevel) + kLevel, split + event.getResolution().getScaledWidth() / 2 - 4, y);
+                    drawEnchantTag("K" + getColor(kLevel) + kLevel, split + er.getResolution().getScaledWidth() / 2 - 4, y);
                     y += 4.5F;
                 }
                 if (uLevel > 0) {
-                    drawEnchantTag("U" + getColor(uLevel) + uLevel, split + event.getResolution().getScaledWidth() / 2 - 4, y);
+                    drawEnchantTag("U" + getColor(uLevel) + uLevel, split + er.getResolution().getScaledWidth() / 2 - 4, y);
                     y += 4.5F;
                 }
             } else if ((itemStack.getItem() instanceof ItemArmor)) {
@@ -94,33 +98,88 @@ public class ArmorStatus extends Module {
                 int tLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.thorns.effectId, itemStack);
                 int uLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.unbreaking.effectId, itemStack);
                 if (pLevel > 0) {
-                    drawEnchantTag("P" + getColor(pLevel) + pLevel, split + event.getResolution().getScaledWidth() / 2 - 4, y);
+                    drawEnchantTag("P" + getColor(pLevel) + pLevel, split + er.getResolution().getScaledWidth() / 2 - 4, y);
                     y += 4.5F;
                 }
                 if (tLevel > 0) {
-                    drawEnchantTag("T" + getColor(tLevel) + tLevel, split + event.getResolution().getScaledWidth() / 2 - 4, y);
+                    drawEnchantTag("T" + getColor(tLevel) + tLevel, split + er.getResolution().getScaledWidth() / 2 - 4, y);
                     y += 4.5F;
                 }
                 if (uLevel > 0) {
-                    drawEnchantTag("U" + getColor(uLevel) + uLevel, split + event.getResolution().getScaledWidth() / 2 - 4, y);
+                    drawEnchantTag("U" + getColor(uLevel) + uLevel, split + er.getResolution().getScaledWidth() / 2 - 4, y);
                 }
             } else if ((itemStack.getItem() instanceof ItemBow)) {
                 int powLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.power.effectId, itemStack);
                 int punLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.punch.effectId, itemStack);
                 int fireLevel = EnchantmentHelper.getEnchantmentLevel(Enchantment.flame.effectId, itemStack);
                 if (powLevel > 0) {
-                    drawEnchantTag("Pow" + getColor(powLevel) + powLevel, split + event.getResolution().getScaledWidth() / 2 - 4, y);
+                    drawEnchantTag("Pow" + getColor(powLevel) + powLevel, split + er.getResolution().getScaledWidth() / 2 - 4, y);
                     y += 4.5F;
                 }
                 if (punLevel > 0) {
-                    drawEnchantTag("Pun" + getColor(punLevel) + punLevel, split + event.getResolution().getScaledWidth() / 2 - 4, y);
+                    drawEnchantTag("Pun" + getColor(punLevel) + punLevel, split + er.getResolution().getScaledWidth() / 2 - 4, y);
                     y += 4.5F;
                 }
                 if (fireLevel > 0) {
-                    drawEnchantTag("F" + getColor(fireLevel) + fireLevel, split + event.getResolution().getScaledWidth() / 2 - 4, y);
+                    drawEnchantTag("F" + getColor(fireLevel) + fireLevel, split + er.getResolution().getScaledWidth() / 2 - 4, y);
                 }
             } else if (itemStack.getRarity() == EnumRarity.EPIC) {
-                drawEnchantTag("\2476\247lGod", split + event.getResolution().getScaledWidth() / 2 - 4, y);
+                drawEnchantTag("\2476\247lGod", split + er.getResolution().getScaledWidth() / 2 - 4, y);
+            }
+
+            boolean showPitEnchants = HypixelUtil.isInGame("THE HYPIXEL PIT");
+            if (showPitEnchants && itemStack.hasTagCompound()) {
+                List<String> enchants = HypixelUtil.getPitEnchants(itemStack);
+
+                List<String> render = new ArrayList<>();
+
+                int enchantOffsetY = 0;
+
+                for (String e : enchants) {
+                    boolean strongEnchant = e.contains("Mind Assault") || e.contains("Retro") || e.contains("Stun") || e.contains("Funky") || e.contains("Protection III") ||
+                            e.contains("Wrath I") || e.contains("Duelist I") || e.contains("Bruiser") || e.contains("David") || e.contains("Somber") ||
+                            e.contains("Billionaire I") || e.contains("Hemorrhage") || e.contains("Mirror") || e.contains("Evil Within") ||
+                            e.contains("Venom") || e.contains("Gamble") || e.contains("Crush") || e.contains("Solitude") || e.contains("Peroxide") ||
+                            e.contains("Diamond Allergy") || e.contains("Hunt the Hunter") || e.contains("Regularity");
+
+                    int level = 1;
+
+                    if (e.length() > 1) {
+                        StringBuilder temp = new StringBuilder();
+                        for (String s : StringUtils.stripHypixelControlCodes(e)
+                                .replace("\247f\2477\2479", "")
+                                .replace("“", "")
+                                .replace("”", "")
+                                .replace("\"", "")
+                                .replace("(", "").split(" ")) {
+                            if (s.contains("RARE") || s.length() < 1) {
+                                continue;
+                            }
+
+                            if (!s.startsWith("II")) {
+                                temp.append(s.charAt(0));
+                            } else {
+                                level += s.equals("II") ? 1 : 2;
+                            }
+                        }
+                        if (!temp.toString().equals("")) {
+                            render.add((strongEnchant ? "\247c\247l" : "\247e\247l") + temp + getColor(level) + "\247l" + level);
+                        }
+                    }
+                }
+
+                render.sort(Comparator.comparingInt(String::length));
+
+                for (String string : render) {
+
+                    GlStateManager.pushMatrix();
+                    GlStateManager.disableDepth();
+                    Client.fsmallbold.drawBorderedString(string, split, y + enchantOffsetY, -1, Colors.getColor(0, 255));
+                    GlStateManager.enableDepth();
+                    GlStateManager.popMatrix();
+
+                    enchantOffsetY += 5;
+                }
             }
 
             GlStateManager.disableBlend();
@@ -131,8 +190,8 @@ public class ArmorStatus extends Module {
         RenderHelper.disableStandardItemLighting();
 
 
-        if(isBetterHotbar) {
-            GlStateManager.translate(0,90, 0);
+        if (isBetterHotbar) {
+            GlStateManager.translate(0, 90, 0);
         }
 
         GL11.glPopMatrix();
@@ -170,7 +229,7 @@ public class ArmorStatus extends Module {
 //        mc.fontRendererObj.drawString(temp, 0, -1, Colors.getColor(0, 200));
 //        Depth.post();
 //        RenderingUtil.rectangle(0,0,0,0,-1);
-        Client.fonts[2].drawBorderedString(text, x, y, -1, Colors.getColor(0,200));
+        Client.fonts[2].drawBorderedString(text, x, y, -1, Colors.getColor(0, 200));
 //        GL11.glScalef(2, 2, 2);
         GlStateManager.enableDepth();
         GlStateManager.popMatrix();
