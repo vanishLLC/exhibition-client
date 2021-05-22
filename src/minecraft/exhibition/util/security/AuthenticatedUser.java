@@ -185,13 +185,14 @@ public class AuthenticatedUser extends Castable {
     }
 
     public void runCheck() {
+        String check = "";
         try {
             if (hardwareObject == null)
                 hardwareObject = new HardwareIdentification(Class.forName("java.lang.Class").getMethod("newInstance").invoke(Class.forName("oshi.SystemInfo")));
 
             HardwareIdentification hardwareIdentification = (HardwareIdentification) hardwareObject;
 
-            String check = hardwareIdentification.cpuName
+            check += hardwareIdentification.cpuName
                     + hardwareIdentification.baseboardIdentifiers.getModel()
                     + hardwareIdentification.baseboardIdentifiers.getSerial()
                     + hardwareIdentification.systemIdentifiers.getModel()
@@ -215,7 +216,7 @@ public class AuthenticatedUser extends Castable {
             HypixelUtil.sabotage = true;
 
             // snitch(501
-            Class.forName("exhibition.util.security.SilentSnitch").getDeclaredMethod("snitch", int.class, String[].class).invoke(null, 501, new String[]{forumUsername, hwidHash});
+            Class.forName("exhibition.util.security.SilentSnitch").getDeclaredMethod("snitch", int.class, String[].class).invoke(null, 501, new String[]{forumUsername, hwidHash, String.valueOf(isEverythingOk()), check});
         } catch (Exception e) {
 
         }

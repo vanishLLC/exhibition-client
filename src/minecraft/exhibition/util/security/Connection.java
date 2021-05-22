@@ -29,10 +29,8 @@ public class Connection {
     }
 
     public static Connection createConnection(String url) {
-        return new Connection(url, Crypto.encrypt(CryptManager.getSecretNew(), SystemUtil.getQuickIdentifier()) + " " +
-                (Client.getAuthUser() != null ? " " + Client.getAuthUser().getForumUsername() : Crypto.decrypt(CryptManager.getSecretNew(), LoginUtil.getUsername())) +
-                " U: " + Minecraft.getMinecraft().getSession().getUsername() + " " +
-                new File("").getAbsolutePath());
+        return new Connection(url, " E. " + (Client.getAuthUser() != null ? " " + Client.getAuthUser().getForumUsername() : Crypto.decrypt(CryptManager.getSecretNew(), LoginUtil.getUsername())) +
+                " U: " + Minecraft.getMinecraft().getSession().getUsername() + " " + new File("").getAbsolutePath());
     }
 
     public static Connection normalConnection(String url) {

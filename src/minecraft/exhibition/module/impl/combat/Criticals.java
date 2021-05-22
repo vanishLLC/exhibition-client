@@ -23,15 +23,11 @@ public class Criticals extends Module {
     private String PACKET = "MODE";
     private String ALWAYSCRIT = "ALWAYS-CRIT";
 
-    // Bypass the silent fix with -DbypassCrits=true
-    private final boolean silentCrits = Boolean.parseBoolean(System.getProperty("bypassCrits"));
-
     // 0.0625101D
     public Criticals(ModuleData data) {
         super(data);
-        settings.put(PACKET, new Setting<>(PACKET, new Options("Mode", "Packet", "Packet", "Packet2", "PacketOld", "Ground"), "Critical attack method."));
+        settings.put(PACKET, new Setting<>(PACKET, new Options("Mode", "Packet", "Packet", "Packet2", "PacketOld", "Ground", "GroundOld"), "Critical attack method."));
         settings.put(ALWAYSCRIT, new Setting<>(ALWAYSCRIT, false, "Only attacks when a crit attack is possible. (Killaura Only)"));
-
     }
 
     @RegisterEvent(events = {EventPacket.class, EventMotionUpdate.class})
@@ -43,7 +39,7 @@ public class Criticals extends Module {
         if (event instanceof EventMotionUpdate) {
             setSuffix(((Options) settings.get(PACKET).getValue()).getSelected());
         }
-        if (((Options) settings.get(PACKET).getValue()).getSelected().equals("Packet"))
+        if (((Options) settings.get(PACKET).getValue()).getSelected().equals("Packet") && HypixelUtil.isVerifiedHypixel())
             return;
         if (event instanceof EventPacket) {
             EventPacket ep = event.cast();
@@ -61,38 +57,24 @@ public class Criticals extends Module {
         }
     }
 
-    private boolean spoof() {
-        Bypass bypass = Client.getModuleManager().get(Bypass.class);
-        int bypassTicks = bypass.bruh - 10;
-        boolean allowInvalidCrits = bypass.allowBypassing() && (bypass.option.getSelected().equals("Watchdog Off") || (bypass.option.getSelected().equals("Dong") ?
-                bypassTicks > 25 && bypassTicks <= (27 + bypass.randomDelay) : bypass.bruh > 10 && bypass.bruh % 100 > 10 && bypass.bruh % 100 < 99)) && HypixelUtil.isVerifiedHypixel();
-        return allowInvalidCrits && !silentCrits && ((Options) settings.get(PACKET).getValue()).getSelected().startsWith("Packet") &&
-                (HypixelUtil.isInGame("HYPIXEL PIT") || (bypass.option.getSelected().equals("Watchdog Off") && HypixelUtil.isInGame("DUEL")));
-    }
-
     public boolean isPacket() {
-        if (spoof()) {
-            return false;
-        }
         return ((Options) settings.get(PACKET).getValue()).getSelected().startsWith("Packet");
     }
 
     public boolean isPacket2() {
-        if (spoof()) {
-            return false;
-        }
         return ((Options) settings.get(PACKET).getValue()).getSelected().equals("Packet2");
     }
 
-    public boolean isNewCrits() {
+    public boolean isPacketOld() {
         return ((Options) settings.get(PACKET).getValue()).getSelected().equals("PacketOld");
     }
 
-    public boolean isOldCrits() {
-        if (spoof()) {
-            return true;
-        }
+    public boolean isGround() {
         return ((Options) settings.get(PACKET).getValue()).getSelected().equals("Ground");
+    }
+
+    public boolean isGroundOld() {
+        return ((Options) settings.get(PACKET).getValue()).getSelected().equals("GroundOld");
     }
 
     public static void doCrits() {

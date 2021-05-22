@@ -33,6 +33,9 @@ public class HardwareIdentification implements Identifier {
     // Firmware
     public final FirmwareIdentifiers firmwareIdentifiers;
 
+    // Graphics Card
+    public final GPUIdentifiers gpuIdentifiers;
+
     // Display
     public final DisplayIdentifiers displayIdentifiers;
 
@@ -66,6 +69,8 @@ public class HardwareIdentification implements Identifier {
         this.baseboardIdentifiers = new BaseboardIdentifiers(baseboard);
 
         this.firmwareIdentifiers = new FirmwareIdentifiers(computerSystem.getFirmware());
+
+        this.gpuIdentifiers = new GPUIdentifiers(hardware.getGraphicsCards());
 
         this.displayIdentifiers = new DisplayIdentifiers(hardware.getDisplays());
 
@@ -144,6 +149,20 @@ public class HardwareIdentification implements Identifier {
         }
 
         jsonObject.add("Displays", displayArray);
+
+        JsonArray graphicsArray = new JsonArray();
+
+        for (GPUIdentifiers.GPUContainer gpu : gpuIdentifiers.getDisplayContainers()) {
+            JsonObject gpuObject = new JsonObject();
+            gpuObject.addProperty("name", gpu.getName());
+            gpuObject.addProperty("version", gpu.getVersionInfo());
+            gpuObject.addProperty("deviceId", gpu.getDeviceId());
+            gpuObject.addProperty("vendor", gpu.getVendor());
+
+            graphicsArray.add(gpuObject);
+        }
+
+        jsonObject.add("Graphics", graphicsArray);
 
         JsonArray diskArray = new JsonArray();
 

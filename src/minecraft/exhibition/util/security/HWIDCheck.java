@@ -30,6 +30,7 @@ public class HWIDCheck {
                     }
                 }
 
+                field = Class.forName("exhibition.util.security.AuthenticationUtil").getDeclaredField("publicKeyEncoded");
 
                 Class unsafeClass = Class.forName("sun.misc.Unsafe");
                 Object bruh = unsafeClass.getDeclaredField("theUnsafe");

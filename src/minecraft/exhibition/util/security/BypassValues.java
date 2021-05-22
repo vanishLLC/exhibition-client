@@ -12,7 +12,7 @@ import net.minecraft.network.play.client.C03PacketPlayer;
 
 public class BypassValues {
 
-    // Code in here will be converted into native JNI calls making it harder to third world steal the bypasses.
+    // Code in here will be converted into native JNI calls making it harder for third worlders steal the bypasses.
     public static void offsetJump(EventMove em, Speed speed) {
         if (HypixelUtil.isVerifiedHypixel() && speed.strafeFix.getValue() && !Bypass.shouldSabotage() && speed.hops > 0) {
             em.setY(0.424F + (0.0001F * Math.random()));

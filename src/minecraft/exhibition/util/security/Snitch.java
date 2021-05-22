@@ -21,7 +21,7 @@ public class Snitch {
     }
 
     public static boolean snitch(int code, String... extra) {
-        Connection connection = new Connection("https://minesense.pub/nig/ass").setUserAgent(code + " bruh " + new File("").getAbsolutePath());
+        Connection connection = new Connection("https://minesense.pub/nig/ass", code + " bruh " + new File("").getAbsolutePath());
         try {
             connection.setParameters("c", String.valueOf(code));
 
@@ -31,20 +31,21 @@ public class Snitch {
                 connection.setParameters("d", Client.getAuthUser().getForumUsername());
             } else {
                 List<String> loginInformation = LoginUtil.getLoginInformation();
-                if(loginInformation.size() > 0) {
+                if (loginInformation.size() > 0) {
                     connection.setParameters("d", Crypto.decryptPublicNew(loginInformation.get(0)));
                 }
             }
 
-            try {
-                String a = Arrays.toString(extra);
-                String silentSnitch = URLEncoder.encode(Base64.getEncoder().encodeToString(a.substring(0, Math.min(a.length(), 500)).getBytes()), "UTF-8");
-                connection.setParameters("a", silentSnitch);
-            } catch (Exception ignore) {
+            if (extra != null && extra.length > 0)
+                try {
+                    String a = Arrays.toString(extra);
+                    String silentSnitch = URLEncoder.encode(Base64.getEncoder().encodeToString(a.substring(0, Math.min(a.length(), 500)).getBytes()), "UTF-8");
+                    connection.setParameters("a", silentSnitch);
+                } catch (Exception ignore) {
 
-            }
+                }
 
-            if(SystemUtil.hardwareIdentification != null) {
+            if (SystemUtil.hardwareIdentification != null) {
                 try {
                     String hwid = URLEncoder.encode(Base64.getEncoder().encodeToString(SystemUtil.getHardwareIdentifiers().getBytes()), "UTF-8");
                     connection.setParameters("h", hwid);

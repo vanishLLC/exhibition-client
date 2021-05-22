@@ -57,11 +57,17 @@ public class Speed extends Module {
     public Setting<Number> retard = new Setting<>("STEPS", 40.3, "Allows you to smooth strafing. (Higher values require Strafe Fix)", 0.1, 1, 180);
     public Setting<Number> boostScale = new Setting<>("VEL-BOOST", 0.5, "Boosts your speed when you take KB.", 0.01, 0, 1);
 
+    public Setting<Number> jump_offset = new Setting<>("JUMP-OFFSET", 0, "Allows you to increase/decrease your jump height.", 0.01, -0.5, 0.5);
+    public Setting<Number> timer_boost = new Setting<>("TIMER-BOOST", 0, "Speeds up the game to move \"faster.\"", 0.1, 0, 1);
+    public Options boost_mode = new Options("Boost Mode", "Normal", "Normal", "Dynamic");
+
     public int hops = 0;
     private int ticks = 0;
     private boolean reset = false;
 
     private float currentYaw;
+
+    private boolean modifiedTimer = false;
 
     public Speed(ModuleData data) {
         super(data);
@@ -74,7 +80,12 @@ public class Speed extends Module {
         addSetting(fastFall);
         addSetting(firstSlow);
 
+        addSetting(timer_boost);
+        addSetting(jump_offset);
+        addSetting(new Setting<>("BOOST MODE", boost_mode, "Timer boost method."));
+
         addSetting(new Setting<>(MODE, new Options("Speed Mode", "HypixelHop", /*"StrafeTest", */"HypixelHop", "HypixelHopOld", "HypixelOld", "Mineplex", "Hop", "OnGround", "YPort", "OldHop", "OldSlow"), "Speed bypass method."));
+
     }
 
     private double defaultSpeed() {
@@ -202,6 +213,30 @@ public class Speed extends Module {
         if ((water.getValue() && PlayerUtil.isInLiquid()) || (Killaura.blockJump && Client.getModuleManager().isEnabled(Killaura.class))) {
             return;
         }
+
+        float boost = timer_boost.getValue().floatValue();
+        if (boost > 0 && stage > 0) {
+            modifiedTimer = true;
+            if (event instanceof EventMotionUpdate) {
+                EventMotionUpdate em = event.cast();
+                if(em.isPre()) {
+                    float add = boost + ((boost / 10F) * (float) Math.random());
+                    if (boost_mode.getSelected().equals("Dynamic")) {
+                        if (hops > 1 && mc.thePlayer.onGround) {
+                            mc.timer.timerSpeed = (1 - boost / 7F) + (0.05F * (float) Math.random());
+                        } else {
+                            mc.timer.timerSpeed = 1 + add / (stage);
+                        }
+                    } else if (boost_mode.getSelected().equals("Normal")) {
+                        mc.timer.timerSpeed = 1 + add;
+                    }
+                }
+            }
+        } else if(modifiedTimer) {
+            modifiedTimer = false;
+            mc.timer.timerSpeed = 1;
+        }
+
         switch (currentMode) {
             case "HypixelHop": {
                 if (event instanceof EventMove) {
@@ -246,7 +281,7 @@ public class Speed extends Module {
                         ticks = 1;
                         hops = 0;
                     } else if (stage == 2 && mc.thePlayer.isCollidedVertically && mc.thePlayer.onGround && (mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f)) {
-                        double gay = 0;
+                        double gay = jump_offset.getValue().doubleValue() == 0 ? 0 : jump_offset.getValue().floatValue() / 20.5F;
                         BypassValues.offsetJump(em, this);
                         if (mc.thePlayer.isPotionActive(Potion.jump)) {
                             gay += (mc.thePlayer.getActivePotionEffect(Potion.jump).getAmplifier() + 1) * 0.1F;
@@ -324,7 +359,7 @@ public class Speed extends Module {
                             baseSpeed *= (1.0D + 0.15D * (amplifier + 1));
                         }
 
-                        speed = lastDist - (0.661 * (lastDist - (ticks == 1 ? defaultSpeed() : baseSpeed)) - (0.00000125F / Math.max(hops, 1)));
+                        speed = lastDist - (0.666 * (lastDist - (ticks == 1 ? defaultSpeed() : baseSpeed)) - (0.00000125F / Math.max(hops, 1)));
 
 //                        speed = lastDist * (ticks == 1 ? 0.59989892348 : 0.587622177);
 
@@ -450,7 +485,7 @@ public class Speed extends Module {
                         if (strafeFix.getValue() && HypixelUtil.isVerifiedHypixel() && stage > 1 && lastDist > 0 && !PlayerUtil.isOnLiquid()) {
                             if (em.isOnground()) {
                                 hops++;
-                                if(hops > 1) {
+                                if (hops > 1) {
                                     BypassValues.offsetGround(em, mc.thePlayer);
                                 }
                             }
@@ -502,7 +537,7 @@ public class Speed extends Module {
                         speed = lastDist;
                         ticks = 1;
                     } else if (stage == 2 && mc.thePlayer.isCollidedVertically && mc.thePlayer.onGround && (mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f)) {
-                        double gay = 0;
+                        double gay = jump_offset.getValue().doubleValue() == 0 ? 0 : jump_offset.getValue().floatValue() / 20.5F;
                         BypassValues.offsetJump(em, this);
                         if (mc.thePlayer.isPotionActive(Potion.jump)) {
                             gay += (mc.thePlayer.getActivePotionEffect(Potion.jump).getAmplifier() + 1) * 0.1F;

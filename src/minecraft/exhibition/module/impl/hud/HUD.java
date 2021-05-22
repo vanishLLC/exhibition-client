@@ -367,11 +367,11 @@ public class HUD extends Module {
 
             if (!strings.isEmpty()) {
                 int offset = 0;
-                mc.fontRendererObj.drawStringWithShadow("\247nPossible Staff", width/2D - mc.fontRendererObj.getStringWidth("\247nPossible Staff")/2D, 70, -1);
+                mc.fontRendererObj.drawStringWithShadow("\247nPossible Staff", width / 2D - mc.fontRendererObj.getStringWidth("\247nPossible Staff") / 2D, 70, -1);
                 offset += 12;
 
                 for (String string : strings.stream().sorted().collect(Collectors.toList())) {
-                    mc.fontRendererObj.drawStringWithShadow(string, width/2D - mc.fontRendererObj.getStringWidth(string)/2D, 70 + offset, -1);
+                    mc.fontRendererObj.drawStringWithShadow(string, width / 2D - mc.fontRendererObj.getStringWidth(string) / 2D, 70 + offset, -1);
                     offset += 10;
                 }
             }
@@ -503,19 +503,23 @@ public class HUD extends Module {
                 Client.virtueFont.drawString("\2477Movement", 29 - Client.virtueFont.getStringWidth("Movement") / 2F, yOffset + 16 + 28, -1);
                 Client.virtueFont.drawString("\2477Player", 29 - Client.virtueFont.getStringWidth("Player") / 2F, yOffset + 16 + 42, -1);
                 Client.virtueFont.drawString("\2477World", 29 - Client.virtueFont.getStringWidth("World") / 2F, yOffset + 16 + 56, -1);
-                int nigga = 0;
+                int bruhOffsetY = 0;
                 if (drawProtocol) {
                     Client.virtueFont.drawStringWithShadow("\2477Ver: \247f" + getServerProtocol(), 3, yOffset + 85, -1);
-                    nigga += 10;
+                    bruhOffsetY += 10;
                 }
                 if (fpsTime) {
-                    Client.virtueFont.drawStringWithShadow("\2477FPS: \247f" + Minecraft.getDebugFPS(), 3, yOffset + 85 + nigga, -1);
-                    nigga += 10;
+                    Client.virtueFont.drawStringWithShadow("\2477FPS: \247f" + Minecraft.getDebugFPS(), 3, yOffset + 85 + bruhOffsetY, -1);
+                    bruhOffsetY += 10;
                 }
-                if (drawPing)
-                    Client.virtueFont.drawStringWithShadow("\2477Ping: \247f" + ping, 3, yOffset + 85 + nigga, -1);
-                if (drawTPS)
-                    Client.virtueFont.drawStringWithShadow("\2477TPS: \247f" + Client.getTPS(), 3, yOffset + 85 + nigga, -1);
+                if (drawPing) {
+                    Client.virtueFont.drawStringWithShadow("\2477Ping: \247f" + ping, 3, yOffset + 85 + bruhOffsetY, -1);
+                    bruhOffsetY += 10;
+                }
+                if (drawTPS) {
+                    Client.virtueFont.drawStringWithShadow("\2477TPS: \247f" + Client.getTPS(), 3, yOffset + 85 + bruhOffsetY, -1);
+                    bruhOffsetY += 10;
+                }
             } else {
                 RenderingUtil.rectangleBordered(2, yOffset + 12, 62, yOffset + 74, 1, Colors.getColor(0, 150), Colors.getColor(0, 200));
                 RenderingUtil.rectangle(3, yOffset + 13, 61, yOffset + 25, colorInt);
@@ -526,19 +530,23 @@ public class HUD extends Module {
                 mc.fontRendererObj.drawString("\2477Player", 6, yOffset + 51, -1);
                 mc.fontRendererObj.drawString("\2477World", 6, yOffset + 63, -1);
 
-                int nigga = 0;
+                int bruhOffsetY = 0;
                 if (drawProtocol) {
                     mc.fontRendererObj.drawStringWithShadow("\2477Ver: \247f" + getServerProtocol(), 3, yOffset + 77, -1);
-                    nigga += 10;
+                    bruhOffsetY += 10;
                 }
                 if (fpsTime) {
-                    mc.fontRendererObj.drawStringWithShadow("\2477FPS: \247f" + Minecraft.getDebugFPS(), 2, yOffset + 77 + nigga, -1);
-                    nigga += 10;
+                    mc.fontRendererObj.drawStringWithShadow("\2477FPS: \247f" + Minecraft.getDebugFPS(), 2, yOffset + 77 + bruhOffsetY, -1);
+                    bruhOffsetY += 10;
                 }
-                if (drawPing)
-                    mc.fontRendererObj.drawStringWithShadow("\2477Ping: \247f" + ping, 2, yOffset + 77 + nigga, -1);
-                if (drawTPS)
-                    mc.fontRendererObj.drawStringWithShadow("\2477TPS: \247f" + Client.getTPS(), 2, yOffset + 77 + nigga, -1);
+                if (drawPing) {
+                    mc.fontRendererObj.drawStringWithShadow("\2477Ping: \247f" + ping, 2, yOffset + 77 + bruhOffsetY, -1);
+                    bruhOffsetY += 10;
+                }
+                if (drawTPS) {
+                    mc.fontRendererObj.drawStringWithShadow("\2477TPS: \247f" + Client.getTPS(), 2, yOffset + 77 + bruhOffsetY, -1);
+                    bruhOffsetY += 10;
+                }
             }
 
             return;
@@ -685,12 +693,15 @@ public class HUD extends Module {
         if (options.getValue("COORDS")) {
             boolean chat = mc.currentScreen instanceof GuiChat;
             String str = String.format((nostalgia ? "\2477XYZ:  \247r" : (font.renderMC ? "" : "\247l")) + "%d %d %d", (int) mc.thePlayer.posX, (int) mc.thePlayer.posY, (int) mc.thePlayer.posZ);
-            String speed = String.format((nostalgia ? "\2477b/s:  \247r" : (font.renderMC ? "" : "\247l")) + "%.2f", Math.sqrt(Math.pow(mc.thePlayer.posX - mc.thePlayer.lastTickPosX, 2) + Math.pow(mc.thePlayer.posZ - mc.thePlayer.lastTickPosZ, 2)) * 20);
-
+            double movementSpeed = Math.sqrt(Math.pow(mc.thePlayer.posX - mc.thePlayer.lastTickPosX, 2) + Math.pow(mc.thePlayer.posZ - mc.thePlayer.lastTickPosZ, 2)) * 20;
+            if (mc.timer.timerSpeed > 1) {
+                movementSpeed *= mc.timer.timerSpeed;
+            }
+            String speedStr = String.format((nostalgia ? "\2477b/s:  \247r" : (font.renderMC ? "" : "\247l")) + "%.2f", movementSpeed);
 
             if (nostalgia) {
                 mc.fontRendererObj.drawStringWithShadow(str, e.getResolution().getScaledWidth() / 2D - mc.fontRendererObj.getStringWidth(str) / 2D, BossStatus.bossName != null && BossStatus.statusBarTime > 0 ? 20 : 2, colorXD);
-                mc.fontRendererObj.drawStringWithShadow(speed, e.getResolution().getScaledWidth() / 2D - mc.fontRendererObj.getStringWidth(speed) / 2D, BossStatus.bossName != null && BossStatus.statusBarTime > 0 ? 30 : 12, colorXD);
+                mc.fontRendererObj.drawStringWithShadow(speedStr, e.getResolution().getScaledWidth() / 2D - mc.fontRendererObj.getStringWidth(speedStr) / 2D, BossStatus.bossName != null && BossStatus.statusBarTime > 0 ? 30 : 12, colorXD);
             } else {
                 String firstPart = "\2477" + (font.renderMC ? "" : "\247l") + "XYZ: ";
                 String firstPart2 = "\2477" + (font.renderMC ? "" : "\247l") + "b/s: ";
@@ -707,7 +718,7 @@ public class HUD extends Module {
                 double offset = font.getWidth(firstPart + str) + 5;
 
                 font.drawStringWithShadow(firstPart2, 2 + offset, e.getResolution().getScaledHeight() - (chat ? 25 : 12), colorXD);
-                font.drawStringWithShadow(speed, 2 + offset + totalWidth2, e.getResolution().getScaledHeight() - (chat ? 25 : 12), colorXD);
+                font.drawStringWithShadow(speedStr, 2 + offset + totalWidth2, e.getResolution().getScaledHeight() - (chat ? 25 : 12), colorXD);
             }
 
         }

@@ -87,7 +87,7 @@ public class ParticleContainer {
             int red = ((color >> 16 & 0xFF));
             int green = ((color >> 8 & 0xFF));
             int blue = ((color & 0xFF));
-            this.scale = 0.5 + (1 * Math.random());
+            this.scale = (2 * Math.random());
             this.opacity = new Opacity((float) (-2550 * Math.random()));
             this.targetNewValue = (float) (1050 + (1500 * scale));
             this.color = Colors.getColor(red, green, blue, (int) ((alpha * (scale - 0.35))));
@@ -127,6 +127,9 @@ public class ParticleContainer {
             int red = ((color >> 16 & 0xFF));
             int green = ((color >> 8 & 0xFF));
             int blue = ((color & 0xFF));
+
+            double radius = this.radius + 0.25 * scale;
+
             RenderingUtil.rectangle(translate.getX() - radius + scalar.getX() / 1000, translate.getY() - radius + scalar.getY() / 1000,
                     translate.getX() + radius + scalar.getX() / 1000, translate.getY() + radius + scalar.getY() / 1000, Colors.getColor(red, green, blue, alpha));
         }

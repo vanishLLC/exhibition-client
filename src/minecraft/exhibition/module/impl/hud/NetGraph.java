@@ -137,7 +137,7 @@ public class NetGraph extends Module {
 
                 HashMap<String, Integer> packetMap = new HashMap<>();
 
-                boolean debug = true;
+                boolean debug = false;
 
                 for (TickPacketData tickPacketData : arrayBlockingQueue) {
                     if (debug) {

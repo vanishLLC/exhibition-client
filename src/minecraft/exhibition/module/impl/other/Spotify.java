@@ -76,33 +76,33 @@ public class Spotify extends Module {
         final int mouseX = Mouse.getX() * var141 / this.mc.displayWidth;
         final int mouseY = var151 - Mouse.getY() * var151 / this.mc.displayHeight - 1;
 
-        if(!Mouse.isButtonDown(0)) {
+        if (!Mouse.isButtonDown(0)) {
             isDragging = false;
         }
 
         boolean hoveringDrag = mc.currentScreen instanceof GuiChat && mouseX >= x && mouseX <= x + getWidth() && mouseY >= y - 2 && mouseY <= y + 17;
 
-        if(hoveringDrag && !isDragging && Mouse.isButtonDown(0)) {
+        if (hoveringDrag && !isDragging && Mouse.isButtonDown(0)) {
             double twoDscale = resolution.getScaleFactor() / Math.pow(resolution.getScaleFactor(), 2.0D);
             isDragging = true;
             startedX = x / twoDscale;
             startedY = y / twoDscale;
 
             final int realMouseX = Mouse.getX();
-            final int realMouseY =  mc.displayHeight - Mouse.getY();
+            final int realMouseY = mc.displayHeight - Mouse.getY();
             draggedX = realMouseX;
             draggedY = realMouseY;
         }
 
-        if(isDragging) {
+        if (isDragging) {
             final int realMouseX = Mouse.getX();
-            final int realMouseY =  mc.displayHeight - Mouse.getY();
+            final int realMouseY = mc.displayHeight - Mouse.getY();
 
             int movedX = (int) (realMouseX - draggedX);
             int movedY = (int) (realMouseY - draggedY);
 
-            settings.get(X).setValue((int)(startedX + movedX));
-            settings.get(Y).setValue((int)(startedY + movedY));
+            settings.get(X).setValue((int) (startedX + movedX));
+            settings.get(Y).setValue((int) (startedY + movedY));
         }
 
         CurrentlyPlayingContext status = (spotifyManager.isConnected()) ? spotifyManager.getCurrentlyPlaying() : null;
@@ -110,8 +110,9 @@ public class Spotify extends Module {
         float trackRight = x + getWidth() - 4;
         int albumSize = getHeight() - 2;
         // 0xFF282828
-        RenderingUtil.rectangle(x, y, x + getWidth(), y + getHeight() - 2, 0xFF181818);
-        RenderingUtil.rectangle(x, y + getHeight() - 2, x + getWidth(), y + getHeight() - 2 + (track != null ? 16 : 0), 0xFF282828);
+        RenderingUtil.rectangle(x, y, x + getWidth(), y + getHeight() - 2, 0xFF121212);
+        RenderingUtil.rectangle(x, y + getHeight() - 2, x + getWidth(), y + getHeight() - 2 + (track != null ? 16 : 0), 0xFF181818);
+        RenderingUtil.rectangle(x, y + getHeight() - 2, x + getWidth(), y + getHeight() - 1.5, 0xFF282828);
 
 
 //        if (track != null && track.getAlbum() != null && track.getAlbum().getImages() != null) {
@@ -125,7 +126,7 @@ public class Spotify extends Module {
 //            base64Renderer.reset();
 //        }
 
-        RenderingUtil.rectangle(x, y, x + albumSize, y + albumSize, 0xFF121212);
+        RenderingUtil.rectangle(x, y, x + albumSize, y + albumSize, 0xFF000000);
 
         GlStateManager.pushMatrix();
         GlStateManager.enableAlpha();
@@ -161,10 +162,14 @@ public class Spotify extends Module {
                 mc.getTextureManager().bindTexture(icons);
                 GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
                 GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
-                RenderingUtil.glColor(hovering ? mouseClicked ? Colors.getColor(125) : Colors.getColor(220) : Colors.getColor(175));
-                GlStateManager.translate(pauseX, pauseY, 0);
+                RenderingUtil.glColor(-1);
+
+                double scale = hovering && !mouseClicked ? 1.25 : 1.15;
+
+                GlStateManager.translate(pauseX + 4, pauseY + 4, 0);
+                GlStateManager.scale(scale, scale, 1);
                 GlStateManager.pushMatrix();
-                Gui.drawModalRectWithCustomSizedTexture(0, 0, status.getIs_playing() ? 8 : 16, 8, 8, 8, 48 / 2F, 32 / 2F);
+                Gui.drawModalRectWithCustomSizedTexture(-4, -4, status.getIs_playing() ? 8 : 16, 8, 8, 8, 48 / 2F, 32 / 2F);
                 GlStateManager.popMatrix();
                 GlStateManager.disableBlend();
                 GlStateManager.disableAlpha();
@@ -196,7 +201,7 @@ public class Spotify extends Module {
                 GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
                 GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
 
-                RenderingUtil.glColor(hovering ? mouseClicked ? Colors.getColor(125) : Colors.getColor(220) : Colors.getColor(175));
+                RenderingUtil.glColor(hovering && !mouseClicked ? Colors.getColor(255) : Colors.getColor(179));
                 GlStateManager.translate(pauseX, pauseY, 0);
                 GlStateManager.pushMatrix();
                 Gui.drawModalRectWithCustomSizedTexture(0, 0, 0, 8, 8, 8, 48 / 2F, 32 / 2F);
@@ -229,7 +234,7 @@ public class Spotify extends Module {
                 GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
                 GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
 
-                RenderingUtil.glColor(hovering ? mouseClicked ? Colors.getColor(125) : Colors.getColor(220) : Colors.getColor(175));
+                RenderingUtil.glColor(hovering && !mouseClicked ? Colors.getColor(255) : Colors.getColor(179));
                 GlStateManager.translate(pauseX, pauseY, 0);
                 GlStateManager.rotate(180, 0, 0, 1);
                 GlStateManager.pushMatrix();
@@ -256,6 +261,8 @@ public class Spotify extends Module {
 
                 boolean hovering = mouseX >= pauseX && mouseX <= pauseX + 8 && mouseY >= pauseY && mouseY <= pauseY + 8 && (mc.currentScreen instanceof GuiChat);
 
+                boolean enabled = status.getShuffle_state();
+
                 GlStateManager.pushMatrix();
                 GlStateManager.enableAlpha();
                 GlStateManager.enableBlend();
@@ -263,14 +270,24 @@ public class Spotify extends Module {
                 GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
                 GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
 
-                RenderingUtil.glColor(hovering ? mouseClicked ? Colors.getColor(125) : Colors.getColor(220) : status.getShuffle_state() ? -14756000 : Colors.getColor(175));
                 GlStateManager.translate(pauseX, pauseY, 0);
                 GlStateManager.pushMatrix();
+                RenderingUtil.glColor(enabled ? 0xff1db954 : Colors.getColor(179));
                 Gui.drawModalRectWithCustomSizedTexture(0, 0, 16, 0, 8, 8, 48 / 2F, 32 / 2F);
+                RenderingUtil.glColor(-1);
                 GlStateManager.popMatrix();
                 GlStateManager.disableBlend();
                 GlStateManager.disableAlpha();
                 GlStateManager.popMatrix();
+
+                if (enabled) {
+                    GlStateManager.pushMatrix();
+                    GlStateManager.translate(pauseX + 4, pauseY + 9, 0);
+                    RenderingUtil.rectangle(-1, -1, 1, 1, Colors.getColorOpacity(0xff1db954, 125));
+                    RenderingUtil.rectangle(-0.5, -1, 0.5, 1, Colors.getColorOpacity(0xff1db954, 200));
+                    RenderingUtil.rectangle(-1, -0.5, 1, 0.5, Colors.getColorOpacity(0xff1db954, 200));
+                    GlStateManager.popMatrix();
+                }
 
                 boolean clicked = hovering && mouseClicked && Display.isActive();
 
@@ -289,21 +306,33 @@ public class Spotify extends Module {
 
                 boolean hovering = mouseX >= pauseX && mouseX <= pauseX + 8 && mouseY >= pauseY && mouseY <= pauseY + 8 && (mc.currentScreen instanceof GuiChat);
 
+                boolean enabled = !status.getRepeat_state().equals("off");
+
                 GlStateManager.pushMatrix();
                 GlStateManager.enableAlpha();
                 GlStateManager.enableBlend();
                 mc.getTextureManager().bindTexture(icons);
                 GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
                 GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
-                RenderingUtil.glColor(hovering ? mouseClicked ? Colors.getColor(125) : Colors.getColor(220) : !status.getRepeat_state().equals("off") ? -14756000 : Colors.getColor(175));
                 GlStateManager.translate(pauseX, pauseY, 0);
                 GlStateManager.pushMatrix();
                 int offset = status.getRepeat_state().equals("track") ? 0 : 8;
+                RenderingUtil.glColor(enabled ? 0xff1db954 : Colors.getColor(179));
                 Gui.drawModalRectWithCustomSizedTexture(0, 0, offset, 0, 8, 8, 48 / 2F, 32 / 2F);
+                RenderingUtil.glColor(-1);
                 GlStateManager.popMatrix();
                 GlStateManager.disableBlend();
                 GlStateManager.disableAlpha();
                 GlStateManager.popMatrix();
+
+                if (enabled) {
+                    GlStateManager.pushMatrix();
+                    GlStateManager.translate(pauseX + 4, pauseY + 9, 0);
+                    RenderingUtil.rectangle(-1, -1, 1, 1, Colors.getColorOpacity(0xff1db954, 125));
+                    RenderingUtil.rectangle(-0.5, -1, 0.5, 1, Colors.getColorOpacity(0xff1db954, 200));
+                    RenderingUtil.rectangle(-1, -0.5, 1, 0.5, Colors.getColorOpacity(0xff1db954, 200));
+                    GlStateManager.popMatrix();
+                }
 
                 boolean clicked = hovering && mouseClicked && Display.isActive();
 
@@ -320,7 +349,7 @@ public class Spotify extends Module {
         String trackName = (track != null) && track.getName() != null ? track.getName() : spotifyManager.isConnected() ? "No song." : "Spotify Connection Error?";
 
         if ((!trackName.equals("")) && ((this.scrollingTrack == null) || (!trackName.equals(this.scrollingTrack.getText())))) {
-            this.scrollingTrack = new ScrollingText(trackName, maxInfoWidth, 8, 0xFF181818, 11184810);
+            this.scrollingTrack = new ScrollingText(trackName, maxInfoWidth, 8, 0xFF121212, -1);
         } else if ((this.scrollingTrack != null) && (trackName.equals(""))) {
             this.scrollingTrack = null;
         }
@@ -340,7 +369,7 @@ public class Spotify extends Module {
 
 
         if ((!artistName.equals("")) && ((this.scrollingArtist == null) || (!artistName.equals(this.scrollingArtist.getText())))) {
-            this.scrollingArtist = new ScrollingText(artistName, maxInfoWidth, 5, 0xFF181818, 11184810);
+            this.scrollingArtist = new ScrollingText(artistName, maxInfoWidth, 5, 0xFF121212, -1);
         } else if ((this.scrollingArtist != null) && (artistName.equals(""))) {
             this.scrollingArtist = null;
         }
@@ -356,83 +385,99 @@ public class Spotify extends Module {
         }
         float positionLineTop = y + getHeight() - 8;
         float positionLineBottom = positionLineTop + 2.5F;
-        float positionLineLeft = infoLeft + 11;
-        float positionLineRight = trackRight - 11;
+        float positionLineLeft = infoLeft + 13;
+        float positionLineRight = trackRight - 13;
         float positionWidth = positionLineRight - positionLineLeft;
 
         Depth.pre();
-        Depth.mask();
-        RenderingUtil.rectangle(positionLineLeft + 0.5, positionLineTop, positionLineRight - 0.5, positionLineBottom, -1);
-        RenderingUtil.rectangle(positionLineLeft, positionLineTop + 0.5, positionLineRight, positionLineBottom - 0.5, -1);
-        Depth.render();
-        RenderingUtil.rectangle(positionLineLeft, positionLineTop, positionLineRight, positionLineBottom, -12566464);
+        {
+            Depth.mask();
+            RenderingUtil.rectangle(positionLineLeft + 0.5, positionLineTop, positionLineRight - 0.5, positionLineBottom, -1);
+            RenderingUtil.rectangle(positionLineLeft, positionLineTop + 0.5, positionLineRight, positionLineBottom - 0.5, -1);
+            Depth.render();
+            RenderingUtil.rectangle(positionLineLeft, positionLineTop, positionLineRight, positionLineBottom, 0xFF535353);
 
-        if (track != null) {
             boolean hovering = mouseX >= positionLineLeft - 1 && mouseX <= positionLineRight && mouseY >= positionLineTop && mouseY <= positionLineBottom && (mc.currentScreen instanceof GuiChat);
-            boolean clicked = hovering && mouseClicked && Display.isActive();
-            if (hovering) {
-                double position = (mouseX - positionLineLeft) / (positionWidth);
+            if (track != null) {
+                boolean clicked = hovering && mouseClicked && Display.isActive();
+                if (hovering) {
+                    double position = (mouseX - positionLineLeft) / (positionWidth);
 
-                RenderingUtil.rectangle(positionLineLeft, positionLineTop, positionLineLeft + position * positionWidth, positionLineBottom, Colors.getColor(255, 35));
-                Depth.render(GL11.GL_LEQUAL);
+                    RenderingUtil.rectangle(positionLineLeft, positionLineTop, positionLineLeft + position * positionWidth, positionLineBottom, Colors.getColor(255, 35));
+                    Depth.render(GL11.GL_LEQUAL);
 
-                long bruh = Math.round(track.getDurationMs() * position);
-                String pp = "Jump to " + convertToClock(bruh);
-                float width = mc.fontRendererObj.getStringWidth(pp);
-                GlStateManager.pushMatrix();
-                GlStateManager.translate(mouseX - width / 4, mouseY - 8, 1000);
-                GlStateManager.scale(0.5, 0.5, 0.5);
-                mc.fontRendererObj.drawStringWithShadow(pp, 0, 0, clicked ? -1 : Colors.getColor(240));
-                GlStateManager.popMatrix();
+                    long bruh = Math.round(track.getDurationMs() * position);
+                    String pp = "Jump to " + convertToClock(bruh);
+                    float width = mc.fontRendererObj.getStringWidth(pp);
+                    GlStateManager.pushMatrix();
+                    GlStateManager.translate(mouseX - width / 4, mouseY - 8, 1000);
+                    GlStateManager.scale(0.5, 0.5, 0.5);
+                    mc.fontRendererObj.drawStringWithShadow(pp, 0, 0, clicked ? -1 : Colors.getColor(240));
+                    GlStateManager.popMatrix();
 
-                if (clicked && timer.delay(300)) {
-                    timer.reset();
-                    new Thread(() -> spotifyManager.seekTo(bruh)).start();
-                } else if (clicked && mouseClicked) {
-                    timer.reset();
+                    if (clicked && timer.delay(300)) {
+                        timer.reset();
+                        new Thread(() -> spotifyManager.seekTo(bruh)).start();
+                    } else if (clicked && mouseClicked) {
+                        timer.reset();
+                    }
                 }
             }
+            Depth.render();
+
+            long adjustedProgress = status != null ? (System.currentTimeMillis() - status.getTimestamp()) - (long) (spotifyManager.getLastTimeStamp() * 1.5D) : 0;
+            double trackPosition = status != null ? status.getIs_playing() ? spotifyManager.getLastProgressMS() + adjustedProgress : status.getProgress_ms() : 0.0D;
+            long trackLength = track != null ? track.getDurationMs() : 1000L;
+            double trackPercentage = Math.max(0, Math.min(1, trackPosition / trackLength));
+            RenderingUtil.rectangle(positionLineLeft, positionLineTop, positionLineLeft + trackPercentage * positionWidth - 0.5, positionLineBottom, hovering ? 0xff1db954 : 0xFFb3b3b3);
+            RenderingUtil.rectangle(trackPercentage * positionWidth - 0.5, positionLineTop + 0.5, positionLineLeft + trackPercentage * positionWidth, positionLineBottom - 0.5, hovering ? 0xff1db954 : 0xFFb3b3b3);
+
+            if(hovering) {
+                GlStateManager.pushMatrix();
+                GlStateManager.translate(positionLineLeft + trackPercentage * positionWidth, positionLineBottom - 1.25,0);
+                RenderingUtil.drawFullCircle(0,0, 2, -1);
+                GlStateManager.popMatrix();
+            }
+
+            Depth.post();
+            drawScaledString(convertToClock((long) trackPosition), infoLeft - 2.5F, positionLineTop - 0.5F, 0xFFb3b3b3, 0.5F);
+            drawScaledString(convertToClock(trackLength), positionLineRight + 3, positionLineTop - 0.5F, 0xFFb3b3b3, 0.5F);
         }
-        Depth.render();
-
-        long adjustedProgress = status != null ? (System.currentTimeMillis() - status.getTimestamp()) - (long) (spotifyManager.getLastTimeStamp() * 1.5D) : 0;
-        double trackPosition = status != null ? status.getIs_playing() ? spotifyManager.getLastProgressMS() + adjustedProgress : status.getProgress_ms() : 0.0D;
-        long trackLength = track != null ? track.getDurationMs() : 1000L;
-        double trackPercentage = Math.max(0, Math.min(1, trackPosition / trackLength));
-        RenderingUtil.rectangle(positionLineLeft, positionLineTop, positionLineLeft + trackPercentage * positionWidth - 0.5, positionLineBottom, -14756000);
-        RenderingUtil.rectangle(trackPercentage * positionWidth - 0.5, positionLineTop + 0.5, positionLineLeft + trackPercentage * positionWidth, positionLineBottom - 0.5, -14756000);
-
-        Depth.post();
-        drawScaledString(convertToClock((long) trackPosition), infoLeft - 2.5F, positionLineTop - 0.5F, 11184810, 0.5F);
-        drawScaledString(convertToClock(trackLength), positionLineRight + 1, positionLineTop - 0.5F, 11184810, 0.5F);
 
         if (track != null) {
-
             double volumeLeft = x + getWidth() - 1.5 - 70 / 2F;
             double volumeRight = x + getWidth() - 1.5F;
             double volumeTop = positionLineBottom + 12.5F;
             double volumeBottom = volumeTop + 2.5F;
+
+            boolean hovering = mouseX >= volumeLeft && mouseX <= volumeRight && mouseY >= volumeTop && mouseY <= volumeBottom && (mc.currentScreen instanceof GuiChat);
 
             Depth.pre();
             Depth.mask();
             RenderingUtil.rectangle(volumeLeft + 0.5, volumeTop, volumeRight - 0.5, volumeBottom, -1);
             RenderingUtil.rectangle(volumeLeft, volumeTop + 0.5, volumeRight, volumeBottom - 0.5, -1);
             Depth.render();
-            RenderingUtil.rectangle(volumeLeft, volumeTop, volumeRight, volumeBottom, -12566464);
+            RenderingUtil.rectangle(volumeLeft, volumeTop, volumeRight, volumeBottom, 0xFF535353);
             double volumePercent = (volumeRight - volumeLeft) * (spotifyManager.getVolume() / 100F);
-            RenderingUtil.rectangle(volumeLeft, volumeTop, volumeLeft + volumePercent - 0.5, volumeBottom, -14756000);
-            RenderingUtil.rectangle(volumeLeft + volumePercent - 0.5, volumeTop + 0.5, volumeLeft + volumePercent, volumeBottom - 0.5, -14756000);
+            RenderingUtil.rectangle(volumeLeft, volumeTop, volumeLeft + volumePercent - 0.5, volumeBottom, hovering ? 0xff1db954 : 0xFFb3b3b3);
+            RenderingUtil.rectangle(volumeLeft + volumePercent - 0.5, volumeTop + 0.5, volumeLeft + volumePercent, volumeBottom - 0.5, hovering ? 0xff1db954 : 0xFFb3b3b3);
             Depth.post();
+
+            if(hovering) {
+                GlStateManager.pushMatrix();
+                GlStateManager.translate(volumeLeft + volumePercent, volumeBottom - 1.25,0);
+                RenderingUtil.drawFullCircle(0,0, 2, -1);
+                GlStateManager.popMatrix();
+            }
 
             GlStateManager.pushMatrix();
             float stringWidth = mc.fontRendererObj.getStringWidth(spotifyManager.getVolume() + "%");
-            GlStateManager.translate(x + getWidth() - 1.5 - 70 / 4F - stringWidth / 4F, volumeBottom - 7.5F, 0);
+            GlStateManager.translate(x + getWidth() - 1.5 - 70 / 4F - stringWidth / 4F, volumeBottom - 9, 0);
             GlStateManager.scale(0.5, 0.5, 0.5);
-            mc.fontRendererObj.drawStringWithShadow(spotifyManager.getVolume() + "%", 0, 0, 11184810);
+            mc.fontRendererObj.drawStringWithShadow(spotifyManager.getVolume() + "%", 0, 0, 0xFFb3b3b3);
             GlStateManager.scale(2, 2, 2);
             GlStateManager.popMatrix();
 
-            boolean hovering = mouseX >= volumeLeft && mouseX <= volumeRight && mouseY >= volumeTop && mouseY <= volumeBottom && (mc.currentScreen instanceof GuiChat);
             boolean clicked = hovering && mouseClicked && Display.isActive();
             if (hovering) {
                 double position = (mouseX - volumeLeft) / (volumeRight - volumeLeft);

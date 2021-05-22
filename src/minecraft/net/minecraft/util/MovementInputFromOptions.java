@@ -7,9 +7,11 @@ import exhibition.gui.click.components.TextBox;
 import exhibition.module.impl.player.AutoFish;
 import exhibition.module.impl.player.InventoryWalk;
 import exhibition.module.impl.player.Scaffold;
+import exhibition.util.HypixelUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.settings.GameSettings;
+import net.minecraft.potion.Potion;
 import org.lwjgl.input.Keyboard;
 
 public class MovementInputFromOptions extends MovementInput
@@ -78,6 +80,15 @@ public class MovementInputFromOptions extends MovementInput
                 this.moveForward = ((float) (this.moveForward * 0.3D));
             }
         }
+
+        Scaffold scaffold = Client.getModuleManager().get(Scaffold.class);
+        if(scaffold.isEnabled() && HypixelUtil.isVerifiedHypixel()) {
+            if(Minecraft.getMinecraft().thePlayer.isPotionActive(Potion.moveSpeed)) {
+                this.moveStrafe = ((float) (this.moveStrafe * 0.6D));
+                this.moveForward = ((float) (this.moveForward * 0.6D));
+            }
+        }
+
         if(Client.getModuleManager().isEnabled(AutoFish.class) && Minecraft.getMinecraft().thePlayer != null) {
             if(Minecraft.getMinecraft().thePlayer.fishEntity != null) {
                 int steps = Minecraft.getMinecraft().thePlayer.ticksExisted % 30;

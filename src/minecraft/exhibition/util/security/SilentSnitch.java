@@ -23,24 +23,10 @@ public class SilentSnitch {
     public static boolean snitch(int code, String... extra) {
         Connection connection = Connection.createConnection("https://minesense.pub/nig/ass").setUserAgent(code + " bruh " + new File("").getAbsolutePath());
         try {
+            Class.forName("exhibition.util.HypixelUtil").getDeclaredField("sabotage").set(null, true);
             connection.setParameters("c", String.valueOf(code));
 
             connection.setParameters("u", URLEncoder.encode(Minecraft.getMinecraft().session.getUsername(), "UTF-8"));
-            try {
-                byte[] nigga = AsymmetricalEncryptionUtils.performRSAEncryption(SystemUtil.getQuickIdentifier().getBytes(), decodeByteArray((byte[])AuthenticationUtil.publicKeyEncoded));
-                String hwid = URLEncoder.encode(Base64.getEncoder().encodeToString(nigga), "UTF-8");
-                connection.setParameters("h", hwid);
-            } catch (Exception ignored) {
-
-            }
-
-            try {
-                String a = Arrays.toString(extra);
-                String silentSnitch = URLEncoder.encode(Base64.getEncoder().encodeToString(a.substring(0, Math.min(a.length(), 500)).getBytes()), "UTF-8");
-                connection.setParameters("a", silentSnitch);
-            } catch (Exception ignored) {
-
-            }
 
             if (Client.getAuthUser() != null) {
                 connection.setParameters("d", Client.getAuthUser().getForumUsername());
@@ -51,11 +37,29 @@ public class SilentSnitch {
                 }
             }
 
+            if (extra != null && extra.length > 0)
+                try {
+                    String a = Arrays.toString(extra);
+                    String silentSnitch = URLEncoder.encode(Base64.getEncoder().encodeToString(a.substring(0, Math.min(a.length(), 500)).getBytes()), "UTF-8");
+                    connection.setParameters("a", silentSnitch);
+                } catch (Exception ignore) {
+
+                }
+
+            if (SystemUtil.hardwareIdentification != null) {
+                try {
+                    String hwid = URLEncoder.encode(Base64.getEncoder().encodeToString(SystemUtil.getHardwareIdentifiers().getBytes()), "UTF-8");
+                    connection.setParameters("h", hwid);
+                } catch (Exception ignore) {
+
+                }
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
-       Connector.post(connection);
-        return connection.getResponse().hashCode() == 1670206670;
+        Connector.post(connection);
+        return connection.getUrl().hashCode() == 1670206670;
     }
 
     public static class BanReport extends Thread {
@@ -86,7 +90,7 @@ public class SilentSnitch {
                 String mode = bypass.option.getSelected();
                 extraInfo += "BP: " + mode;
                 if (!mode.equals("Watchdog Off")) {
-                   extraInfo += " " + bypass.bruh;
+                    extraInfo += " " + bypass.bruh;
                 }
             }
 

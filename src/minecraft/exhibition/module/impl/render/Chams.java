@@ -74,14 +74,11 @@ public class Chams extends Module {
 
                                 boolean bruh = false;
 
-                                float oldgamma = mc.gameSettings.gammaSetting;
                                 if ((Boolean) settings.get("FLAT").getValue()) {
                                     if (GL11.glIsEnabled(GL11.GL_LIGHTING)) {
                                         bruh = true;
                                         GL11.glDisable(GL11.GL_LIGHTING);
                                     }
-                                    mc.gameSettings.gammaSetting = 10000000;
-                                    mc.entityRenderer.forceUpdateLightmap(mc.timer.renderPartialTicks);
                                 }
                                 switch (selected) {
                                     case "Friend":
@@ -190,10 +187,8 @@ public class Chams extends Module {
                                 GL11.glDisable(GL11.GL_BLEND);
                                 GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
                                 if ((Boolean) settings.get("FLAT").getValue()) {
-                                    mc.gameSettings.gammaSetting = oldgamma;
                                     if (bruh)
                                         GL11.glEnable(GL11.GL_LIGHTING);
-                                    mc.entityRenderer.forceUpdateLightmap(mc.timer.renderPartialTicks);
                                 }
                                 GL11.glPopMatrix();
                                 ((RendererLivingEntity) var11).renderLayers(er.getEntity(), er.getLimbSwing(), er.getLimbSwingAmount(), mc.timer.renderPartialTicks, er.getAgeInTicks(), er.getRotationYawHead(), er.getRotationPitch(), er.getOffset());

@@ -655,7 +655,7 @@ public class Killaura extends Module {
 
                             lastAngles.y = em.getPitch();
 
-                            boolean setupCrits = critModule.isOldCrits() || target.hurtTime <= 1 || (target.waitTicks <= 1);
+                            boolean setupCrits = critModule.isGround() || target.hurtTime <= 1 || (target.waitTicks <= 1);
 
                             boolean dontCrit = antiCritFunky.getValue() && hasEnchant(target, "Crit", "Funk");
 
@@ -672,7 +672,7 @@ public class Killaura extends Module {
 
                             if (!dontCrit) {
                                 if (crits) {
-                                    if (critModule.isNewCrits()) {
+                                    if (critModule.isPacketOld()) {
                                         if (mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically && isNextTickGround()) {
                                             if (setupTick == 0 && setupCrits) {
                                                 stepDelay = 1;
@@ -709,7 +709,58 @@ public class Killaura extends Module {
                                         } else {
                                             setupTick = 0;
                                         }
-                                    } else if (critModule.isOldCrits()) {
+                                    } else if (critModule.isGround()) {
+                                        boolean canAttackRightNow = (attack.equals("Always")) ||
+                                                (attack.equals("Precise") ? target.waitTicks <= 1 :
+                                                        target.waitTicks <= 1 || (target.hurtResistantTime <= 11 && target.hurtResistantTime >= 6) || target.hurtTime > 6);
+
+                                        if (isNextTickGround() && !Client.instance.isLagging()) {
+                                            if (setupCrits && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {
+                                                if (HypixelUtil.isVerifiedHypixel()) {
+                                                    if (canAttackRightNow && setupTick == 0) {
+                                                        stepDelay = 5;
+                                                        blockJump = true;
+                                                        em.setY(em.getY() + 0.125F);
+                                                        em.setGround(false);
+                                                        em.setForcePos(true);
+                                                        isCritSetup = false;
+                                                    } else if (setupTick >= 1) {
+                                                        if (setupTick > 2 || PlayerUtil.isMoving())
+                                                            isCritSetup = true;
+                                                        em.setY(em.getY() + 0.125F);
+                                                        switch (setupTick) {
+                                                            case 1: {
+                                                                blockJump = true;
+                                                                em.setY(em.getY() + 0.046599998474120774);
+                                                                break;
+                                                            }
+                                                            case 2: {
+                                                                blockJump = true;
+                                                                em.setY(em.getY() + 0.046599998474120774 - 0.07501);
+                                                                break;
+                                                            }
+                                                            case 3: {
+                                                                em.setY(em.getY() + (0.046599998474120774 - 0.07501 - 0.07501));
+                                                                break;
+                                                            }
+                                                        }
+                                                        em.setGround(false);
+                                                        em.setForcePos(true);
+
+                                                        //ChatUtil.printChat((em.getY() - mc.thePlayer.posY) + "");
+                                                    }
+                                                    setupTick++;
+                                                    if (setupTick >= 4) {
+                                                        setupTick = -1;
+                                                    }
+                                                }
+                                            } else {
+                                                setupTick = 0;
+                                            }
+                                        } else {
+                                            setupTick = 0;
+                                        }
+                                    } else if (critModule.isGroundOld()) {
                                         boolean canAttackRightNow = (attack.equals("Always")) ||
                                                 (attack.equals("Precise") ? target.waitTicks <= 1 :
                                                         target.waitTicks <= 1 || (target.hurtResistantTime <= 11 && target.hurtResistantTime >= 6) || target.hurtTime > 6);
@@ -717,37 +768,22 @@ public class Killaura extends Module {
                                         if (isNextTickGround() && !Client.instance.isLagging()) {
                                             if (setupCrits && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {
                                                 if (canAttackRightNow && setupTick == 0) {
-                                                    stepDelay = 5;
+                                                    stepDelay = 2;
                                                     blockJump = true;
-                                                    em.setY(em.getY() + 0.125F);
+                                                    em.setY(em.getY() + 0.07234F + (0.0000023F) * Math.random());
                                                     em.setGround(false);
                                                     em.setForcePos(true);
                                                     isCritSetup = false;
-                                                } else if (setupTick >= 1) {
+                                                    setupTick = 1;
+                                                } else if (setupTick == 1) {
                                                     isCritSetup = true;
-                                                    em.setY(em.getY() + 0.125F);
-                                                    switch (setupTick) {
-                                                        case 1: {
-                                                            em.setY(em.getY() + 0.046599998474120774);
-                                                            break;
-                                                        }
-                                                        case 2: {
-                                                            em.setY(em.getY() + (0.026599998474120774 - 0.0076092939542));
-                                                            break;
-                                                        }
-                                                        case 3: {
-                                                            em.setY(em.getY() + (0.0076092939542));
-                                                            break;
-                                                        }
-                                                    }
+                                                    if (HypixelUtil.isInGame("HYPIXEL PIT"))
+                                                        em.setY(em.getY() + 0.0076092939542 - (0.0000000002475776F) * Math.random());
                                                     em.setGround(false);
                                                     em.setForcePos(true);
-
-                                                    ChatUtil.printChat((em.getY() - mc.thePlayer.posY) + "");
-                                                }
-                                                setupTick++;
-                                                if (setupTick >= 4) {
-                                                    setupTick = -1;
+                                                    setupTick = 0;
+                                                } else {
+                                                    setupTick = 0;
                                                 }
                                             } else {
                                                 setupTick = 0;
@@ -848,17 +884,19 @@ public class Killaura extends Module {
 
                 boolean threeTickCritsGood = !mc.thePlayer.onGround || (!PlayerUtil.isOnLiquid() && (isOptimalAttack || target.waitTicks <= 1) && isCritSetup);
 
-                boolean criticalsAreSet = !crits || ((critModule.isNewCrits() ? threeTickCritsGood : critModule.isOldCrits() ? twoTickCritsGood : critModule.isPacket()));
+                boolean criticalsAreSet = !crits || ((critModule.isPacketOld() ? threeTickCritsGood : critModule.isGround() ? twoTickCritsGood : critModule.isPacket()));
 
                 boolean shouldAttack = alwaysCrit ? isCriticalAttack : criticalsAreSet;
 
-                boolean setupCrits = critModule.isOldCrits() || (target.hurtTime <= 0 && target.waitTicks >= 6) || (target.waitTicks <= 0);
+                boolean setupCrits = critModule.isGround() || (target.hurtTime <= 0 && target.waitTicks >= 6) || (target.waitTicks <= 0);
 
                 double[] p = getPrediction(target, predictionTicks.getValue().intValue(), predictionTicks.getValue().doubleValue());
 
                 double distance = mc.thePlayer.getDistance(target.posX + p[0], target.posY + p[1], target.posZ + p[2]);
 
-                boolean isAttacking = distance <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && delay.roundDelay(50 * nextRandom);
+                long attackDelay = 50 * nextRandom;
+
+                boolean isAttacking = distance <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && (mc.timer.timerSpeed <= 1 ? delay.roundDelay(attackDelay) : delay.delay(attackDelay));
 
                 boolean canAttackRightNow = attack.equals("Always") || (attack.equals("Precise") ? target.waitTicks <= 0 : target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
 

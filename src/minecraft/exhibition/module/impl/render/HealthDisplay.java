@@ -61,7 +61,7 @@ public class HealthDisplay extends Module {
                 try {
                     float[] fractions = new float[]{0f, 0.5f, 1f};
                     Color[] colors = new Color[]{Color.RED, Color.YELLOW, Color.GREEN};
-                    float progress = health / mc.thePlayer.getMaxHealth();
+                    float progress = Math.min(Math.max(health / mc.thePlayer.getMaxHealth(), 0), 1);
                     customColor = ESP2D.blendColors(fractions, colors, progress).brighter();
                 } catch (Exception ignore) {
                 }

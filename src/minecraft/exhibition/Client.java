@@ -232,11 +232,6 @@ public class Client extends Castable implements EventListener {
         this.progressScreenTask.incrementStage(); // Stage 3 login cache was checked
         AuthenticationUtil.isHWIDValid(parsedVersion + commandManager, true);
 
-//        if (!b) {
-//            exhibition.module.impl.combat.AutoPot.snitch(11);
-//            killSwitch();
-//        }
-
         try {
             this.progressScreenTask = (ProgressScreen) args[8334];
         } catch (Exception e) {
@@ -289,7 +284,7 @@ public class Client extends Castable implements EventListener {
         dataDirectory = new File(Client.clientName);
         this.progressScreenTask.incrementStage(); // Stage 6
         commandManager = new CommandManager();
-        moduleManager = new ModuleManager(Module.class);
+        moduleManager = new ModuleManager<>(Module.class);
         this.progressScreenTask.incrementStage(); // Stage 7
         try {
             new ViaFabric().onInitialize();

@@ -164,7 +164,8 @@ public class ChestStealer extends Module {
                     GuiChest guiChest = chestContainer;
                     IInventory inventry = guiChest.lowerChestInventory;
                     String name = guiChest.lowerChestInventory.getDisplayName().getFormattedText().toLowerCase();
-                    boolean isVanillaChest = !inventry.hasCustomName() || name.equalsIgnoreCase(new ChatComponentTranslation("container.chest").getFormattedText().toLowerCase().trim()) || name.equalsIgnoreCase("low") || name.equalsIgnoreCase("Chest");
+                    boolean isVanillaChest = !inventry.hasCustomName() || name.equalsIgnoreCase(new ChatComponentTranslation("container.chest").getFormattedText().toLowerCase().trim()) || name.equalsIgnoreCase("low") || name.equalsIgnoreCase("Chest") || name.equals("chest\247r");
+
                     chestContainer = guiChest;
 
                     if ((boolean) settings.get(IGNORE).getValue() && !isVanillaChest) {

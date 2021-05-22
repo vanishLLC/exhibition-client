@@ -792,6 +792,7 @@ public class RenderingUtil {
         float f2 = (c >> 8 & 0xFF) / 255.0F;
         float f3 = (c & 0xFF) / 255.0F;
         enableGL2D();
+        GL11.glEnable(GL_POLYGON_SMOOTH);
         GL11.glScalef(0.5F, 0.5F, 0.5F);
         GL11.glColor4f(f1, f2, f3, f);
         GL11.glBegin(GL11.GL_TRIANGLE_FAN);
@@ -803,7 +804,7 @@ public class RenderingUtil {
             i++;
         }
         GL11.glEnd();
-
+        GL11.glDisable(GL_POLYGON_SMOOTH);
         GL11.glScalef(2.0F, 2.0F, 2.0F);
         disableGL2D();
     }

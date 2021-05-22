@@ -145,17 +145,12 @@ public class SilentView extends Module {
                             GL11.glEnable(GL11.GL_BLEND);
 
                             boolean bruh = false;
-                            float oldgamma = mc.gameSettings.gammaSetting;
-
-                            Chams chams = (Chams) Client.getModuleManager().get(Chams.class);
-
+                            Chams chams = Client.getModuleManager().get(Chams.class);
                             if ((boolean) chams.getSetting("FLAT").getValue()) {
                                 if (GL11.glIsEnabled(GL11.GL_LIGHTING)) {
                                     bruh = true;
                                     GL11.glDisable(GL11.GL_LIGHTING);
                                 }
-                                mc.gameSettings.gammaSetting = 10000000;
-                                mc.entityRenderer.forceUpdateLightmap(mc.timer.renderPartialTicks);
                             }
 
 //                            RenderingUtil.glColor(ColorManager.getFriendlyInvisible().getColorHex());
@@ -173,10 +168,8 @@ public class SilentView extends Module {
                             GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 
                             if ((Boolean) chams.getSetting("FLAT").getValue()) {
-                                mc.gameSettings.gammaSetting = oldgamma;
                                 if (bruh)
                                     GL11.glEnable(GL11.GL_LIGHTING);
-                                mc.entityRenderer.forceUpdateLightmap(mc.timer.renderPartialTicks);
                             }
                             GL11.glPopMatrix();
 

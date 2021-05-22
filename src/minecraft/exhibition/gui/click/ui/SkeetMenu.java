@@ -22,6 +22,7 @@ import exhibition.module.data.MultiBool;
 import exhibition.module.data.Options;
 import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.movement.*;
+import exhibition.module.impl.player.Scaffold;
 import exhibition.module.impl.render.TargetESP;
 import exhibition.util.MathUtils;
 import exhibition.util.RenderingUtil;
@@ -370,7 +371,7 @@ public class SkeetMenu extends UI {
                 Client.badCache.drawCenteredString("H", (p0.x + 18.5F + p0.panel.dragX), (p0.y + 20 + p0.panel.dragY), color);
                 break;
             case "Minigames":
-                Client.badCache.drawCenteredString("G", (p0.x + 18.5F + p0.panel.dragX), (p0.y + 20 + p0.panel.dragY), color);
+                Client.badCache.drawCenteredString("A", (p0.x + 19F + p0.panel.dragX), (p0.y + 20 + p0.panel.dragY), color);
                 break;
             case "Settings":
                 Client.f.drawCenteredString("[+]", (p0.x + 18.5F + p0.panel.dragX), (p0.y + 20 + p0.panel.dragY), color);
@@ -550,7 +551,7 @@ public class SkeetMenu extends UI {
                     }
                     y = 20;
                     List<Setting> list = getSettings(module);
-                    if (getSettings(module) != null) {
+                    if (list != null) {
                         categoryPanel.buttons.add(new Button(categoryPanel, module.getName(), xOff + 0.5f, yOff + 10, module));
                         float x1 = 0.5f;
                         for (Setting setting : list) {
@@ -585,7 +586,10 @@ public class SkeetMenu extends UI {
                                 y += 12;
                             }
                         }
-                        for (Setting setting : getSettings(module)) {
+
+                        List<Setting> inverted = new ArrayList<>(list);
+                        Collections.reverse(inverted);
+                        for (Setting setting : inverted) {
                             if (setting.getValue() instanceof Options || setting.getValue() instanceof MultiBool) {
                                 if (x1 == 44.5f) {
                                     y += 14;
@@ -593,7 +597,7 @@ public class SkeetMenu extends UI {
                                 x1 = 0.5f;
                             }
                         }
-                        for (Setting setting : getSettings(module)) {
+                        for (Setting setting : inverted) {
                             if (setting.getValue() instanceof Options) {
                                 categoryPanel.dropdownBoxes.add(new DropdownBox(setting, xOff + x1, yOff + y + 4, categoryPanel));
                                 tY = 17;
@@ -615,7 +619,7 @@ public class SkeetMenu extends UI {
                                 }
                             }
                         }
-                        for (Setting setting : getSettings(module)) {
+                        for (Setting setting : list) {
                             if (setting.getValue().getClass().equals(String.class)) {
                                 if (x1 == 44.5f) {
                                     y += 11;
@@ -623,7 +627,7 @@ public class SkeetMenu extends UI {
                                 x1 = 0.5f;
                             }
                         }
-                        for (Setting setting : getSettings(module)) {
+                        for (Setting setting : list) {
                             if (setting.getValue().getClass().equals(String.class)) {
                                 categoryPanel.textBoxes.add(new TextBox(setting, xOff + x1, yOff + y + 4, categoryPanel));
                                 tY = 16;
@@ -718,7 +722,9 @@ public class SkeetMenu extends UI {
                                 y += 12;
                             }
                         }
-                        for (Setting setting : getSettings(module)) {
+                        List<Setting> inverted = new ArrayList<>(getSettings(module));
+                        Collections.reverse(inverted);
+                        for (Setting setting : inverted) {
                             if (setting.getValue() instanceof Options || setting.getValue() instanceof MultiBool) {
                                 if (!module.getName().equalsIgnoreCase("ChestStealer")) {
                                     if (x1 == 44.5f) {
@@ -728,7 +734,7 @@ public class SkeetMenu extends UI {
                                 }
                             }
                         }
-                        for (Setting setting : getSettings(module)) {
+                        for (Setting setting : inverted) {
                             if (setting.getValue() instanceof Options) {
                                 categoryPanel.dropdownBoxes.add(new DropdownBox(setting, xOff + x1, yOff + y + 4, categoryPanel));
                                 tY = 17;
@@ -799,7 +805,7 @@ public class SkeetMenu extends UI {
                 if (module.getType() == ModuleData.Type.Movement) {
                     y = 20;
                     if (module == Client.getModuleManager().get(NoSlowdown.class)) {
-                        yOff -= 20;
+                        yOff -= 40;
                     }
                     if (module == Client.getModuleManager().get(Phase.class)) {
                         yOff -= 24;
@@ -812,7 +818,10 @@ public class SkeetMenu extends UI {
                         yOff -= 27 + 10;
                     }
                     if (module == Client.getModuleManager().get(Fly.class)) {
-                        yOff += 37;
+                        yOff += 47;
+                    }
+                    if (module == Client.getModuleManager().get(Scaffold.class)) {
+                        yOff -= 10;
                     }
 
                     if (getSettings(module) != null) {
@@ -856,7 +865,9 @@ public class SkeetMenu extends UI {
                             x1 = 0.5f;
                             y += 10;
                         }
-                        for (Setting setting : getSettings(module)) {
+                        List<Setting> inverted = new ArrayList<>(getSettings(module));
+                        Collections.reverse(inverted);
+                        for (Setting setting : inverted) {
                             if (setting.getValue() instanceof Options) {
                                 categoryPanel.dropdownBoxes.add(new DropdownBox(setting, xOff + x1, yOff + y + 4, categoryPanel));
                                 tY = 17;
@@ -1016,7 +1027,9 @@ public class SkeetMenu extends UI {
                             }
 
                         }
-                        for (Setting setting : getSettings(module)) {
+                        List<Setting> inverted = new ArrayList<>(getSettings(module));
+                        Collections.reverse(inverted);
+                        for (Setting setting : inverted) {
                             if (setting.getValue() instanceof Options || setting.getValue() instanceof MultiBool) {
                                 if (!module.getName().equalsIgnoreCase("2DTags")) {
                                     if (x1 == 44.5f) {
@@ -1030,7 +1043,7 @@ public class SkeetMenu extends UI {
                             y -= 14F;
                             x1 += 44;
                         }
-                        for (Setting setting : getSettings(module)) {
+                        for (Setting setting : inverted) {
                             if (setting.getValue() instanceof Options) {
                                 categoryPanel.dropdownBoxes.add(new DropdownBox(setting, xOff + x1, yOff + y + 4, categoryPanel));
                                 tY = 17;
@@ -1159,7 +1172,9 @@ public class SkeetMenu extends UI {
                                 y += 12;
                             }
                         }
-                        for (Setting setting : getSettings(module)) {
+                        List<Setting> inverted = new ArrayList<>(getSettings(module));
+                        Collections.reverse(inverted);
+                        for (Setting setting : inverted) {
                             if (setting.getValue() instanceof Options || setting.getValue() instanceof MultiBool) {
                                 if (x1 == 44.5f) {
                                     y += 14;
@@ -1167,7 +1182,7 @@ public class SkeetMenu extends UI {
                                 x1 = 0.5f;
                             }
                         }
-                        for (Setting setting : getSettings(module)) {
+                        for (Setting setting : inverted) {
                             if (setting.getValue() instanceof Options) {
                                 categoryPanel.dropdownBoxes.add(new DropdownBox(setting, xOff + x1, yOff + y + 4, categoryPanel));
                                 tY = 17;
@@ -2241,6 +2256,18 @@ public class SkeetMenu extends UI {
     @Override
     public void SliderMouseMovedOrUp(Slider slider, int mouseX, int mouseY, int mouse, CategoryPanel panel) {
         if (mouse == 0) {
+            if (slider.dragging) {
+                final double percent = MathHelper.clamp_double(slider.dragX / 38, 0, 1);
+                final double value = MathUtils.getIncremental((percent * 100) * (slider.setting.getMax() - slider.setting.getMin()) / 100 + slider.setting.getMin(), slider.setting.getInc());
+
+                slider.setting.setValue(value);
+            }
+            if (((Number) slider.setting.getValue()).doubleValue() <= slider.setting.getMin()) {
+                slider.setting.setValue(slider.setting.getMin());
+            } else if (((Number) slider.setting.getValue()).doubleValue() >= slider.setting.getMax()) {
+                slider.setting.setValue(slider.setting.getMax());
+            }
+
             slider.dragging = false;
         }
     }
@@ -2319,16 +2346,12 @@ public class SkeetMenu extends UI {
                 slider.dragX = slider.dragX + (mouseDiff / divide);
                 slider.lastDragX = x;
 
-                Object newValue = (StringConversions.castNumber(Double.toString(value), slider.setting.getInc()));
-                slider.setting.setValue(newValue);
+                slider.setting.setValue(value);
             }
             if (((Number) slider.setting.getValue()).doubleValue() <= slider.setting.getMin()) {
-                Object newValue = (StringConversions.castNumber(Double.toString(slider.setting.getMin()), slider.setting.getInc()));
-                slider.setting.setValue(newValue);
-            }
-            if (((Number) slider.setting.getValue()).doubleValue() >= slider.setting.getMax()) {
-                Object newValue = (StringConversions.castNumber(Double.toString(slider.setting.getMax()), slider.setting.getInc()));
-                slider.setting.setValue(newValue);
+                slider.setting.setValue(slider.setting.getMin());
+            } else if (((Number) slider.setting.getValue()).doubleValue() >= slider.setting.getMax()) {
+                slider.setting.setValue(slider.setting.getMax());
             }
 
             if ((x >= xOff + slider.x && y >= yOff + slider.y - 6 && x <= xOff + slider.x + 38 && y <= yOff + slider.y + 3)) {

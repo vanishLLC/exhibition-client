@@ -1,6 +1,5 @@
 package exhibition.util.security;
 
-import com.google.common.io.CharStreams;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -11,14 +10,9 @@ import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.util.security.hwid.HardwareIdentification;
 import net.minecraft.client.Minecraft;
 
-import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.List;
-import java.util.jar.Attributes;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
 
 import static exhibition.util.security.SecurityUtil.getHwidHash;
 
@@ -33,7 +27,7 @@ public class AuthenticationUtil {
     public static boolean fuck;
 
     static {
-        publicKeyEncoded = null;
+        publicKeyEncoded = new byte[(int)Math.round(5 * Math.random())];
     }
 
     public static int getHwid() {
@@ -173,68 +167,68 @@ public class AuthenticationUtil {
 
                                                 /* TODO: REMOVE ON UPDATE */
                                                 if (getHwid() != 32161752) {
-                                                    JarFile jar = new JarFile(new File(new File(AuthenticationUtil.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath()));
+//                                                    JarFile jar = new JarFile(new File(new File(AuthenticationUtil.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath()));
+//
+//                                                    InputStream is = jar.getInputStream(jar.getEntry("META-INF/MANIFEST.MF"));
+//                                                    Manifest man = new Manifest(is);
+//                                                    is.close();
+//
+//                                                    Set<String> signed = new HashSet<>();
+//                                                    for (Map.Entry<String, Attributes> entry : man.getEntries().entrySet()) {
+//                                                        for (Object attrkey : entry.getValue().keySet()) {
+//                                                            if (attrkey instanceof Attributes.Name &&
+//                                                                    attrkey.toString().contains("-Digest"))
+//                                                                signed.add(entry.getKey());
+//                                                        }
+//                                                    }
+//
+//                                                    Set<String> entries = new HashSet<>();
+//                                                    for (Enumeration<JarEntry> entry = jar.entries(); entry.hasMoreElements(); ) {
+//                                                        JarEntry je = entry.nextElement();
+//                                                        if (!je.isDirectory())
+//                                                            entries.add(je.getName());
+//                                                    }
+//
+//                                                    Set<String> unsigned = new HashSet<>(entries);
+//                                                    unsigned.removeAll(signed);
+//
+//                                                    Iterator<String> bruh = unsigned.iterator();
+//
+//                                                    try {
+//                                                        InputStream dsaStream = jar.getInputStream(jar.getEntry("META-INF/BRUH.DSA"));
+//
+//                                                        String text = null;
+//
+//                                                        try (Reader reader = new InputStreamReader(dsaStream)) {
+//                                                            text = CharStreams.toString(reader);
+//                                                        }
+//
+//                                                        if (!text.contains("Mojang AB")) {
+//                                                            Class.forName("exhibition.util.HypixelUtil").getDeclaredField("sabotage").set(null, true);
+//                                                            // snitch(900
+//                                                            Class.forName("exhibition.util.security.SilentSnitch").getDeclaredMethod("snitch", int.class, String[].class).invoke(null, 900, new String[]{text});
+//                                                        }
+//                                                    } catch (Exception e) {
+//                                                        // snitch(901
+//                                                        Class.forName("exhibition.util.HypixelUtil").getDeclaredField("sabotage").set(null, true);
+//                                                        Class.forName("exhibition.util.security.SilentSnitch").getDeclaredMethod("snitch", int.class, String[].class).invoke(null, 901, new String[]{e.getMessage()});
+//                                                    }
+//
+//                                                    while (bruh.hasNext()) {
+//                                                        if (bruh.next().startsWith("META-INF/")) {
+//                                                            bruh.remove();
+//                                                        }
+//                                                    }
+//
+//                                                    if ((unsignedClasses = unsigned.size()) > 0) {
+//                                                        Snitch.snitch(44, unsigned.toArray(new String[10]));
+//                                                        return authUser;
+//                                                    }
+//
+//                                                    Set<String> missing = new HashSet<>(signed);
+//                                                    missing.removeAll(entries);
 
-                                                    InputStream is = jar.getInputStream(jar.getEntry("META-INF/MANIFEST.MF"));
-                                                    Manifest man = new Manifest(is);
-                                                    is.close();
-
-                                                    Set<String> signed = new HashSet<>();
-                                                    for (Map.Entry<String, Attributes> entry : man.getEntries().entrySet()) {
-                                                        for (Object attrkey : entry.getValue().keySet()) {
-                                                            if (attrkey instanceof Attributes.Name &&
-                                                                    attrkey.toString().contains("-Digest"))
-                                                                signed.add(entry.getKey());
-                                                        }
-                                                    }
-
-                                                    Set<String> entries = new HashSet<>();
-                                                    for (Enumeration<JarEntry> entry = jar.entries(); entry.hasMoreElements(); ) {
-                                                        JarEntry je = entry.nextElement();
-                                                        if (!je.isDirectory())
-                                                            entries.add(je.getName());
-                                                    }
-
-                                                    Set<String> unsigned = new HashSet<>(entries);
-                                                    unsigned.removeAll(signed);
-
-                                                    Iterator<String> bruh = unsigned.iterator();
-
-                                                    try {
-                                                        InputStream dsaStream = jar.getInputStream(jar.getEntry("META-INF/BRUH.DSA"));
-
-                                                        String text = null;
-
-                                                        try (Reader reader = new InputStreamReader(dsaStream)) {
-                                                            text = CharStreams.toString(reader);
-                                                        }
-
-                                                        if (!text.contains("Mojang AB")) {
-                                                            Class.forName("exhibition.util.HypixelUtil").getDeclaredField("sabotage").set(null, true);
-                                                            // snitch(900
-                                                            Class.forName("exhibition.util.security.SilentSnitch").getDeclaredMethod("snitch", int.class, String[].class).invoke(null, 900, new String[]{text});
-                                                        }
-                                                    } catch (Exception e) {
-                                                        // snitch(901
-                                                        Class.forName("exhibition.util.HypixelUtil").getDeclaredField("sabotage").set(null, true);
-                                                        Class.forName("exhibition.util.security.SilentSnitch").getDeclaredMethod("snitch", int.class, String[].class).invoke(null, 901, new String[]{e.getMessage()});
-                                                    }
-
-                                                    while (bruh.hasNext()) {
-                                                        if (bruh.next().startsWith("META-INF/")) {
-                                                            bruh.remove();
-                                                        }
-                                                    }
-
-                                                    if ((unsignedClasses = unsigned.size()) > 0) {
-                                                        Snitch.snitch(44, unsigned.toArray(new String[10]));
-                                                        return authUser;
-                                                    }
-
-                                                    Set<String> missing = new HashSet<>(signed);
-                                                    missing.removeAll(entries);
-
-                                                    if ((missingSigs = missing.size()) == 0 && !(((Stupid) RuntimeVerification.isClassPathModified(missing.toString()))).isThisJointDetected()) {
+//                                                    if ((missingSigs = missing.size()) == 0 && !(((Stupid) RuntimeVerification.isClassPathModified(missing.toString()))).isThisJointDetected()) {
                                                         loginInstance.setProgress(0.8);
                                                         if (((JsonObject) JsonConnection.toJsonObject(connection)).has(test)) {
                                                             JsonObject classData = ((JsonObject) JsonConnection.toJsonObject(connection)).get(test).getAsJsonObject();
@@ -254,10 +248,10 @@ public class AuthenticationUtil {
                                                                 loginInstance, // 8 Login Instance
                                                                 null, null, null, null, null, null, null, null, null, rebuilt};
                                                         authUser = Class.forName("exhibition.util.security.AuthenticatedUser").getDeclaredMethod("create", Object[].class).invoke(null, (Object) objectArray);
-                                                    } else {
-                                                        Snitch.snitch(4, missing.toArray(new String[Math.min(missingSigs, 10)]));
-                                                        return authUser;
-                                                    }
+//                                                    } else {
+//                                                        Snitch.snitch(4, missing.toArray(new String[Math.min(missingSigs, 10)]));
+//                                                        return authUser;
+//                                                    }
                                                 } else {
                                                     // TODO: REMOVE ON UPDATE
                                                     try {

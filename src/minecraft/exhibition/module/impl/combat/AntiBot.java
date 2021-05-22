@@ -360,10 +360,16 @@ public class AntiBot extends Module {
                                         break;
                                     }
 
+                                    boolean ignore = false;
+
                                     if (doPingCheck) {
-                                        if (ticksOnGroundMap.getOrDefault(ent.getEntityId(), 0) < 15 && isInTabList && ESP2D.getPlayerPing(ent) > 1) {
+                                        int ping = ESP2D.getPlayerPing(ent);
+
+                                        if (ticksOnGroundMap.getOrDefault(ent.getEntityId(), 0) < 15 && isInTabList && ping > 1) {
                                             invalid.add(ent);
                                             shouldUpdateTOG = false;
+                                        } else if (isInTabList && ping == 1) {
+                                            ignore = true;
                                         }
                                     }
 
@@ -387,54 +393,59 @@ public class AntiBot extends Module {
                                         }
                                     }
 
-                                    if (ticksOnGroundMap.getOrDefault(ent.getEntityId(), 0) < 15) {
-                                        invalid.add(ent);
-                                    }
+                                    if (!ignore)
+                                        if (ticksOnGroundMap.getOrDefault(ent.getEntityId(), 0) < 15) {
+                                            invalid.add(ent);
+                                        }
 
-                                    if (botNameFormat || str.equalsIgnoreCase(ent.getName())) {
-                                        if (botNameFormat && !isInTabList && isOnHypixel) {
-                                            if (ticksOnGroundMap.getOrDefault(ent.getEntityId(), 0) < 15) {
+                                    if (!ignore)
+                                        if (botNameFormat || str.equalsIgnoreCase(ent.getName())) {
+                                            if (botNameFormat && !isInTabList && isOnHypixel) {
+                                                if (ticksOnGroundMap.getOrDefault(ent.getEntityId(), 0) < 15) {
+                                                    invalid.add(ent);
+                                                    shouldUpdateTOG = false;
+                                                    if (remove && (ticksOnGroundMap.getOrDefault(ent.getEntityId(), 0) < -20 && ent.isInvisible()) && mc.thePlayer.getDistanceToEntity(ent) < 10) {
+                                                        playersToRemove.add(ent);
+                                                        DevNotifications.getManager().post("Removed " + ent.getName() + " A");
+                                                        continue;
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                    if (!ignore)
+                                        if (ent.isInvisible() && ticksOnGroundMap.getOrDefault(ent.getEntityId(), 0) < 15 && botNameFormat) {
+                                            invalid.add(ent);
+                                            shouldUpdateTOG = false;
+                                            if (remove && ticksOnGroundMap.getOrDefault(ent.getEntityId(), 0) < -20 && !isInTabList) {
+                                                playersToRemove.add(ent);
+                                                DevNotifications.getManager().post("Removed " + ent.getName() + " B");
+                                                continue;
+                                            }
+                                        }
+
+                                    if (!ignore)
+                                        if (botNameFormat || str.equalsIgnoreCase(ent.getName()) || str.contains("[NPC]")) {
+                                            if (!isInTabList && isOnHypixel && (ticksOnGroundMap.getOrDefault(ent.getEntityId(), 0) < 15)) {
                                                 invalid.add(ent);
                                                 shouldUpdateTOG = false;
-                                                if (remove && (ticksOnGroundMap.getOrDefault(ent.getEntityId(), 0) < -20 && ent.isInvisible()) && mc.thePlayer.getDistanceToEntity(ent) < 10) {
+                                                if (remove && ent.isInvisible() && mc.thePlayer.getDistanceToEntity(ent) < 10 && ticksOnGroundMap.getOrDefault(ent.getEntityId(), 0) < -20) {
                                                     playersToRemove.add(ent);
-                                                    DevNotifications.getManager().post("Removed " + ent.getName() + " A");
+                                                    DevNotifications.getManager().post("Removed " + ent.getName() + " C");
                                                     continue;
                                                 }
                                             }
                                         }
-                                    }
 
-                                    if (ent.isInvisible() && ticksOnGroundMap.getOrDefault(ent.getEntityId(), 0) < 15 && botNameFormat) {
-                                        invalid.add(ent);
-                                        shouldUpdateTOG = false;
-                                        if (remove && ticksOnGroundMap.getOrDefault(ent.getEntityId(), 0) < -20 && !isInTabList) {
-                                            playersToRemove.add(ent);
-                                            DevNotifications.getManager().post("Removed " + ent.getName() + " B");
-                                            continue;
-                                        }
-                                    }
-
-                                    if (botNameFormat || str.equalsIgnoreCase(ent.getName()) || str.contains("[NPC]")) {
-                                        if (!isInTabList && isOnHypixel && (ticksOnGroundMap.getOrDefault(ent.getEntityId(), 0) < 15)) {
+                                    if (!ignore)
+                                        if (((str.equals(ent.getName() + "\247r") || str.equals("\247r" + ent.getName()) || str.equals("\247r" + ent.getName() + "\247r")) && !isInTabList) || str.contains("[NPC]")) {
                                             invalid.add(ent);
                                             shouldUpdateTOG = false;
-                                            if (remove && ent.isInvisible() && mc.thePlayer.getDistanceToEntity(ent) < 10 && ticksOnGroundMap.getOrDefault(ent.getEntityId(), 0) < -20) {
+                                            if (remove && ((ent.isInvisible() && ticksOnGroundMap.getOrDefault(ent.getEntityId(), 0) < -20) || !ent.canBeCollidedWith())) {
                                                 playersToRemove.add(ent);
-                                                DevNotifications.getManager().post("Removed " + ent.getName() + " C");
                                                 continue;
                                             }
                                         }
-                                    }
-
-                                    if (((str.equals(ent.getName() + "\247r") || str.equals("\247r" + ent.getName()) || str.equals("\247r" + ent.getName() + "\247r")) && !isInTabList) || str.contains("[NPC]")) {
-                                        invalid.add(ent);
-                                        shouldUpdateTOG = false;
-                                        if (remove && ((ent.isInvisible() && ticksOnGroundMap.getOrDefault(ent.getEntityId(), 0) < -20) || !ent.canBeCollidedWith())) {
-                                            playersToRemove.add(ent);
-                                            continue;
-                                        }
-                                    }
                                     break;
                                 }
                                 case "Mineplex": {

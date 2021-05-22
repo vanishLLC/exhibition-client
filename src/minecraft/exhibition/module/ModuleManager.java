@@ -191,7 +191,7 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
                     //add(new AutoPaper(new ModuleData(Other, "AutoPaper", "Automatically enables Paper Challenge on Skywars.")));
                     add(new PitNotifications(new ModuleData(Other, "PitNotifications", "Notifications for events in the pit.")));
                     add(new MCV(new ModuleData(Other, "MCV", "View others inventories with a middle click.")));
-                    add(new BetterHotbar(new ModuleData(Visuals, "BetterHotbar", "Shows your armor/inventory right under your hotbar.")));
+                    add(new BetterHotbar(new ModuleData(Visuals, "BetterHotbar", "Shows your armor/inventory right over your hotbar.")));
                     add(new MysticSwap(new ModuleData(Other, "MysticSwap", "Automatically swaps to certain gear against other players.")));
 
                     if (Boolean.parseBoolean((String) (Class.forName("java.lang.System").getMethod("getProperty", String.class)).invoke(null, "NEoBuMASs"))) {
@@ -585,7 +585,7 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
         return setup;
     }
 
-    public boolean isEnabled(Class<? extends Module> clazz) {
+    public boolean isEnabled(Class<? extends E> clazz) {
         Module module = get(clazz);
         return module != null && module.isEnabled();
     }

@@ -22,6 +22,7 @@ import exhibition.module.impl.movement.LongJump;
 import exhibition.module.impl.movement.Speed;
 import exhibition.util.*;
 import exhibition.util.Timer;
+import exhibition.util.misc.ChatUtil;
 import exhibition.util.render.Colors;
 import exhibition.util.render.Depth;
 import net.minecraft.block.Block;
@@ -181,7 +182,7 @@ public class Scaffold extends Module {
 
     private Timer placeTimer = new Timer();
 
-    private boolean shouldUnSneak, shouldReSprint;
+//    private boolean shouldUnSneak, shouldReSprint;
 
     public boolean isPlacing() {
         return !placeTimer.delay(200);
@@ -441,16 +442,17 @@ public class Scaffold extends Module {
                 BlockPos pos = new BlockPos(x, y, z);
 
                 if (em.isPre()) {
-                    if (shouldReSprint && mc.thePlayer.isSprinting()) {
-                        NetUtil.sendPacketNoEvents(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.START_SPRINTING));
-                        shouldReSprint = false;
-                    }
+//                    if (shouldReSprint && mc.thePlayer.isSprinting()) {
+//                        NetUtil.sendPacketNoEvents(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.START_SPRINTING));
+//                        shouldReSprint = false;
+//                    }
 
                     Vec3 vec = getBlockLook(pos);
 
                     if (lastAngles.x == -1337) {
                         float newAngle = RotationUtils.getNewAngle(mc.thePlayer.rotationYaw);
-                        em.setYaw(targetYaw = lastAngles.x = mc.thePlayer.rotationYaw + (newAngle > 0 ? 180 : -180));
+                        lastAngles.x = mc.thePlayer.rotationYaw;
+                        em.setYaw(targetYaw = mc.thePlayer.rotationYaw + (newAngle > 0 ? 180 : -180));
                         em.setPitch(lastAngles.y = 70F);
                     }
 
@@ -514,7 +516,7 @@ public class Scaffold extends Module {
                         if ((!PlayerUtil.isMoving() && (Boolean) settings.get(TOWER).getValue())) {
                             if (fastTower.getValue()) {
                                 if (fastPlaceTimer.delay(600)) {
-                                    mc.timer.timerSpeed = 2.23F + (float) (0.04F * Math.random());
+                                    mc.timer.timerSpeed = 2.23F + (float) (.223F * Math.random());
                                     fastPlaceTimer.reset();
                                 }
                                 if (fastPlaceTimer.delay(500)) {

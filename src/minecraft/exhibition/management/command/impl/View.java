@@ -24,7 +24,7 @@ public class View extends Command {
             String playerName = args[0];
 
             for (Entity entity : mc.theWorld.getLoadedEntityList()) {
-                if (entity instanceof EntityPlayer) {
+                if (entity instanceof EntityPlayer && entity.canBeCollidedWith()) {
                     if (entity.getName().equalsIgnoreCase(playerName)) {
                         new Thread("View Thread"){
                             @Override
