@@ -128,7 +128,7 @@ public class ArmorStatus extends Module {
             }
 
             boolean showPitEnchants = HypixelUtil.isInGame("THE HYPIXEL PIT");
-            if (showPitEnchants && itemStack.hasTagCompound()) {
+            if (showPitEnchants && HypixelUtil.isItemMystic(itemStack)) {
                 List<String> enchants = HypixelUtil.getPitEnchants(itemStack);
 
                 List<String> render = new ArrayList<>();

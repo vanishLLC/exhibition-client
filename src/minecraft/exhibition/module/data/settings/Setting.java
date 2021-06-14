@@ -5,8 +5,6 @@
 
 package exhibition.module.data.settings;
 
-import com.google.gson.annotations.Expose;
-
 import java.lang.reflect.Type;
 
 public class Setting<E> {
@@ -21,7 +19,6 @@ public class Setting<E> {
     private final double inc;
     private final double min;
     private final double max;
-    @Expose
     private E value;
 
     public Setting(String name, E value) {

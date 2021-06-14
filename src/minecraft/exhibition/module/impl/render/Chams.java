@@ -15,10 +15,12 @@ import exhibition.module.data.Options;
 import exhibition.module.data.settings.Setting;
 import exhibition.util.RenderingUtil;
 import exhibition.util.TeamUtils;
+import exhibition.util.render.Colors;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RendererLivingEntity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.MathHelper;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
@@ -38,8 +40,8 @@ public class Chams extends Module {
 
     public void colorRainbow() {
         ColorObject c1 = ColorManager.getFriendlyVisible();
-        Color color = Color.getHSBColor(hue.getOpacity() / 255F, 0.8F, 1);
-        RenderingUtil.glColor(c1.getAlpha() / 255F, color.getRed(), color.getGreen(), color.getBlue());
+        int color = MathHelper.hsvToRGB(hue.getOpacity() / 255F, 0.8F, 1);
+        RenderingUtil.glColor(Colors.getColorOpacity(color, c1.getAlpha()));
     }
 
     @Override
@@ -52,7 +54,7 @@ public class Chams extends Module {
         if (event instanceof EventRender3D) {
             hue.interp(255, 1);
             if (hue.getOpacity() >= 255) {
-                hue.setOpacity(0);
+                hue.setOpacity(hue.getOpacity() - 255);
             }
         }
         if (event instanceof EventRenderEntity) {
@@ -68,8 +70,11 @@ public class Chams extends Module {
                             if (var11 instanceof RendererLivingEntity) {
                                 GL11.glPushMatrix();
                                 GL11.glDisable(GL11.GL_DEPTH_TEST);
-                                GL11.glDisable(GL11.GL_TEXTURE_2D);
-                                GL11.glEnable(GL11.GL_BLEND);
+                                GlStateManager.disableTexture2D();
+                                GlStateManager.enableBlend();
+                                GlStateManager.disableAlpha();
+                                GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+                                GlStateManager.shadeModel(7425);
                                 String selected = ((Options) settings.get("COLOR").getValue()).getSelected();
 
                                 boolean bruh = false;
@@ -121,10 +126,10 @@ public class Chams extends Module {
                                         break;
                                     case "Rainbow": {
                                         ColorObject c1 = ColorManager.chamsInvis;
-                                        float hue = this.hue.getOpacity() + er.getEntity().getEntityId()/5F + Math.abs(er.getEntity().getName().hashCode())/300F;
+                                        float hue = this.hue.getOpacity() + er.getEntity().getEntityId() / 5F + Math.abs(er.getEntity().getName().hashCode()) / 300F;
                                         hue = hue % 255;
-                                        Color color = Color.getHSBColor(hue / 255F, 0.8F, 1);
-                                        RenderingUtil.glColor(c1.getAlpha() / 255F, color.getRed(), color.getGreen(), color.getBlue());
+                                        int color = MathHelper.hsvToRGB((hue / 255F) % 1, 0.8F, 1);
+                                        RenderingUtil.glColor(Colors.getColorOpacity(color, c1.getAlpha()));
                                         break;
                                     }
                                 }
@@ -174,17 +179,21 @@ public class Chams extends Module {
                                         break;
                                     case "Rainbow": {
                                         ColorObject c1 = ColorManager.chamsVis;
-                                        int hue = (int) this.hue.getOpacity() + er.getEntity().getEntityId() + Math.abs(er.getEntity().getName().hashCode());
+                                        float hue = this.hue.getOpacity() + er.getEntity().getEntityId() / 5F + Math.abs(er.getEntity().getName().hashCode()) / 300F;
                                         hue = hue % 255;
-                                        Color color = Color.getHSBColor(1 - ((float) hue / 255), 0.8F, 1);
-                                        RenderingUtil.glColor((float) c1.getAlpha() / 255, color.getRed(), color.getGreen(), color.getBlue());
+                                        int color = MathHelper.hsvToRGB((1 - (hue / 255F)) % 1, 0.8F, 1);
+                                        RenderingUtil.glColor(Colors.getColorOpacity(color,c1.getAlpha()));
                                         break;
                                     }
                                 }
 
                                 ((RendererLivingEntity) var11).renderModel(er.getEntity(), er.getLimbSwing(), er.getLimbSwingAmount(), er.getAgeInTicks(), er.getRotationYawHead(), er.getRotationPitch(), er.getOffset());
-                                GL11.glEnable(GL11.GL_TEXTURE_2D);
-                                GL11.glDisable(GL11.GL_BLEND);
+
+                                GlStateManager.shadeModel(7424);
+                                GlStateManager.disableBlend();
+                                GlStateManager.enableAlpha();
+                                GlStateManager.enableTexture2D();
+
                                 GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
                                 if ((Boolean) settings.get("FLAT").getValue()) {
                                     if (bruh)

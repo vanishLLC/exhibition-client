@@ -11,19 +11,16 @@ import exhibition.event.EventSystem;
 import exhibition.event.RegisterEvent;
 import exhibition.event.impl.*;
 import exhibition.management.ColorManager;
-import exhibition.management.command.impl.Damage;
 import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.combat.AutoPot;
-import exhibition.module.impl.combat.Bypass;
 import exhibition.module.impl.player.Scaffold;
 import exhibition.util.*;
 import exhibition.util.render.Colors;
-import exhibition.util.render.Depth;
+import net.minecraft.block.material.Material;
 import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -33,41 +30,43 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.*;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
-import net.minecraft.network.play.server.S12PacketEntityVelocity;
-import net.minecraft.network.play.server.S27PacketExplosion;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.util.MathHelper;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class LongJump extends Module {
 
-    private String PROGRESS = "PROGRESS";
-    private String OFF = "TOGGLE";
-    private String BOOST = "BOOST";
-    private String AUTISM = "AUTISM";
-    private String FAKELAG = "FAKELAG";
+    //private String PROGRESS = "PROGRESS";
+    //private String OFF = "TOGGLE";
+    //private String BOOST = "BOOST";
+    //private String AUTISM = "AUTISM";
+    //private String FAKELAG = "FAKELAG";
     //private String C13PACKET = "C13PACKET";
     //private String CHOKE = "CHOKE-TICKS";
-    private String TIMER = "TIMER";
+    //private String TIMER = "TIMER";
+    private final Setting<Boolean> toggle = new Setting<>("TOGGLE", true, "Toggles off on landing. (Not for Autism)");
+    private final Setting<Boolean> progress = new Setting<>("PROGRESS", true, "Shows the Bow progress bar.");
+    private final Setting<Number> boost = new Setting<>("BOOST", 1.55, "The speed boost multiplier.", 0.01, 1.0, 10);
     //private Setting<Boolean> useBlink = new Setting<>("CHOKE", false, "Uses blink to bypass.");
-    private Setting<Boolean> bowOnly = new Setting<>("BOW", false, "Only LongJumps if you bow yourself/take damage.");
-    private Setting<Boolean> dynamicJump = new Setting<>("DYNAMIC-JUMP", false, "Scales your Jump-Boost value based off of your pitch.");
-    private Setting<Boolean> targetStrafe = new Setting<>("TARGETSTRAFE", false, "Target Strafes around players.");
-    private Setting<Number> jumpBoost = new Setting<>("JUMP-BOOST", 0, "Increases your jump velocity.", 0.01, 0, 4);
-    private Setting<Number> boostScale = new Setting<>("VEL-BOOST", 0.5, "Boosts your speed when you take KB.", 0.01, 0, 1);
+    private final Setting<Boolean> bowOnly = new Setting<>("BOW", false, "Only LongJumps if you bow yourself/take damage.");
+    private final Setting<Number> timerBoost = new Setting<>("TIMER", 0.0, "Adds to base Game Timer. (-0.5 = 0.5x Timer, 0 = 1x Timer, 1.0 = 2x Timer)", 0.01, 0, 2);
 
-    private Timer waitTimer = new Timer();
-    private Timer auraTimer = new Timer();
+    //private Setting<Boolean> dynamicJump = new Setting<>("DYNAMIC-JUMP", false, "Scales your Jump-Boost value based off of your pitch.");
+    //private Setting<Boolean> targetStrafe = new Setting<>("TARGETSTRAFE", false, "Target Strafes around players.");
+    //private Setting<Number> jumpBoost = new Setting<>("JUMP-BOOST", 0, "Increases your jump velocity.", 0.01, 0, 4);
+    //private Setting<Number> boostScale = new Setting<>("VEL-BOOST", 0.5, "Boosts your speed when you take KB.", 0.01, 0, 1);
 
-    private Timer timer = new Timer();
-    private Timer boostDelay = new Timer();
+    private final Timer waitTimer = new Timer();
+    private final Timer auraTimer = new Timer();
+
+    private final Timer timer = new Timer();
+    private final Timer boostDelay = new Timer();
 
     private boolean wasOnGround;
     private int zoom;
@@ -85,34 +84,32 @@ public class LongJump extends Module {
 
     private double distanceTraveled;
 
-    private double randomSeed = Math.random();
-
-    public int bruhTick;
+    //public int bruhTick;
 
     private Queue<Packet> packetList = new ConcurrentLinkedQueue<>();
 
     public LongJump(ModuleData data) {
         super(data);
-        settings.put(OFF, new Setting<>(OFF, true, "Toggles off on landing. (Not for Autism)"));
-        settings.put(BOOST, new Setting<>(BOOST, 4.5, "The speed boost multiplier.", 0.01, 2.5, 10));
-        settings.put(AUTISM, new Setting<>(AUTISM, true, "Fast Fly for Hypixel. (Experimental)"));
-        settings.put(PROGRESS, new Setting<>(PROGRESS, false, "Renders your blink progress. Can be used to know when you may blink or flag."));
-        //settings.put(C13PACKET, new Setting<>(C13PACKET, true, "Sends a C13 Flying packet on enable. (Experimental)"));
-        addSetting(targetStrafe);
-        //addSetting(useBlink);
-        addSetting(jumpBoost);
-        addSetting(bowOnly);
-        addSetting(boostScale);
-        addSetting(dynamicJump);
-        //settings.put(CHOKE, new Setting<>(CHOKE, 50, "The amount of ticks to choke by in between blinks.", 1, 2, 70));
-        settings.put(TIMER, new Setting<>(TIMER, 0.0, "Adds to base Game Timer. (-0.5 = 0.5x Timer, 0 = 1x Timer, 1.0 = 2x Timer)", 0.01, -0.75, 2));
+        addSettings(toggle, progress, bowOnly, boost, timerBoost);
 
-        speed = 0.27999999999999997;
+        //settings.put(OFF, new Setting<>(OFF, true, "Toggles off on landing. (Not for Autism)"));
+        //settings.put(BOOST, );
+        //settings.put(AUTISM, new Setting<>(AUTISM, true, "Fast Fly for Hypixel. (Experimental)"));
+        //settings.put(PROGRESS, new Setting<>(PROGRESS, false, "Renders your blink progress. Can be used to know when you may blink or flag."));
+        //settings.put(C13PACKET, new Setting<>(C13PACKET, true, "Sends a C13 Flying packet on enable. (Experimental)"));
+        //addSetting(targetStrafe);
+        //addSetting(useBlink);
+        //addSetting(jumpBoost);
+        //addSetting(boostScale);
+        //addSetting(dynamicJump);
+        //settings.put(CHOKE, new Setting<>(CHOKE, 50, "The amount of ticks to choke by in between blinks.", 1, 2, 70));
+
+        speed = 0;
         onGroundLastTick = false;
         distance = 0.0;
     }
 
-    private float jumpHeight;
+    //private float jumpHeight;
 
     @Override
     public void onDisable() {
@@ -125,7 +122,7 @@ public class LongJump extends Module {
         if (mc.thePlayer.onGround && !mc.thePlayer.isCollidedVertically) {
             mc.thePlayer.onGround = false;
         }
-        bruhTick = 0;
+        //bruhTick = 0;
         EventSystem.unregister(this);
 
         if (packetList.size() > 0) {
@@ -137,7 +134,7 @@ public class LongJump extends Module {
     }
 
     public boolean allowTargetStrafe() {
-        return this.isEnabled() && targetStrafe.getValue();
+        return false;
     }
 
 
@@ -161,7 +158,7 @@ public class LongJump extends Module {
         distanceTraveled = 0;
         packetList.clear();
 
-        bruhTick = 0;
+        //bruhTick = 0;
 //        if (mc.getIntegratedServer() == null && mc.getCurrentServerData() != null) {
 //            if (mc.getCurrentServerData().serverIP.toLowerCase().contains("hypixel.net")) {
 //                Notifications.getManager().post("Detected Feature", "Detected feature has been disabled.");
@@ -188,18 +185,18 @@ public class LongJump extends Module {
             return;
         }
 
-        Bypass bypass = Client.getModuleManager().get(Bypass.class);
-        if (!bypass.isEnabled() && (!bowMode && (boolean) settings.get(AUTISM).getValue())) {
-            toggle();
-            Notifications.getManager().post("LongJump Disabled", "This feature requires Bypass.", 1000, Notifications.Type.NOTIFY);
-            return;
-        }
+//        Bypass bypass = Client.getModuleManager().get(Bypass.class);
+//        if (!bypass.isEnabled() && (!bowMode && (boolean) settings.get(AUTISM).getValue())) {
+//            toggle();
+//            Notifications.getManager().post("LongJump Disabled", "This feature requires Bypass.", 1000, Notifications.Type.NOTIFY);
+//            return;
+//        }
 
-        if (bypass.option.getSelected().equals("Dong") && (bypass.bruh != 0 && bypass.bruh < 11)) {
-            toggle();
-            Notifications.getManager().post("LongJump Disabled", "Dong mode moment. Re-toggle LongJump.", 1000, Notifications.Type.NOTIFY);
-            return;
-        }
+//        if (bypass.option.getSelected().equals("Dong") && (bypass.bruh != 0 && bypass.bruh < 11)) {
+//            toggle();
+//            Notifications.getManager().post("LongJump Disabled", "Dong mode moment. Re-toggle LongJump.", 1000, Notifications.Type.NOTIFY);
+//            return;
+//        }
 
         delay = 1;
         mc.timer.timerSpeed = 1f;
@@ -221,58 +218,59 @@ public class LongJump extends Module {
 
         bowTicks = 0;
 
-        if ((boolean) settings.get(AUTISM).getValue()) {
-            if (!mc.thePlayer.onGround && !mc.thePlayer.isCollidedVertically) {
-                Notifications.getManager().post("LongJump Disabled", "Disabled to prevent in air lagback.");
-                this.toggle();
-                return;
-            }
-
-            if (bowMode) {
-                boolean bowFound = false;
-                boolean arrowsFound = false;
-                for (int i = 9; i < 45; i++) {
-                    if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
-                        ItemStack is = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
-                        Item item = is.getItem();
-                        if (i >= 36 && item instanceof ItemBow) {
-                            bowFound = true;
-                        }
-                        if (item == Items.arrow) {
-                            arrowsFound = true;
-                        }
-                    }
-                }
-
-                if (!bowFound) {
-                    Notifications.getManager().post("Cannot LongJump", "Place a bow in your hotbar.");
-                    this.toggle();
-                    return;
-                }
-                if (!arrowsFound) {
-                    Notifications.getManager().post("Cannot LongJump", "You are out of Arrows.");
-                    this.toggle();
-                    return;
-                }
-                bowTicks = 20;
-            } else {
-                if (mc.thePlayer.isSprinting())
-                    NetUtil.sendPacket(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.STOP_SPRINTING));
-                Damage.damagePlayer();
-                if (mc.thePlayer.isSprinting())
-                    NetUtil.sendPacket(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.START_SPRINTING));
-            }
-
-            timer.reset();
-            this.zoom = 40;
-
-            //this.blinkTicks = ((Number) settings.get(CHOKE).getValue()).intValue();
-            this.delay = 7;
-            boostDelay.reset();
-
-            mc.thePlayer.motionX = 0;
-            mc.thePlayer.motionZ = 0;
-        } else {
+//        if ((boolean) settings.get(AUTISM).getValue()) {
+//            if (!mc.thePlayer.onGround && !mc.thePlayer.isCollidedVertically) {
+//                Notifications.getManager().post("LongJump Disabled", "Disabled to prevent in air lagback.");
+//                this.toggle();
+//                return;
+//            }
+//
+//            if (bowMode) {
+//                boolean bowFound = false;
+//                boolean arrowsFound = false;
+//                for (int i = 9; i < 45; i++) {
+//                    if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
+//                        ItemStack is = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
+//                        Item item = is.getItem();
+//                        if (i >= 36 && item instanceof ItemBow) {
+//                            bowFound = true;
+//                        }
+//                        if (item == Items.arrow) {
+//                            arrowsFound = true;
+//                        }
+//                    }
+//                }
+//
+//                if (!bowFound) {
+//                    Notifications.getManager().post("Cannot LongJump", "Place a bow in your hotbar.");
+//                    this.toggle();
+//                    return;
+//                }
+//                if (!arrowsFound) {
+//                    Notifications.getManager().post("Cannot LongJump", "You are out of Arrows.");
+//                    this.toggle();
+//                    return;
+//                }
+//                bowTicks = 20;
+//            } else {
+//                if (mc.thePlayer.isSprinting())
+//                    NetUtil.sendPacket(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.STOP_SPRINTING));
+//                Damage.damagePlayer();
+//                if (mc.thePlayer.isSprinting())
+//                    NetUtil.sendPacket(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.START_SPRINTING));
+//            }
+//
+//            timer.reset();
+//            this.zoom = 40;
+//
+//            //this.blinkTicks = ((Number) settings.get(CHOKE).getValue()).intValue();
+//            this.delay = 7;
+//            boostDelay.reset();
+//
+//            mc.thePlayer.motionX = 0;
+//            mc.thePlayer.motionZ = 0;
+//        } else {
+        {
             this.zoom = 40;
             if (bowMode) {
                 if (!mc.thePlayer.onGround && !mc.thePlayer.isCollidedVertically) {
@@ -281,7 +279,7 @@ public class LongJump extends Module {
                     return;
                 }
 
-                jumpHeight = jumpBoost.getValue().floatValue();
+                // jumpHeight = 0;
 
                 boolean bowFound = false;
                 boolean arrowsFound = false;
@@ -297,7 +295,7 @@ public class LongJump extends Module {
                             if (shouldSwap) {
                                 mc.playerController.windowClick(mc.thePlayer.inventoryContainer.windowId, i, 4, 2, mc.thePlayer);
                             }
-                            if(arrowsFound) {
+                            if (arrowsFound) {
                                 ignoreRod = false;
                                 break;
                             }
@@ -344,14 +342,14 @@ public class LongJump extends Module {
     private double distance;
     private boolean onGroundLastTick;
 
-    private Random random = new Random();
+    private final Random random = new Random();
 
     public boolean noShake() {
         return !timer.delay(1000) && autismEnabled() && !HypixelUtil.isInGame("PIT") && !HypixelUtil.isInGame("UHC") && !bowOnly.getValue();
     }
 
     public boolean autismEnabled() {
-        return isEnabled() && (boolean) settings.get(AUTISM).getValue();
+        return false;
     }
 
     public boolean allowAttack() {
@@ -368,8 +366,8 @@ public class LongJump extends Module {
             return;
         }
 
-        boolean autism = (boolean) settings.get(AUTISM).getValue();
-        if (event instanceof EventRenderGui && (!autism || (boolean) settings.get(PROGRESS).getValue())) {
+        boolean autism = false;
+        if (event instanceof EventRenderGui && (!autism || progress.getValue())) {
 //            if (useBlink.getValue()) {
 //                int chokePackets = ((Number) settings.get(CHOKE).getValue()).intValue();
 //                ScaledResolution res = new ScaledResolution(mc);
@@ -403,48 +401,48 @@ public class LongJump extends Module {
 
                 double centerX = res.getScaledWidth_double() / 2, centerY = res.getScaledHeight_double() / 2 - 40;
 
-                if (dynamicJump.getValue()) {
-
-                    RenderingUtil.rectangleBordered(centerX + 40 - 4, centerY - 24, centerX + 40, centerY - 4, 1, Colors.getColor(0, 100), Colors.getColor(0, 150));
-
-                    float pitch = mc.thePlayer.rotationPitch;
-
-                    float high = -30;
-
-                    float percent = Math.max(Math.min((pitch / high), 1), 0);
-
-                    String jumpPowerStr = "\247l" + MathUtils.roundToPlace(percent * jumpHeight, 2);
-
-                    Depth.pre();
-                    Depth.mask();
-                    RenderingUtil.rectangle(centerX + 40 - 3, centerY - 5 - (18 * percent), centerX + 39, centerY - 5, Colors.getColor(255));
-                    Depth.render();
-                    RenderingUtil.drawGradient(centerX + 40 - 3, centerY - 23, centerX + 39, centerY - 14, Colors.getColor(0,255,0), Colors.getColor(255,255,0));
-                    RenderingUtil.drawGradient(centerX + 40 - 3, centerY - 14, centerX + 39, centerY - 5, Colors.getColor(255,255,0), Colors.getColor(255,00,0));
-                    Depth.post();
-
-                    int color = Colors.getColor(255);
-
-                    GlStateManager.pushMatrix();
-
-                    GlStateManager.translate(centerX + 34, centerY - 15.5, 0);
-
-                    GlStateManager.enableBlend();
-                    Depth.pre();
-                    Depth.mask();
-                    Client.fss.drawString(jumpPowerStr, -Client.fss.getWidth(jumpPowerStr), 0, color);
-                    Depth.render(GL11.GL_LESS);
-                    Client.fss.drawString(jumpPowerStr, -Client.fss.getWidth(jumpPowerStr) + 0.5, 0, Colors.getColor(0, 150));
-                    Client.fss.drawString(jumpPowerStr, -Client.fss.getWidth(jumpPowerStr), 0.5, Colors.getColor(0, 150));
-                    Client.fss.drawString(jumpPowerStr, -Client.fss.getWidth(jumpPowerStr) - 0.5, 0, Colors.getColor(0, 150));
-                    Client.fss.drawString(jumpPowerStr, -Client.fss.getWidth(jumpPowerStr), -0.5, Colors.getColor(0, 150));
-                    Depth.post();
-                    Client.fss.drawString(jumpPowerStr, -Client.fss.getWidth(jumpPowerStr), 0, color);
-                    GlStateManager.disableBlend();
-
-                    GlStateManager.popMatrix();
-
-                }
+//                if (dynamicJump.getValue()) {
+//
+//                    RenderingUtil.rectangleBordered(centerX + 40 - 4, centerY - 24, centerX + 40, centerY - 4, 1, Colors.getColor(0, 100), Colors.getColor(0, 150));
+//
+//                    float pitch = mc.thePlayer.rotationPitch;
+//
+//                    float high = -30;
+//
+//                    float percent = Math.max(Math.min((pitch / high), 1), 0);
+//
+//                    String jumpPowerStr = "\247l" + MathUtils.roundToPlace(percent * jumpHeight, 2);
+//
+//                    Depth.pre();
+//                    Depth.mask();
+//                    RenderingUtil.rectangle(centerX + 40 - 3, centerY - 5 - (18 * percent), centerX + 39, centerY - 5, Colors.getColor(255));
+//                    Depth.render();
+//                    RenderingUtil.drawGradient(centerX + 40 - 3, centerY - 23, centerX + 39, centerY - 14, Colors.getColor(0, 255, 0), Colors.getColor(255, 255, 0));
+//                    RenderingUtil.drawGradient(centerX + 40 - 3, centerY - 14, centerX + 39, centerY - 5, Colors.getColor(255, 255, 0), Colors.getColor(255, 00, 0));
+//                    Depth.post();
+//
+//                    int color = Colors.getColor(255);
+//
+//                    GlStateManager.pushMatrix();
+//
+//                    GlStateManager.translate(centerX + 34, centerY - 15.5, 0);
+//
+//                    GlStateManager.enableBlend();
+//                    Depth.pre();
+//                    Depth.mask();
+//                    Client.fss.drawString(jumpPowerStr, -Client.fss.getWidth(jumpPowerStr), 0, color);
+//                    Depth.render(GL11.GL_LESS);
+//                    Client.fss.drawString(jumpPowerStr, -Client.fss.getWidth(jumpPowerStr) + 0.5, 0, Colors.getColor(0, 150));
+//                    Client.fss.drawString(jumpPowerStr, -Client.fss.getWidth(jumpPowerStr), 0.5, Colors.getColor(0, 150));
+//                    Client.fss.drawString(jumpPowerStr, -Client.fss.getWidth(jumpPowerStr) - 0.5, 0, Colors.getColor(0, 150));
+//                    Client.fss.drawString(jumpPowerStr, -Client.fss.getWidth(jumpPowerStr), -0.5, Colors.getColor(0, 150));
+//                    Depth.post();
+//                    Client.fss.drawString(jumpPowerStr, -Client.fss.getWidth(jumpPowerStr), 0, color);
+//                    GlStateManager.disableBlend();
+//
+//                    GlStateManager.popMatrix();
+//
+//                }
 
                 int chokePackets = 20;
 
@@ -469,7 +467,7 @@ public class LongJump extends Module {
                 float[] hsbVals = new float[3];
                 Color.RGBtoHSB(ColorManager.hudColor.getRed(), ColorManager.hudColor.getGreen(), ColorManager.hudColor.getBlue(), hsbVals);
 
-                RenderingUtil.rectangle(centerX - barHalf + 1, centerY - 1, centerX - barHalf + 1 + width, centerY + 1, Color.getHSBColor((hsbVals[0] + 0.5F) % 1.0F, hsbVals[1], hsbVals[2]).getRGB());
+                RenderingUtil.rectangle(centerX - barHalf + 1, centerY - 1, centerX - barHalf + 1 + width, centerY + 1, Colors.getColorOpacity(MathHelper.hsvToRGB((hsbVals[0] + 0.5F) % 1.0F, hsbVals[1], hsbVals[2]), 255));
                 return;
             }
         }
@@ -492,30 +490,41 @@ public class LongJump extends Module {
 //                }
 //            }
 
-            if (delay < 0 || bowOnly.getValue()) {
-                if (packet instanceof S12PacketEntityVelocity) {
-                    S12PacketEntityVelocity velocity = (S12PacketEntityVelocity) packet;
-                    if (velocity.getEntityID() == mc.thePlayer.getEntityId()) {
-                        double x = (double) velocity.getMotionX() / 8000.0D;
-                        double y = (double) velocity.getMotionY() / 8000.0D;
-                        double z = (double) velocity.getMotionZ() / 8000.0D;
-                        if (x != 0 || z != 0) {
-                            velocityBoost = Math.sqrt(x * x + z * z) * boostScale.getValue().doubleValue();
-                        }
-                    }
-                }
-                if (packet instanceof S27PacketExplosion) {
-                    S27PacketExplosion velocity = (S27PacketExplosion) packet;
-                    if (velocity.xMotion != 0 || velocity.zMotion != 0) {
-                        velocityBoost = Math.sqrt(velocity.xMotion * velocity.xMotion + velocity.zMotion * velocity.zMotion) * boostScale.getValue().doubleValue();
-                    }
-                }
-            }
+//            if (delay < 0 || bowOnly.getValue()) {
+//                if (packet instanceof S12PacketEntityVelocity) {
+//                    S12PacketEntityVelocity velocity = (S12PacketEntityVelocity) packet;
+//                    if (velocity.getEntityID() == mc.thePlayer.getEntityId()) {
+//                        double x = (double) velocity.getMotionX() / 8000.0D;
+//                        double y = (double) velocity.getMotionY() / 8000.0D;
+//                        double z = (double) velocity.getMotionZ() / 8000.0D;
+//                        if (x != 0 || z != 0) {
+//                            velocityBoost = Math.sqrt(x * x + z * z) * boostScale.getValue().doubleValue();
+//                        }
+//                    }
+//                }
+//                if (packet instanceof S27PacketExplosion) {
+//                    S27PacketExplosion velocity = (S27PacketExplosion) packet;
+//                    if (velocity.xMotion != 0 || velocity.zMotion != 0) {
+//                        velocityBoost = Math.sqrt(velocity.xMotion * velocity.xMotion + velocity.zMotion * velocity.zMotion) * boostScale.getValue().doubleValue();
+//                    }
+//                }
+//            }
         }
         if (event instanceof EventMove) {
             EventMove em = (EventMove) event;
-            double boost = ((Number) settings.get(BOOST).getValue()).doubleValue();
-            float autBoost = ((Number) settings.get(TIMER).getValue()).floatValue();
+            double boost = this.boost.getValue().doubleValue();
+            float autBoost = timerBoost.getValue().floatValue();
+
+            if (bowTicks > 4 && mc.thePlayer.hurtTime != 0) {
+                if (bowTicks >= 16 && bowTicks < 19) {
+                    NetUtil.sendPacketNoEvents(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
+                    NetUtil.sendPacketNoEvents(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem));
+                }
+            }
+
+            if(mc.thePlayer.hurtTime != 0){
+                bowTicks = 0;
+            }
 
             if (bowOnly.getValue()) {
                 auraTimer.reset();
@@ -543,62 +552,54 @@ public class LongJump extends Module {
                     return;
                 }
 
+                boolean canSprint = mc.thePlayer.getFoodStats().getFoodLevel() >= 6;
+
+                double moveSpeed = speed = (defaultSpeed()) * ((mc.thePlayer.isInsideOfMaterial(Material.vine)) ? 0.5 : (mc.thePlayer.isSneaking()) ? 0.8 : (PlayerUtil.isInLiquid() ? 0.54 : ((mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.1, mc.thePlayer.posZ)).getBlock().slipperiness == 0.98f) ? 2.4 : canSprint ? 1.0 : 0.765)));
+
                 if (mc.thePlayer.onGround) {
                     if (onGroundLastTick) { // B
-                        speed *= 1.83949644F;
-                        double gay = (double) (0.42F) - (autism ? 0.07840000152587834 : 0);
+//                        float pitch = mc.thePlayer.rotationPitch;
+//
+//                        float high = -30;
+//
+//                        float percent = dynamicJump.getValue() ? Math.max(Math.min((pitch / high), 1), 0) : 1;
+//
+//                        gay += jumpHeight * percent;
 
-                        float pitch = mc.thePlayer.rotationPitch;
-
-                        float high = -30;
-
-                        float percent = dynamicJump.getValue() ? Math.max(Math.min((pitch / high), 1), 0) : 1;
-
-                        gay += jumpHeight * percent;
-
+                        double gay = (double) (0.42F);
                         em.setY(mc.thePlayer.motionY = gay);
+                        speed = moveSpeed * boost;
 
                     } else { // A
-                        double baseSpeed = 0.25999999999999997;
-                        if (mc.thePlayer.isPotionActive(Potion.moveSpeed)) {
-                            int amplifier = mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getAmplifier();
-                            baseSpeed *= (1.0D + 0.105D * (amplifier + 1));
-                        }
-
-                        speed = Math.max( velocityBoost, (boost + (0.0000000011324D * Math.random())) * baseSpeed);
+//                        double baseSpeed = 0.25999999999999997;
+//                        if (mc.thePlayer.isPotionActive(Potion.moveSpeed)) {
+//                            int amplifier = mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getAmplifier();
+//                            baseSpeed *= (1.0D + 0.105D * (amplifier + 1));
+//                        }
+//                        speed = Math.max(velocityBoost, (boost + (0.0000000011324D * Math.random())) * baseSpeed);
+                        speed = moveSpeed;
                     }
                 } else if (onGroundLastTick) { // C
-                    if (distance < 1.73949644) {
-                        distance = 1.73949644;
-                    }
-                    if (autism)
-                        em.setY(mc.thePlayer.motionY = 0);
+//                    if (distance < 1.73949644) {
+//                        distance = 1.73949644;
+//                    }
+//                    if (autism)
+//                        em.setY(mc.thePlayer.motionY = 0);
 //                if (lower.getValue()) {
 //                    em.setY(mc.thePlayer.motionY = -0.07840000152587834);
 //                }
-                    mc.thePlayer.onGround = false;
+                    double baseSpeed = 0.3303950079529733;
+                    if (mc.thePlayer.isPotionActive(Potion.moveSpeed) && mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getDuration() > 5) {
+                        int amplifier = mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getAmplifier();
+                        baseSpeed *= (1.0D + 0.15D * (amplifier + 1));
+                    }
 
-                    double difference = (0.66D) * (distance - defaultSpeed());
-                    speed = distance - (float) difference;
+                    speed = distance - (0.666 * (distance - baseSpeed));
                     wasOnGround = true;
                 } else { // D
-                    speed = distance - distance / 160D;
+                    this.speed = distance - (distance / 50);
 
-                    double a = distance - distance / 160;
-                    double b = distance - (distance - defaultSpeed()) / 33.3;
-                    double c = distance - (distance - defaultSpeed()) * 0.020000000000000018;
-
-                    java.util.List<Double> list = new ArrayList<>();
-
-                    list.add(a);
-                    list.add(b);
-                    list.add(c);
-
-                    list.sort(Double::compare);
-
-                    this.speed = list.get(2) - 0.0000125F;
-
-                    if (autism) {
+/*                    if (autism) {
                         if (delay <= 4)
                             if (zoom > 0 && !boostDelay.delay(5000)) {
                                 mc.timer.timerSpeed = 1 + (autBoost + (float) (autBoost / 10 * Math.random()));
@@ -621,7 +622,8 @@ public class LongJump extends Module {
                         if (wasOnGround) {
                             wasOnGround = false;
                         }
-                    } else if (bowOnly.getValue()) {
+                    } else */
+                    if (bowOnly.getValue()) {
                         mc.timer.timerSpeed = 1 + (autBoost + (float) (autBoost / 10 * Math.random()));
                     }
                 }
@@ -633,9 +635,8 @@ public class LongJump extends Module {
 //                    velocityBoost *= 0.66;
 //                }
 
-                TargetStrafe targetStrafe = (TargetStrafe) Client.getModuleManager().get(TargetStrafe.class);
-                float yaw = (allowTargetStrafe() && mc.thePlayer.movementInput.moveStrafe == 0 && mc.thePlayer.movementInput.moveForward > 0) ?
-                        targetStrafe.getTargetYaw(mc.thePlayer.rotationYaw, em.getY()) : mc.thePlayer.rotationYaw;
+                //TargetStrafe targetStrafe = (TargetStrafe) Client.getModuleManager().get(TargetStrafe.class);
+                float yaw = mc.thePlayer.rotationYaw;
 
                 em.setX(mc.thePlayer.motionX = (float) (-(Math.sin(mc.thePlayer.getDirection(yaw)) * speed)));
                 em.setZ(mc.thePlayer.motionZ = (float) (Math.cos(mc.thePlayer.getDirection(yaw)) * speed));
@@ -645,13 +646,6 @@ public class LongJump extends Module {
         } else if (event instanceof EventMotionUpdate) {
             EventMotionUpdate em = (EventMotionUpdate) event;
             if (em.isPre()) {
-                if (bowTicks > 4 && mc.thePlayer.hurtTime != 0) {
-                    if (bowTicks >= 16 && bowTicks < 19) {
-                        NetUtil.sendPacketNoEvents(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
-                        NetUtil.sendPacketNoEvents(new C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem));
-                    }
-                    bowTicks = 0;
-                }
 
                 if (bowTicks <= 0) {
                     bowTicks--;
@@ -668,78 +662,78 @@ public class LongJump extends Module {
 //                        this.resetPackets();
 //                        //blinkTicks = ((Number) settings.get(CHOKE).getValue()).intValue();
 //                    }
-                    boolean isHypixel = mc.getCurrentServerData() != null && HypixelUtil.isVerifiedHypixel() && (mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net"));
-                    boolean up = false;
-
-                    if (autism && !mc.thePlayer.isCollidedVertically && !mc.thePlayer.onGround && delay < 3) {
-                        float bruh = 0;
-                        if (mc.getIntegratedServer() == null && mc.getCurrentServerData() != null) {
-                            if (isHypixel) {
-                                float min = 0.00000014F;
-                                float max = 0.00000043F;
-
-                                int tickPassed = bruhTick % 5;
-
-                                if (tickPassed == 0) {
-                                    bruh = 0.000014F + (float) (min + (max - min) * Math.random());
-                                }
-                                if (tickPassed == 1) {
-                                    up = true;
-                                    bruh = 0.000024F + (float) (min + (max - min) * Math.random()); // 0.00079
-                                }
-                                if (tickPassed == 2) {
-                                    bruh = 0.000014F + (float) (min + (max - min) * Math.random()); // -0.00031
-                                }
-                                if (tickPassed == 3) {
-                                    up = true;
-                                    bruh = 0.000024F + (float) (min + (max - min) * Math.random()); // -0.00069
-                                }
-                                if (tickPassed == 4) {
-                                    bruh = 0.000017F + (float) (min + (max - min) * Math.random()); // 0.0012
-                                }
-
-                                bruhTick++;
-
-                                // Movement fix to make the movement > 0.00090D
-                                double var3 = mc.thePlayer.posX - mc.thePlayer.lastReportedPosX;
-                                double var5 = (em.getY() + bruh) - mc.thePlayer.lastReportedPosY;
-                                double var7 = mc.thePlayer.posZ - mc.thePlayer.lastReportedPosZ;
-
-                                if (var3 * var3 + var5 * var5 + var7 * var7 <= 0.00090D) {
-                                    em.setCancelled(true);
+//                    boolean isHypixel = mc.getCurrentServerData() != null && HypixelUtil.isVerifiedHypixel() && (mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net"));
+//                    boolean up = false;
+//
+//                    if (autism && !mc.thePlayer.isCollidedVertically && !mc.thePlayer.onGround && delay < 3) {
+//                        float bruh = 0;
+//                        if (mc.getIntegratedServer() == null && mc.getCurrentServerData() != null) {
+//                            if (isHypixel) {
+//                                float min = 0.00000014F;
+//                                float max = 0.00000043F;
+//
+//                                int tickPassed = bruhTick % 5;
+//
+//                                if (tickPassed == 0) {
+//                                    bruh = 0.000014F + (float) (min + (max - min) * Math.random());
+//                                }
 //                                if (tickPassed == 1) {
-//                                    bruh = 0.000924F + (float) (min + (max - min) * Math.random()); // 0.00079
+//                                    up = true;
+//                                    bruh = 0.000024F + (float) (min + (max - min) * Math.random()); // 0.00079
 //                                }
 //                                if (tickPassed == 2) {
-//                                    bruh = 0.000914F + (float) (min + (max - min) * Math.random()); // -0.00031
+//                                    bruh = 0.000014F + (float) (min + (max - min) * Math.random()); // -0.00031
 //                                }
 //                                if (tickPassed == 3) {
-//                                    bruh = 0.000924F + (float) (min + (max - min) * Math.random()); // -0.00069
+//                                    up = true;
+//                                    bruh = 0.000024F + (float) (min + (max - min) * Math.random()); // -0.00069
 //                                }
 //                                if (tickPassed == 4) {
-//                                    bruh = 0.000917F + (float) (min + (max - min) * Math.random()); // 0.0012
+//                                    bruh = 0.000017F + (float) (min + (max - min) * Math.random()); // 0.0012
 //                                }
-                                }
-
-//                                if ((boolean) settings.get(C13PACKET).getValue() && bruhTick > 0 && (bruhTick % (20 * 6) == 0)) {
-//                                    Bypass bypass = Client.getModuleManager().get(Bypass.class);
-//                                    sendC13Packet();
-//                                    distanceTraveled = 0;
+//
+//                                bruhTick++;
+//
+//                                // Movement fix to make the movement > 0.00090D
+//                                double var3 = mc.thePlayer.posX - mc.thePlayer.lastReportedPosX;
+//                                double var5 = (em.getY() + bruh) - mc.thePlayer.lastReportedPosY;
+//                                double var7 = mc.thePlayer.posZ - mc.thePlayer.lastReportedPosZ;
+//
+//                                if (var3 * var3 + var5 * var5 + var7 * var7 <= 0.00090D) {
+//                                    em.setCancelled(true);
+////                                if (tickPassed == 1) {
+////                                    bruh = 0.000924F + (float) (min + (max - min) * Math.random()); // 0.00079
+////                                }
+////                                if (tickPassed == 2) {
+////                                    bruh = 0.000914F + (float) (min + (max - min) * Math.random()); // -0.00031
+////                                }
+////                                if (tickPassed == 3) {
+////                                    bruh = 0.000924F + (float) (min + (max - min) * Math.random()); // -0.00069
+////                                }
+////                                if (tickPassed == 4) {
+////                                    bruh = 0.000917F + (float) (min + (max - min) * Math.random()); // 0.0012
+////                                }
 //                                }
-                            }
-                        }
-
-                        em.setY((float) (em.getY() + (double) bruh));
-                        em.setGround(false);
-                    }
-
-                    if (isHypixel && em.isOnground() && ((bowOnly.getValue() && bowTicks < 2) || (delay == 6 & mc.thePlayer.onGround))) {
-                        em.setY(em.getY() + MathUtils.roundToPlace(0.00053424 + ((0.015625 - 0.00053424) * Math.random()), 7));
-                    }
-
-                    if (autism && delay < 3) {
-                        em.setGround(bruhTick % 6 == 0 && HypixelUtil.isVerifiedHypixel());
-                    }
+//
+////                                if ((boolean) settings.get(C13PACKET).getValue() && bruhTick > 0 && (bruhTick % (20 * 6) == 0)) {
+////                                    Bypass bypass = Client.getModuleManager().get(Bypass.class);
+////                                    sendC13Packet();
+////                                    distanceTraveled = 0;
+////                                }
+//                            }
+//                        }
+//
+//                        em.setY((float) (em.getY() + (double) bruh));
+//                        em.setGround(false);
+//                    }
+//
+//                    if (isHypixel && em.isOnground() && ((bowOnly.getValue() && bowTicks < 2) || (delay == 6 & mc.thePlayer.onGround))) {
+//                        em.setY(em.getY() + MathUtils.roundToPlace(0.00053424 + ((0.015625 - 0.00053424) * Math.random()), 7));
+//                    }
+//
+//                    if (autism && delay < 3) {
+//                        em.setGround(bruhTick % 6 == 0 && HypixelUtil.isVerifiedHypixel());
+//                    }
                 } else {
                     if (bowTicks == 19 || (ignoreRod && bowTicks == 18)) {
                         if (ignoreRod && bowTicks == 19) {
@@ -775,11 +769,11 @@ public class LongJump extends Module {
                 distance = Math.hypot(mc.thePlayer.posX - mc.thePlayer.prevPosX, mc.thePlayer.posZ - mc.thePlayer.prevPosZ);
                 distanceTraveled += distance;
             } else {
-                if (bowTicks > 1 || mc.thePlayer.hurtTime != 0)
+                if (bowTicks > 1)
                     bowTicks--;
             }
         }
-        if ((Boolean) settings.get(OFF).getValue() && !autism && bowTicks <= -4) {
+        if (toggle.getValue() && !autism && bowTicks <= -4) {
             if (!onGroundLastTick && (mc.thePlayer.isCollidedVertically || mc.thePlayer.motionY < 0 && mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY + mc.thePlayer.motionY, mc.thePlayer.posZ)).getBlock() != Blocks.air) && wasOnGround && isEnabled()) {
                 toggle();
                 EventSystem.unregister(this);
@@ -819,10 +813,10 @@ public class LongJump extends Module {
     }
 
     private double defaultSpeed() {
-        double baseSpeed = 0.27999999999999997;
-        if (mc.thePlayer.isPotionActive(Potion.moveSpeed)) {
+        double baseSpeed = 0.28730000691562896;
+        if (mc.thePlayer.isPotionActive(Potion.moveSpeed) && mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getDuration() > 5) {
             int amplifier = mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getAmplifier();
-            baseSpeed *= (1.0D + 0.2D * (amplifier + 1));
+            baseSpeed *= (1.0D + 0.15D * (amplifier + 1));
         }
         return baseSpeed;
     }

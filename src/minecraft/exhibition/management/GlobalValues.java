@@ -1,6 +1,5 @@
 package exhibition.management;
 
-import exhibition.gui.click.ClickGui;
 import exhibition.module.data.settings.Setting;
 import net.minecraft.client.Minecraft;
 import org.lwjgl.input.Mouse;
@@ -32,16 +31,19 @@ public class GlobalValues {
             Minecraft mc = Minecraft.getMinecraft();
 
             if (mc.thePlayer != null) {
-                if (mc.currentScreen instanceof ClickGui) {
+                if (mc.currentScreen != null) {
                     Mouse.setGrabbed(!Mouse.isGrabbed());
                 }
             }
 
         }
     };
+    public static Setting<Number> targetHUDWidth = new Setting<>("Target HUD Width", 0.5078125,"", 0.01, 0,1);
+    public static Setting<Number> targetHUDHeight = new Setting<>("Target HUD Height", 0.569444444,"", 0.01, 0,1);
 
     static {
-        globalValues.addAll(Arrays.asList(saveVisuals, loadVisuals, centerNotifs, showCursor, scaleFix, allowDebug, showCape, keepPriority, showFlags));
+        globalValues.addAll(Arrays.asList(saveVisuals, loadVisuals, centerNotifs, showCursor, scaleFix,
+                allowDebug, showCape, keepPriority, showFlags, targetHUDWidth, targetHUDHeight));
     }
 
 }

@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
+import exhibition.Client;
 import exhibition.gui.screen.impl.mainmenu.GuiLoginMenu;
 import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.util.security.hwid.HardwareIdentification;
@@ -24,10 +25,8 @@ public class AuthenticationUtil {
 
     public static int hashCheckStub = 0;
 
-    public static boolean fuck;
-
     static {
-        publicKeyEncoded = new byte[(int)Math.round(5 * Math.random())];
+        publicKeyEncoded = new byte[(int) Math.round(5 * Math.random())];
     }
 
     public static int getHwid() {
@@ -54,26 +53,31 @@ public class AuthenticationUtil {
         return AESCipher.encrypt("Jkg5NZ4tVxs8CD0n", str).getData();
     }
 
-    public static String getAESKey() {
-        return "";
-    }
+//    public static String getAESKey() {
+//        return "";
+//    }
 
-    public static Object isAuth(final GuiLoginMenu.AuthenticationThread authenticationThread, final GuiLoginMenu loginInstance, final String encryptedUsername, final String encryptedPassword, final String hashedUsername, final String hashedPassword) {
+    public static Object hardwareIdentification;
+
+    public static String temporaryUsername = null;
+
+    public static Object isAuth(final AuthenticationThread authenticationThread, final GuiLoginMenu loginInstance, final String encryptedUsername, final String encryptedPassword, final String hashedUsername, final String hashedPassword) {
         Object authUser = null;
         try {
             String hardware = SystemUtil.getHardwareIdentifiers();
             loginInstance.setProgress(0.1);
             try {
                 String name = "";
-                if (Boolean.parseBoolean(decodeByteArray(new byte[]{116, 114, 117, 101})) && !((Stupid) InstrumentationCheck.TEMPPROTECT0()).detected) {
+                if (!((Stupid) InstrumentationCheck.TEMPPROTECT0()).detected) {
                     // Real Auth
                     String data = "";
                     Connection connection = new Connection("https://minesense.pub/nig/bruh", " E. " + Crypto.decryptPublicNew(encryptedUsername) + " U: " + Minecraft.getMinecraft().session.getUsername());
-                    HardwareIdentification hardwareIdentification = new HardwareIdentification(LibraryIntegrityChecker.checkOSHIIntegrity());
+                    if (hardwareIdentification == null)
+                        hardwareIdentification = new HardwareIdentification(LibraryIntegrityChecker.checkOSHIIntegrity());
                     loginInstance.setProgress(0.2);
 
                     // Hardware
-                    Class.forName("exhibition.util.security.AuthenticationUtil").getDeclaredField("hashCheckStub").set(null, (int) Class.forName("java.lang.String").getMethod("hashCode").invoke(connection.getUrl()));
+                    Class.forName("exhibition.util.security.AuthenticationUtil").getDeclaredField("hashCheckStub").set(null, Class.forName("java.lang.String").getMethod("hashCode").invoke(connection.getUrl()));
 
                     byte[] hardwareBytes = new byte[Math.min(hardware.getBytes().length, 501)];
                     for (int i = 0; i < 501 && i < hardware.getBytes().length; i++) {
@@ -87,6 +91,8 @@ public class AuthenticationUtil {
                     String rebuilt = decodeByteArray(hardwareBytes);
                     connection.setParameters("aooga", URLEncoder.encode(encryptAES(Base64.encode(AsymmetricalEncryptionUtils.performRSAEncryption(rebuilt.getBytes(), decodeByteArray((byte[]) publicKeyEncoded)))), "UTF-8"));
 
+                    temporaryUsername = Crypto.decryptPublicNew(encryptedUsername);
+
                     // Username
                     connection.setParameters("ooga", username = URLEncoder.encode(encryptAES(Base64.encode(AsymmetricalEncryptionUtils.performRSAEncryption(Crypto.decryptPublicNew(encryptedUsername).getBytes(), decodeByteArray((byte[]) publicKeyEncoded)))), "UTF-8"));
 
@@ -94,7 +100,7 @@ public class AuthenticationUtil {
                     connection.setParameters("booga", password = URLEncoder.encode(encryptAES(Base64.encode(AsymmetricalEncryptionUtils.performRSAEncryption(Crypto.decryptPublicNew(encryptedPassword).getBytes(), decodeByteArray((byte[]) publicKeyEncoded)))), "UTF-8"));
                     loginInstance.setProgress(0.3);
 
-                    String hwidJson = hardwareIdentification.getIdentifiersAsJson();
+                    String hwidJson = ((HardwareIdentification) hardwareIdentification).getIdentifiersAsJson();
 
                     JsonObject jsonObject = new JsonObject();
 
@@ -112,6 +118,8 @@ public class AuthenticationUtil {
                     SSLConnector.post(connection);
 
                     //System.out.println(result);
+
+                    boolean isBeta = false;
 
                     String test = "";
                     loginInstance.setProgress(0.5);
@@ -144,14 +152,34 @@ public class AuthenticationUtil {
                                     case "uid":
                                         uid = key;
                                         break;
+                                    case "beta":
+                                        isBeta = true;
+                                        break;
                                 }
                             } catch (Exception ignored) {
                                 //ignored.printStackTrace();
                             }
                         }
 
-                        switch (AESCipher.decrypt("Jkg5NZ4tVxs8CD0n", ((JsonObject) JsonConnection.toJsonObject(connection)).get("response").getAsString()).getData()) {
-                            case "success":
+                        switch (AESCipher.decrypt("Jkg5NZ4tVxs8CD0n", ((JsonObject) JsonConnection.toJsonObject(connection)).get("response").getAsString()).getData().hashCode()) {
+                            case -1867169789: // success
+                                if (Client.isBeta() && !isBeta) {
+                                    loginInstance.setLoginFailed();
+                                    loginInstance.setProgress(0);
+                                    Notifications.getManager().post("Unauthorized User", "Action logged. Client will be closing in {s}s.", 5000, Notifications.Type.WARNING);
+                                    SilentSnitch.snitch(77777, Crypto.decryptPublicNew(encryptedUsername), Client.version, Client.parsedVersion);
+                                    new Thread() {
+                                        @Override
+                                        public void run() {
+                                            try {
+                                                Thread.sleep(5100);
+                                            } catch (Exception ignored) {
+                                            }
+                                            Minecraft.getMinecraft().shutdown();
+                                        }
+                                    }.start();
+                                    return authUser;
+                                }
                                 if (((JsonObject) JsonConnection.toJsonObject(connection)).has(ciphered)) {
                                     String cipherText = ((JsonObject) JsonConnection.toJsonObject(connection)).get(ciphered).getAsString();
                                     String decryptedData = AsymmetricalEncryptionUtils.performRSADecryption(cipherText, decodeByteArray((byte[]) publicKeyEncoded));
@@ -162,116 +190,40 @@ public class AuthenticationUtil {
                                     try {
                                         if (Crypto.decryptPublicNew(encryptedUsername).equalsIgnoreCase(AESCipher.decrypt("Jkg5NZ4tVxs8CD0n", parsed[0]).getData())) {
                                             loginInstance.setProgress(0.6);
-                                            if (BCrypt.checkpw(hardwareIdentification.getHashedHardware(), parsed[1].replace("$2y$", "$2a$")).detected) {
+                                            if (BCrypt.checkpw(((HardwareIdentification) hardwareIdentification).getHashedHardware(), parsed[1].replace("$2y$", "$2a$")).detected) {
                                                 loginInstance.setProgress(0.7);
+                                                if (((JsonObject) JsonConnection.toJsonObject(connection)).has(test)) {
+                                                    authUser = ((JsonObject) JsonConnection.toJsonObject(connection)).get(test).getAsJsonObject();
+                                                }
+                                                loginInstance.setProgress(0.8);
 
-                                                /* TODO: REMOVE ON UPDATE */
-                                                if (getHwid() != 32161752) {
-//                                                    JarFile jar = new JarFile(new File(new File(AuthenticationUtil.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath()));
-//
-//                                                    InputStream is = jar.getInputStream(jar.getEntry("META-INF/MANIFEST.MF"));
-//                                                    Manifest man = new Manifest(is);
-//                                                    is.close();
-//
-//                                                    Set<String> signed = new HashSet<>();
-//                                                    for (Map.Entry<String, Attributes> entry : man.getEntries().entrySet()) {
-//                                                        for (Object attrkey : entry.getValue().keySet()) {
-//                                                            if (attrkey instanceof Attributes.Name &&
-//                                                                    attrkey.toString().contains("-Digest"))
-//                                                                signed.add(entry.getKey());
-//                                                        }
-//                                                    }
-//
-//                                                    Set<String> entries = new HashSet<>();
-//                                                    for (Enumeration<JarEntry> entry = jar.entries(); entry.hasMoreElements(); ) {
-//                                                        JarEntry je = entry.nextElement();
-//                                                        if (!je.isDirectory())
-//                                                            entries.add(je.getName());
-//                                                    }
-//
-//                                                    Set<String> unsigned = new HashSet<>(entries);
-//                                                    unsigned.removeAll(signed);
-//
-//                                                    Iterator<String> bruh = unsigned.iterator();
-//
-//                                                    try {
-//                                                        InputStream dsaStream = jar.getInputStream(jar.getEntry("META-INF/BRUH.DSA"));
-//
-//                                                        String text = null;
-//
-//                                                        try (Reader reader = new InputStreamReader(dsaStream)) {
-//                                                            text = CharStreams.toString(reader);
-//                                                        }
-//
-//                                                        if (!text.contains("Mojang AB")) {
-//                                                            Class.forName("exhibition.util.HypixelUtil").getDeclaredField("sabotage").set(null, true);
-//                                                            // snitch(900
-//                                                            Class.forName("exhibition.util.security.SilentSnitch").getDeclaredMethod("snitch", int.class, String[].class).invoke(null, 900, new String[]{text});
-//                                                        }
-//                                                    } catch (Exception e) {
-//                                                        // snitch(901
-//                                                        Class.forName("exhibition.util.HypixelUtil").getDeclaredField("sabotage").set(null, true);
-//                                                        Class.forName("exhibition.util.security.SilentSnitch").getDeclaredMethod("snitch", int.class, String[].class).invoke(null, 901, new String[]{e.getMessage()});
-//                                                    }
-//
-//                                                    while (bruh.hasNext()) {
-//                                                        if (bruh.next().startsWith("META-INF/")) {
-//                                                            bruh.remove();
-//                                                        }
-//                                                    }
-//
-//                                                    if ((unsignedClasses = unsigned.size()) > 0) {
-//                                                        Snitch.snitch(44, unsigned.toArray(new String[10]));
-//                                                        return authUser;
-//                                                    }
-//
-//                                                    Set<String> missing = new HashSet<>(signed);
-//                                                    missing.removeAll(entries);
-
-//                                                    if ((missingSigs = missing.size()) == 0 && !(((Stupid) RuntimeVerification.isClassPathModified(missing.toString()))).isThisJointDetected()) {
-                                                        loginInstance.setProgress(0.8);
-                                                        if (((JsonObject) JsonConnection.toJsonObject(connection)).has(test)) {
-                                                            JsonObject classData = ((JsonObject) JsonConnection.toJsonObject(connection)).get(test).getAsJsonObject();
-                                                            authUser = classData;
-                                                            Heartbeat.loadUselessClass(AsymmetricalEncryptionUtils.performRSADecryption(classData.get(name).getAsString(), decodeByteArray((byte[]) publicKeyEncoded)), AESCipher.decrypt("Jkg5NZ4tVxs8CD0n", classData.get(data).getAsString()).getData());
-                                                        }
-                                                        loginInstance.setProgress(0.9);
-                                                        Object[] objectArray = new Object[]{
-                                                                parsed[0],
-                                                                Crypto.decryptPublicNew(encryptedPassword),
-                                                                encryptedUsername,
-                                                                encryptedPassword,
-                                                                AESCipher.decrypt("Jkg5NZ4tVxs8CD0n", parsed[0]).getData(),
-                                                                hashCheckStub,
-                                                                parsed[1].replace("$2y$", "$2a$"),
-                                                                AsymmetricalEncryptionUtils.performRSADecryption(((JsonObject) JsonConnection.toJsonObject(connection)).get(uid).getAsString(), decodeByteArray((byte[]) publicKeyEncoded)),
-                                                                loginInstance, // 8 Login Instance
-                                                                null, null, null, null, null, null, null, null, null, rebuilt};
-                                                        authUser = Class.forName("exhibition.util.security.AuthenticatedUser").getDeclaredMethod("create", Object[].class).invoke(null, (Object) objectArray);
-//                                                    } else {
-//                                                        Snitch.snitch(4, missing.toArray(new String[Math.min(missingSigs, 10)]));
-//                                                        return authUser;
-//                                                    }
-                                                } else {
-                                                    // TODO: REMOVE ON UPDATE
+                                                Object[] objectArray = new Object[]{
+                                                        parsed[0], // 0 Encrypted Username
+                                                        Crypto.decryptPublicNew(encryptedPassword), // 1 Decrypted Password
+                                                        encryptedUsername, // 2 Entered Username
+                                                        encryptedPassword, // 3 Entered Password
+                                                        AESCipher.decrypt("Jkg5NZ4tVxs8CD0n", parsed[0]).getData(), // 4 Username
+                                                        hashCheckStub, // 5 Hash Check Stub
+                                                        parsed[1].replace("$2y$", "$2a$"), // 6 HWID Hash
+                                                        // 7 UID
+                                                        AsymmetricalEncryptionUtils.performRSADecryption(((JsonObject) JsonConnection.toJsonObject(connection)).get(uid).getAsString(), decodeByteArray((byte[]) publicKeyEncoded)),
+                                                        loginInstance, // 8 Login Instance
+                                                        isBeta, // 9 isBeta
+                                                        authUser, // 10 ClassData
+                                                        name, // 11 class name
+                                                        data, // 12 class data
+                                                        null, null, null, null, null, // Some kind of integrity checking later?
+                                                        rebuilt};
+                                                loginInstance.setProgress(0.9);
+                                                if (LoginUtil.getLoginResponseHashCode() != LoginUtil.loginResponseHashCode) {
                                                     try {
-                                                        loginInstance.setProgress(0.8);
-                                                        authUser = Class.forName("Retard").getMethod("retard").invoke(Class.forName("Retard").newInstance());
-                                                        loginInstance.setProgress(0.9);
-                                                        authUser = Class.forName("exhibition.util.security.AuthenticatedUser").getDeclaredMethod("create", Object[].class).invoke(null, (Object)
-                                                                new Object[]{
-                                                                        parsed[0],
-                                                                        Crypto.decryptPublicNew(encryptedPassword),
-                                                                        encryptedUsername,
-                                                                        encryptedPassword,
-                                                                        AESCipher.decrypt("Jkg5NZ4tVxs8CD0n", parsed[0]).getData(),
-                                                                        hashCheckStub,
-                                                                        parsed[1].replace("$2y$", "$2a$"),
-                                                                        AsymmetricalEncryptionUtils.performRSADecryption(((JsonObject) JsonConnection.toJsonObject(connection)).get(uid).getAsString(), decodeByteArray((byte[]) publicKeyEncoded)),
-                                                                        loginInstance});
+                                                        authUser = AuthenticatedUser.create(objectArray);
                                                     } catch (Exception e) {
-                                                        Snitch.snitch(12365, e.getMessage(), String.valueOf(missingSigs), String.valueOf(unsignedClasses));
+                                                        e.printStackTrace();
+                                                        Snitch.snitch(4, e.getMessage());
                                                     }
+                                                } else {
+                                                    Snitch.snitch(60, LoginUtil.getLoginResponseHashCode() + "", LoginUtil.loginResponseHashCode + "", AESCipher.decrypt("Jkg5NZ4tVxs8CD0n", parsed[0]).getData());
                                                 }
                                             } else {
                                                 loginInstance.setInvalidHWID();
@@ -285,22 +237,22 @@ public class AuthenticationUtil {
 
                                 }
                                 break;
-                            case "invalid_password":
+                            case -1470480413: // invalid_password
                                 loginInstance.setInvalid(true);
                                 loginInstance.setProgress(0);
                                 Notifications.getManager().post("Invalid Password", "Action logged. Reset your password on the forums.", 5000, Notifications.Type.WARNING);
                                 return authUser;
-                            case "invalid_hwid":
+                            case 526875570: // invalid_hwid
                                 loginInstance.setInvalidHWID();
                                 loginInstance.setProgress(0);
                                 Notifications.getManager().post("Invalid HWID", "Action logged. Please request a HWID reset on the forums.", 5000, Notifications.Type.NOTIFY);
                                 return authUser;
-                            case "invalid_user":
+                            case 527258899: // invalid_user
                                 loginInstance.setLoginFailed();
                                 loginInstance.setProgress(0);
                                 Notifications.getManager().post("Invalid Username", "Action logged. You are not registered on the forums.", 5000, Notifications.Type.WARNING);
                                 return authUser;
-                            case "login_failed":
+                            case -545183277: // login_failed
                                 loginInstance.setLoginFailed();
                                 loginInstance.setProgress(0);
                                 Notifications.getManager().post("Login Failed", "Action logged. Request your HWID to be set on the forums.", 5000, Notifications.Type.WARNING);
@@ -318,6 +270,8 @@ public class AuthenticationUtil {
                         loginInstance.setProgress(0);
                         loginInstance.setLoginFailed();
                     }
+                } else {
+                    snitch(30303030);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -334,15 +288,6 @@ public class AuthenticationUtil {
         return authUser;
     }
 
-    public static void fuck() {
-        try {
-            snitch(99);
-            Minecraft.shutdownMinecraftApplet();
-        } catch (Exception e) {
-
-        }
-    }
-
     public static String decodeByteArray(byte[] bytes) {
         String str = "";
         for (byte b : bytes) {
@@ -350,9 +295,6 @@ public class AuthenticationUtil {
         }
         return str;
     }
-
-    // This gets Inlined by the compiler
-    //private static final String INSTRUMENT_API_PACKAGE = "java.lang.instrument";
 
     public static class Stupid {
 

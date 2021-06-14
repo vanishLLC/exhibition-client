@@ -124,10 +124,7 @@ public class Blink extends Module {
     public void onEnable() {
         this.resetPackets();
 
-        LongJump lj = (LongJump) Client.getModuleManager().get(LongJump.class);
-
-        if (lj.isEnabled() && (boolean) lj.getSetting("CHOKE").getValue() && (boolean) lj.getSetting("AUTISM").getValue()) {
-            Notifications.getManager().post("Already Blinking", "Disabled due to LongJump already blinking.", Notifications.Type.NOTIFY);
+        if (mc.thePlayer == null || mc.theWorld == null) {
             toggle();
             return;
         }

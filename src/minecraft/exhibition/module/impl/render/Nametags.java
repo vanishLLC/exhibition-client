@@ -320,7 +320,7 @@ public class Nametags extends Module {
                         int y = 21;
 
                         boolean showPitEnchants = HypixelUtil.isInGame("THE HYPIXEL PIT");
-                        if (showPitEnchants && stack.hasTagCompound()) {
+                        if (showPitEnchants && HypixelUtil.isItemMystic(stack)) {
                             List<String> enchants = HypixelUtil.getPitEnchants(stack);
 
                             List<String> render = new ArrayList<>();

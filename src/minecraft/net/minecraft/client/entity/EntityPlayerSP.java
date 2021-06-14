@@ -706,7 +706,7 @@ public class EntityPlayerSP extends AbstractClientPlayer {
             this.sprintToggleTimer = 0;
         }
 
-        EventPushBlock epb = (EventPushBlock) EventSystem.getInstance(EventPushBlock.class);
+        EventPushBlock epb = EventSystem.getInstance(EventPushBlock.class);
         if (!epb.isCancelled()) {
             this.pushOutOfBlocks(this.posX - (double) this.width * 0.35D, this.getEntityBoundingBox().minY + 0.5D, this.posZ + (double) this.width * 0.35D);
             this.pushOutOfBlocks(this.posX - (double) this.width * 0.35D, this.getEntityBoundingBox().minY + 0.5D, this.posZ - (double) this.width * 0.35D);

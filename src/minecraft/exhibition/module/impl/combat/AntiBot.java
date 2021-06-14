@@ -41,6 +41,7 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 public class AntiBot extends Module {
 
@@ -138,6 +139,15 @@ public class AntiBot extends Module {
             EventMotionUpdate em = (EventMotionUpdate) event;
             setSuffix(currentSetting);
             if (em.isPre()) {
+
+                if (mc.thePlayer.ticksExisted % 100 == 0)
+                    mc.theWorld.playerEntities.removeIf(new Predicate<EntityPlayer>() {
+                        @Override
+                        public boolean test(EntityPlayer entityPlayer) {
+                            return !mc.theWorld.getLoadedEntityList().contains(entityPlayer);
+                        }
+                    });
+
                 if (mc.thePlayer.isAllowEdit()) {
                     if (HypixelUtil.isGameStarting()) {
                         waitTimer.reset();

@@ -1,3 +1,4 @@
+
 /**
  * Time: 5:30:04 AM
  * Date: Jan 7, 2017
@@ -20,15 +21,21 @@ public class Brightness extends Module {
 
 	}
 
-	@Override
-	@RegisterEvent(events = { EventTick.class })
+	@RegisterEvent(events = EventTick.class)
 	public void onEvent(Event event) {
 		mc.thePlayer.addPotionEffect(new PotionEffect(Potion.nightVision.getId(), 5200, 1));
 	}
 
 	@Override
+	public void onEnable() {
+
+	}
+
+	@Override
 	public void onDisable() {
-		super.onDisable();
+		if (mc.thePlayer == null || mc.theWorld == null) {
+			return;
+		}
 		this.mc.thePlayer.removePotionEffect(Potion.nightVision.getId());
 	}
 

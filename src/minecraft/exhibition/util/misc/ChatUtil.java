@@ -10,6 +10,8 @@ import net.minecraft.util.ChatComponentText;
 public class ChatUtil implements MinecraftUtil {
 
 	public static void printChat(String text) {
+		if(mc.thePlayer == null)
+			return;
 		mc.thePlayer.addChatComponentMessage(new ChatComponentText(text));
 	}
 

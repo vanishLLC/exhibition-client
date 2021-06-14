@@ -6,7 +6,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import exhibition.Client;
 import exhibition.util.security.DiscordUtil;
-import net.minecraft.client.Minecraft;
 import oshi.SystemInfo;
 import oshi.hardware.*;
 import oshi.software.os.OperatingSystem;
@@ -211,10 +210,9 @@ public class HardwareIdentification implements Identifier {
             str += displayContainer.getSerial();
         }
 
-        if (diskIdentifiers != null)
-            for (DiskIdentifiers.DiskContainer diskContainer : diskIdentifiers.getDiskContainers()) {
-                str += diskContainer.getSerial();
-            }
+        for (DiskIdentifiers.DiskContainer diskContainer : diskIdentifiers.getDiskContainers()) {
+            str += diskContainer.getSerial();
+        }
 
         return str.trim();
     }

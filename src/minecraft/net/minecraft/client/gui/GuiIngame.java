@@ -13,6 +13,7 @@ import exhibition.event.EventSystem;
 import exhibition.event.impl.EventRenderGui;
 import exhibition.management.font.DynamicTTFFont;
 import exhibition.management.notifications.dev.DevNotifications;
+import exhibition.module.data.Options;
 import exhibition.module.impl.hud.BetterHotbar;
 import exhibition.module.impl.hud.HUD;
 import exhibition.module.impl.other.BanStats;
@@ -20,6 +21,7 @@ import exhibition.module.impl.other.StreamerMode;
 import exhibition.module.impl.render.Crosshair;
 import exhibition.util.HypixelUtil;
 import exhibition.util.MathUtils;
+import exhibition.util.RenderingUtil;
 import exhibition.util.render.Colors;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
@@ -209,28 +211,30 @@ public class GuiIngame extends Gui {
         GlStateManager.disableBlend();
 
         this.mc.mcProfiler.startSection("eventRenderGui");
-        ((EventRenderGui) EventSystem.getInstance(EventRenderGui.class)).fire(scaledresolution);
+        EventSystem.getInstance(EventRenderGui.class).fire(scaledresolution);
         this.mc.mcProfiler.endSection();
 
         HUD hud = ((HUD) Client.getModuleManager().get(HUD.class));
 
-        if (font == null)
-            font = hud.getFont();
+        DynamicTTFFont.DynamicTTForMC font = hud.getFont();
 
-        if (build == null)
-            build = "\2477" + ((username.equals("Arithmo")) ? "Developer Build" :
+        if (build == null) {
+            build = "\2477" + (username.equals("Arithmo") ? "Developer Build" :
                     username.equals("Neohack") ? "Special ED Developer Build" :
                             (username.equals("eZeeWin") || username.equals("Incognito")) ? "Special ED Build" :
                                     username.equals("Koala") ? "Loser Build" :
                                             username.equals("peh") ? "Public Servant Build" :
-                                                    username.equals("Luca") ? "Watchdog Pass Build" :
-                                                            username.equals("jungy") ? "Jungy Build" :
-                                                                    username.equals("Cygnus") ||
-                                                                            username.equals("Kaxon") ||
-                                                                            username.equals("Latch") ? "\247dFurfag Build" : Client.isBeta() ? "Beta Build" : "Release Build");
+                                                    username.equals("Cygnus") ||
+                                                            username.equals("Kaxon") ||
+                                                            username.equals("Latch") ? "\247dFurfag Build" :
+                                                            username.equals("Anthrecite") ||
+                                                                    username.equals("belle") ? "\247dE-Girl Build" :
+                                                                    username.equals("Max") ? "Bum Build" :
+                                                                            Client.isBeta() ? "Beta Build" : "Release Build");
+        }
 
-        String xd = build + " \247l- \247f\247l" + Client.version + " \2477\247l- \247l" + (hud.showUID() ? "UID " + Client.getAuthUser().userID : username);
-        font.drawStringWithShadow(xd, scaledresolution.getScaledWidth() - font.getWidth(xd) + (font.renderMC ? -1 : 0), scaledresolution.getScaledHeight() - ((mc.currentScreen instanceof GuiChat) ? 16 + font.getHeight(xd) : font.getHeight(xd)), Colors.getColor(255, 220));
+        String watermark = build + " \247l- \247f\247l" + Client.version + " \2477\247l- \247l" + (hud.showUID() ? "UID " + Client.getAuthUser().userID : username);
+        font.drawStringWithShadow(watermark, scaledresolution.getScaledWidth() - font.getWidth(watermark) + (font.renderMC ? -1 : 0), scaledresolution.getScaledHeight() - ((mc.currentScreen instanceof GuiChat) ? 16 + font.getHeight(watermark) : font.getHeight(watermark)), Colors.getColor(255, 220));
 
         if (this.mc.thePlayer.getSleepTimer() > 0) {
             this.mc.mcProfiler.startSection("sleep");
@@ -293,7 +297,7 @@ public class GuiIngame extends Gui {
                 int i1 = 16777215;
 
                 if (this.recordIsPlaying) {
-                    i1 = MathHelper.func_181758_c(f3 / 50.0F, 0.7F, 0.6F) & 16777215;
+                    i1 = MathHelper.hsvToRGB(f3 / 50.0F, 0.7F, 0.6F) & 16777215;
                 }
 
                 this.getFontRenderer().drawString(this.recordPlaying, -this.getFontRenderer().getStringWidth(this.recordPlaying) / 2, -4, i1 + (k1 << 24 & -16777216));
@@ -431,8 +435,8 @@ public class GuiIngame extends Gui {
 
         int offset = 65;
 
-        if(isBetterHotbar) {
-            GlStateManager.translate(0,-offset, 0);
+        if (isBetterHotbar) {
+            GlStateManager.translate(0, -offset, 0);
         }
 
         this.mc.mcProfiler.startSection("expBar");
@@ -472,8 +476,8 @@ public class GuiIngame extends Gui {
             this.mc.mcProfiler.endSection();
         }
 
-        if(isBetterHotbar) {
-            GlStateManager.translate(0,offset, 0);
+        if (isBetterHotbar) {
+            GlStateManager.translate(0, offset, 0);
         }
     }
 
@@ -484,8 +488,8 @@ public class GuiIngame extends Gui {
 
         int offset = 65;
 
-        if(isBetterHotbar) {
-            GlStateManager.translate(0,-offset, 0);
+        if (isBetterHotbar) {
+            GlStateManager.translate(0, -offset, 0);
         }
 
         if (this.remainingHighlightTicks > 0 && this.highlightingItemStack != null) {
@@ -518,8 +522,8 @@ public class GuiIngame extends Gui {
             }
         }
 
-        if(isBetterHotbar) {
-            GlStateManager.translate(0,offset, 0);
+        if (isBetterHotbar) {
+            GlStateManager.translate(0, offset, 0);
         }
 
         this.mc.mcProfiler.endSection();
@@ -541,7 +545,7 @@ public class GuiIngame extends Gui {
     }
 
     protected boolean showCrosshair() {
-        Crosshair c = (Crosshair) Client.getModuleManager().get(Crosshair.class);
+        Crosshair c = Client.getModuleManager().get(Crosshair.class);
         if ((this.mc.gameSettings.showDebugInfo && !this.mc.thePlayer.hasReducedDebug() && !this.mc.gameSettings.reducedDebugInfo) || c.isEnabled()) {
             return false;
         } else if (this.mc.playerController.isSpectator()) {
@@ -601,8 +605,15 @@ public class GuiIngame extends Gui {
 
         for (Object score : arraylist1) {
             ScorePlayerTeam scoreplayerteam = scoreboard.getPlayersTeam(((Score) score).getPlayerName());
-            String s = ScorePlayerTeam.formatPlayerName(scoreplayerteam, ((Score) score).getPlayerName()) + ": " + EnumChatFormatting.RED + ((Score) score).getScorePoints();
-            i = Math.max(i, this.getFontRenderer().getStringWidth(s));
+            String firstPart = ScorePlayerTeam.formatPlayerName(scoreplayerteam, ((Score) score).getPlayerName());
+            String s = firstPart + ": " + EnumChatFormatting.RED + ((Score) score).getScorePoints();
+
+            if (HypixelUtil.isVerifiedHypixel() && StringUtils.stripInvalidControlCodes(StringUtils.stripHypixelControlCodes(firstPart).replaceAll("[^\247^\\x00-\\x7F]", "")).equals("www.hypixel.net")) {
+                i = Math.max(i, Math.round(Client.fonts[4].getWidth("\247lwww.minesense.pub" + ": " + EnumChatFormatting.RED + ((Score) score).getScorePoints())));
+            } else {
+                i = Math.max(i, this.getFontRenderer().getStringWidth(s));
+            }
+
         }
 
         BanStats banStats = Client.getModuleManager().get(BanStats.class);
@@ -645,9 +656,19 @@ public class GuiIngame extends Gui {
 //                }
 //            }
 
-                this.getFontRenderer().drawString(s1, j, l, 553648127);
-                //this.getFontRenderer().drawString(s2, i1 - this.getFontRenderer().getStringWidth(s2), l, 553648127);
+                if (HypixelUtil.isVerifiedHypixel() && StringUtils.stripInvalidControlCodes(StringUtils.stripHypixelControlCodes(s1).replaceAll("[^\247^\\x00-\\x7F]", "")).equals("www.hypixel.net")) {
+                    //s1 = "\247awww.hypixel.net";
+                    //this.getFontRenderer().drawStringWithShadow(s1, j, l, 553648127);
+                    HUD hud = Client.getModuleManager().get(HUD.class);
+                    String selected = ((Options) hud.getSetting("COLOR").getValue()).getSelected();
+                    int color = !selected.equals("White") ? hud.getColor() : 0xFFFFFF55;
+                    Client.fonts[4].drawBorderedString("\247lwww.minesense.pub", j - 1, l - 1, color, Colors.getColor(0, 150));
+                    RenderingUtil.glColor(1342177280);
+                } else {
+                    this.getFontRenderer().drawString(s1, j, l, 553648127);
+                }
 
+                //this.getFontRenderer().drawString(s2, i1 - this.getFontRenderer().getStringWidth(s2), l, 553648127);
 
                 if (k == arraylist.size()) {
                     if (renderBanStats) {
@@ -713,8 +734,8 @@ public class GuiIngame extends Gui {
 
             int offset = 65;
 
-            if(isBetterHotbar) {
-                GlStateManager.translate(0,-offset, 0);
+            if (isBetterHotbar) {
+                GlStateManager.translate(0, -offset, 0);
             }
 
             EntityPlayer entityplayer = (EntityPlayer) this.mc.getRenderViewEntity();
@@ -948,8 +969,8 @@ public class GuiIngame extends Gui {
 
             this.mc.mcProfiler.endSection();
 
-            if(isBetterHotbar) {
-                GlStateManager.translate(0,offset, 0);
+            if (isBetterHotbar) {
+                GlStateManager.translate(0, offset, 0);
             }
         }
     }

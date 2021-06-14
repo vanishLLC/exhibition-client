@@ -45,14 +45,14 @@ public class AutoClicker extends Module {
                 if (timer.delay(nextDelay)) {
                     KeyBinding.setKeyBindState(mc.gameSettings.keyBindAttack.getKeyCode(), true);
                     KeyBinding.onTick(mc.gameSettings.keyBindAttack.getKeyCode());
-                    KeyBinding.setKeyBindState(mc.gameSettings.keyBindAttack.getKeyCode(), false);
-
                     long minimumDelay = 1000 / Math.max(minDelay.getValue().longValue(), 1);
                     long maximumDelay = 1000 / Math.max(maxDelay.getValue().longValue(), 1);
 
                     nextDelay = randomNumber(maximumDelay, minimumDelay);
 
                     timer.reset();
+                } else {
+                    KeyBinding.setKeyBindState(mc.gameSettings.keyBindAttack.getKeyCode(), false);
                 }
             }
         }

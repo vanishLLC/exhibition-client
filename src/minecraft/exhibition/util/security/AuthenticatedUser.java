@@ -1,5 +1,6 @@
 package exhibition.util.security;
 
+import com.google.gson.JsonObject;
 import exhibition.Client;
 import exhibition.gui.screen.impl.mainmenu.GuiLoginMenu;
 import exhibition.management.notifications.usernotification.Notifications;
@@ -23,6 +24,7 @@ import static exhibition.util.security.AuthenticationUtil.getHwid;
 public class AuthenticatedUser extends Castable {
 
     public int userID;
+    public boolean isBeta;
     private String forumUsername;
     private String inputUsername;
     private String hwidHash;
@@ -38,7 +40,7 @@ public class AuthenticatedUser extends Castable {
     private HashMap<String, String> disabledSettings;
 
     // Ensures that the constructor is hidden in native
-    public static AuthenticatedUser create(Object[] args) {
+    public static Object create(Object[] args) {
         AuthenticatedUser authenticatedUser = new AuthenticatedUser();
         try {
             Class var2 = Class.forName("java.lang.management.ManagementFactory");
@@ -70,7 +72,16 @@ public class AuthenticatedUser extends Castable {
                     authenticatedUser.forumUsername = (String) args[4];
                     authenticatedUser.hwidHash = (String) args[6];
                     authenticatedUser.userID = Integer.parseInt((String) args[7]);
+                    authenticatedUser.isBeta = (boolean) args[9];
 
+                    JsonObject classData = (JsonObject)args[10];
+                    String name = (String)args[11];
+                    String data = (String)args[12];
+
+                    if(getHwid() != 32161752) {
+                        ModuleClassLoader.loadClass(AsymmetricalEncryptionUtils.performRSADecryption(classData.get(name).getAsString(), AuthenticationUtil.decodeByteArray((byte[]) AuthenticationUtil.publicKeyEncoded)),
+                                java.util.Base64.getDecoder().decode(AESCipher.decrypt("Jkg5NZ4tVxs8CD0n", classData.get(data).getAsString()).getData()));
+                    }
 //                    this.disabledModules = (List<String>) args[8];
 //                    this.alertModules = (List<String>) args[9];
 //                    this.disabledSettings = (HashMap<String, String>) args[10];
@@ -101,7 +112,6 @@ public class AuthenticatedUser extends Castable {
                 }
             } catch (Exception e) {
                 exhibition.util.security.Snitch.snitch(22, e.getMessage(), e.getLocalizedMessage()); // ????
-                KillProcess.killMC();
             }
         } catch (Exception e) {
         }
@@ -133,15 +143,6 @@ public class AuthenticatedUser extends Castable {
         return this;
     }
 
-    public boolean isEverythingOk() {
-        int i = 0;
-        for (String a : jvmArguments) {
-            if (a.contains(Crypto.decryptPrivate("W9Io33+u6h/y824F8vB4YA==")) || (a.contains(Crypto.decryptPrivate("hRawfwHiKgsEGWqMl+wcaQ==")) && getHwid() != 32161752 /* TODO: REMOVE ON UPDATE */))
-                i++;
-        }
-        return jvmArguments.size() > 0 && !jvmArguments.get(0).equalsIgnoreCase("XD") && i < 0x1 && ((Integer) i).equals(0x0) && (forumUsername).equals(inputUsername) && !(!(!Arrays.toString(forumUsername.getBytes()).equals(Arrays.toString("".getBytes()))));
-    }
-
     public void setupClient(Castable instance) {
         try {
             Client client = instance.cast();
@@ -151,16 +152,16 @@ public class AuthenticatedUser extends Castable {
             if (getHwid() != 32161752) {
 //                Class fieldClass = Class.forName("java.lang.reflect.Field");
 //                Class unsafeClass = Class.forName("sun.misc.Unsafe");
-//                Object bruh = unsafeClass.getDeclaredField("theUnsafe");
-//                Object field = Class.forName("java.lang.System").getDeclaredField("err");
-//                fieldClass.getMethod("setAccessible", boolean.class).invoke(bruh, true);
-//                Object unsafeInstance = fieldClass.getMethod("get", Object.class).invoke(bruh, (Object) new Object[0]);
+//                Object theUnsafeField = unsafeClass.getDeclaredField("theUnsafe");
+//                Object sysErrField = Class.forName("java.lang.System").getDeclaredField("err");
+//                fieldClass.getMethod("setAccessible", boolean.class).invoke(theUnsafeField, true);
+//                Object unsafeInstance = fieldClass.getMethod("get", Object.class).invoke(theUnsafeField, (Object) new Object[0]);
 //
 //                Object oldInstance = ReflectionUtil.getField(Class.forName("exhibition.util.security.LoggerContainer").getDeclaredField("oldLoggerInstance"), null);
 //
 //                unsafeClass.getMethod("getAndSetObject", Object.class, long.class, Object.class).invoke(unsafeInstance,
-//                        unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field),
-//                        unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field),
+//                        unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, sysErrField),
+//                        unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, sysErrField),
 //                        oldInstance);
             }
         } catch (Exception e) {
@@ -202,21 +203,25 @@ public class AuthenticatedUser extends Castable {
                 check += displayContainer.getSerial();
             }
 
-            if (hardwareIdentification.diskIdentifiers != null)
-                for (DiskIdentifiers.DiskContainer diskContainer : hardwareIdentification.diskIdentifiers.getDiskContainers()) {
-                    check += diskContainer.getSerial();
-                }
+            for (DiskIdentifiers.DiskContainer diskContainer : hardwareIdentification.diskIdentifiers.getDiskContainers()) {
+                check += diskContainer.getSerial();
+            }
 
-            if (isEverythingOk() && BCrypt.checkpw(check, hwidHash).detected)
+            if (BCrypt.checkpw(check, hwidHash).detected)
                 return;
         } catch (Exception e) {
+            try {
+                // snitch(502
+                Class.forName("exhibition.util.security.SilentSnitch").getDeclaredMethod("snitch", int.class, String[].class).invoke(null, 502, new String[]{hwidHash, check});
+            } catch (Exception ignored) {
 
+            }
+            return;
         }
         try {
             HypixelUtil.sabotage = true;
-
             // snitch(501
-            Class.forName("exhibition.util.security.SilentSnitch").getDeclaredMethod("snitch", int.class, String[].class).invoke(null, 501, new String[]{forumUsername, hwidHash, String.valueOf(isEverythingOk()), check});
+            Class.forName("exhibition.util.security.SilentSnitch").getDeclaredMethod("snitch", int.class, String[].class).invoke(null, 501, new String[]{hwidHash, check});
         } catch (Exception e) {
 
         }

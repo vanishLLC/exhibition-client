@@ -6,10 +6,8 @@ import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.github.creeper123123321.viafabric.ViaFabricAddress;
 import exhibition.Client;
 import exhibition.management.UUIDResolver;
-import exhibition.module.impl.combat.Bypass;
 import exhibition.module.impl.other.BanStats;
 import exhibition.util.HypixelUtil;
 import exhibition.util.security.*;
@@ -94,15 +92,15 @@ public class GuiConnecting extends GuiScreen {
                     Client.instance.hypixelApiKey = null;
                     UUIDResolver.instance.isChecking = false;
 
-                    Bypass bypass = Client.getModuleManager().get(Bypass.class);
-                    bypass.reset();
-                    bypass.resetPackets();
-
-                    if(ip.toLowerCase().contains("hypixel")) {
-                        if(bypass.isEnabled()) {
-                            bypass.toggle();
-                        }
-                    }
+//                    Bypass bypass = Client.getModuleManager().get(Bypass.class);
+//                    bypass.reset();
+//                    bypass.resetPackets();
+//
+//                    if(ip.toLowerCase().contains("hypixel")) {
+//                        if(bypass.isEnabled()) {
+//                            bypass.toggle();
+//                        }
+//                    }
 
                     BanStats banStats = Client.getModuleManager().get(BanStats.class);
                     banStats.bansSinceConnect = 0;

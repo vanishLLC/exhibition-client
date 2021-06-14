@@ -23,7 +23,6 @@ import exhibition.module.impl.player.*;
 import exhibition.module.impl.render.*;
 import exhibition.util.FileUtils;
 import exhibition.util.StringConversions;
-import exhibition.util.security.KillProcess;
 import exhibition.util.security.Snitch;
 import net.minecraft.client.Minecraft;
 import org.apache.logging.log4j.LogManager;
@@ -174,7 +173,7 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
                     add(new SimsESP(new ModuleData(Visuals, "SimsESP", "Swebsi Madoo Geelfrob. Renders a Sims thing over peoples heads.")));
                     add(new Spotify(new ModuleData(Other, "Spotify", "Shows currently playing song on Spotify. (Credits to Alerithe HTTP Server)")));
                     add(new PlayPause(new ModuleData(Other, "Play/Pause", "Bind this to toggle Spotify playback.")));
-                    add(new Bypass(new ModuleData(Combat, "Bypass", "PingSpoof for Hypixel. Helps features bypass.")));
+                    //add(new Bypass(new ModuleData(Combat, "Bypass", "PingSpoof for Hypixel. Helps features bypass.")));
                     add(new LightningLog(new ModuleData(Other, "LightningLog", "Prints out the coordinates of lightning.")));
                     add(new SilentView(new ModuleData(Other, "SilentView", "Shows your silent view angles in third person.")));
                     add(new AutoMath(new ModuleData(Other, "AutoMath", "Automatically solves \247d\247lQUICK MATHS\247f in the pit.")));
@@ -209,7 +208,6 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
                 }
             } catch (Exception e) {
                 exhibition.util.security.Snitch.snitch(22, e.getMessage(), e.getLocalizedMessage()); // ????
-                KillProcess.killMC();
             }
         } catch (Exception e) {
         }

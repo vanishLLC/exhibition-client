@@ -31,5 +31,7 @@ public interface EventListener<E extends Event> {
         return getPriority().ordinal();
     }
 
+    String getName();
+
     void onEvent(E event);
 }

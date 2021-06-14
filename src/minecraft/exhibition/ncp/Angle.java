@@ -16,7 +16,7 @@ public class Angle {
     public static Angle INSTANCE = new Angle();
 
     // Data of the angle check.
-    public LinkedList<AttackLocation> angleHits = new LinkedList<>();
+    public  LinkedList<AttackLocation> angleHits = new LinkedList<>();
     public double angleVL;
 
     public static class AttackLocation {

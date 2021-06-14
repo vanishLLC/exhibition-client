@@ -35,22 +35,96 @@ public class ClickGui extends GuiScreen {
         mc = Minecraft.getMinecraft();
     }
 
-    @Override
-    public void initGui() {
-        super.initGui();
+    public static boolean isOpen() {
+        return Client.instance != null && Client.getClickGui() != null && Client.getClickGui().mainPanel.isOpen;
+    }
+
+    public void grabMouse() {
         if (GlobalValues.showCursor.getValue())
             return;
         Mouse.setGrabbed(true);
     }
 
+    public void releaseMouse() {
+        if (!GlobalValues.showCursor.getValue() && Mouse.isGrabbed())
+            Mouse.setGrabbed(false);
+    }
+
+    @Override
+    public void initGui() {
+        super.initGui();
+        grabMouse();
+    }
+
+    @Override
+    public void handleKeyboardInput() throws IOException {
+        if (Keyboard.getEventKeyState()) {
+            char c = Keyboard.getEventCharacter();
+            int k = Keyboard.getEventKey();
+
+            boolean inOtherScreen = mc.currentScreen != null && mc.currentScreen != Client.getClickGui();
+            if (inOtherScreen && (k == Keyboard.KEY_RSHIFT || k == Keyboard.KEY_INSERT || k == Keyboard.KEY_DELETE || k == Keyboard.KEY_ESCAPE) && Client.getClickGui().mainPanel.isOpen) {
+                mainPanel.keyPressed(k);
+                mainPanel.isOpen = false;
+                Keyboard.enableRepeatEvents(false);
+                releaseMouse();
+                return;
+            }
+
+            this.keyTyped(c, k);
+        }
+
+        this.mc.dispatchKeypresses();
+    }
+
     @Override
     public void handleMouseInput() throws IOException {
         mainPanel.handleMouseInput();
-        super.handleMouseInput();
+        if(mc.currentScreen == this) {
+            super.handleMouseInput();
+        } else {
+            this.handleMouse();
+        }
+    }
+
+    public void handleMouse() throws IOException
+    {
+        GuiScreen currentScreen = mc.currentScreen;
+
+        int i = Mouse.getEventX() * currentScreen.width / mc.displayWidth;
+        int j = currentScreen.height - Mouse.getEventY() * currentScreen.height / mc.displayHeight - 1;
+        int k = Mouse.getEventButton();
+
+        if (Mouse.getEventButtonState())
+        {
+            if (this.mc.gameSettings.touchscreen && currentScreen.touchValue++ > 0)
+            {
+                return;
+            }
+
+            this.eventButton = k;
+            currentScreen.lastMouseEvent = Minecraft.getSystemTime();
+            this.mouseClicked(i, j, this.eventButton);
+        }
+        else if (k != -1)
+        {
+            if (this.mc.gameSettings.touchscreen && --currentScreen.touchValue > 0)
+            {
+                return;
+            }
+
+            this.eventButton = -1;
+            this.mouseReleased(i, j, k);
+        }
+        else if (this.eventButton != -1 && currentScreen.lastMouseEvent > 0L)
+        {
+            long l = Minecraft.getSystemTime() - currentScreen.lastMouseEvent;
+            this.mouseClickMove(i, j, this.eventButton, l);
+        }
     }
 
     public void drawMenu(int mouseX, int mouseY) {
-        if (SkeetMenu.opacity.getOpacity() <= 0 && mainPanel.opacity == 0) {
+        if (SkeetMenu.opacity.getOpacity() <= 0 && !mainPanel.isOpen) {
             SkeetMenu.opacity.interpolate(0);
             return;
         }
@@ -114,10 +188,9 @@ public class ClickGui extends GuiScreen {
 
     @Override
     public void onGuiClosed() {
-        if (!GlobalValues.showCursor.getValue())
-            Mouse.setGrabbed(false);
+        releaseMouse();
 
-        this.mainPanel.opacity = (0);
+        this.mainPanel.isOpen = false;
         Keyboard.enableRepeatEvents(false);
         for (CategoryButton button : Client.getClickGui().mainPanel.typeButton) {
             for (TextBox textBox : button.categoryPanel.textBoxes) {

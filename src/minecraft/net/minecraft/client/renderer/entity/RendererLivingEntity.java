@@ -158,10 +158,7 @@ public abstract class RendererLivingEntity<T extends EntityLivingBase> extends R
 
 
 
-                float f8 = (Minecraft.getMinecraft().gameSettings.thirdPersonView != 0 && Client.getModuleManager().get(AntiAim.class).isEnabled() && entity == Minecraft.getMinecraft().thePlayer) ?
-                        previousPitch + ((AntiAim.rotationPitch != 0 ? AntiAim.rotationPitch :
-                                entity.rotationPitch) - previousPitch) :
-                        previousPitch + (entity.rotationPitch - previousPitch) * partialTicks;
+                float f8 = previousPitch + (entity.rotationPitch - previousPitch) * partialTicks;
 
 
                 if (bruh) {

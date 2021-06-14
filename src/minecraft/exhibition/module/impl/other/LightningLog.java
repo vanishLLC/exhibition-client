@@ -27,9 +27,19 @@ public class LightningLog extends Module {
         super(data);
     }
 
+    @Override
+    public void worldChange() {
+        for (LogBruh logBruh : logList) {
+            if (Client.waypointManager.getWaypoints().contains(logBruh.waypoint)) {
+                Client.waypointManager.deleteWaypoint(logBruh.waypoint);
+            }
+        }
+        logList.clear();
+    }
+
     @RegisterEvent(events = {EventPacket.class, EventTick.class})
     public void onEvent(Event event) {
-        if(mc.thePlayer == null || mc.theWorld == null) {
+        if (mc.thePlayer == null || mc.theWorld == null) {
             return;
         }
 
@@ -45,20 +55,18 @@ public class LightningLog extends Module {
                 int color = Colors.getColor((int) (255 * Math.random()), (int) (255 * Math.random()), (int) (255 * Math.random()));
                 Notifications.getManager().post("Lightning Struck (" + d0 + ", " + d1 + ", " + d2 + ")", "Someone may have died here.", 5000, Notifications.Type.WARNING);
                 String serverIP = mc.getCurrentServerData() == null ? "SINGLEPLAYER" : mc.getCurrentServerData().serverIP;
-                Waypoint bruh = Client.waypointManager.createWaypoint(String.format("Lightning (%o, %o, %o)", d0, d1, d2), new Vec3(d0, d1, d2), color, serverIP);
+                Waypoint bruh = Client.waypointManager.createTempWaypoint(String.format("Lightning (%o, %o, %o)", d0, d1, d2), new Vec3(d0, d1, d2), color, serverIP);
                 logList.add(new LogBruh(bruh, System.currentTimeMillis()));
             }
         } else if (event instanceof EventTick) {
             List<LogBruh> remove = new ArrayList<>();
             for (LogBruh logBruh : logList) {
-                if(System.currentTimeMillis() - logBruh.when > 60_000 * 3) {
+                if (System.currentTimeMillis() - logBruh.when > 60_000 * 3) {
                     remove.add(logBruh);
                 }
             }
             for (LogBruh logBruh : remove) {
-                if(Client.waypointManager.getWaypoints().contains(logBruh.waypoint)) {
-                    Client.waypointManager.deleteWaypoint(logBruh.waypoint);
-                }
+                Client.waypointManager.deleteWaypoint(logBruh.waypoint);
                 logList.remove(logBruh);
             }
         }

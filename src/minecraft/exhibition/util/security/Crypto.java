@@ -63,15 +63,15 @@ public class Crypto {
 		return null;
 	}
 
-	public static String decryptPrivateNew(String str) {
-		try {
-			SecretKeySpec secretKeySpec = CryptManager.getDecryptNew();
-			return decrypt(secretKeySpec, str);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
+//	public static String decryptPrivateNew(String str) {
+//		try {
+//			SecretKeySpec secretKeySpec = CryptManager.getDecryptNew();
+//			return decrypt(secretKeySpec, str);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		return null;
+//	}
 
 	public static String decryptPublicNew(String str) {
 		try {

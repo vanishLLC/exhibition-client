@@ -33,7 +33,6 @@ public class AntiAim extends Module {
     private Setting<Boolean> matchOnly = new Setting<>("MATCH-ONLY", false, "Cops n Crims only spin when in match.");
 
     float[] lastAngles;
-    public static float rotationPitch;
     private boolean fake;
     private boolean fake1;
     Timer fakeJitter = new Timer();
@@ -49,14 +48,11 @@ public class AntiAim extends Module {
     public void onDisable() {
         fake1 = true;
         lastAngles = null;
-        rotationPitch = 0;
-        mc.thePlayer.renderYawOffset = mc.thePlayer.rotationYaw;
     }
 
     public void onEnable() {
         fake1 = true;
         lastAngles = null;
-        rotationPitch = 0;
     }
 
     @Override

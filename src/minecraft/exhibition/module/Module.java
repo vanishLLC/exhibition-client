@@ -154,6 +154,12 @@ public abstract class Module extends Saveable implements EventListener, Bindable
         return null;
     }
 
+    public void addSettings(Setting... list) {
+        for (Setting setting : list) {
+            addSetting(setting);
+        }
+    }
+
     public boolean addSetting(Setting setting) {
         if (settings.containsKey(setting.getName())) {
             return false;
@@ -196,7 +202,9 @@ public abstract class Module extends Saveable implements EventListener, Bindable
         return data.name;
     }
 
-    public String getNickname() { return nickname; }
+    public String getNickname() {
+        return nickname;
+    }
 
     public void setNickname(String nickname) {
         this.nickname = nickname;

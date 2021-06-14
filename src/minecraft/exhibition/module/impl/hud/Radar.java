@@ -16,6 +16,7 @@ import exhibition.util.render.Depth;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
@@ -92,12 +93,9 @@ public class Radar extends Module {
             if(h3 > 255) {
                 h3 -= 255;
             }
-            final java.awt.Color color33 = java.awt.Color.getHSBColor(h / 255.0f, 0.9f, 1);
-            final java.awt.Color color332 = java.awt.Color.getHSBColor(h2 / 255.0f, 0.9f, 1);
-            final java.awt.Color color333 = java.awt.Color.getHSBColor(h3 / 255.0f, 0.9f, 1);
-            int color1 = color33.getRGB();
-            int color2 = color332.getRGB();
-            int color3 = color333.getRGB();
+            int color1 = MathHelper.hsvToRGB(h / 255.0f, 0.9f, 1);
+            int color2 = MathHelper.hsvToRGB(h2 / 255.0f, 0.9f, 1);
+            int color3 = MathHelper.hsvToRGB(h3 / 255.0f, 0.9f, 1);
             hue += 0.1;
 
             RenderingUtil.rectangleBordered(xOffset, yOffset, xOffset + size, yOffset + size, 0.5, Colors.getColor(60), Colors.getColor(10));

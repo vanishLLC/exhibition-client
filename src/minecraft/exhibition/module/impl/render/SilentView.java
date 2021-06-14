@@ -10,7 +10,6 @@ import exhibition.management.ColorManager;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
-import exhibition.module.impl.combat.Bypass;
 import exhibition.module.impl.combat.Killaura;
 import exhibition.util.RenderingUtil;
 import exhibition.util.render.Colors;
@@ -73,15 +72,15 @@ public class SilentView extends Module {
                         em.setPitch(em.getPitch() - 360);
                     }
 
-                    Killaura killaura = Client.getModuleManager().get(Killaura.class).cast();
-                    if (Client.getModuleManager().isEnabled(Bypass.class) && killaura.isEnabled() && Killaura.getTarget() != null && (boolean) killaura.getSetting("REDUCE").getValue() && (currentPitch > 90 || currentPitch < -90)) {
-                        if(currentPitch < 360) {
-                            currentPitch = lastPitch + MathHelper.wrapAngleTo180_float(((180 - currentPitch) - lastPitch));
-                        } else {
-                            currentPitch = lastPitch + MathHelper.wrapAngleTo180_float(((currentPitch) - lastPitch));
-                        }
-                        currentYaw = lastYaw + MathHelper.wrapAngleTo180_float((em.getYaw() + 180) - lastYaw); // So your head isn't looking away from them
-                    }
+//                    Killaura killaura = Client.getModuleManager().get(Killaura.class).cast();
+//                    if (Client.getModuleManager().isEnabled(Bypass.class) && killaura.isEnabled() && Killaura.getTarget() != null && (boolean) killaura.getSetting("REDUCE").getValue() && (currentPitch > 90 || currentPitch < -90)) {
+//                        if(currentPitch < 360) {
+//                            currentPitch = lastPitch + MathHelper.wrapAngleTo180_float(((180 - currentPitch) - lastPitch));
+//                        } else {
+//                            currentPitch = lastPitch + MathHelper.wrapAngleTo180_float(((currentPitch) - lastPitch));
+//                        }
+//                        currentYaw = lastYaw + MathHelper.wrapAngleTo180_float((em.getYaw() + 180) - lastYaw); // So your head isn't looking away from them
+//                    }
 
                     isSilent = true;
                 } else {

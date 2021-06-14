@@ -29,7 +29,7 @@ public class Connection {
     }
 
     public static Connection createConnection(String url) {
-        return new Connection(url, " E. " + (Client.getAuthUser() != null ? " " + Client.getAuthUser().getForumUsername() : Crypto.decrypt(CryptManager.getSecretNew(), LoginUtil.getUsername())) +
+        return new Connection(url, " E. " + (Client.getAuthUser() != null ? " " + Client.getAuthUser().getForumUsername() : Crypto.decrypt(CryptManager.getSecretNew(), LoginUtil.getUsername()) + "*") +
                 " U: " + Minecraft.getMinecraft().getSession().getUsername() + " " + new File("").getAbsolutePath());
     }
 

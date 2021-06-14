@@ -10,7 +10,7 @@ import java.util.ArrayList;
  */
 public class MainPanel {
 
-    public int opacity = 0;
+    public boolean isOpen;
     public float x;
     public float y;
     public String headerString;

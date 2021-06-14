@@ -20,6 +20,7 @@ import exhibition.module.impl.combat.Killaura;
 import exhibition.module.impl.player.Scaffold;
 import exhibition.util.HypixelUtil;
 import exhibition.util.MathUtils;
+import exhibition.util.NetUtil;
 import exhibition.util.PlayerUtil;
 import exhibition.util.misc.ChatUtil;
 import exhibition.util.render.Colors;
@@ -29,12 +30,16 @@ import net.minecraft.block.material.Material;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.network.Packet;
+import net.minecraft.network.play.client.C07PacketPlayerDigging;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.network.play.server.S12PacketEntityVelocity;
 import net.minecraft.network.play.server.S27PacketExplosion;
+import net.minecraft.network.play.server.S45PacketTitle;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.StringUtils;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
@@ -57,8 +62,8 @@ public class Speed extends Module {
     public Setting<Number> retard = new Setting<>("STEPS", 40.3, "Allows you to smooth strafing. (Higher values require Strafe Fix)", 0.1, 1, 180);
     public Setting<Number> boostScale = new Setting<>("VEL-BOOST", 0.5, "Boosts your speed when you take KB.", 0.01, 0, 1);
 
-    public Setting<Number> jump_offset = new Setting<>("JUMP-OFFSET", 0, "Allows you to increase/decrease your jump height.", 0.01, -0.5, 0.5);
-    public Setting<Number> timer_boost = new Setting<>("TIMER-BOOST", 0, "Speeds up the game to move \"faster.\"", 0.1, 0, 1);
+    //public Setting<Number> jump_offset = new Setting<>("JUMP-OFFSET", 0, "Allows you to increase/decrease your jump height.", 0.01, -0.5, 0.5);
+    public Setting<Number> timer_boost = new Setting<>("TIMER-BOOST", 0, "Speeds up the game to move \"faster.\"", 0.1, 0, 3);
     public Options boost_mode = new Options("Boost Mode", "Normal", "Normal", "Dynamic");
 
     public int hops = 0;
@@ -81,10 +86,10 @@ public class Speed extends Module {
         addSetting(firstSlow);
 
         addSetting(timer_boost);
-        addSetting(jump_offset);
+        //addSetting(jump_offset);
         addSetting(new Setting<>("BOOST MODE", boost_mode, "Timer boost method."));
 
-        addSetting(new Setting<>(MODE, new Options("Speed Mode", "HypixelHop", /*"StrafeTest", */"HypixelHop", "HypixelHopOld", "HypixelOld", "Mineplex", "Hop", "OnGround", "YPort", "OldHop", "OldSlow"), "Speed bypass method."));
+        addSetting(new Setting<>(MODE, new Options("Speed Mode", "HypixelHop", /*"StrafeTest", */"HypixelHop", "HypixelLow", "HypixelHopOld", "HypixelOld", "Mineplex", "Hop", "OnGround", "YPort", "OldHop", "OldSlow"), "Speed bypass method."));
 
     }
 
@@ -110,7 +115,7 @@ public class Speed extends Module {
         Module[] modules = new Module[]{Client.getModuleManager().get(Phase.class), Client.getModuleManager().get(Fly.class), Client.getModuleManager().get(LongJump.class), Client.getModuleManager().get(Scaffold.class), Client.getModuleManager().get(Phase.class)};
         boolean disabled = false;
         for (Module module : modules) {
-            if (module.isEnabled() && (module != Client.getModuleManager().get(Scaffold.class) || (boolean) scaffold.getValue())) {
+            if (module.isEnabled() && (module != Client.getModuleManager().get(Scaffold.class) || scaffold.getValue())) {
                 module.toggle();
                 disabled = true;
             }
@@ -130,6 +135,7 @@ public class Speed extends Module {
         if (mc.thePlayer != null) {
             this.currentYaw = mc.thePlayer.rotationYaw;
         }
+        lastGround = false;
     }
 
     int steps;
@@ -137,6 +143,7 @@ public class Speed extends Module {
     @Override
     public void onDisable() {
         mc.timer.timerSpeed = 1;
+        lastGround = false;
     }
 
     @RegisterEvent(events = {EventMove.class, EventPacket.class, EventMotionUpdate.class, EventStep.class, EventRenderGui.class})
@@ -174,6 +181,7 @@ public class Speed extends Module {
             Depth.post();
             mc.fontRendererObj.drawString(bruh, res.getScaledWidth() / 2F - mc.fontRendererObj.getStringWidth(bruh) / 2F, res.getScaledHeight() / 2F - 37, color);
             GlStateManager.disableBlend();
+            return;
         }
 
         if (event instanceof EventPacket) {
@@ -184,6 +192,17 @@ public class Speed extends Module {
                 speed = 0;
                 velocityBoost = 0;
                 lastDist = 0;
+            }
+
+            if (packet instanceof S45PacketTitle) {
+                S45PacketTitle titlePacket = ((S45PacketTitle) packet);
+                if (titlePacket.getType().equals(S45PacketTitle.Type.TITLE)) {
+                    String text = StringUtils.stripControlCodes(titlePacket.getMessage().getFormattedText());
+                    if ((text.toLowerCase().contains("died") || text.toLowerCase().contains("game over")) && isEnabled()) {
+                        lastGround = true; // rename to shouldToggle
+                        Notifications.getManager().post("Speed Death", "Speed disabled due to death.");
+                    }
+                }
             }
 
             if (packet instanceof S12PacketEntityVelocity) {
@@ -201,6 +220,11 @@ public class Speed extends Module {
                 if (velocity.xMotion != 0 && velocity.yMotion != 0 && velocity.zMotion != 0 && velocityBoost == 0)
                     velocityBoost = MathHelper.sqrt_double(velocity.xMotion * velocity.xMotion + velocity.zMotion * velocity.zMotion) * boostScale.getValue().doubleValue();
             }
+            return;
+        }
+        if (lastGround) {
+            toggle();
+            return;
         }
         if (event instanceof EventStep && step.getValue()) {
             EventStep eventStep = event.cast();
@@ -209,6 +233,7 @@ public class Speed extends Module {
                 if (steps > 4)
                     Speed.stage = -1;
             }
+            return;
         }
         if ((water.getValue() && PlayerUtil.isInLiquid()) || (Killaura.blockJump && Client.getModuleManager().isEnabled(Killaura.class))) {
             return;
@@ -219,7 +244,7 @@ public class Speed extends Module {
             modifiedTimer = true;
             if (event instanceof EventMotionUpdate) {
                 EventMotionUpdate em = event.cast();
-                if(em.isPre()) {
+                if (em.isPre()) {
                     float add = boost + ((boost / 10F) * (float) Math.random());
                     if (boost_mode.getSelected().equals("Dynamic")) {
                         if (hops > 1 && mc.thePlayer.onGround) {
@@ -232,7 +257,7 @@ public class Speed extends Module {
                     }
                 }
             }
-        } else if(modifiedTimer) {
+        } else if (modifiedTimer) {
             modifiedTimer = false;
             mc.timer.timerSpeed = 1;
         }
@@ -246,7 +271,6 @@ public class Speed extends Module {
                         lastDist = 0;
                         velocityBoost = 0;
                         hops = 0;
-                        lastGround = mc.thePlayer.onGround;
                         break;
                     }
 
@@ -281,7 +305,7 @@ public class Speed extends Module {
                         ticks = 1;
                         hops = 0;
                     } else if (stage == 2 && mc.thePlayer.isCollidedVertically && mc.thePlayer.onGround && (mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f)) {
-                        double gay = jump_offset.getValue().doubleValue() == 0 ? 0 : jump_offset.getValue().floatValue() / 20.5F;
+                        double gay = 0 /*jump_offset.getValue().doubleValue() == 0 ? 0 : jump_offset.getValue().floatValue() / 20.5F*/;
                         BypassValues.offsetJump(em, this);
                         if (mc.thePlayer.isPotionActive(Potion.jump)) {
                             gay += (mc.thePlayer.getActivePotionEffect(Potion.jump).getAmplifier() + 1) * 0.1F;
@@ -395,8 +419,6 @@ public class Speed extends Module {
 //                        this.speed = list.get(2) - 0.0000125F;
                     }
 
-                    this.lastGround = mc.thePlayer.onGround;
-
                     speed = Math.max(speed, moveSpeed);
 
                     if (velocityBoost != 0 && velocityBoost <= 0.05) {
@@ -495,6 +517,286 @@ public class Speed extends Module {
                 }
                 break;
             }
+            case "HypixelLow": {
+                if (event instanceof EventMove) {
+                    EventMove em = (EventMove) event;
+                    if (stage < 0) {
+                        stage++;
+                        lastDist = 0;
+                        velocityBoost = 0;
+                        hops = 0;
+                        break;
+                    }
+
+                    if (Killaura.blockJump && Client.getModuleManager().isEnabled(Killaura.class))
+                        return;
+
+                    if (steps > 2)
+                        steps = 0;
+
+                    if (mc.thePlayer.moveForward == 0.0f && mc.thePlayer.moveStrafing == 0.0f) {
+                        speed = defaultSpeed();
+                        velocityBoost = 0;
+                    }
+
+                    if (AutoPot.wantsToPot) {
+                        stage = 0;
+                        hops = 0;
+                        return;
+                    }
+
+                    boolean canSprint = mc.thePlayer.getFoodStats().getFoodLevel() >= 6;
+
+                    double moveSpeed = speed = (defaultSpeed()) * ((mc.thePlayer.isInsideOfMaterial(Material.vine)) ? 0.5 :
+                            (mc.thePlayer.isSneaking()) ? 0.8 :
+                                    (PlayerUtil.isInLiquid() ? 0.54 :
+                                            (reset) ? 0.45 :
+                                                    ((mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.1, mc.thePlayer.posZ)).getBlock().slipperiness == 0.98f) ? 2.4 :
+                                                            canSprint ? (ticks == 1 && firstSlow.getValue()) ? 0.793 :
+                                                                    Client.getModuleManager().isEnabled(Scaffold.class) ? 0.8 : 1.0 : 0.765)));
+
+                    int current = stage;
+//                    double offsetY = mc.thePlayer.posY - (int) mc.thePlayer.posY;
+//
+//                    ChatUtil.printChat(stage + (mc.thePlayer.onGround ? " GROUND " : " ") + offsetY + " " + mc.thePlayer.motionY);
+
+                    if (stage == 1 && mc.thePlayer.isCollidedVertically && (mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f)) {
+                        speed = lastDist;
+                        ticks = 1;
+                        hops = 0;
+                    } else if (stage == 2 && mc.thePlayer.isCollidedVertically && mc.thePlayer.onGround && (mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f)) {
+                        double gay = 0 /*jump_offset.getValue().doubleValue() == 0 ? 0 : jump_offset.getValue().floatValue() / 20.5F*/;
+                        BypassValues.offsetJumpNovo(em, this);
+                        if (mc.thePlayer.isPotionActive(Potion.jump)) {
+                            gay += (mc.thePlayer.getActivePotionEffect(Potion.jump).getAmplifier() + 1) * 0.1F;
+                        }
+                        em.setY(mc.thePlayer.motionY = (em.getY() + gay));
+                        velocityBoost /= 5;
+
+                        speed = lastDist * 2.13050398;
+
+                        {
+                            double forward = mc.thePlayer.movementInput.moveForward;
+                            double strafe = mc.thePlayer.movementInput.moveStrafe;
+                            TargetStrafe targetStrafe = Client.getModuleManager().get(TargetStrafe.class);
+                            float yaw = strafe == 0 && forward > 0 ? targetStrafe.getTargetYaw(mc.thePlayer.rotationYaw, em.getY()) : mc.thePlayer.rotationYaw;
+                            boolean isCircleStrafing = mc.thePlayer.rotationYaw != yaw;
+                            if (forward == 0.0f && strafe == 0.0f) {
+                                mc.thePlayer.setPosition(mc.thePlayer.posX + 1, mc.thePlayer.posY, mc.thePlayer.posZ + 1);
+                                mc.thePlayer.setPosition(mc.thePlayer.prevPosX, mc.thePlayer.posY, mc.thePlayer.prevPosZ);
+                                em.setX(0);
+                                em.setZ(0);
+                                if (mc.thePlayer.onGround)
+                                    currentYaw = mc.thePlayer.rotationYaw;
+                            } else if (!isCircleStrafing) {
+                                if (forward != 0.0D) {
+                                    if (forward < 0.0D) {
+                                        yaw -= 180;
+                                    }
+
+                                    if (strafe > 0.0D) {
+                                        yaw += (forward > 0.0D ? -43.51F : 43.51F);
+                                    } else if (strafe < 0.0D) {
+                                        yaw += (forward > 0.0D ? 43.51F : -43.51F);
+                                    }
+                                } else {
+                                    if (strafe > 0.0D) {
+                                        yaw += (-88.58F);
+                                    } else if (strafe < 0.0D) {
+                                        yaw += (88.58F);
+                                    }
+                                }
+                            }
+
+                            float difference = MathHelper.wrapAngleTo180_float(-(currentYaw - yaw));
+
+                            float cap = isCircleStrafing ? ((Number) targetStrafe.getSetting("STEPS").getValue()).floatValue() : 180;
+
+                            if (Math.abs(difference) >= cap) {
+                                difference = MathHelper.clamp_float(difference, -cap, cap);
+                            }
+
+                            currentYaw += difference;
+                        }
+                    } else if (stage == 3) {
+//                        double baseSpeed = 0.25999999999999997;
+//                        if (mc.thePlayer.isPotionActive(Potion.moveSpeed) && mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getDuration() > 10) {
+//                            int amplifier = mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getAmplifier();
+//                            baseSpeed *= (1.0D + 0.135D * (amplifier + 1));
+//                        }
+//
+//                        double bruh = 0.7666;
+//
+//                        if (mc.thePlayer.isPotionActive(Potion.moveSpeed) && mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getDuration() > 10) {
+//                            if (mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getAmplifier() == 0) {
+//                                bruh = 0.71193D;
+//                            } else {
+//                                bruh = 0.678D;
+//                            }
+//                        }
+//
+//                        final double difference = bruh * (lastDist - baseSpeed);
+
+                        double baseSpeed = 0.3303950079529733;
+                        if (mc.thePlayer.isPotionActive(Potion.moveSpeed) && (!((Options) settings.get(MODE).getValue()).getSelected().startsWith("HypixelHop") || mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getDuration() > 10)) {
+                            int amplifier = mc.thePlayer.getActivePotionEffect(Potion.moveSpeed).getAmplifier();
+                            baseSpeed *= (1.0D + 0.15D * (amplifier + 1));
+                        }
+
+                        //speed = lastDist - (0.666 * (lastDist - (ticks == 1 ? defaultSpeed() : baseSpeed)) - (0.00000125F / Math.max(hops, 1)));
+
+                        this.speed = this.lastDist - 0.819999 * (this.lastDist - moveSpeed);
+
+//                        speed = lastDist * (ticks == 1 ? 0.59989892348 : 0.587622177);
+
+                    } else {
+                        if (stage == 7 && fastFall.getValue()) {
+                            em.setY(mc.thePlayer.motionY += -(0.18999F + (0.00000004F * Math.random())));
+                        }
+
+                        final List collidingList = mc.theWorld.getCollidingBlockBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(0.0, mc.thePlayer.motionY, 0.0));
+                        if ((collidingList.size() > 0 || mc.thePlayer.isCollidedVertically) && stage > 0) {
+                            stage = (mc.thePlayer.moveForward != 0.0F || mc.thePlayer.moveStrafing != 0.0F) ? 1 : 0;
+                            if (stage == 0) {
+                                ticks = 1;
+                            } else {
+                                ticks = 0;
+                            }
+                        }
+
+//                        List<Double> list = new ArrayList<>();
+//
+//                        double a = lastDist - lastDist / 160;
+//                        double b = lastDist - (lastDist - defaultSpeed()) / 33.3;
+//                        double c = lastDist - (lastDist - moveSpeed) * 0.020000000000000018D;
+//
+//                        list.add(a);
+//                        list.add(b);
+//                        list.add(c);
+//
+//                        list.sort(Double::compare);
+
+                        // this.speed = moveSpeed * 1.255 * Math.pow(0.99, (current - 1)) - (0.0001125F / Math.max(1, hops));
+
+                        double c = lastDist - (lastDist / 50);
+
+                        this.speed = c;
+
+//                        this.speed = list.get(2) - 0.0000125F;
+                    }
+
+                    if (stage == 6) {
+                        mc.thePlayer.motionY = -0.1089496;
+                    }
+
+                    speed = Math.max(speed, moveSpeed);
+
+                    if (velocityBoost != 0 && velocityBoost <= 0.05) {
+                        velocityBoost = 0;
+                    }
+                    if (velocityBoost != 0 && stage > 2) {
+                        speed += velocityBoost;
+                    }
+                    if (stage > 2)
+                        velocityBoost *= 0.66;
+
+                    //Stage checks if you're greater than 0 as step sets you -6 stage to make sure the player wont flag.
+                    if (current > 1 && stage > 0) {
+                        double forward = mc.thePlayer.movementInput.moveForward;
+                        double strafe = mc.thePlayer.movementInput.moveStrafe;
+                        TargetStrafe targetStrafe = Client.getModuleManager().get(TargetStrafe.class);
+                        float yaw = strafe == 0 && forward > 0 ? targetStrafe.getTargetYaw(mc.thePlayer.rotationYaw, em.getY()) : mc.thePlayer.rotationYaw;
+                        boolean isCircleStrafing = mc.thePlayer.rotationYaw != yaw;
+                        if (forward == 0.0f && strafe == 0.0f) {
+                            mc.thePlayer.setPosition(mc.thePlayer.posX + 1, mc.thePlayer.posY, mc.thePlayer.posZ + 1);
+                            mc.thePlayer.setPosition(mc.thePlayer.prevPosX, mc.thePlayer.posY, mc.thePlayer.prevPosZ);
+                            em.setX(0);
+                            em.setZ(0);
+                            if (mc.thePlayer.onGround)
+                                currentYaw = mc.thePlayer.rotationYaw;
+                        } else if (!isCircleStrafing) {
+                            if (forward != 0.0D) {
+                                double oldForward = forward;
+                                if (forward > 0.0D) {
+                                    forward = 1;
+                                } else if (forward < 0.0D) {
+                                    forward = 0.85F;
+                                    yaw -= 179.83;
+                                }
+
+                                if (strafe != 0) {
+                                    forward = 0.985F;
+                                    if (strafe > 0.0D) {
+                                        yaw += (oldForward > 0.0D ? -44.5933 : 44.5933);
+                                    } else if (strafe < 0.0D) {
+                                        yaw += (oldForward > 0.0D ? 44.5933 : -44.5933);
+                                    }
+                                }
+                            } else {
+                                if (strafe > 0.0D) {
+                                    yaw += (-89.453);
+                                } else if (strafe < 0.0D) {
+                                    yaw += (89.453);
+                                }
+                                forward = 0.75F;
+                            }
+                        }
+
+                        float difference = MathHelper.wrapAngleTo180_float(-(currentYaw - yaw));
+
+                        float cap = isCircleStrafing ? Math.min(retard.getValue().floatValue(), ((Number) targetStrafe.getSetting("STEPS").getValue()).floatValue()) : retard.getValue().floatValue();
+
+                        if (isCircleStrafing) {
+                            forward = 0.985F;
+                        }
+
+                        if (Math.abs(difference) >= cap) {
+                            difference = MathHelper.clamp_float(difference, -cap, cap);
+                        }
+
+                        currentYaw += difference;
+
+                        double mx = Math.cos(Math.toRadians(currentYaw + 90));
+                        double mz = Math.sin(Math.toRadians(currentYaw + 90));
+
+                        em.setX((forward * this.speed * mx));
+                        em.setZ((forward * this.speed * mz));
+                    }
+                    //If the player is moving, step the stage up.
+                    if (mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f) {
+                        ++stage;
+                    }
+                }
+                if (event instanceof EventMotionUpdate) {
+                    EventMotionUpdate em = (EventMotionUpdate) event;
+                    if (em.isPre()) {
+                        double xDist = mc.thePlayer.posX - mc.thePlayer.prevPosX;
+                        double zDist = mc.thePlayer.posZ - mc.thePlayer.prevPosZ;
+                        lastDist = Math.sqrt(xDist * xDist + zDist * zDist);
+
+                        if (strafeFix.getValue() && HypixelUtil.isVerifiedHypixel() && lastDist > 0) {
+                            boolean ground = em.isOnground();
+                            if (hops > 0) {
+                                BypassValues.novolineStrafeFix(em, mc.thePlayer);
+                            }
+                            if (ground) {
+                                hops++;
+                            }
+                        }
+
+//                        if (strafeFix.getValue() && HypixelUtil.isVerifiedHypixel() && stage > 1 && lastDist > 0 && !PlayerUtil.isOnLiquid()) {
+//                            if (em.isOnground()) {
+//                                hops++;
+//                                if (hops > 1) {
+//                                    BypassValues.offsetGround(em, mc.thePlayer);
+//                                }
+//                            }
+//                        }
+
+                    }
+                }
+                break;
+            }
             case "HypixelHopOld": {
                 if (event instanceof EventMove) {
                     EventMove em = (EventMove) event;
@@ -537,7 +839,7 @@ public class Speed extends Module {
                         speed = lastDist;
                         ticks = 1;
                     } else if (stage == 2 && mc.thePlayer.isCollidedVertically && mc.thePlayer.onGround && (mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f)) {
-                        double gay = jump_offset.getValue().doubleValue() == 0 ? 0 : jump_offset.getValue().floatValue() / 20.5F;
+                        double gay = /*jump_offset.getValue().doubleValue() == 0 ? */0/* : jump_offset.getValue().floatValue() / 20.5F*/;
                         BypassValues.offsetJump(em, this);
                         if (mc.thePlayer.isPotionActive(Potion.jump)) {
                             gay += (mc.thePlayer.getActivePotionEffect(Potion.jump).getAmplifier() + 1) * 0.1F;
@@ -1135,7 +1437,7 @@ public class Speed extends Module {
                     if (mc.thePlayer.isInWater())
                         return;
                     if ((mc.thePlayer.moveForward != 0.0f || mc.thePlayer.moveStrafing != 0.0f) && mc.thePlayer.isCollidedVertically && mc.thePlayer.onGround) {
-                        double superlegitvaluethatmostanticheatswillacceptasnormaljumping = 0.41999998688697815D;
+                        double superlegitvaluethatmostanticheatswillacceptasnormaljumping = 0.42F;
                         if (mc.thePlayer.isPotionActive(Potion.jump)) {
                             superlegitvaluethatmostanticheatswillacceptasnormaljumping += (mc.thePlayer.getActivePotionEffect(Potion.jump).getAmplifier() + 1) * 0.1F;
                         }
@@ -1145,55 +1447,55 @@ public class Speed extends Module {
                 }
                 break;
             }
-            case "HPort": {
-                if (stage < 1) {
-                    stage++;
-                    lastDist = 0;
-                    velocityBoost = 0;
-                    break;
-                }
-                if (event instanceof EventMove) {
-                    EventMove em = (EventMove) event;
-                    if (((mc.thePlayer.onGround) || (stage == 3))) {
-                        if (((!mc.thePlayer.isCollidedHorizontally) && (mc.thePlayer.moveForward != 0.0F)) || (mc.thePlayer.moveStrafing != 0.0F)) {
-                            if (stage == 2) {
-                                speed *= 1.374D;
-                                stage = 3;
-                            } else if (stage == 3) {
-                                stage = 2;
-                                double difference = 0.66D * (lastDist - defaultSpeed());
-                                speed = (lastDist - difference);
-                            } else {
-                                List collidingList = mc.theWorld.getCollidingBlockBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(0, mc.thePlayer.motionY, 0));
-                                if ((collidingList.size() > 0) || (mc.thePlayer.isCollidedVertically)) {
-                                    stage = 1;
-                                }
-                            }
-                        } else {
-                            mc.timer.timerSpeed = 1.0F;
-                        }
-                        speed = Math.max(speed, defaultSpeed());
-                        setMotion(em, speed);
-
-                    }
-                }
-                if (event instanceof EventMotionUpdate) {
-                    EventMotionUpdate em = (EventMotionUpdate) event;
-                    if (em.isPre()) {
-                        if (stage == 3) {
-                            double gay = 0.398936D;
-                            if (mc.thePlayer.isPotionActive(Potion.jump)) {
-                                gay = (mc.thePlayer.getActivePotionEffect(Potion.jump).getAmplifier() + 1) * 0.1F;
-                            }
-                            em.setY(em.getY() + gay);
-                        }
-                        double xDist = mc.thePlayer.posX - mc.thePlayer.prevPosX;
-                        double zDist = mc.thePlayer.posZ - mc.thePlayer.prevPosZ;
-                        lastDist = Math.sqrt(xDist * xDist + zDist * zDist);
-                    }
-                }
-                break;
-            }
+//            case "HPort": {
+//                if (stage < 1) {
+//                    stage++;
+//                    lastDist = 0;
+//                    velocityBoost = 0;
+//                    break;
+//                }
+//                if (event instanceof EventMove) {
+//                    EventMove em = (EventMove) event;
+//                    if (((mc.thePlayer.onGround) || (stage == 3))) {
+//                        if (((!mc.thePlayer.isCollidedHorizontally) && (mc.thePlayer.moveForward != 0.0F)) || (mc.thePlayer.moveStrafing != 0.0F)) {
+//                            if (stage == 2) {
+//                                speed *= 1.374D;
+//                                stage = 3;
+//                            } else if (stage == 3) {
+//                                stage = 2;
+//                                double difference = 0.66D * (lastDist - defaultSpeed());
+//                                speed = (lastDist - difference);
+//                            } else {
+//                                List collidingList = mc.theWorld.getCollidingBlockBoundingBoxes(mc.thePlayer, mc.thePlayer.boundingBox.offset(0, mc.thePlayer.motionY, 0));
+//                                if ((collidingList.size() > 0) || (mc.thePlayer.isCollidedVertically)) {
+//                                    stage = 1;
+//                                }
+//                            }
+//                        } else {
+//                            mc.timer.timerSpeed = 1.0F;
+//                        }
+//                        speed = Math.max(speed, defaultSpeed());
+//                        setMotion(em, speed);
+//
+//                    }
+//                }
+//                if (event instanceof EventMotionUpdate) {
+//                    EventMotionUpdate em = (EventMotionUpdate) event;
+//                    if (em.isPre()) {
+//                        if (stage == 3) {
+//                            double gay = 0.398936D;
+//                            if (mc.thePlayer.isPotionActive(Potion.jump)) {
+//                                gay = (mc.thePlayer.getActivePotionEffect(Potion.jump).getAmplifier() + 1) * 0.1F;
+//                            }
+//                            em.setY(em.getY() + gay);
+//                        }
+//                        double xDist = mc.thePlayer.posX - mc.thePlayer.prevPosX;
+//                        double zDist = mc.thePlayer.posZ - mc.thePlayer.prevPosZ;
+//                        lastDist = Math.sqrt(xDist * xDist + zDist * zDist);
+//                    }
+//                }
+//                break;
+//            }
             case "OldSlow": {
                 if (event instanceof EventMove) {
                     EventMove em = (EventMove) event;

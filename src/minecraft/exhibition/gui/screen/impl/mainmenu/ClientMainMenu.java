@@ -23,8 +23,8 @@ public class ClientMainMenu extends PanoramaScreen {
 	@Override
 	protected void keyTyped(char typedChar, int keyCode) throws IOException {
 		if (keyCode == key) {
-			toggleVanilla();
-			display();
+			//toggleVanilla();
+			//display();
 		}
 	}
 

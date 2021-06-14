@@ -16,6 +16,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import exhibition.Client;
+import exhibition.gui.click.ClickGui;
 import exhibition.management.keybinding.KeyHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.stream.GuiTwitchUserMode;
@@ -75,13 +77,13 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback
     /** The button that was just pressed. */
     private GuiButton selectedButton;
     public int eventButton;
-    private long lastMouseEvent;
+    public long lastMouseEvent;
 
     /**
      * Incremented when the game is in touchscreen mode and the screen is tapped, decremented if the screen isn't
      * tapped. Does not appear to be used.
      */
-    private int touchValue;
+    public int touchValue;
     private URI clickedLinkURI;
 
     /**
@@ -567,7 +569,11 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback
         {
             while (Mouse.next())
             {
-                this.handleMouseInput();
+                if(ClickGui.isOpen()) {
+                    Client.getClickGui().handleMouseInput();
+                } else {
+                    this.handleMouseInput();
+                }
             }
         }
 
@@ -575,9 +581,13 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback
         {
             while (Keyboard.next())
             {
-                boolean isInGui = mc.currentScreen != null;
-                KeyHandler.update(isInGui);
-                this.handleKeyboardInput();
+                if(ClickGui.isOpen()) {
+                    Client.getClickGui().handleKeyboardInput();
+                } else {
+                    boolean isInGui = mc.currentScreen != null;
+                    KeyHandler.update(isInGui);
+                    this.handleKeyboardInput();
+                }
             }
         }
     }
@@ -622,11 +632,22 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback
     /**
      * Handles keyboard input.
      */
-    public void handleKeyboardInput() throws IOException
-    {
-        if (Keyboard.getEventKeyState())
-        {
-            this.keyTyped(Keyboard.getEventCharacter(), Keyboard.getEventKey());
+    public void handleKeyboardInput() throws IOException {
+        if (Keyboard.getEventKeyState()) {
+            char c = Keyboard.getEventCharacter();
+            int k = Keyboard.getEventKey();
+
+            if(Client.instance != null && Client.getClickGui() != null && !(mc.currentScreen instanceof GuiChat)) {
+                boolean inOtherScreen = mc.currentScreen != null && mc.currentScreen != Client.getClickGui();
+                if (inOtherScreen && (k == Keyboard.KEY_RSHIFT || k == Keyboard.KEY_INSERT || k == Keyboard.KEY_DELETE) && !Client.getClickGui().mainPanel.isOpen) {
+                    Client.getClickGui().mainPanel.isOpen = true;
+                    Keyboard.enableRepeatEvents(true);
+                    Client.getClickGui().grabMouse();
+                    return;
+                }
+            }
+
+            this.keyTyped(c, k);
         }
 
         this.mc.dispatchKeypresses();

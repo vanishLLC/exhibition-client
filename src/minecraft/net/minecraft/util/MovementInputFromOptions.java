@@ -84,8 +84,8 @@ public class MovementInputFromOptions extends MovementInput
         Scaffold scaffold = Client.getModuleManager().get(Scaffold.class);
         if(scaffold.isEnabled() && HypixelUtil.isVerifiedHypixel()) {
             if(Minecraft.getMinecraft().thePlayer.isPotionActive(Potion.moveSpeed)) {
-                this.moveStrafe = ((float) (this.moveStrafe * 0.6D));
-                this.moveForward = ((float) (this.moveForward * 0.6D));
+                this.moveStrafe = ((float) (this.moveStrafe * 0.596D));
+                this.moveForward = ((float) (this.moveForward * 0.596D));
             }
         }
 

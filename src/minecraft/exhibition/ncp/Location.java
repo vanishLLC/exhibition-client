@@ -4,11 +4,11 @@ import net.minecraft.entity.Entity;
 
 public class Location {
 
-    private double x;
-    private double y;
-    private double z;
+    private final double x;
+    private final double y;
+    private final double z;
 
-    private float yaw, pitch;
+    private final float yaw, pitch;
 
     public Location(double x, double y, double z, float yaw, float pitch) {
         this.x = x;

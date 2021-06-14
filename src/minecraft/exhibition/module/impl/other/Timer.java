@@ -1,3 +1,4 @@
+
 package exhibition.module.impl.other;
 
 import exhibition.event.Event;
@@ -21,6 +22,11 @@ public class Timer extends Module {
 
     @Override
     public void onEnable() {
+        if (mc.thePlayer == null || mc.theWorld == null) {
+            toggle();
+            return;
+        }
+
         mc.timer.timerSpeed = 1.0F;
     }
 

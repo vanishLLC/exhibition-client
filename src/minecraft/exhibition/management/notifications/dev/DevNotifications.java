@@ -24,8 +24,13 @@ public class DevNotifications {
     }
 
     public void post(String text) {
-        if (Client.instance != null)
-            Client.getSourceConsoleGUI().sourceConsole.addStringList(text);
+        try {
+            if (Client.instance != null && Client.getSourceConsoleGUI() != null && Client.getSourceConsoleGUI().sourceConsole != null)
+                Client.getSourceConsoleGUI().sourceConsole.addStringList(text);
+        } catch (Exception e) {
+            System.out.println("Error adding \"" + text + "\" to source screen.");
+            e.printStackTrace();
+        }
 
         if (!GlobalValues.allowDebug.getValue())
             return;

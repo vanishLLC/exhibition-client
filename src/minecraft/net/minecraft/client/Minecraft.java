@@ -46,16 +46,12 @@ import exhibition.gui.click.ClickGui;
 import exhibition.gui.click.components.CategoryButton;
 import exhibition.gui.click.components.TextBox;
 import exhibition.gui.click.virtue.VirtueClickGui;
-import exhibition.gui.screen.GuiChangelog;
 import exhibition.gui.screen.impl.mainmenu.ClientMainMenu;
 import exhibition.gui.screen.impl.mainmenu.GuiLoginMenu;
 import exhibition.management.GlobalValues;
-import exhibition.management.command.Command;
 import exhibition.management.keybinding.KeyHandler;
-import exhibition.module.impl.combat.Bypass;
 import exhibition.module.impl.hud.HUD;
 import exhibition.module.impl.other.Spotify;
-import exhibition.util.misc.ChatUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.audio.MusicTicker;
@@ -1007,14 +1003,14 @@ public class Minecraft implements IThreadListener, IPlayerUsage {
      */
     private void runGameLoop() throws IOException {
         long i = System.nanoTime();
-        this.mcProfiler.startSection("root");
+        this.mcProfiler.startSection("root"); // root
 
-        this.mcProfiler.startSection("displayClose");
+        this.mcProfiler.startSection("displayShutdown"); // root.displayShutdown
         if (Display.isCreated() && Display.isCloseRequested()) {
             this.shutdown();
         }
 
-        this.mcProfiler.endStartSection("displayClose");
+        this.mcProfiler.endStartSection("displayClose"); // root.displayClose
         if (this.isGamePaused && this.theWorld != null) {
             float f = this.timer.renderPartialTicks;
             this.timer.updateTimer();
@@ -1023,7 +1019,7 @@ public class Minecraft implements IThreadListener, IPlayerUsage {
             this.timer.updateTimer();
         }
 
-        this.mcProfiler.endStartSection("scheduledExecutables");
+        this.mcProfiler.endStartSection("scheduledExecutables"); // root.scheduledExecutables
 
         synchronized (this.scheduledTasks) {
             while (!this.scheduledTasks.isEmpty()) {
@@ -1031,42 +1027,42 @@ public class Minecraft implements IThreadListener, IPlayerUsage {
             }
         }
 
-        this.mcProfiler.endSection();
+        this.mcProfiler.endSection(); // root
         long l = System.nanoTime();
-        this.mcProfiler.startSection("tick");
+        this.mcProfiler.startSection("tick"); // root.tick
 
         for (int j = 0; j < this.timer.elapsedTicks; ++j) {
             this.runTick();
         }
 
-        this.mcProfiler.endStartSection("preRenderErrors");
+        this.mcProfiler.endStartSection("preRenderErrors"); // root.preRenderErrors
         long i1 = System.nanoTime() - l;
         this.checkGLError("Pre render");
-        this.mcProfiler.endStartSection("sound");
+        this.mcProfiler.endStartSection("sound"); // root.sound
         this.mcSoundHandler.setListener(this.thePlayer, this.timer.renderPartialTicks);
         this.mcProfiler.endSection();
-        this.mcProfiler.startSection("render");
+
+        this.mcProfiler.startSection("render"); // root.render
         GlStateManager.pushMatrix();
         GlStateManager.clear(16640);
         this.framebufferMc.bindFramebuffer(true);
-        this.mcProfiler.startSection("display");
+        this.mcProfiler.startSection("display");  // root.display
         GlStateManager.enableTexture2D();
 
         if (this.thePlayer != null && this.thePlayer.isEntityInsideOpaqueBlock()) {
             this.gameSettings.thirdPersonView = 0;
         }
 
-        this.mcProfiler.endSection();
+        this.mcProfiler.endSection(); // root
 
         if (!this.skipRenderWorld) {
-            this.mcProfiler.endStartSection("gameRenderer");
-            this.entityRenderer.func_181560_a(this.timer.renderPartialTicks, i);
-            this.mcProfiler.endSection();
+            this.mcProfiler.endStartSection("gameRenderer");  // gameRenderer
+            this.entityRenderer.updateCameraAndRender(this.timer.renderPartialTicks, i);
+            this.mcProfiler.endSection(); // end
         }
 
         this.mcProfiler.endSection();
 
-        this.mcProfiler.startSection("debugInfo");
         if (this.gameSettings.showDebugInfo && this.gameSettings.showDebugProfilerChart && !this.gameSettings.hideGUI) {
             if (!this.mcProfiler.profilingEnabled) {
                 this.mcProfiler.clearProfiling();
@@ -1078,7 +1074,6 @@ public class Minecraft implements IThreadListener, IPlayerUsage {
             this.mcProfiler.profilingEnabled = false;
             this.prevFrameTime = System.nanoTime();
         }
-        this.mcProfiler.endSection();
 
         this.mcProfiler.startSection("buffers");
         this.guiAchievement.updateAchievementWindow();
@@ -1667,12 +1662,18 @@ public class Minecraft implements IThreadListener, IPlayerUsage {
                         }
                     }
 
+
+
                     if (this.currentScreen == null) {
                         if (!this.inGameHasFocus && Mouse.getEventButtonState()) {
                             this.setIngameFocus();
                         }
                     } else if (this.currentScreen != null) {
-                        this.currentScreen.handleMouseInput();
+                        if(ClickGui.isOpen()) {
+                            Client.getClickGui().handleMouseInput();
+                        } else {
+                            this.currentScreen.handleMouseInput();
+                        }
                     }
                 }
             }
@@ -1688,7 +1689,7 @@ public class Minecraft implements IThreadListener, IPlayerUsage {
                 KeyBinding.setKeyBindState(k, Keyboard.getEventKeyState());
 
                 if (Keyboard.getEventKeyState()) {
-                    EventKeyPress eventKey = (EventKeyPress) EventSystem.getInstance(EventKeyPress.class);
+                    EventKeyPress eventKey = EventSystem.getInstance(EventKeyPress.class);
                     eventKey.fire(k);
                     k = eventKey.getKey();
                     boolean bad = false;
@@ -1698,10 +1699,11 @@ public class Minecraft implements IThreadListener, IPlayerUsage {
                                 bad = true;
                         }
                     }
-                    if (!bad && (k == Keyboard.KEY_RSHIFT || k == Keyboard.KEY_INSERT || k == Keyboard.KEY_DELETE) && this.currentScreen == null && Client.getClickGui().mainPanel.opacity == 0) {
-                        this.displayGuiScreen((k == Keyboard.KEY_INSERT && ((HUD) Client.getModuleManager().get(HUD.class)).isVirtue()) ? VirtueClickGui.getInstance() : Client.getClickGui());
+                    if (!bad && (k == Keyboard.KEY_RSHIFT || k == Keyboard.KEY_INSERT || k == Keyboard.KEY_DELETE) && this.currentScreen == null && !Client.getClickGui().mainPanel.isOpen) {
+                        boolean showVirtue = (k == Keyboard.KEY_INSERT && Client.getModuleManager().get(HUD.class).isVirtue());
+                        this.displayGuiScreen(showVirtue ? VirtueClickGui.getInstance() : Client.getClickGui());
                         if (currentScreen instanceof ClickGui) {
-                            Client.getClickGui().mainPanel.opacity = (255);
+                            Client.getClickGui().mainPanel.isOpen = true;
                             Keyboard.enableRepeatEvents(true);
                         }
                     }
@@ -1732,7 +1734,11 @@ public class Minecraft implements IThreadListener, IPlayerUsage {
                     }
 
                     if (this.currentScreen != null) {
-                        this.currentScreen.handleKeyboardInput();
+                        if(ClickGui.isOpen()) {
+                            Client.getClickGui().handleKeyboardInput();
+                        } else {
+                            this.currentScreen.handleKeyboardInput();
+                        }
                     } else {
                         if (k == 1) {
                             this.displayInGameMenu();

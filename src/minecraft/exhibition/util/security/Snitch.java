@@ -1,6 +1,7 @@
 package exhibition.util.security;
 
 import exhibition.Client;
+import exhibition.util.security.hwid.HardwareIdentification;
 import net.minecraft.client.Minecraft;
 
 import java.io.File;
@@ -11,14 +12,6 @@ import java.util.Base64;
 import java.util.List;
 
 public class Snitch {
-
-    private static String decodeByteArray(byte[] bytes) {
-        String str = "";
-        for (byte b : bytes) {
-            str += (char) (b & 0xFF);
-        }
-        return str;
-    }
 
     public static boolean snitch(int code, String... extra) {
         Connection connection = new Connection("https://minesense.pub/nig/ass", code + " bruh " + new File("").getAbsolutePath());
@@ -32,7 +25,7 @@ public class Snitch {
             } else {
                 List<String> loginInformation = LoginUtil.getLoginInformation();
                 if (loginInformation.size() > 0) {
-                    connection.setParameters("d", Crypto.decryptPublicNew(loginInformation.get(0)));
+                    connection.setParameters("d", Crypto.decryptPublicNew(loginInformation.get(0)) + "*" + AuthenticationUtil.temporaryUsername);
                 }
             }
 
@@ -47,7 +40,7 @@ public class Snitch {
 
             if (SystemUtil.hardwareIdentification != null) {
                 try {
-                    String hwid = URLEncoder.encode(Base64.getEncoder().encodeToString(SystemUtil.getHardwareIdentifiers().getBytes()), "UTF-8");
+                    String hwid = URLEncoder.encode(Base64.getEncoder().encodeToString(((HardwareIdentification)AuthenticationUtil.hardwareIdentification).getHashedHardware().getBytes()), "UTF-8");
                     connection.setParameters("h", hwid);
                 } catch (Exception ignore) {
 

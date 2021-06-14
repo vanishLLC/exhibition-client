@@ -11,6 +11,7 @@ import java.util.Set;
 import exhibition.Client;
 import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.util.HypixelUtil;
+import exhibition.util.RenderingUtil;
 import exhibition.util.render.Colors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
@@ -157,7 +158,7 @@ public class GuiView extends GuiScreen {
                 int j1 = slot.xDisplayPosition;
                 int k1 = slot.yDisplayPosition;
                 GlStateManager.colorMask(true, true, true, false);
-                this.drawGradientRect(j1, k1, j1 + 16, k1 + 16, -2130706433, -2130706433);
+                RenderingUtil.rectangleBordered(j1, k1, j1 + 16, k1 + 16, 0.5, Colors.getColor(0,0), -2130706433);
                 GlStateManager.colorMask(true, true, true, true);
                 GlStateManager.enableLighting();
                 GlStateManager.enableDepth();
@@ -355,7 +356,7 @@ public class GuiView extends GuiScreen {
             this.itemRender.renderItemOverlayIntoGUI(this.fontRendererObj, itemstack, i, j, s);
 
             boolean showPitEnchants = HypixelUtil.isInGame("THE HYPIXEL PIT");
-            if (itemstack != null && showPitEnchants && itemstack.hasTagCompound()) {
+            if (showPitEnchants && HypixelUtil.isItemMystic(itemstack)) {
                 List<String> enchants = HypixelUtil.getPitEnchants(itemstack);
 
                 List<String> render = new ArrayList<>();

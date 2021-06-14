@@ -2,8 +2,6 @@ package net.minecraft.client.gui;
 
 import java.io.IOException;
 
-import com.github.creeper123123321.viafabric.handler.CommonTransformer;
-import com.github.creeper123123321.viafabric.handler.clientside.VRDecodeHandler;
 import exhibition.Client;
 import exhibition.management.GlobalValues;
 import exhibition.management.PriorityManager;
@@ -11,25 +9,19 @@ import exhibition.management.command.impl.Teleport;
 import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.Module;
 import exhibition.module.impl.combat.AntiBot;
-import exhibition.module.impl.combat.Bypass;
 import exhibition.module.impl.combat.Killaura;
 import exhibition.module.impl.movement.Fly;
 import exhibition.module.impl.movement.LongJump;
 import exhibition.module.impl.movement.Phase;
 import exhibition.module.impl.movement.Speed;
-import exhibition.module.impl.other.AutoPaper;
 import exhibition.module.impl.other.HackerDetect;
 import exhibition.module.impl.player.AutoFish;
 import exhibition.module.impl.player.Scaffold;
-import exhibition.module.impl.render.MotionPrediction;
 import exhibition.ncp.Angle;
 import exhibition.util.security.DiscordUtil;
-import io.netty.channel.ChannelHandler;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.network.play.client.C00PacketKeepAlive;
-import us.myles.ViaVersion.api.protocol.ProtocolVersion;
-import us.myles.ViaVersion.protocols.base.ProtocolInfo;
 
 public class GuiDownloadTerrain extends GuiScreen {
     private NetHandlerPlayClient netHandlerPlayClient;
@@ -80,7 +72,7 @@ public class GuiDownloadTerrain extends GuiScreen {
 
         AntiBot.clear();
 
-        Client.getModuleManager().get(Bypass.class).worldChange();
+        //Client.getModuleManager().get(Bypass.class).worldChange();
         //Client.getModuleManager().get(AutoPaper.class).worldChange();
 
         Client.instance.differenceQueue.clear();

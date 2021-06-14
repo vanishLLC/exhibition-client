@@ -14,13 +14,13 @@ import exhibition.management.friend.FriendManager;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
-import exhibition.module.impl.combat.Killaura;
 import exhibition.util.HypixelUtil;
 import exhibition.util.RenderingUtil;
 import exhibition.util.render.Colors;
 import exhibition.util.render.Depth;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.StringUtils;
@@ -34,6 +34,7 @@ import java.util.regex.Pattern;
 public class TargetESP extends Module {
 
     private Setting x, y, showList;
+    private final Setting<Boolean> preMega = new Setting<>("PRE-MEGA", false, "Shows players who are pre mega.");
 
     public TargetESP(ModuleData data) {
         super(data);
@@ -41,9 +42,7 @@ public class TargetESP extends Module {
         showList = new Setting<>("SHOW-LIST", false, "Show target list.");
         x = new Setting<>("X", screenSize.getWidth() / 2, "X Position", 1, 0, screenSize.getWidth());
         y = new Setting<>("Y", 20, "Y Position", 1, 0, screenSize.getHeight());
-        addSetting(x.getName(), x);
-        addSetting(y.getName(), y);
-        addSetting(showList.getName(), showList);
+        addSettings(x, y, showList, preMega);
     }
 
     @Override
@@ -101,9 +100,32 @@ public class TargetESP extends Module {
 
     private static final Pattern bountyPattern = Pattern.compile("\247l[\\d]+g");
 
+    private static TargetESP instance;
+
     public static boolean isPriority(EntityPlayer player) {
         if (PriorityManager.isPriority(player))
             return true;
+
+        if (instance == null) {
+            instance = Client.getModuleManager().get(TargetESP.class);
+        }
+
+        if (instance.preMega.getValue()) {
+            double x = player.posX;
+            double y = player.posY;
+            double z = player.posZ;
+            if (y > Client.instance.spawnY && x < 30 && x > -30 && z < 30 && z > -30) {
+                return false;
+            }
+
+            for (Slot slot : player.inventoryContainer.inventorySlots) {
+                if (slot.getHasStack() && HypixelUtil.isItemMystic(slot.getStack()) && HypixelUtil.getPitEnchants(slot.getStack()).size() > 0) {
+                    if (player.getDisplayName().getFormattedText().contains("["))
+                        return true;
+                }
+            }
+            return false;
+        }
 
         if (HypixelUtil.scoreboardCache != null && Client.getModuleManager().isEnabled(TargetESP.class)) {
             boolean isRobbery = false;
@@ -149,9 +171,9 @@ public class TargetESP extends Module {
                 return false;
             } else if (isRagePit) {
                 ItemStack pants = player.getEquipmentInSlot(2);
-                if (pants != null && pants.getItem() instanceof ItemArmor) {
+                if (HypixelUtil.isItemMystic(pants) && pants.getItem() instanceof ItemArmor) {
                     ItemArmor itemArmor = (ItemArmor) pants.getItem();
-                    if(itemArmor.getArmorMaterial() == ItemArmor.ArmorMaterial.LEATHER) {
+                    if (itemArmor.getArmorMaterial() == ItemArmor.ArmorMaterial.LEATHER) {
                         for (String pitEnchant : HypixelUtil.getPitEnchants(pants)) {
                             if (pitEnchant.contains("Mind")) {
                                 return true;

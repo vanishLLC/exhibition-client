@@ -9,7 +9,6 @@ import exhibition.event.RegisterEvent;
 import exhibition.event.impl.EventRenderGui;
 import exhibition.event.impl.EventTick;
 import exhibition.management.ColorManager;
-import exhibition.management.GlobalValues;
 import exhibition.management.animate.Opacity;
 import exhibition.management.font.DynamicTTFFont;
 import exhibition.module.Module;
@@ -17,7 +16,6 @@ import exhibition.module.data.ModuleData;
 import exhibition.module.data.MultiBool;
 import exhibition.module.data.Options;
 import exhibition.module.data.settings.Setting;
-import exhibition.module.impl.combat.Bypass;
 import exhibition.module.impl.other.AutoSkin;
 import exhibition.module.impl.other.ChatCommands;
 import exhibition.util.HypixelUtil;
@@ -129,10 +127,8 @@ public class HUD extends Module {
     private final Opacity fadeState = new Opacity(0);
     private boolean goingUp;
 
-    private final DynamicTTFFont.DynamicTTForMC font = Client.hudFont;
-
     public DynamicTTFFont.DynamicTTForMC getFont() {
-        return this.font;
+        return Client.hudFont;
     }
 
     private void updateFade() {
@@ -164,7 +160,7 @@ public class HUD extends Module {
 
         if (event instanceof EventTick) {
             checkPing();
-            font.renderMC = selectedFont.getSelected().equalsIgnoreCase("Minecraft");
+            Client.hudFont.renderMC = selectedFont.getSelected().equalsIgnoreCase("Minecraft");
             return;
         }
 
@@ -251,18 +247,18 @@ public class HUD extends Module {
             mc.fontRendererObj.drawStringWithShadow(s, (int) (e.getResolution().getScaledWidth_double() / 2 - mc.fontRendererObj.getStringWidth(s) / 2), 30, -1);
         }
 
-        Bypass bypass = Client.getModuleManager().get(Bypass.class);
-        if (GlobalValues.allowDebug.getValue() && bypass.isEnabled() && mc.getIntegratedServer() == null)
-            if (bypass.option.getSelected().equals("Dong")) {
-                int current = Math.max((bypass.bruh - 10), 0);
-                int max = (45 + bypass.randomDelay);
-
-                String bruh = bypass.bruh == 0 ? "Watchdog Inactive" : Math.round((current / (float) max) * 100) + "%";
-                mc.fontRendererObj.drawStringWithShadow(bruh, (int) (e.getResolution().getScaledWidth_double() / 2 - mc.fontRendererObj.getStringWidth(bruh) / 2), 20, -1);
-            } else if (bypass.option.getSelected().equals("Watchdog Off")) {
-                String bruh = bypass.lastSentUid != 2 ? bypass.lastSentUid == 1 ? "Watchdog Off" : "Watchdog Inactive" : "\247c\247lWatchdog Bugged";
-                mc.fontRendererObj.drawStringWithShadow(bruh, (int) (e.getResolution().getScaledWidth_double() / 2 - mc.fontRendererObj.getStringWidth(bruh) / 2), 20, -1);
-            }
+//        Bypass bypass = Client.getModuleManager().get(Bypass.class);
+//        if (GlobalValues.allowDebug.getValue() && bypass.isEnabled() && mc.getIntegratedServer() == null)
+//            if (bypass.option.getSelected().equals("Dong")) {
+//                int current = Math.max((bypass.bruh - 10), 0);
+//                int max = (45 + bypass.randomDelay);
+//
+//                String bruh = bypass.bruh == 0 ? "Watchdog Inactive" : Math.round((current / (float) max) * 100) + "%";
+//                mc.fontRendererObj.drawStringWithShadow(bruh, (int) (e.getResolution().getScaledWidth_double() / 2 - mc.fontRendererObj.getStringWidth(bruh) / 2), 20, -1);
+//            } else if (bypass.option.getSelected().equals("Watchdog Off")) {
+//                String bruh = bypass.lastSentUid != 2 ? bypass.lastSentUid == 1 ? "Watchdog Off" : "Watchdog Inactive" : "\247c\247lWatchdog Bugged";
+//                mc.fontRendererObj.drawStringWithShadow(bruh, (int) (e.getResolution().getScaledWidth_double() / 2 - mc.fontRendererObj.getStringWidth(bruh) / 2), 20, -1);
+//            }
 
 //        String okbruh = Angle.INSTANCE.angleVL + " Angle VL | Size: " + Angle.INSTANCE.angleHits.size();
 //        mc.fontRendererObj.drawStringWithShadow(okbruh, e.getResolution().getScaledWidth_double() / 2 - 50, 250, -1);
@@ -383,7 +379,13 @@ public class HUD extends Module {
             Client.blockyFont.drawStringWithShadow("Virtue 6", (29 - Client.blockyFont.getStringWidth("Virtue 6") / 2D + 2), 4.0D,
                     -4210753, 0.8F);
 
-            String serverVersion = getServerProtocol() + " | " + Client.getTPS();
+            double movementSpeed = Math.sqrt(Math.pow(mc.thePlayer.posX - mc.thePlayer.lastTickPosX, 2) + Math.pow(mc.thePlayer.posZ - mc.thePlayer.lastTickPosZ, 2)) * 20;
+            if (mc.timer.timerSpeed > 1) {
+                movementSpeed *= mc.timer.timerSpeed;
+            }
+            String speedStr = String.format("%.2f", movementSpeed);
+
+            String serverVersion = speedStr + " | " + Client.getTPS();
 
             Client.blockyFont.drawStringWithShadow("Fps: " + Minecraft.getDebugFPS(), (29 - Client.blockyFont.getStringWidth("Fps: " + Minecraft.getDebugFPS()) / 2D + 2), 14.0D, -6513508, 1.2F);
             Client.blockyFont.drawStringWithShadow(serverVersion, (29 - Client.blockyFont.getStringWidth(serverVersion) / 2D + 2), 24.0D, -6513508, 1.2F);
@@ -400,6 +402,8 @@ public class HUD extends Module {
             }
             return;
         }
+
+        DynamicTTFFont.DynamicTTForMC font = Client.hudFont;
 
         if (isETB() || isVirtue()) {
             int colorInt = isETB() ? 0xffff4d4c : Colors.getColor(203, 206, 209);
@@ -479,12 +483,12 @@ public class HUD extends Module {
                     List<Module> moduleList = Arrays.stream(Client.getModuleManager().getArray()).filter(module -> (!shouldHide(module) && module.isEnabled())).sorted(Comparator.comparingDouble(o -> -mc.fontRendererObj.getStringWidth(o.getSuffix() != null ? o.getName() + " - " + o.getSuffix() : o.getName()))).collect(Collectors.toList());
                     for (Module module : moduleList) {
                         if (h > 255) {
-                            h = 0;
+                            h -= 255;
                         }
                         String name = module.getName() + (module.getSuffix() == null ? "" : " \2477- " + module.getSuffix());
                         float width = mc.fontRendererObj.getStringWidth(name);
-                        final Color color = Color.getHSBColor(h / 255.0f, 0.55f, 0.9f);
-                        mc.fontRendererObj.drawStringWithShadow(name, e.getResolution().getScaledWidth() - width - 1, y, color.getRGB());
+                        int color = MathHelper.hsvToRGB((h / 255.0f) % 1, 0.55f, 0.9f);
+                        mc.fontRendererObj.drawStringWithShadow(name, e.getResolution().getScaledWidth() - width - 1, y, color);
                         y += 10;
                         h += 9;
                     }
@@ -492,7 +496,6 @@ public class HUD extends Module {
             }
 
             int yOffset = isETB() ? 16 : 0;
-
 
             if (isVirtue()) {
                 RenderingUtil.rectangle(2, yOffset + 12, 55, yOffset + 15 + 56 + 12, -1610612736);
@@ -553,8 +556,7 @@ public class HUD extends Module {
         }
 
         String selected = ((Options) settings.get(COLOR).getValue()).getSelected();
-        final Color color2222 = Color.getHSBColor(h / 255.0f, 0.55f, 0.9f);
-        final int c2222 = color2222.getRGB();
+        int c2222 = Colors.getColorOpacity(MathHelper.hsvToRGB((h / 255.0f) % 1, 0.55f, 0.9f), 255);
         int colorXD = selected.equalsIgnoreCase("Rainbow") ? c2222 : selected.equalsIgnoreCase("Fade") ? currentColor : Colors.getColor(ColorManager.hudColor.red, ColorManager.hudColor.green, ColorManager.hudColor.blue, 220);
         if (!nostalgia) {
             if (clientName.equalsIgnoreCase("") || clientName.toLowerCase().equalsIgnoreCase("Astolfo")) {
@@ -599,18 +601,30 @@ public class HUD extends Module {
 
                 for (Module module : modules) {
                     if (h > 255) {
-                        h = 0;
+                        h -= 255;
                     }
                     String suffix = suf && module.getSuffix() != null ? " \2477" + module.getSuffix() : "";
                     float x = left ? 2 : e.getResolution().getScaledWidth() - font.getWidth(module.getName() + suffix) - 1;
                     if (module.isEnabled() && !shouldHide(module))
                         module.translate.interpolate(x, y, 0.35F);
-                    final Color color = Color.getHSBColor(h / 255.0f, 0.55f, 0.9f);
-                    final int c = color.getRGB();
+
+                    int c = Colors.getColorOpacity(MathHelper.hsvToRGB((h / 255.0f) % 1, 0.55f, 0.9f), 255);
                     boolean rainbow = selected.equalsIgnoreCase("Rainbow");
                     boolean cus = selected.equalsIgnoreCase("Custom");
                     boolean fade = selected.equalsIgnoreCase("Fade");
-                    font.drawStringWithShadow((font.renderMC ? "" : "\247l") + module.getName() + suffix, module.translate.getX(), module.translate.getY(), fade ? colorXD : rainbow ? c : (cus ? ColorManager.hudColor.getColorHex() : Colors.getColor(255, 220)));
+
+                    if (fade) {
+                        double ratio = ((mc.thePlayer.ticksExisted * (10 * ((Number) settings.get(SPEED).getValue()).intValue()) + y * 7) / 255.0D) % 2;
+                        if (ratio > 1) {
+                            ratio = 1 - (ratio - 1);
+                        }
+                        int r = ColorManager.hudColor.red;
+                        int g = ColorManager.hudColor.green;
+                        int b = ColorManager.hudColor.blue;
+                        c = getFadeHex(Colors.getColor((int) (r * 0.6), (int) (g * 0.6), (int) (b * 0.6)), Colors.getColor(r, g, b), ratio);
+                    }
+
+                    font.drawStringWithShadow((font.renderMC ? "" : "\247l") + module.getName() + suffix, module.translate.getX(), module.translate.getY(), fade ? c : rainbow ? c : (cus ? ColorManager.hudColor.getColorHex() : Colors.getColor(255, 220)));
                     if (module.isEnabled() && !shouldHide(module)) {
                         h += 9;
                         y += 9;
@@ -742,8 +756,7 @@ public class HUD extends Module {
 
     public int getColor() {
         String selected = ((Options) settings.get(COLOR).getValue()).getSelected();
-        final Color color2222 = Color.getHSBColor(hueThing.getOpacity() / 255.0f, 0.55f, 0.9f);
-        final int c2222 = color2222.getRGB();
+        int c2222 = Colors.getColorOpacity(MathHelper.hsvToRGB((hueThing.getOpacity() / 255.0f) % 1, 0.55f, 0.9f), 255);
         return selected.equalsIgnoreCase("Rainbow") ? c2222 : selected.equalsIgnoreCase("Fade") ? currentColor : Colors.getColor(ColorManager.hudColor.red, ColorManager.hudColor.green, ColorManager.hudColor.blue, 220);
     }
 
@@ -774,8 +787,8 @@ public class HUD extends Module {
         List<PotionEffect> potions = new ArrayList<>();
         for (Object o : mc.thePlayer.getActivePotionEffects())
             potions.add((PotionEffect) o);
-        potions.sort(Comparator.comparingDouble(effect -> -font.getWidth(I18n.format((Potion.potionTypes[effect.getPotionID()]).getName()))));
-        float pY = (mc.currentScreen instanceof GuiChat) ? -(16 + font.getHeight("SpEgYy") + 3) : -(font.getHeight("SpEgYy") + 3);
+        potions.sort(Comparator.comparingDouble(effect -> -Client.hudFont.getWidth(I18n.format((Potion.potionTypes[effect.getPotionID()]).getName()))));
+        float pY = (mc.currentScreen instanceof GuiChat) ? -(16 + Client.hudFont.getHeight("SpEgYy") + 3) : -(Client.hudFont.getHeight("SpEgYy") + 3);
         for (PotionEffect effect : potions) {
             Potion potion = Potion.potionTypes[effect.getPotionID()];
             String name = I18n.format(potion.getName());
@@ -795,11 +808,11 @@ public class HUD extends Module {
                 PType = PType + "\2477 " + Potion.getDurationString(effect);
             }
             Color c = new Color(potion.getLiquidColor());
-            font.drawStringWithShadow(name,
-                    sr.getScaledWidth() - font.getWidth(name + PType) - 1,
+            Client.hudFont.drawStringWithShadow(name,
+                    sr.getScaledWidth() - Client.hudFont.getWidth(name + PType) - 1,
                     sr.getScaledHeight() - 9 + pY, Colors.getColor(c.getRed(), c.getGreen(), c.getBlue()));
-            font.drawStringWithShadow(PType,
-                    sr.getScaledWidth() - font.getWidth(PType) - 1,
+            Client.hudFont.drawStringWithShadow(PType,
+                    sr.getScaledWidth() - Client.hudFont.getWidth(PType) - 1,
                     sr.getScaledHeight() - 9 + pY, -1);
             pY -= 9;
         }

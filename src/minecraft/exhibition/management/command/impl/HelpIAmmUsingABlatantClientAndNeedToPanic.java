@@ -6,7 +6,6 @@ import exhibition.management.command.Command;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.impl.combat.AntiBot;
-import exhibition.module.impl.combat.Bypass;
 import exhibition.module.impl.hud.HUD;
 import exhibition.module.impl.other.ChatCommands;
 
@@ -27,7 +26,7 @@ public class HelpIAmmUsingABlatantClientAndNeedToPanic extends Command {
     @Override
     public void fire(String[] args) {
 
-        Class[] classes = new Class[]{HUD.class, AntiBot.class, Bypass.class, ChatCommands.class};
+        Class[] classes = new Class[]{HUD.class, AntiBot.class, ChatCommands.class};
 
         List<Module> modules = new ArrayList<>();
 

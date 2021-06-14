@@ -12,12 +12,6 @@ import exhibition.module.data.Options;
 import exhibition.module.data.settings.Setting;
 import exhibition.util.StringConversions;
 import exhibition.util.misc.ChatUtil;
-import exhibition.util.security.AuthenticationUtil;
-import exhibition.util.security.Crypto;
-import exhibition.util.security.KillProcess;
-import exhibition.util.security.LoginUtil;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.CryptManager;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

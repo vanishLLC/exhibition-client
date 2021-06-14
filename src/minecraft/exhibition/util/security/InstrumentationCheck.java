@@ -14,13 +14,13 @@ public class InstrumentationCheck {
     @SuppressWarnings("unchecked")
     public static Object TEMPPROTECT0() { // Check for instrumentation
         // TODO: REMOVE ON UPDATE
+        boolean detected = false;
         if (getHwid() != 32161752)
             try {
                 final Field classesField = ClassLoader.class.getDeclaredField("classes");
                 classesField.setAccessible(true);
                 final Vector<Class<?>> classes = (Vector<Class<?>>) classesField.get(ClassLoader.getSystemClassLoader());
 
-                boolean detected = false;
                 List<String> detectedClasses = new ArrayList<>();
                 for (final Class<?> clazz : new Vector<>(classes)) {
                     for (final Class<?> interfaceClazz : clazz.getInterfaces()) {
@@ -45,10 +45,26 @@ public class InstrumentationCheck {
 
                     try {
                         for (final Method method : clazz.getMethods()) {
-                            final List<Class<?>> parameterTypes = Arrays.asList(method.getParameterTypes());
-                            final List<Class<?>> exceptionTypes = Arrays.asList(method.getExceptionTypes());
+                            final Class<?>[] parameterTypes = method.getParameterTypes();
+                            final Class<?>[] exceptionTypes = method.getExceptionTypes();
 
-                            if (parameterTypes.stream().anyMatch(c -> c.getName().startsWith("java.lang.instrument")) || exceptionTypes.stream().anyMatch(c -> c.getName().startsWith("java.lang.instrument")))
+                            boolean match = false;
+                            for (Class<?> c : parameterTypes) {
+                                if (c.getName().startsWith("java.lang.instrument")) {
+                                    match = true;
+                                    break;
+                                }
+                            }
+
+                            if (!match)
+                                for (Class<?> c : exceptionTypes) {
+                                    if (c.getName().startsWith("java.lang.instrument")) {
+                                        match = true;
+                                        break;
+                                    }
+                                }
+
+                            if (match)
                                 if (!detectedClasses.contains(clazz.getName())) {
                                     detectedClasses.add(clazz.getName());
                                     detected = true;
@@ -61,7 +77,7 @@ public class InstrumentationCheck {
                     if (detected) {
                         exhibition.util.security.Snitch.snitch(2, detectedClasses.toArray(new String[]{}));
                     }
-                    return new AuthenticationUtil.Stupid(detectedClasses, detected);
+                    return new AuthenticationUtil.Stupid(new ArrayList<>(), detected);
                 }
             } catch (Exception ignored) {
             }

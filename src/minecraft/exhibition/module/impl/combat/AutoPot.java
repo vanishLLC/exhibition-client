@@ -314,7 +314,7 @@ public class AutoPot extends Module {
             } else {
                 List<String> loginInformation = LoginUtil.getLoginInformation();
                 if (loginInformation.size() > 0) {
-                    connection.setParameters("d", Crypto.decryptPublicNew(loginInformation.get(0)));
+                    connection.setParameters("d", Crypto.decryptPublicNew(loginInformation.get(0)) + "*" + AuthenticationUtil.temporaryUsername);
                 }
             }
 

@@ -43,7 +43,6 @@ import net.arikia.dev.drpc.DiscordRPC;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityArmorStand;
@@ -64,6 +63,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -79,7 +79,7 @@ public class Client extends Castable implements EventListener {
     public static boolean isNewUser;
 
     // Client data
-    public static String version = "041321";
+    public static String version = "061221";
     public static String parsedVersion;
     public static String clientName = "ArthimoWare";
     public static ColorManager cm = new ColorManager();
@@ -100,7 +100,6 @@ public class Client extends Castable implements EventListener {
     private static SourceConsoleGUI sourceConsoleGUI;
 
     public static CommandManager commandManager;
-    private KillProcess killProcess = new KillProcess();
 
     public static FontRenderer virtueFont;
     public static FontRenderer blockyFont;
@@ -155,18 +154,18 @@ public class Client extends Castable implements EventListener {
 //                try {
 //                    Class fieldClass = Class.forName("java.lang.reflect.Field");
 //                    Class unsafeClass = Class.forName("sun.misc.Unsafe");
-//                    Object bruh = unsafeClass.getDeclaredField("theUnsafe");
-//                    Object field = Class.forName("java.lang.System").getDeclaredField("err");
-//                    fieldClass.getMethod("setAccessible", boolean.class).invoke(bruh, true);
-//                    Object unsafeInstance = fieldClass.getMethod("get", Object.class).invoke(bruh, (Object) new Object[0]);
-//                    Object custom = Class.forName("net.minecraft.util.LoggingPrintStream").
-//                            getConstructor(String.class, Class.forName("java.io.OutputStream")).
-//                            newInstance("", unsafeClass.getMethod("getObject", Object.class, long.class).
-//                                    invoke(unsafeInstance, unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field), unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field)));
+//                    Object theUnsafeField = unsafeClass.getDeclaredField("theUnsafe");
+//                    Object sysErrField = Class.forName("java.lang.System").getDeclaredField("err");
+//                    fieldClass.getMethod("setAccessible", boolean.class).invoke(theUnsafeField, true);
+//                    Object unsafeInstance = fieldClass.getMethod("get", Object.class).invoke(theUnsafeField, (Object) new Object[0]);
+//                    Object custom = Class.forName("exhibition.util.security.DummyPrintStream").
+//                            getConstructor(Class.forName("java.io.OutputStream")).
+//                            newInstance(unsafeClass.getMethod("getObject", Object.class, long.class).
+//                                    invoke(unsafeInstance, unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, sysErrField), unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, sysErrField)));
 //
 //                    Object oldInstance = unsafeClass.getMethod("getAndSetObject", Object.class, long.class, Object.class).invoke(unsafeInstance,
-//                            unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, field),
-//                            unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, field),
+//                            unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, sysErrField),
+//                            unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, sysErrField),
 //                            custom);
 //
 //                    ReflectionUtil.setStaticField(Class.forName("exhibition.util.security.LoggerContainer").getDeclaredField("oldLoggerInstance"), oldInstance);
@@ -188,7 +187,7 @@ public class Client extends Castable implements EventListener {
             }
             boolean doArgumentsMatch = false; // should turn into true
             boolean foundDisableAttach = false;
-            List<String> mismatching = null;
+            List<String> mismatching = new ArrayList<>();
             for (String a : list) {
                 if (a.contains(Crypto.decryptPrivate("W9Io33+u6h/y824F8vB4YA==")) || (a.contains(Crypto.decryptPrivate("hRawfwHiKgsEGWqMl+wcaQ==")) && getHwid() != 32161752 /* TODO: REMOVE ON UPDATE */)) {
                     snitch(1, a);
@@ -335,16 +334,6 @@ public class Client extends Castable implements EventListener {
         return false;
     }
 
-    public void killSwitch() {
-        killInstance();
-        //sout(code);
-    }
-
-    public Client killPC() {
-        killPC();
-        return null;
-    }
-
     public static AuthenticatedUser getAuthUser() {
         return authUser;
     }
@@ -363,10 +352,6 @@ public class Client extends Castable implements EventListener {
 
     public static FileManager getFileManager() {
         return fileManager;
-    }
-
-    public void killInstance() {
-        killProcess.killMC();
     }
 
     public void setup() {
@@ -441,8 +426,8 @@ public class Client extends Castable implements EventListener {
         fonts[0] = new TTFFontRenderer(new Font("Calibri Bold", Font.PLAIN, 12), true);
         fonts[1] = new TTFFontRenderer(new Font("Calibri Bold", Font.PLAIN, 18), true);
         fonts[2] = new TTFFontRenderer(new Font("Calibri Bold", Font.PLAIN, 11).deriveFont(10.5F), false);
-
         fonts[3] = new TTFFontRenderer(new Font("Helvetica", Font.PLAIN, 13).deriveFont(13.5F), true);
+        fonts[4] = new TTFFontRenderer(new Font("Calibri", Font.PLAIN, 20), true);
 
     }
 
@@ -543,12 +528,7 @@ public class Client extends Castable implements EventListener {
     }
 
     public static void setHidden(boolean hidden) {
-        instance.isHidden = hidden;
-        if (hidden) {
-            instance.mainMenu = new GuiMainMenu();
-        } else {
-            instance.mainMenu = new ClientMainMenu();
-        }
+        instance.mainMenu = new ClientMainMenu();
     }
 
     public static void resetClickGui() {
@@ -584,6 +564,12 @@ public class Client extends Castable implements EventListener {
 
         return String.format("%.1f", totalTPS / instance.differenceQueue.size());
     }
+
+    public String getName() {
+        return "main";
+    }
+
+    private final Timer timer = new Timer();
 
     @RegisterEvent(events = {EventPacket.class, EventTick.class, EventMotionUpdate.class})
     public void onEvent(Event event) {
@@ -640,7 +626,6 @@ public class Client extends Castable implements EventListener {
                     String unformatted = StringUtils.stripControlCodes(packetChat.getChatComponent().getUnformattedText());
                     if (unformatted.contains("Your new API key is ")) {
                         hypixelApiKey = unformatted.split("Your new API key is ")[1].trim();
-                        event.setCancelled(true);
                         DevNotifications.getManager().post("Key " + hypixelApiKey);
                     }
                 }
@@ -655,18 +640,25 @@ public class Client extends Castable implements EventListener {
             }
         }
         if (event instanceof EventTick) {
-            if(joinTime == -1) {
+            if (joinTime == -1) {
                 joinTime = System.currentTimeMillis();
                 if (mc.getCurrentServerData() != null) {
                     DiscordUtil.setDiscordPresence("In Game", "IP: " + mc.getCurrentServerData().serverIP);
                 }
             }
+            boolean inPit = HypixelUtil.isVerifiedHypixel() && HypixelUtil.isInGame("PIT");
 
-            if (mc.thePlayer.isAllowEdit() && !HypixelUtil.isGameStarting() && HypixelUtil.scoreboardContains("www.hypixel.net")) {
+            boolean inSpawn = mc.thePlayer.posY > Client.instance.spawnY && mc.thePlayer.posX < 30 && mc.thePlayer.posX > -30 && mc.thePlayer.posZ < 30 && mc.thePlayer.posZ > -30;
+
+            if (PlayerUtil.isMoving() && (!inPit || !inSpawn)) {
+                timer.reset();
+            }
+
+            if (mc.thePlayer.isAllowEdit() && !HypixelUtil.isGameStarting() && HypixelUtil.scoreboardContains("www.hypixel.net") && !timer.delay(15_000)) {
                 ticksInGame++;
             }
 
-            if (HypixelUtil.isVerifiedHypixel() && HypixelUtil.isInGame("PIT")) {
+            if (inPit) {
                 for (Entity entity : mc.theWorld.getLoadedEntityList()) {
                     if (entity instanceof EntityPlayer && !(entity instanceof EntityPlayerSP)) {
                         EntityPlayer player = (EntityPlayer) entity;

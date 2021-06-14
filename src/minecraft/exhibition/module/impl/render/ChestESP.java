@@ -1,3 +1,4 @@
+
 package exhibition.module.impl.render;
 
 import exhibition.event.Event;
@@ -27,34 +28,22 @@ public class ChestESP extends Module {
     public void onEvent(Event event) {
         EventRender3D e = (EventRender3D) event;
 
-        GL11.glPushMatrix();
         RenderingUtil.pre3D();
-
-        mc.entityRenderer.setupCameraTransform(mc.timer.renderPartialTicks, 2);
         for (Object o : this.mc.theWorld.loadedTileEntityList) {
             if (o instanceof TileEntityChest) {
                 TileEntityLockable storage = (TileEntityLockable) o;
                 this.drawESPOnStorage(storage, storage.getPos().getX(), storage.getPos().getY(),
                         storage.getPos().getZ());
-            }
-            if (o instanceof TileEntityEnderChest) {
+            } else if (o instanceof TileEntityEnderChest) {
                 TileEntityEnderChest chest = (TileEntityEnderChest) o;
-
-                Vec3 vec;
-                Vec3 vec2;
-
-                vec = new Vec3(chest.getPos().getX() + 0.0625, chest.getPos().getY(), chest.getPos().getZ() + 0.0625);
-                vec2 = new Vec3(chest.getPos().getX() + 0.9375, chest.getPos().getY() + 0.875, chest.getPos().getZ() + 0.9375);
-
+                AxisAlignedBB bb = new AxisAlignedBB(chest.getPos().getX() + 0.0625, chest.getPos().getY(), chest.getPos().getZ() + 0.0625,
+                        chest.getPos().getX() + 0.9375, chest.getPos().getY() + 0.875, chest.getPos().getZ() + 0.9375);
                 RenderingUtil.glColor(Colors.getColor(150, 0, 252, 75));
-
-                RenderingUtil.drawBoundingBox(new AxisAlignedBB(vec.xCoord - RenderManager.renderPosX, vec.yCoord - RenderManager.renderPosY, vec.zCoord - RenderManager.renderPosZ, vec2.xCoord - RenderManager.renderPosX, vec2.yCoord - RenderManager.renderPosY, vec2.zCoord - RenderManager.renderPosZ));
+                RenderingUtil.drawBoundingBox(bb.offset(-RenderManager.renderPosX, -RenderManager.renderPosY, -RenderManager.renderPosZ));
                 GL11.glColor4f(1, 1, 1, 1);
             }
         }
-
         RenderingUtil.post3D();
-        GL11.glPopMatrix();
 
     }
 
@@ -77,7 +66,6 @@ public class ChestESP extends Module {
             return;
         }
 
-
         if (((TileEntityChest) storage).getChestType() != 0) {
             GL11.glColor4d(0.9, 0.3, 0.3, 0.3);
         } else if (chest.isEmpty || chest.lidAngle > 0) {
@@ -85,10 +73,8 @@ public class ChestESP extends Module {
         } else
             RenderingUtil.glColor(ColorManager.chestESPColor.getColorHex());
 
-
         RenderingUtil.drawBoundingBox(new AxisAlignedBB(vec.xCoord - RenderManager.renderPosX, vec.yCoord - RenderManager.renderPosY, vec.zCoord - RenderManager.renderPosZ, vec2.xCoord - RenderManager.renderPosX, vec2.yCoord - RenderManager.renderPosY, vec2.zCoord - RenderManager.renderPosZ));
         GL11.glColor4f(1, 1, 1, 1);
-
     }
 
 

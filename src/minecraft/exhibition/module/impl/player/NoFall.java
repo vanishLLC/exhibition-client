@@ -93,17 +93,17 @@ public class NoFall extends Module {
                 double fallen = mc.thePlayer.fallDistance - dist;
                 double predictedFallen = fallen + -((fallY - 0.08D) * 0.9800000190734863D);
                 if (predictedFallen >= 3.0 && mc.thePlayer.posY > 50 && mc.thePlayer.posY < 255) {
-                    Bypass bypass = Client.getModuleManager().get(Bypass.class);
-                    boolean allowVanilla = bypass.allowBypassing() && (bypass.option.getSelected().equals("Watchdog Off") || (bypass.bruh == 0 || bypass.bruh > 10));
+//                    Bypass bypass = Client.getModuleManager().get(Bypass.class);
+//                    boolean allowVanilla = bypass.allowBypassing() && (bypass.option.getSelected().equals("Watchdog Off") || (bypass.bruh == 0 || bypass.bruh > 10));
 
-                    boolean preModification = !HypixelUtil.isVerifiedHypixel() || (vanilla.getValue() && allowVanilla);
+                    boolean preModification = !HypixelUtil.isVerifiedHypixel() || Bypass.shouldSabotage();
 
                     if (isBlockUnder() && fallY > -4) {
                         if (em.isPre()) {
                             if (preModification) {
-                                if (bypass.bruh > 10) {
-                                    bypass.bruh -= 1;
-                                }
+//                                if (bypass.bruh > 10) {
+//                                    bypass.bruh -= 1;
+//                                }
                                 em.setGround(true);
                                 dist = mc.thePlayer.fallDistance;
 

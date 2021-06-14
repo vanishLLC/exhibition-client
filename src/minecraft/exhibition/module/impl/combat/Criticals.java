@@ -58,7 +58,7 @@ public class Criticals extends Module {
     }
 
     public boolean isPacket() {
-        return ((Options) settings.get(PACKET).getValue()).getSelected().startsWith("Packet");
+        return ((Options) settings.get(PACKET).getValue()).getSelected().startsWith("Packet") && !isPacketOld();
     }
 
     public boolean isPacket2() {

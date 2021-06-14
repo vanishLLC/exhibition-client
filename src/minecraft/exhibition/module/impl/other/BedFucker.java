@@ -72,9 +72,7 @@ public class BedFucker extends Module {
 
                                 final BlockPos pos = new BlockPos(posX, posY, posZ);
 
-                                if ((mc.theWorld.getBlockState(pos).getBlock() != Blocks.air &&
-                                        this.blockChecks(mc.theWorld.getBlockState(pos).getBlock()) &&
-                                        this.getHitResult(pos) != null) &&
+                                if ((mc.theWorld.getBlockState(pos).getBlock() != Blocks.air && this.blockChecks(mc.theWorld.getBlockState(pos).getBlock()) && this.getHitResult(pos) != null) &&
                                         mc.thePlayer.getDistance(posX, posY, posZ) <= 6.0) {
 
                                     IBlockState blockState = mc.theWorld.getBlockState(pos);
@@ -96,7 +94,15 @@ public class BedFucker extends Module {
                 }
 
                 if(this.blockBreaking != null) {
-                    final float[] rotations = this.getBlockRotations(blockBreaking.getX() + 0.5, blockBreaking.getY() + 0.1, blockBreaking.getZ() + 0.5);
+                    IBlockState blockState = mc.theWorld.getBlockState(blockBreaking);
+                    Block block = blockState.getBlock();
+                    AxisAlignedBB bb = block.getSelectedBoundingBox(mc.theWorld, blockBreaking);
+
+                    double centerX = bb.minX + (bb.maxX - bb.minX)/2;
+                    double centerY = bb.minY + (bb.maxY - bb.minY)/2;
+                    double centerZ = bb.minZ + (bb.maxZ - bb.minZ)/2;
+
+                    final float[] rotations = this.getBlockRotations(centerX, centerY, centerZ);
                     em.setYaw(rotations[0]);
                     em.setPitch(rotations[1]);
                 }
@@ -128,11 +134,9 @@ public class BedFucker extends Module {
 
                 IBlockState blockState = mc.theWorld.getBlockState(blockBreaking);
                 Block block = blockState.getBlock();
-
+                AxisAlignedBB bb = block.getSelectedBoundingBox(mc.theWorld, blockBreaking);
                 RenderingUtil.pre3D();
-                drawESP(blockBreaking.getX() + block.getBlockBoundsMinX(), blockBreaking.getY() + block.getBlockBoundsMinY(), blockBreaking.getZ() + block.getBlockBoundsMinZ(),
-                        blockBreaking.getX() + block.getBlockBoundsMaxX(), blockBreaking.getY() + + block.getBlockBoundsMaxY(), blockBreaking.getZ() + block.getBlockBoundsMaxZ(),
-                        100, 255, 100);
+                drawESP(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ, 100, 255, 100);
                 RenderingUtil.post3D();
             }
         }
@@ -261,14 +265,15 @@ public class BedFucker extends Module {
     }
 
     private MovingObjectPosition getHitResult(final BlockPos pos) {
-
         IBlockState blockState = mc.theWorld.getBlockState(pos);
         Block block = blockState.getBlock();
+        AxisAlignedBB bb = block.getSelectedBoundingBox(mc.theWorld, pos);
 
-        double centerX = block.getBlockBoundsMinX() + (block.getBlockBoundsMaxX() - block.getBlockBoundsMinX())/2;
-        double centerY = block.getBlockBoundsMinY() + (block.getBlockBoundsMaxY() - block.getBlockBoundsMinY())/2;
-        double centerZ = block.getBlockBoundsMinZ() + (block.getBlockBoundsMaxZ() - block.getBlockBoundsMinZ())/2;
-        return mc.theWorld.rayTraceOnBlockPos(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY + mc.thePlayer.getEyeHeight(), mc.thePlayer.posZ), new Vec3(pos.getX() + centerX, pos.getY() + centerY, pos.getZ() + centerZ), pos);
+        double centerX = bb.minX + (bb.maxX - bb.minX)/2;
+        double centerY = bb.minY + (bb.maxY - bb.minY)/2;
+        double centerZ = bb.minZ + (bb.maxZ - bb.minZ)/2;
+
+        return mc.theWorld.rayTraceOnBlockPos(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY + mc.thePlayer.getEyeHeight(), mc.thePlayer.posZ), new Vec3(centerX, centerY, centerZ), pos);
     }
 
 }

@@ -15,6 +15,7 @@ import exhibition.management.command.impl.ColorCommand;
 import exhibition.management.font.TTFFontRenderer;
 import exhibition.management.keybinding.Keybind;
 import exhibition.management.notifications.dev.DevNotifications;
+import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.Module;
 import exhibition.module.ModuleManager;
 import exhibition.module.data.ModuleData;
@@ -76,22 +77,16 @@ public class SkeetMenu extends UI {
 
     @Override
     public void mainPanelDraw(MainPanel panel, int p0, int p1) {
-        opacity.interp(panel.opacity, 25);
+        opacity.interp(panel.isOpen ? 255 : 0, 25);
 
         RenderingUtil.rectangleBordered(panel.x + panel.dragX - 0.3, panel.y + panel.dragY - 0.3, panel.x + 340 + panel.dragX + 0.5, panel.y + 340 + panel.dragY + 0.3, 0.5, Colors.getColor(0, 0), Colors.getColor(10, (int) opacity.getOpacity()));//60 60 opaccity and 22
         RenderingUtil.rectangleBordered(panel.x + panel.dragX, panel.y + panel.dragY, panel.x + 340 + panel.dragX, panel.y + 340 + panel.dragY, 0.5, Colors.getColor(0, 0), Colors.getColor(60, (int) opacity.getOpacity()));
         RenderingUtil.rectangleBordered(panel.x + panel.dragX + 2, panel.y + panel.dragY + 2, panel.x + 340 + panel.dragX - 2, panel.y + 340 + panel.dragY - 2, 0.5, Colors.getColor(0, 0), Colors.getColor(60, (int) opacity.getOpacity()));
         RenderingUtil.rectangleBordered(panel.x + panel.dragX + 0.6, panel.y + panel.dragY + 0.6, panel.x + 340 + panel.dragX - 0.5, panel.y + 340 + panel.dragY - 0.6, 1.3, Colors.getColor(0, 0), Colors.getColor(40, (int) opacity.getOpacity()));
-        RenderingUtil.rectangleBordered(panel.x + panel.dragX + 2.5, panel.y + panel.dragY + 2.5, panel.x + 340 + panel.dragX - 2.5, panel.y + 340 + panel.dragY - 2.5, 0.5, Colors.getColor(22, (int) opacity.getOpacity()), Colors.getColor(22, (int) opacity.getOpacity()));
-        RenderingUtil.drawGradientSideways(panel.x + panel.dragX + 3, panel.y + panel.dragY + 3, panel.x + 178 + panel.dragX - 3, panel.dragY + panel.y + 4, Colors.getColor(55, 177, 218, (int) opacity.getOpacity()), Colors.getColor(204, 77, 198, (int) opacity.getOpacity()));
-        RenderingUtil.drawGradientSideways(panel.x + panel.dragX + 175, panel.y + panel.dragY + 3, panel.x + 340 + panel.dragX - 3, panel.dragY + panel.y + 4, Colors.getColor(204, 77, 198, (int) opacity.getOpacity()), Colors.getColor(204, 227, 53, (int) opacity.getOpacity()));
 
-        int i11 = (int) opacity.getOpacity() - 145;
-        if (i11 < 0) {
-            i11 = 0;
-        }
-        RenderingUtil.rectangle(panel.x + panel.dragX + 3, panel.y + panel.dragY + 3.3, panel.x + 340 + panel.dragX - 3, panel.dragY + panel.y + 4, Colors.getColor(0, i11));
-        RenderingUtil.drawGradientSideways(-1, -1, -1, -1, Colors.getColor(255, (int) opacity.getOpacity()), Colors.getColor(255, (int) opacity.getOpacity()));
+
+        Depth.pre();
+        Depth.mask();
 
         float y = 15;
         for (int i = 0; i <= panel.typeButton.size(); i++) {
@@ -102,25 +97,44 @@ public class SkeetMenu extends UI {
         bar.interpolate(0, y, 0.6F);
         y = bar.getY();
 
+        RenderingUtil.rectangle(panel.x + panel.dragX + 3, panel.y + panel.dragY + 4F, panel.x + panel.dragX + 40, panel.y + panel.dragY + y, -1);
+        RenderingUtil.rectangle(panel.x + panel.dragX + 3, panel.y + panel.dragY + y + 40, panel.x + panel.dragX + 40, panel.y + panel.dragY + 307.5 + 30, -1);
+
+        Depth.render(GL11.GL_LESS);
+
+        RenderingUtil.rectangleBordered(panel.x + panel.dragX + 2.5, panel.y + panel.dragY + 2.5, panel.x + 340 + panel.dragX - 2.5, panel.y + 340 + panel.dragY - 2.5, 0.5, Colors.getColor(22, (int) opacity.getOpacity()), Colors.getColor(22, (int) opacity.getOpacity()));
+
+        Depth.post();
+
+        RenderingUtil.drawGradientSideways(panel.x + panel.dragX + 3, panel.y + panel.dragY + 3, panel.x + 178 + panel.dragX - 3, panel.dragY + panel.y + 4, Colors.getColor(55, 177, 218, (int) opacity.getOpacity()), Colors.getColor(204, 77, 198, (int) opacity.getOpacity()));
+        RenderingUtil.drawGradientSideways(panel.x + panel.dragX + 175, panel.y + panel.dragY + 3, panel.x + 340 + panel.dragX - 3, panel.dragY + panel.y + 4, Colors.getColor(204, 77, 198, (int) opacity.getOpacity()), Colors.getColor(204, 227, 53, (int) opacity.getOpacity()));
+
+        int i11 = (int) opacity.getOpacity() - 145;
+        if (i11 < 0) {
+            i11 = 0;
+        }
+        RenderingUtil.rectangle(panel.x + panel.dragX + 3, panel.y + panel.dragY + 3.3, panel.x + 340 + panel.dragX - 3, panel.dragY + panel.y + 4, Colors.getColor(0, i11));
+        RenderingUtil.drawGradientSideways(-1, -1, -1, -1, Colors.getColor(255, (int) opacity.getOpacity()), Colors.getColor(255, (int) opacity.getOpacity()));
+
         //Draw texture in ghetto way
         GlStateManager.pushMatrix();
         Depth.pre();
-        Depth.mask();
-        RenderingUtil.rectangle(panel.x + panel.dragX + 3, panel.y + panel.dragY + 4F, panel.x + panel.dragX + 40, panel.y + panel.dragY + y, -1);
-        RenderingUtil.rectangle(panel.x + panel.dragX + 3, panel.y + panel.dragY + y + 40, panel.x + panel.dragX + 40, panel.y + panel.dragY + 308 + 30, -1);
-        Depth.render(GL11.GL_LESS);
         GlStateManager.enableAlpha();
         GlStateManager.enableBlend();
         Depth.mask();
+
         mc.getTextureManager().bindTexture(texture);
-        GlStateManager.translate(panel.x + panel.dragX + 2.5, panel.dragY + panel.y + 3f, 0);
-        drawIcon(1, 1, 0, 0, 340 - 6.5, 310 - 7 + 30, 812 / 2F, 688 / 2F);
+        GlStateManager.translate(panel.x + panel.dragX + 40, panel.dragY + panel.y + 3f, 0);
+        drawIcon(0, 0, 0, .5F, 340 - 3 - 40, 310 - 6 + 30, 812 / 2F, 688 / 2F);
+        drawIcon(-40 + 2.5,y - 3, .5F, .5F + y, 40 - 2.5F, 40, 812 / 2F, 688 / 2F);
+
         Depth.render(GL11.GL_EQUAL);
+
         mc.getTextureManager().bindTexture(tex);
-        drawIcon(1, 1, 0, 0, 340 - 6.5, 310 - 7 + 30, 812 / 2F, 688 / 2F);
-        Depth.post();
+        drawIcon(-40, 1, 0, 0, 340, 310 - 7 + 30, 812 / 2F, 688 / 2F);
         GlStateManager.disableBlend();
         GlStateManager.disableAlpha();
+
         Depth.post();
         GlStateManager.popMatrix();
 /*
@@ -137,12 +151,12 @@ public class SkeetMenu extends UI {
         RenderingUtil.rectangle(panel.x + panel.dragX + 3, panel.y + panel.dragY + y + 40, panel.x + panel.dragX + 40, panel.y + panel.dragY + 307.5 + 30, -1);
 
         Depth.render();
-        RenderingUtil.rectangleBordered(panel.x + panel.dragX + 2, panel.y + panel.dragY + 3, panel.x + panel.dragX + 40, panel.y + panel.dragY + y, 1, Colors.getColor(0, 0), Colors.getColor(0, (int) opacity.getOpacity()));
+        RenderingUtil.rectangleBordered(panel.x + panel.dragX + 2, panel.y + panel.dragY + 3, panel.x + panel.dragX + 39.5, panel.y + panel.dragY + y - 0.5, 0.5, Colors.getColor(0, 0), Colors.getColor(0, (int) opacity.getOpacity()));
         RenderingUtil.rectangleBordered(panel.x + panel.dragX + 2, panel.y + panel.dragY + 3, panel.x + panel.dragX + 40, panel.y + panel.dragY + y, 0.5, Colors.getColor(0, 0), Colors.getColor(48, (int) opacity.getOpacity()));
 
         RenderingUtil.rectangle(panel.x + panel.dragX + 3, panel.y + panel.dragY + 4, panel.x + panel.dragX + 39, panel.y + panel.dragY + y - 1, Colors.getColor(12, (int) opacity.getOpacity()));
 
-        RenderingUtil.rectangleBordered(panel.x + panel.dragX + 2, panel.y + panel.dragY + y + 40, panel.x + panel.dragX + 40, panel.y + panel.dragY + 308 + 30, 1, Colors.getColor(0, 0), Colors.getColor(0, (int) opacity.getOpacity()));
+        RenderingUtil.rectangleBordered(panel.x + panel.dragX + 2, panel.y + panel.dragY + y + 40.5, panel.x + panel.dragX + 39.5, panel.y + panel.dragY + 308 + 30, 0.5, Colors.getColor(0, 0), Colors.getColor(0, (int) opacity.getOpacity()));
         RenderingUtil.rectangleBordered(panel.x + panel.dragX + 2, panel.y + panel.dragY + y + 40, panel.x + panel.dragX + 40, panel.y + panel.dragY + 308 + 30, 0.5, Colors.getColor(0, 0), Colors.getColor(48, (int) opacity.getOpacity()));
 
         RenderingUtil.rectangle(panel.x + panel.dragX + 3, panel.y + panel.dragY + y + 41, panel.x + panel.dragX + 39, panel.y + panel.dragY + 307.5 + 30, Colors.getColor(12, (int) opacity.getOpacity()));
@@ -179,7 +193,7 @@ public class SkeetMenu extends UI {
             }
         }
 
-        if (panel.opacity == 255 && !GlobalValues.showCursor.getValue() && Mouse.isGrabbed()) {
+        if (panel.isOpen && !GlobalValues.showCursor.getValue() && Mouse.isGrabbed()) {
             GlStateManager.pushMatrix();
             GlStateManager.enableAlpha();
             GlStateManager.enableBlend();
@@ -245,8 +259,8 @@ public class SkeetMenu extends UI {
                 panel.typeButton.forEach(o -> o.categoryPanel.textBoxes.forEach(b -> b.isTyping = false));
                 panel.typeButton.forEach(o -> o.categoryPanel.textBoxes.forEach(b -> b.isFocused = false));
 
-
-                mc.displayGuiScreen(null);
+                if (mc.currentScreen instanceof ClickGui)
+                    mc.displayGuiScreen(null);
             } catch (Exception e) {
 
             }
@@ -371,7 +385,7 @@ public class SkeetMenu extends UI {
                 Client.badCache.drawCenteredString("H", (p0.x + 18.5F + p0.panel.dragX), (p0.y + 20 + p0.panel.dragY), color);
                 break;
             case "Minigames":
-                Client.badCache.drawCenteredString("A", (p0.x + 19F + p0.panel.dragX), (p0.y + 20 + p0.panel.dragY), color);
+                Client.badCache.drawCenteredString("A", (p0.x + 20F + p0.panel.dragX), (p0.y + 20 + p0.panel.dragY), color);
                 break;
             case "Settings":
                 Client.f.drawCenteredString("[+]", (p0.x + 18.5F + p0.panel.dragX), (p0.y + 20 + p0.panel.dragY), color);
@@ -525,7 +539,7 @@ public class SkeetMenu extends UI {
 
                 if (module.getType() == ModuleData.Type.Combat) {
                     if (module.getName().equalsIgnoreCase("AutoSword")) {
-                        yOff -= 178 - 16;
+                        yOff -= 178 - 6;
                         xOff += 95;
                     }
                     if (module.getName().equalsIgnoreCase("AutoPot")) {
@@ -541,9 +555,9 @@ public class SkeetMenu extends UI {
                     if (module.getName().equalsIgnoreCase("Killaura")) {
                         xOff -= 95 * 2;
                     }
-                    if(module.getName().equals("AutoClicker")) {
-                        xOff += 95;
-                        yOff -= 148 + 21;
+                    if (module.getName().equals("AutoClicker")) {
+                        xOff -= 95;
+                        yOff += 23 + 24 + 5;
                     }
                     if (module.getName().equalsIgnoreCase("AutoPot")) {
                         xOff += 95;
@@ -805,7 +819,7 @@ public class SkeetMenu extends UI {
                 if (module.getType() == ModuleData.Type.Movement) {
                     y = 20;
                     if (module == Client.getModuleManager().get(NoSlowdown.class)) {
-                        yOff -= 40;
+                        yOff -= 50;
                     }
                     if (module == Client.getModuleManager().get(Phase.class)) {
                         yOff -= 24;
@@ -818,10 +832,10 @@ public class SkeetMenu extends UI {
                         yOff -= 27 + 10;
                     }
                     if (module == Client.getModuleManager().get(Fly.class)) {
-                        yOff += 47;
+                        yOff += 52;
                     }
                     if (module == Client.getModuleManager().get(Scaffold.class)) {
-                        yOff -= 10;
+                        yOff -= 15;
                     }
 
                     if (getSettings(module) != null) {
@@ -1126,10 +1140,10 @@ public class SkeetMenu extends UI {
                         if (module.getName().equalsIgnoreCase("Spotify")) {
                             yOff += 11;
                         }
-                        if(module.getName().equals("AutoMath")) {
+                        if (module.getName().equals("AutoMath")) {
                             yOff -= 18.5;
                         }
-                        if(module.getName().equals("BanStats")) {
+                        if (module.getName().equals("BanStats")) {
                             yOff -= 5.5;
                         }
                         if (module.getName().equalsIgnoreCase("SilentView")) {
@@ -1523,7 +1537,11 @@ public class SkeetMenu extends UI {
                     desktop.browse(Client.configManager.getFolder().toURI()); // Throws
                 }
             } catch (Exception e) {
-                ChatUtil.printChat("Error opening Configs directory.");
+                if(mc.thePlayer != null) {
+                    ChatUtil.printChat("Error opening Configs directory. " + e.getMessage());
+                } else {
+                    Notifications.getManager().post("Config Directory Error", e.getMessage(), 5000, Notifications.Type.WARNING);
+                }
             }
         } else if (hovering && button == 0 && configButton.configList.configs.length > 0 && configButton.configList.selectedConfigID != -1) {
             switch (configButton.buttonType.name()) {
@@ -1666,7 +1684,11 @@ public class SkeetMenu extends UI {
                 } else if (p4 == 1) {
                     if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
                         p0.module.setHeld(!p0.module.getHeld());
-                        ChatUtil.printChat(Command.chatPrefix + p0.module.getName() + " is now activated \247a" + (!p0.module.getHeld() ? "on Toggle" : "on Held") + "\2478.");
+                        if(mc.thePlayer != null) {
+                            ChatUtil.printChat(Command.chatPrefix + p0.module.getName() + " is now activated \247a" + (!p0.module.getHeld() ? "on Toggle" : "on Held") + "\2478.");
+                        } else {
+                            Notifications.getManager().post("Module State Changed", p0.module.getName() + " is now activated \247a" + (!p0.module.getHeld() ? "on Toggle" : "on Held") + "\247f.", 3000);
+                        }
                         ModuleManager.saveStatus();
                     } else {
                         if (p0.isBinding) {
@@ -1695,7 +1717,7 @@ public class SkeetMenu extends UI {
             boolean hovering = p2 >= p0.x + xOff && p3 >= p0.y + yOff && p2 <= p0.x + 35 + xOff && p3 <= p0.y + 6 + yOff;
             GlStateManager.pushMatrix();
             Client.fs.drawStringWithShadow(p0.module.getName(), (p0.x + xOff + 3), (p0.y + 0.5f + yOff - 7), Colors.getColor(220, (int) opacity.getOpacity()));
-            Client.fss.drawStringWithShadow("Enable", (p0.x + 7.6f + xOff), (p0.y + 1 + yOff), Colors.getColor(220, (int) opacity.getOpacity()));
+            Client.fss.drawStringWithShadow("Enable", (p0.x + 7.6f + xOff), (p0.y + 1 + yOff), Colors.getColor(185, (int) opacity.getOpacity()));
 
             String meme = !p0.module.getKeybind().getKeyStr().equalsIgnoreCase("None") ? "[" + p0.module.getKeybind().getKeyStr() + "]" : "[-]";
             GlStateManager.pushMatrix();
@@ -1758,7 +1780,7 @@ public class SkeetMenu extends UI {
             float yOff = panel.categoryButton.panel.dragY;
             GlStateManager.pushMatrix();
             String xd = p0.setting.getName().charAt(0) + p0.setting.getName().toLowerCase().substring(1);
-            Client.fss.drawStringWithShadow(xd, (p0.x + 7.5f + xOff), (p0.y + 1 + yOff), Colors.getColor(220, (int) opacity.getOpacity()));
+            Client.fss.drawStringWithShadow(xd, (p0.x + 7.5f + xOff), (p0.y + 1 + yOff), Colors.getColor(185, (int) opacity.getOpacity()));
             GlStateManager.popMatrix();
             RenderingUtil.rectangleBordered(p0.x + xOff + 0.6, p0.y + yOff + 0.6, p0.x + 6 + xOff + -0.6, p0.y + 6 + yOff + -0.6, 0.5, Colors.getColor(0, 0), Colors.getColor(10, (int) opacity.getOpacity()));
             RenderingUtil.drawGradient(p0.x + xOff + 1, p0.y + yOff + 1, p0.x + 6 + xOff + -1, p0.y + 6 + yOff + -1, Colors.getColor(76, (int) opacity.getOpacity()), Colors.getColor(51, (int) opacity.getOpacity()));
@@ -1815,7 +1837,7 @@ public class SkeetMenu extends UI {
         if (hovering) {
             RenderingUtil.rectangleBordered(p0.x + xOff, p0.y + yOff, p0.x + xOff + 40, p0.y + yOff + 9, 0.3, Colors.getColor(0, 0), Colors.getColor(90, (int) opacity.getOpacity()));
         }
-        Client.fss.drawStringWithShadow(p0.option.getName(), (p0.x + xOff + 1), (p0.y - 6 + yOff), Colors.getColor(220, (int) opacity.getOpacity()));
+        Client.fss.drawStringWithShadow(p0.option.getName(), (p0.x + xOff + 1), (p0.y - 6 + yOff), Colors.getColor(185, (int) opacity.getOpacity()));
         GlStateManager.pushMatrix();
         GlStateManager.translate((p0.x + xOff + 38 - (p0.active ? 2.5 : 0)), (p0.y + 4.5 + yOff), 0);
         GlStateManager.rotate(p0.active ? 270 : 90, 0, 0, 90);
@@ -1909,7 +1931,7 @@ public class SkeetMenu extends UI {
         if (hovering) {
             RenderingUtil.rectangleBordered(p0.x + xOff, p0.y + yOff, p0.x + xOff + 40, p0.y + yOff + 9, 0.3, Colors.getColor(0, 0), Colors.getColor(90, (int) opacity.getOpacity()));
         }
-        Client.fss.drawStringWithShadow(p0.name, (p0.x + xOff + 1), (p0.y - 6 + yOff), Colors.getColor(220, (int) opacity.getOpacity()));
+        Client.fss.drawStringWithShadow(p0.name, (p0.x + xOff + 1), (p0.y - 6 + yOff), Colors.getColor(185, (int) opacity.getOpacity()));
         GlStateManager.pushMatrix();
         GlStateManager.translate((p0.x + xOff + 38 - (p0.active ? 2.5 : 0)), (p0.y + 4.5 + yOff), 0);
         GlStateManager.rotate(p0.active ? 270 : 90, 0, 0, 90);
@@ -1992,30 +2014,30 @@ public class SkeetMenu extends UI {
 
     @Override
     public void slButtonMouseClicked(SLButton slButton, float x, float y, int button, MainPanel panel) {
-        float xOff = panel.dragX;
-        float yOff = panel.dragY + 75;
-        if (button == 0 &&
-                x >= 55 + slButton.x + xOff &&
-                y >= slButton.y + yOff - 2 &&
-                x <= 55 + slButton.x + xOff + 40 &&
-                y <= slButton.y + 8 + yOff + 2) {
-
-            if (slButton.load) {
-                ChatUtil.printChat("Settings have been loaded.");
-                ModuleManager.loadSettings();
-                ColorCommand.loadStatus();
-                panel.typePanel.forEach(o -> o.sliders.forEach(slider -> {
-                    slider.dragX = slider.lastDragX = ((Number) slider.setting.getValue()).doubleValue() * 40 / slider.setting.getMax();
-                }));
-            } else {
-                ChatUtil.printChat("Settings have been saved.");
-                ColorCommand.saveStatus();
-                ModuleManager.saveSettings();
-                panel.typePanel.forEach(o -> o.sliders.forEach(slider -> {
-                    slider.dragX = slider.lastDragX = ((Number) slider.setting.getValue()).doubleValue() * 40 / slider.setting.getMax();
-                }));
-            }
-        }
+//        float xOff = panel.dragX;
+//        float yOff = panel.dragY + 75;
+//        if (button == 0 &&
+//                x >= 55 + slButton.x + xOff &&
+//                y >= slButton.y + yOff - 2 &&
+//                x <= 55 + slButton.x + xOff + 40 &&
+//                y <= slButton.y + 8 + yOff + 2) {
+//
+//            if (slButton.load) {
+//                ChatUtil.printChat("Settings have been loaded.");
+//                ModuleManager.loadSettings();
+//                ColorCommand.loadStatus();
+//                panel.typePanel.forEach(o -> o.sliders.forEach(slider -> {
+//                    slider.dragX = slider.lastDragX = ((Number) slider.setting.getValue()).doubleValue() * 40 / slider.setting.getMax();
+//                }));
+//            } else {
+//                ChatUtil.printChat("Settings have been saved.");
+//                ColorCommand.saveStatus();
+//                ModuleManager.saveSettings();
+//                panel.typePanel.forEach(o -> o.sliders.forEach(slider -> {
+//                    slider.dragX = slider.lastDragX = ((Number) slider.setting.getValue()).doubleValue() * 40 / slider.setting.getMax();
+//                }));
+//            }
+//        }
     }
 
     @Override
@@ -2053,21 +2075,21 @@ public class SkeetMenu extends UI {
         Depth.mask();
         RenderingUtil.rectangle(xOff + 0.5, yOff + 0.5, xOff + 42.5, yOff + 42.5, -1);
         Depth.render();
-        RenderingUtil.drawGradientSideways(xOff + 0.5, yOff + 0.5, xOff + 46.5f, yOff + 42.5, Colors.getColor(255, (int) opacity.getOpacity()), Colors.getColor(Color.getHSBColor(cp.hue, 1, 1), (int) opacity.getOpacity()));
+        RenderingUtil.drawGradientSideways(xOff + 0.5, yOff + 0.5, xOff + 46.5f, yOff + 42.5, Colors.getColor(255, (int) opacity.getOpacity()), Colors.getColorOpacity(MathHelper.hsvToRGB(cp.hue, 1, 1), (int) opacity.getOpacity()));
         RenderingUtil.drawGradient(xOff + 0.5, yOff - 4, xOff + 42.5, yOff + 42.5, Colors.getColor(0, 0), Colors.getColor(0, (int) opacity.getOpacity()));
         Depth.post();
-        RenderingUtil.rectangleBordered(xOff + (42.5 * cp.saturation) - 1, yOff + 42.5 - (42.5 * cp.brightness) - 1, xOff + (42.5 * cp.saturation) + 1, yOff + 42.5 - (42.5 * cp.brightness) + 1, 0.5, Colors.getColor(Color.getHSBColor(cp.hue, cp.saturation, cp.brightness), (int) opacity.getOpacity()), Colors.getColor(0, (int) opacity.getOpacity()));
+        RenderingUtil.rectangleBordered(xOff + (42.5 * cp.saturation) - 1, yOff + 42.5 - (42.5 * cp.brightness) - 1, xOff + (42.5 * cp.saturation) + 1, yOff + 42.5 - (42.5 * cp.brightness) + 1, 0.5, Colors.getColorOpacity(MathHelper.hsvToRGB(cp.hue, cp.saturation, cp.brightness), (int) opacity.getOpacity()), Colors.getColor(0, (int) opacity.getOpacity()));
         //Hue Slider Rainbow
         RenderingUtil.rectangle(xOff + 45, yOff, xOff + 48, yOff + 43, Colors.getColor(32, (int) opacity.getOpacity()));
 
-        RenderingUtil.drawGradient(xOff + 45.5f, yOff + 0.5f, xOff + 47.5f, yOff + 8, Colors.getColor(Color.getHSBColor(0, 1, 1), (int) opacity.getOpacity()), Colors.getColor(Color.getHSBColor(0.2f, 1, 1), (int) opacity.getOpacity()));
-        RenderingUtil.drawGradient(xOff + 45.5f, yOff + 8, xOff + 47.5f, yOff + 13, Colors.getColor(Color.getHSBColor(0.2f, 1, 1), (int) opacity.getOpacity()), Colors.getColor(Color.getHSBColor(0.3f, 1, 1), (int) opacity.getOpacity()));
-        RenderingUtil.drawGradient(xOff + 45.5f, yOff + 13, xOff + 47.5f, yOff + 17, Colors.getColor(Color.getHSBColor(0.3f, 1, 1), (int) opacity.getOpacity()), Colors.getColor(Color.getHSBColor(0.4f, 1, 1), (int) opacity.getOpacity()));
-        RenderingUtil.drawGradient(xOff + 45.5f, yOff + 17, xOff + 47.5f, yOff + 22, Colors.getColor(Color.getHSBColor(0.4f, 1, 1), (int) opacity.getOpacity()), Colors.getColor(Color.getHSBColor(0.5f, 1, 1), (int) opacity.getOpacity()));
-        RenderingUtil.drawGradient(xOff + 45.5f, yOff + 22, xOff + 47.5f, yOff + 26, Colors.getColor(Color.getHSBColor(0.5f, 1, 1), (int) opacity.getOpacity()), Colors.getColor(Color.getHSBColor(0.6f, 1, 1), (int) opacity.getOpacity()));
-        RenderingUtil.drawGradient(xOff + 45.5f, yOff + 26, xOff + 47.5f, yOff + 30, Colors.getColor(Color.getHSBColor(0.6f, 1, 1), (int) opacity.getOpacity()), Colors.getColor(Color.getHSBColor(0.7f, 1, 1), (int) opacity.getOpacity()));
-        RenderingUtil.drawGradient(xOff + 45.5f, yOff + 30, xOff + 47.5f, yOff + 34, Colors.getColor(Color.getHSBColor(0.7f, 1, 1), (int) opacity.getOpacity()), Colors.getColor(Color.getHSBColor(0.8f, 1, 1), (int) opacity.getOpacity()));
-        RenderingUtil.drawGradient(xOff + 45.5f, yOff + 34, xOff + 47.5f, yOff + 42.5, Colors.getColor(Color.getHSBColor(0.8f, 1, 1), (int) opacity.getOpacity()), Colors.getColor(Color.getHSBColor(1f, 1, 1), (int) opacity.getOpacity()));
+        RenderingUtil.drawGradient(xOff + 45.5f, yOff + 0.5f, xOff + 47.5f, yOff + 8, Colors.getColorOpacity(MathHelper.hsvToRGB(0, 1, 1), (int) opacity.getOpacity()), Colors.getColorOpacity(MathHelper.hsvToRGB(0.2f, 1, 1), (int) opacity.getOpacity()));
+        RenderingUtil.drawGradient(xOff + 45.5f, yOff + 8, xOff + 47.5f, yOff + 13, Colors.getColorOpacity(MathHelper.hsvToRGB(0.2f, 1, 1), (int) opacity.getOpacity()), Colors.getColorOpacity(MathHelper.hsvToRGB(0.3f, 1, 1), (int) opacity.getOpacity()));
+        RenderingUtil.drawGradient(xOff + 45.5f, yOff + 13, xOff + 47.5f, yOff + 17, Colors.getColorOpacity(MathHelper.hsvToRGB(0.3f, 1, 1), (int) opacity.getOpacity()), Colors.getColorOpacity(MathHelper.hsvToRGB(0.4f, 1, 1), (int) opacity.getOpacity()));
+        RenderingUtil.drawGradient(xOff + 45.5f, yOff + 17, xOff + 47.5f, yOff + 22, Colors.getColorOpacity(MathHelper.hsvToRGB(0.4f, 1, 1), (int) opacity.getOpacity()), Colors.getColorOpacity(MathHelper.hsvToRGB(0.5f, 1, 1), (int) opacity.getOpacity()));
+        RenderingUtil.drawGradient(xOff + 45.5f, yOff + 22, xOff + 47.5f, yOff + 26, Colors.getColorOpacity(MathHelper.hsvToRGB(0.5f, 1, 1), (int) opacity.getOpacity()), Colors.getColorOpacity(MathHelper.hsvToRGB(0.6f, 1, 1), (int) opacity.getOpacity()));
+        RenderingUtil.drawGradient(xOff + 45.5f, yOff + 26, xOff + 47.5f, yOff + 30, Colors.getColorOpacity(MathHelper.hsvToRGB(0.6f, 1, 1), (int) opacity.getOpacity()), Colors.getColorOpacity(MathHelper.hsvToRGB(0.7f, 1, 1), (int) opacity.getOpacity()));
+        RenderingUtil.drawGradient(xOff + 45.5f, yOff + 30, xOff + 47.5f, yOff + 34, Colors.getColorOpacity(MathHelper.hsvToRGB(0.7f, 1, 1), (int) opacity.getOpacity()), Colors.getColorOpacity(MathHelper.hsvToRGB(0.8f, 1, 1), (int) opacity.getOpacity()));
+        RenderingUtil.drawGradient(xOff + 45.5f, yOff + 34, xOff + 47.5f, yOff + 42.5, Colors.getColorOpacity(MathHelper.hsvToRGB(0.8f, 1, 1), (int) opacity.getOpacity()), Colors.getColorOpacity(MathHelper.hsvToRGB(1f, 1, 1), (int) opacity.getOpacity()));
         //Hue Slider Selector
         RenderingUtil.rectangleBordered(xOff + 45, yOff + (42.5 * cp.hue) - 1.5f, xOff + 48, yOff + (42.5 * cp.hue) + 1.5f, 0.5f, Colors.getColor(0, (int) opacity.getOpacity()), Colors.getColor(cp.selectingHue ? 255 : 200, (int) opacity.getOpacity()));
         RenderingUtil.rectangleBordered(xOff + 50, yOff, xOff + 53, yOff + 43, 0.5f, Colors.getColor(cp.color.getRed(), cp.color.getGreen(), cp.color.getBlue(), (int) opacity.getOpacity()), Colors.getColor(32, (int) opacity.getOpacity()));
@@ -2258,7 +2280,15 @@ public class SkeetMenu extends UI {
         if (mouse == 0) {
             if (slider.dragging) {
                 final double percent = MathHelper.clamp_double(slider.dragX / 38, 0, 1);
-                final double value = MathUtils.getIncremental((percent * 100) * (slider.setting.getMax() - slider.setting.getMin()) / 100 + slider.setting.getMin(), slider.setting.getInc());
+
+                double value;
+                if (percent <= 0) {
+                    value = slider.setting.getMin();
+                } else if(percent >= 1) {
+                    value = slider.setting.getMax();
+                } else {
+                    value = MathUtils.getIncremental((percent * (slider.setting.getMax() - slider.setting.getMin())) + slider.setting.getMin(), slider.setting.getInc());
+                }
 
                 slider.setting.setValue(value);
             }
@@ -2287,7 +2317,14 @@ public class SkeetMenu extends UI {
             float yOff = panel.categoryButton.panel.dragY;
 
             final double percent = MathHelper.clamp_double(slider.dragX / 38, 0, 1);
-            final double value = MathUtils.getIncremental((percent * 100) * (slider.setting.getMax() - slider.setting.getMin()) / 100 + slider.setting.getMin(), slider.setting.getInc());
+            double value;
+            if (percent <= 0) {
+                value = slider.setting.getMin();
+            } else if(percent >= 1) {
+                value = slider.setting.getMax();
+            } else {
+                value = MathUtils.getIncremental((percent * (slider.setting.getMax() - slider.setting.getMin())) + slider.setting.getMin(), slider.setting.getInc());
+            }
 
             float sliderX = (float) (((((Number) slider.setting.getValue()).doubleValue() - slider.setting.getMin()) / (slider.setting.getMax() - slider.setting.getMin())) * 38);
             RenderingUtil.rectangle(slider.x + xOff - 0.3, slider.y + yOff - 0.3, slider.x + xOff + 38 + 0.3, slider.y + yOff + 2.5 + 0.3, Colors.getColor(10, (int) opacity.getOpacity()));
@@ -2333,7 +2370,7 @@ public class SkeetMenu extends UI {
             Client.fsmallbold.drawBorderedString(labelText, (slider.x + xOff + 42) - strWidth, (slider.y - 6 + yOff), Colors.getColor(220, (int) opacity.getOpacity()), Colors.getColor(0, (int) opacity.getOpacity()));
             GlStateManager.scale(1, 1, 1);
             GlStateManager.popMatrix();
-            Client.fss.drawStringWithShadow(xd, (slider.x + xOff), (slider.y - 6 + yOff), Colors.getColor(220, (int) opacity.getOpacity()));
+            Client.fss.drawStringWithShadow(xd, (slider.x + xOff), (slider.y - 6 + yOff), Colors.getColor(185, (int) opacity.getOpacity()));
 
             if (slider.dragging) {
                 float divide = Math.abs((y - (slider.y + yOff + 2))) / 4;
@@ -2414,7 +2451,7 @@ public class SkeetMenu extends UI {
             RenderingUtil.rectangleBordered(textBox.x + xOff, textBox.y + yOff, textBox.x + xOff + 84, textBox.y + yOff + 7.5F, 0.3, Colors.getColor(0, 0), textBox.isFocused ? Colors.getColor(130, (int) opacity.getOpacity()) : Colors.getColor(90, (int) opacity.getOpacity()));
         }
         String xd = textBox.setting.getName().charAt(0) + textBox.setting.getName().toLowerCase().substring(1);
-        Client.fss.drawStringWithShadow(xd, (textBox.x + xOff + 1), (textBox.y - 6 + yOff), Colors.getColor(220, (int) opacity.getOpacity()));
+        Client.fss.drawStringWithShadow(xd, (textBox.x + xOff + 1), (textBox.y - 6 + yOff), Colors.getColor(185, (int) opacity.getOpacity()));
 
         Depth.pre();
         Depth.mask();

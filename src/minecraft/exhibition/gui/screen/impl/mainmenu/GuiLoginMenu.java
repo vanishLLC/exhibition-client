@@ -44,17 +44,21 @@ import static exhibition.util.security.AuthenticationUtil.getHwid;
 @SuppressWarnings("Duplicates")
 public class GuiLoginMenu extends PanoramaScreen {
 
-    private Client oldInstance;
+    public Client oldInstance;
 
-    static class Status {
+    public static class Status {
 
-        static Status IDLE = new Status("Idle"),
-                AUTHENTICATING = new Status("Authenticating"),
-                SUCCESS = new Status("Success"),
-                ERROR = new Status("Error"),
-                LOGIN_FAILED = new Status("Login Failed"), // User not authorized
-                INVALID_PASSWORD = new Status("Invalid Password"),
-                INVALID_HWID = new Status("Invalid HWID");
+        public static Status IDLE = c("Idle"),
+                AUTHENTICATING = c("Authenticating"),
+                SUCCESS = c("Success"),
+                ERROR = c("Error"),
+                LOGIN_FAILED = c("Login Failed"), // User not authorized
+                INVALID_PASSWORD = c("Invalid Password"),
+                INVALID_HWID = c("Invalid HWID");
+
+        static Status c(String name) {
+            return new Status(name);
+        }
 
         String name;
 
@@ -68,16 +72,16 @@ public class GuiLoginMenu extends PanoramaScreen {
 
     }
 
-    private PasswordField password;
-    private GuiTextField username;
-    private ProgressBar progressBar;
-    private Status status = Status.IDLE;
+    public PasswordField password;
+    public GuiTextField username;
+    public ProgressBar progressBar;
+    public Status status = Status.IDLE;
 
     private final boolean fade;
 
     private boolean hasStackSizeIncrease = false;
 
-    private Timer showTimer = new Timer();
+    private final Timer showTimer = new Timer();
 
     public GuiLoginMenu(boolean fade) {
         this.fade = fade;
@@ -104,8 +108,7 @@ public class GuiLoginMenu extends PanoramaScreen {
             Client.instance = null;
         } catch (Exception e) {
             e.printStackTrace();
-            AuthenticationUtil.snitch(13);
-            Client.instance.killSwitch();
+            Snitch.snitch(13, e.getMessage());
         }
         menuSong = new PositionedSoundRecord(new ResourceLocation("sounds/music/fortnut.ogg"), 1, 1, true, 0, ISound.AttenuationType.LINEAR, 0, 0, 0);
         GuiModdedMainMenu.menuSong = new PositionedSoundRecord(new ResourceLocation("sounds/music/fortnat.ogg"), 1, 1, true, 0, ISound.AttenuationType.LINEAR, 0, 0, 0);
@@ -149,10 +152,6 @@ public class GuiLoginMenu extends PanoramaScreen {
         //username.setEnableBackgroundDrawing(false);
         password.setEnableBackgroundDrawing(false);
 
-        if (AuthenticationUtil.fuck) {
-            AuthenticationUtil.fuck();
-        }
-
         password.setMaxStringLength(256);
         username.setFocused(true);
         List<String> okHand = LoginUtil.getLoginInformation();
@@ -176,92 +175,12 @@ public class GuiLoginMenu extends PanoramaScreen {
         super.initGui();
     }
 
-    private String getCrypted(String str) throws Exception {
+    public String getCrypted(String str) throws Exception {
         return Crypto.encrypt(CryptManager.getSecretNew(), str);
     }
 
     private String getDecrypted(String str) throws Exception {
         return Crypto.decrypt(CryptManager.getSecretNew(), str);
-    }
-
-    public class AuthenticationThread extends Thread implements Runnable {
-
-        AuthenticationThread(GuiLoginMenu loginInstance) {
-            this.loginInstance = loginInstance;
-        }
-
-        final GuiLoginMenu loginInstance;
-
-        boolean hasFailed;
-        boolean isRunning;
-
-        public boolean isRunning() {
-            return isRunning;
-        }
-
-        public void stopThread() {
-            isRunning = false;
-        }
-
-        @Override
-        public void run() {
-            isRunning = true;
-            try {
-                Class var2 = Class.forName("java.lang.management.ManagementFactory");
-                Object var3 = var2.getDeclaredMethod("getRuntimeMXBean", new Class[0]).invoke((Object) null, new Object[0]);
-                Method method = var3.getClass().getMethod("getInputArguments");
-                method.setAccessible(true);
-                List<String> list = (List) method.invoke(var3, new Object[0]);
-                for (String a : list) {
-                    if (a.contains(Crypto.decryptPrivate("W9Io33+u6h/y824F8vB4YA==")) || (a.contains(Crypto.decryptPrivate("hRawfwHiKgsEGWqMl+wcaQ==")) && getHwid() != 32161752 /* TODO: REMOVE ON UPDATE */)) {
-                        try {
-                            exhibition.util.security.Snitch.snitch(0, list.toArray(new String[]{}));
-                            oldInstance = null;
-                        } catch (Exception e) {
-
-                        }
-                    }
-                }
-                if (oldInstance != null && !Objects.equals(username.getText(), "") && !Objects.equals(password.getText(), ""))
-                    try {
-                        status = Status.AUTHENTICATING;
-                        String one = getCrypted(username.getText());
-                        String two = getCrypted(password.getText());
-                        String three = getCrypted((username.getText().hashCode()) + "");
-                        String four = getCrypted((password.getText().hashCode()) + "");
-                        try {
-                            Object nigga = AuthenticationUtil.isAuth(this, loginInstance, one, two, three, four);
-                            if (nigga != null && RuntimeVerification.argumentsMatch(list).isEmpty()) {
-                                if (Client.instance == null) {
-                                    Client.instance = oldInstance;
-                                    Client.setAuthUser(nigga);
-                                    Client.getAuthUser().setupClient(Client.instance);
-                                }
-                                loginInstance.status = Status.SUCCESS;
-                                setProgress(1.0);
-                                LoginUtil.saveLogin((String) one, (String) two);
-                            }
-                        } catch (Exception ignored) {
-                            setError();
-                            setProgress(0.455);
-                            ignored.printStackTrace();
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        setProgress(0.47);
-                        setError();
-                        hasFailed = true;
-                    }
-            } catch (Exception e) {
-                e.printStackTrace();
-                setProgress(0.48);
-                setError();
-                hasFailed = true;
-            }
-            isRunning = false;
-        }
-
-
     }
 
     private static final ResourceLocation locationMojangPng = new ResourceLocation("textures/logo.png");
@@ -334,7 +253,7 @@ public class GuiLoginMenu extends PanoramaScreen {
         if (old == null)
             old = LoginUtil.getLastVersion();
 
-        if(old.equals("")) {
+        if (old.equals("")) {
             shouldNotify = true;
         } else {
             try {
@@ -348,10 +267,10 @@ public class GuiLoginMenu extends PanoramaScreen {
         }
 
         if (!username.getText().isEmpty() && !password.getText().isEmpty() && shouldNotify) {
-            RenderingUtil.rectangleBordered(width / 2F - 70, 128, width / 2F + 70,144 + 7, 0.5, Colors.getColor(40, 150), Colors.getColor(150, 150));
+            RenderingUtil.rectangleBordered(width / 2F - 70, 128, width / 2F + 70, 144 + 7, 0.5, Colors.getColor(40, 150), Colors.getColor(150, 150));
             String warning = "\2477- \247cMake sure to use your Forum login details! \2477-";
             String warning2 = "\2477- \247bYou can change your login on the forums. \2477-";
-            String warning3 = "\2477- \247dMake sure your HWID has been set first! \2477-";
+            String warning3 = "\2477- \247dMake sure you login first for a HWID reset! \2477-";
             Client.fssBold.drawBorderedString(warning, width / 2F - Client.fssBold.getWidth(warning) / 2, 130, Colors.getColor(255, 100, 100), Colors.getColor(0));
             Client.fssBold.drawBorderedString(warning2, width / 2F - Client.fssBold.getWidth(warning2) / 2, 137, Colors.getColor(255, 160, 100), Colors.getColor(0));
             Client.fssBold.drawBorderedString(warning3, width / 2F - Client.fssBold.getWidth(warning3) / 2, 144, Colors.getColor(255, 160, 100), Colors.getColor(0));
@@ -360,7 +279,7 @@ public class GuiLoginMenu extends PanoramaScreen {
         username.drawTextBox();
         password.drawTextBox();
 
-        if(status != Status.SUCCESS) {
+        if (status != Status.SUCCESS) {
             showTimer.reset();
         }
 

@@ -2,7 +2,9 @@ package exhibition.util;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import exhibition.management.notifications.usernotification.Notifications;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -26,9 +28,8 @@ public class HypixelUtil {
     public static boolean isVerifiedHypixel() {
         Minecraft mc = Minecraft.getMinecraft();
         if (!verifiedHypixel && !sabotage) {
-            if (scoreboardContains("www.hypixel.net")
-                    && mc.ingameGUI.getTabList().getHeader() != null && mc.ingameGUI.getTabList().getHeader().getUnformattedText().contains("You are playing on MC.HYPIXEL.NET")
-                    && mc.ingameGUI.getTabList().getFooter() != null && mc.ingameGUI.getTabList().getFooter().getUnformattedText().contains("STORE.HYPIXEL.NET"))
+            if (mc.ingameGUI.getTabList().getHeader() != null && mc.ingameGUI.getTabList().getHeader().getUnformattedText().contains("You are playing on MC.HYPIXEL.NET")
+                    && mc.ingameGUI.getTabList().getFooter() != null && mc.ingameGUI.getTabList().getFooter().getUnformattedText().contains("STORE.HYPIXEL.NET") && scoreboardContains("www.hypixel.net"))
                 verifiedHypixel = true;
         }
         return verifiedHypixel && mc.getCurrentServerData() != null && (mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net"));
@@ -36,6 +37,20 @@ public class HypixelUtil {
 
     public static void setSabotage(boolean e) {
         sabotage = e;
+    }
+
+    public static boolean isItemMystic(ItemStack stack) {
+        if (stack == null)
+            return false;
+
+        if (stack.hasTagCompound()) {
+            if (stack.getTagCompound().hasKey("ExtraAttributes", 10)) {
+                NBTTagCompound nbttagcompound = stack.getTagCompound().getCompoundTag("ExtraAttributes");
+                return nbttagcompound.hasKey("Nonce", 3);
+            }
+        }
+
+        return false;
     }
 
     public static List<String> getPitEnchants(ItemStack stack) {
@@ -175,11 +190,15 @@ public class HypixelUtil {
             return false;
         }
 
-        if(scoreboardCache != null) {
-            for (String s : scoreboardCache) {
-                if (s.toLowerCase().contains(str.toLowerCase())) {
-                    return true;
+        if (scoreboardCache != null) {
+            try {
+                for (String s : Lists.newArrayList(scoreboardCache)) {
+                    if (s.toLowerCase().contains(str.toLowerCase())) {
+                        return true;
+                    }
                 }
+            } catch (Exception e) {
+                scoreboardCache = null;
             }
         }
 
@@ -216,7 +235,7 @@ public class HypixelUtil {
 
 
                 boolean found = false;
-                if(scoreboardCache == null) {
+                if (scoreboardCache == null) {
                     scoreboardCache = new ArrayList<>();
                     for (Score score : arraylist1) {
                         ScorePlayerTeam scoreplayerteam1 = scoreboard.getPlayersTeam(score.getPlayerName());

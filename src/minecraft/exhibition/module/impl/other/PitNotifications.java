@@ -99,16 +99,16 @@ public class PitNotifications extends Module {
                             } catch (Exception e) {
 
                             }
+
+                            List<String> enchantList = HypixelUtil.getPitEnchants(itemStack);
+
+                            String enchant = enchantList.size() == 0 ? "" : Arrays.toString(enchantList.toArray());
+
+                            Notifications.getManager().post(itemStack.getDisplayName() + " \247rhas dropped! (" + (int) mc.thePlayer.getDistanceToEntity(updatedItem) + "m)", enchant + (nonce > 1000 ? " (" + nonce + ")" : ""), 5000L, Notifications.Type.NOTIFY);
+                            System.out.println(enchant);
+
+                            trackedItems.add(updatedItem);
                         }
-
-                        List<String> enchantList = HypixelUtil.getPitEnchants(itemStack);
-
-                        String enchant = enchantList.size() == 0 ? "" : Arrays.toString(enchantList.toArray());
-
-                        Notifications.getManager().post(itemStack.getDisplayName() + " \247rhas dropped! (" + (int) mc.thePlayer.getDistanceToEntity(updatedItem) + "m)", enchant + (nonce > 1000 ? " (" + nonce + ")" : ""), 5000L, Notifications.Type.NOTIFY);
-                        System.out.println(enchant);
-
-                        trackedItems.add(updatedItem);
                     }
                     updatedItems.remove(updatedItem);
                 } else {

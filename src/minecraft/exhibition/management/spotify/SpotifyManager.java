@@ -62,6 +62,12 @@ public class SpotifyManager {
         new Thread("Spotify Auth Thread") {
             @Override
             public void run() {
+                Notifications.getManager().post("Spotify Enabled", "Opening Spotify Auth page in {s}s!", 5_000, Notifications.Type.SPOTIFY);
+                try {
+                    Thread.sleep(5000);
+                } catch (Exception e) {
+
+                }
                 authorizationCodeUri_Sync();
                 while (!authorizationCode_Sync() && Spotify.spotifyManager != null && Client.getModuleManager().isEnabled(Spotify.class)) {
                     try {

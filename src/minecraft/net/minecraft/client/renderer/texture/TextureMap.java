@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
 
+import optifine.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -31,10 +32,6 @@ import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.ResourceLocation;
-import optifine.Config;
-import optifine.ConnectedTextures;
-import optifine.Reflector;
-import optifine.TextureUtils;
 import shadersmod.client.ShadersTex;
 
 public class TextureMap extends AbstractTexture implements ITickableTextureObject
@@ -149,6 +146,7 @@ public class TextureMap extends AbstractTexture implements ITickableTextureObjec
             }
         }
 
+        CustomItems.updateIcons(this);
         ConnectedTextures.updateIcons(this);
         int l1 = Minecraft.getGLMaximumTextureSize();
         Stitcher stitcher = new Stitcher(l1, l1, true, 0, this.mipmapLevels);

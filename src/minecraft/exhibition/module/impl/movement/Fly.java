@@ -140,8 +140,8 @@ public class Fly extends Module {
             }
         }
 
-        Bypass bypass = Client.getModuleManager().get(Bypass.class);
-        if (!bypass.isEnabled() && (boolean) settings.get(BYPASS).getValue()) {
+        //Bypass bypass = Client.getModuleManager().get(Bypass.class);
+        if ((boolean) settings.get(BYPASS).getValue()) {
             toggle();
             Notifications.getManager().post("Fly Disabled", "This feature requires Bypass.", 1000, Notifications.Type.NOTIFY);
             return;

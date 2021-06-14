@@ -22,7 +22,6 @@ import exhibition.module.impl.movement.LongJump;
 import exhibition.module.impl.movement.Speed;
 import exhibition.util.*;
 import exhibition.util.Timer;
-import exhibition.util.misc.ChatUtil;
 import exhibition.util.render.Colors;
 import exhibition.util.render.Depth;
 import net.minecraft.block.Block;
@@ -74,12 +73,12 @@ public class Scaffold extends Module {
     private String SWING = "SWING";
     private Setting delay = new Setting<>("DELAY", 2, "Block placement delay in ticks.", 1, 1, 10);
 
+    public Setting<Number> timer_boost = new Setting<>("TIMER-BOOST", 0, "Speeds up the game to move \"faster.\"", 0.1, 0, 10);
     private Setting<Boolean> fastTower = new Setting<>("FAST-TOWER", false, "Gives you a timer boost when towering.");
 
     private Vector2f lastAngles = new Vector2f(-1337, -1337);
     private float targetYaw;
 
-    private int lastSlot = -1;
     private int lastHeldSlot = -1;
 
     public Scaffold(ModuleData data) {
@@ -88,8 +87,11 @@ public class Scaffold extends Module {
         settings.put(MODE, new Setting<>(MODE, new Options("Mode", "Normal", "Normal", "Watchdog", "Old"), "Scaffold method."));
         settings.put(SWING, new Setting<>(SWING, true, "Place blocks without swinging client side."));
         settings.put(delay.getName(), delay);
+        addSetting(timer_boost);
         addSetting(fastTower);
     }
+
+    private boolean modifiedTimer = false;
 
     @Override
     public void onEnable() {
@@ -113,7 +115,7 @@ public class Scaffold extends Module {
             lastHeldSlot = mc.thePlayer.inventory.currentItem;
         }
 
-        if (fastTower.getValue()) {
+        if (fastTower.getValue() || modifiedTimer) {
             mc.timer.timerSpeed = 1F;
         }
 
@@ -141,7 +143,7 @@ public class Scaffold extends Module {
             }
 
         }
-        if (fastTower.getValue()) {
+        if (fastTower.getValue() || modifiedTimer) {
             mc.timer.timerSpeed = 1F;
         }
     }
@@ -397,8 +399,6 @@ public class Scaffold extends Module {
 
                 double z = mc.thePlayer.posZ;
 
-                boolean stepDown = mc.gameSettings.keyBindSneak.getIsKeyPressed() && mc.thePlayer.onGround;
-
                 double height = (mc.thePlayer.posY - (int) mc.thePlayer.posY);
 
                 double y = mc.thePlayer.posY - (mc.gameSettings.keyBindSneak.getIsKeyPressed() && mc.thePlayer.onGround ? 1.2 : (Client.getModuleManager().isEnabled(Speed.class) && PlayerUtil.isMoving()) ?
@@ -442,10 +442,15 @@ public class Scaffold extends Module {
                 BlockPos pos = new BlockPos(x, y, z);
 
                 if (em.isPre()) {
-//                    if (shouldReSprint && mc.thePlayer.isSprinting()) {
-//                        NetUtil.sendPacketNoEvents(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.START_SPRINTING));
-//                        shouldReSprint = false;
-//                    }
+                    float boost = timer_boost.getValue().floatValue();
+                    if (boost > 0) {
+                        modifiedTimer = true;
+                        float add = boost + ((boost / 10F) * (float) Math.random());
+                        mc.timer.timerSpeed = 1 + add;
+                    } else if (modifiedTimer) {
+                        modifiedTimer = false;
+                        mc.timer.timerSpeed = 1;
+                    }
 
                     Vec3 vec = getBlockLook(pos);
 

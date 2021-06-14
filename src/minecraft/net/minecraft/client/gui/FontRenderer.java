@@ -614,36 +614,28 @@ public class FontRenderer implements IResourceManagerReloadListener {
         if (text == null) {
             return 0;
         } else {
-            float f = 0.0F;
-            boolean flag = false;
+            float stringWidth = 0.0F;
+            boolean isBold = false;
 
             for (int i = 0; i < text.length(); ++i) {
-                char c0 = text.charAt(i);
-                float f1 = this.getCharWidthFloat(c0);
+                char charAt = text.charAt(i);
+                float charWidth = this.getCharWidthFloat(charAt);
 
-                if (f1 < 0.0F && i < text.length() - 1) {
+                if (charWidth < 0.0F && i < text.length() - 1) {
                     ++i;
-                    c0 = text.charAt(i);
-
-                    if (c0 != 108 && c0 != 76) {
-                        if (c0 == 114 || c0 == 82) {
-                            flag = false;
-                        }
-                    } else {
-                        flag = true;
-                    }
-
-                    f1 = 0.0F;
+                    charAt = text.charAt(i);
+                    isBold = charAt == 'l' || charAt == 'L';
+                    charWidth = 0.0F;
                 }
 
-                f += f1;
+                stringWidth += charWidth;
 
-                if (flag && f1 > 0.0F) {
-                    f += this.unicodeFlag ? 1.0F : this.offsetBold;
+                if (isBold && charWidth > 0.0F) {
+                    stringWidth += this.unicodeFlag ? 1.0F : this.offsetBold;
                 }
             }
 
-            return (int) f;
+            return (int) stringWidth;
         }
     }
 

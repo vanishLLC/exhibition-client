@@ -39,6 +39,7 @@ import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.passive.EntitySquid;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemSword;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.*;
@@ -53,37 +54,48 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Killaura extends Module {
-    private String AUTOBLOCK = /*AUTOBLOCK*/decodeByteArray(new byte[]{65, 85, 84, 79, 66, 76, 79, 67, 75});
-    private String RANGE = /*RANGE*/decodeByteArray(new byte[]{82, 65, 78, 71, 69});
-    private String ANGLESTEP = /*ANGLESTEP*/decodeByteArray(new byte[]{65, 78, 71, 76, 69, 83, 84, 69, 80});
-    private String TICK = /*EXISTED*/decodeByteArray(new byte[]{69, 88, 73, 83, 84, 69, 68});
-    private String MAX = /*MXAXAPS*/decodeByteArray(new byte[]{77, 88, 65, 88, 65, 80, 83});
-    private String MIN = /*MINAPS*/decodeByteArray(new byte[]{77, 73, 78, 65, 80, 83});
-    private String SWITCH = /*SWITCH*/decodeByteArray(new byte[]{83, 87, 73, 84, 67, 72});
-    private String DEATH = /*DEATH*/decodeByteArray(new byte[]{68, 69, 65, 84, 72});
-    private String TARGETMODE = /*PRIORITY*/decodeByteArray(new byte[]{80, 82, 73, 79, 82, 73, 84, 89});
-    private String FOVCHECK = /*FOV*/decodeByteArray(new byte[]{70, 79, 86});
-    private String RAYTRACE = /*RAYTRACE*/decodeByteArray(new byte[]{82, 65, 89, 84, 82, 65, 67, 69});
-    private String TARGETING = /*TARGETING*/decodeByteArray(new byte[]{84, 65, 82, 71, 69, 84, 73, 78, 71});
-    private Timer delay = new Timer();
-    private Timer fakeSwingTimer = new Timer();
-    private Timer deathTimer = new Timer();
-    private Timer switchTimer = new Timer();
-    private Timer blockTimer = new Timer();
-    private Timer angleTimer = new Timer();
 
+    // Timers
+    private final Timer delay = new Timer();
+    private final Timer fakeSwingTimer = new Timer();
+    private final Timer deathTimer = new Timer();
+    private final Timer switchTimer = new Timer();
+    private final Timer blockTimer = new Timer();
+    private final Timer angleTimer = new Timer();
+
+    // Numbers
+    private final Setting<Number> range = new Setting<>("RANGE", 4.5, "Range for killaura.", 0.1, 1, 7);
+    private final Setting<Number> blockRange = new Setting<>("BLOCK-RANGE", 4.5, "Range for killaura.", 0.1, 1, 10);
+    private final Setting<Number> fov = new Setting<>("FOV", 180, "Targets must be in FOV.", 1, 1, 180);
+    private final Setting<Number> angleStep = new Setting<>("ANGLESTEP", 180, "The amount of degrees KillAura can step per tick. -1 = Your real yaw", 5, -1, 180);
+    private final Setting<Number> existed = new Setting<>("EXISTED", 50, "Existed ticks before attacking.", 5, 1, 120);
+    private final Setting<Number> minAPS = new Setting<>("MINAPS", 5, "Minimum APS.", 1, 1, 20);
+    private final Setting<Number> maxAPS = new Setting<>("MXAXAPS", 15, "Maximum APS.", 1, 1, 20);
+    private final Setting<Number> predictionTicks = new Setting<>("PTICKS", 1, "The amount of ticks to predict. 1 tick = 50ms", 1, 1, 10);
+    private final Setting<Number> predictionScale = new Setting<>("PSCALE", 1.0, "The scale of how much prediction is applied.", 0.05, 0, 2);
+    private final Setting<Number> maxTargets = new Setting<>("SWITCH-SIZE", 4, "The maximum amount of targets to switch through.", 1, 1, 10);
+    private final Setting<Number> switchDelay = new Setting<>("SWITCH", 300, "Switch speed delay.", 50, 50, 1000);
+
+    // Options/MultiBool
+    private final Options priority = new Options("Priority", "Angle", "Angle", "Range", "FOV", "Armor", "Health", "Bounty", "Health Vamp", "Bounty Vamp");
+    private final Options attackMode = new Options("Attack Mode", "Smart", "Precise", "Smart", "Always");
+
+    // Booleans
+    private final Setting<Boolean> exclusiveMode = new Setting<>("PRIORITY-ONLY", false, "Only targets a priority targets.");
+    private final Setting<Boolean> autoBlock = new Setting<>("AUTOBLOCK", true, "Automatically blocks for you.");
+    private final Setting<Boolean> autoShovel = new Setting<>("AUTOSHOVEL", false, "Swaps to a shovel silently. Intended for PIT.");
     private final Setting<Boolean> pitSpawn = new Setting<>("PIT-SPAWN", true, "Disables Killaura when in PIT spawn.");
     private final Setting<Boolean> antiLag = new Setting<>("ANTI-LAG", true, "Prevents the Killaura from flagging you when lagging.");
     private final Setting<Boolean> reduce = new Setting<>("REDUCE", false, "Reduces your rotations to prevent flags.");
-    private Setting<Boolean> antiCritFunky = new Setting<>("ANTI-CF", false, "Attacks players without proccing Critically Funky.");
-    private Setting<Boolean> prediction = new Setting<>("PREDICTION", true, "Predicts where the player will be on server side.");
-    private Setting<Number> predictionTicks = new Setting<>("PTICKS", 1, "The amount of ticks to predict. 1 tick = 50ms", 1, 1, 10);
-    private Setting<Number> predictionScale = new Setting<>("PSCALE", 1.0, "The scale of how much prediction is applied.", 0.05, 0, 2);
-    private Setting<Number> maxTargets = new Setting<>("SWITCH-SIZE", 4, "The maximum amount of targets to switch through.", 1, 1, 10);
-    private Setting noswing = new Setting<>(/*NOSWING*/decodeByteArray(new byte[]{78, 79, 83, 87, 73, 78, 71}), false, /*Blocks swinging server sided.*/decodeByteArray(new byte[]{66, 108, 111, 99, 107, 115, 32, 115, 119, 105, 110, 103, 105, 110, 103, 32, 115, 101, 114, 118, 101, 114, 32, 115, 105, 100, 101, 100, 46}));
-    private Setting indicator = new Setting<>("INDICATOR", false, "Renders an indicator on target.");
+    private final Setting<Boolean> antiCritFunky = new Setting<>("ANTI-CF", false, "Attacks players without proccing Critically Funky.");
+    private final Setting<Boolean> prediction = new Setting<>("PREDICTION", true, "Predicts where the player will be on server side.");
+    private final Setting<Boolean> noswing = new Setting<>("NOSWING", false, "Blocks swinging server sided.");
+    private final Setting<Boolean> indicator = new Setting<>("INDICATOR", false, "Renders an indicator on target.");
+    private final Setting<Boolean> deathCheck = new Setting<>("DEATH", true, "Disables Killaura on death.");
+    private final Setting<Boolean> raytrace = new Setting<>("RAYTRACE", true, "Visible check for target.");
 
-    private Options attackMode = new Options("Attack Mode", "Smart", "Precise", "Smart", "Always");
+    private final Setting<Boolean> particles = new Setting<>("PARTICLES", false, "Show enchant/crit particles when attacking. (Client Side)");
+    private final Setting<Boolean> stepCompat = new Setting<>("STEPCOMPAT", true, "Adds extra compatibility when stepping up blocks with Criticals.");
 
     private final HashMap<EntityLivingBase, EntityDelta> deltaHashMap = new HashMap<>();
 
@@ -94,9 +106,13 @@ public class Killaura extends Module {
     public static boolean blockJump;
     public static boolean wantedToJump;
     public Vector2f lastAngles = new Vector2f(0, 0);
-    private Setting blockRange = new Setting<>(/*BLOCK-RANGE*/decodeByteArray(new byte[]{66, 76, 79, 67, 75, 45, 82, 65, 78, 71, 69}), 4.5, /*Range for killaura.*/decodeByteArray(new byte[]{82, 97, 110, 103, 101, 32, 102, 111, 114, 32, 107, 105, 108, 108, 97, 117, 114, 97, 46}), 0.1, 1, 10);
+    public int swapped = -1;
 
-    private final UUID[] whitelistedUUIDs = {UUID.fromString("3ea40f14-cbcf-4191-ba3b-c126ca334714"), UUID.fromString("ff33c84a-03de-4919-9160-b461f10f4657"), UUID.fromString("6bf87338-c054-40c4-bce3-c64a4bf38b3a")};
+    private final UUID[] whitelistedUUIDs = {
+            UUID.fromString("3ea40f14-cbcf-4191-ba3b-c126ca334714"), // WatchdogOff
+            UUID.fromString("ff33c84a-03de-4919-9160-b461f10f4657"), // Fouo
+            UUID.fromString("fb6d1e25-9c98-4865-ac77-6a307493abfa"), // PoopSock9
+            /*UUID.fromString("")*/};
 
     private static String decodeByteArray(byte[] bytes) {
         String str = "";
@@ -108,68 +124,39 @@ public class Killaura extends Module {
 
     public Killaura(ModuleData data) {
         super(data);
-        settings.put(FOVCHECK, new Setting<>(FOVCHECK, 180, /*Targets must be in FOV.*/decodeByteArray(new byte[]{84, 97, 114, 103, 101, 116, 115, 32, 109, 117, 115, 116, 32, 98, 101, 32, 105, 110, 32, 70, 79, 86, 46}), 1, 1, 180));
-        settings.put(TICK, new Setting<>(TICK, 50, /*Existed ticks before attacking.*/decodeByteArray(new byte[]{69, 120, 105, 115, 116, 101, 100, 32, 116, 105, 99, 107, 115, 32, 98, 101, 102, 111, 114, 101, 32, 97, 116, 116, 97, 99, 107, 105, 110, 103, 46}), 5, 1, 120));
-        settings.put(AUTOBLOCK, new Setting<>(AUTOBLOCK, true, /*Automatically blocks for you.*/decodeByteArray(new byte[]{65, 117, 116, 111, 109, 97, 116, 105, 99, 97, 108, 108, 121, 32, 98, 108, 111, 99, 107, 115, 32, 102, 111, 114, 32, 121, 111, 117, 46})));
-        settings.put(RANGE, new Setting<>(RANGE, 4.5, /*Range for killaura.*/decodeByteArray(new byte[]{82, 97, 110, 103, 101, 32, 102, 111, 114, 32, 107, 105, 108, 108, 97, 117, 114, 97, 46}), 0.1, 1, 7));
-        settings.put(/*BLOCK-RANGE*/decodeByteArray(new byte[]{66, 76, 79, 67, 75, 45, 82, 65, 78, 71, 69}), blockRange);
+        addSettings(range, fov, existed, autoBlock, autoShovel, range, blockRange, minAPS, maxAPS,
+                angleStep, deathCheck, raytrace, particles, stepCompat, switchDelay, noswing,
+                indicator, reduce, prediction, predictionTicks, predictionScale, maxTargets,
+                antiLag, pitSpawn, antiCritFunky);
 
-        settings.put(MIN, new Setting<>(MIN, 5, /*Minimum APS.*/decodeByteArray(new byte[]{77, 105, 110, 105, 109, 117, 109, 32, 65, 80, 83, 46}), 1, 1, 20));
-        settings.put(MAX, new Setting<>(MAX, 15, /*Maximum APS.*/decodeByteArray(new byte[]{77, 97, 120, 105, 109, 117, 109, 32, 65, 80, 83, 46}), 1, 1, 20));
-        settings.put(ANGLESTEP, new Setting<>(ANGLESTEP, 180, "The amount of degrees KillAura can step per tick. -1 = Your real yaw", 5, -1, 180));
-        settings.put(DEATH, new Setting<>(DEATH, true, /*Disables killaura when you die.*/decodeByteArray(new byte[]{68, 105, 115, 97, 98, 108, 101, 115, 32, 107, 105, 108, 108, 97, 117, 114, 97, 32, 119, 104, 101, 110, 32, 121, 111, 117, 32, 100, 105, 101, 46})));
-        settings.put(RAYTRACE, new Setting<>(RAYTRACE, true, /*Visible check for target.*/decodeByteArray(new byte[]{86, 105, 115, 105, 98, 108, 101, 32, 99, 104, 101, 99, 107, 32, 102, 111, 114, 32, 116, 97, 114, 103, 101, 116, 46})));
-        settings.put(TARGETMODE, new Setting<>(TARGETMODE, new Options(/*Priority*/decodeByteArray(new byte[]{80, 114, 105, 111, 114, 105, 116, 121}),
-                /*Angle*/decodeByteArray(new byte[]{65, 110, 103, 108, 101}),
-                /*Angle*/decodeByteArray(new byte[]{65, 110, 103, 108, 101}),
-                /*Range*/decodeByteArray(new byte[]{82, 97, 110, 103, 101}),
-                /*FOV*/decodeByteArray(new byte[]{70, 79, 86}),
-                /*Armor*/decodeByteArray(new byte[]{65, 114, 109, 111, 114}),
-                /*Health*/decodeByteArray(new byte[]{72, 101, 97, 108, 116, 104}),
-                /*Bounty*/decodeByteArray(new byte[]{66, 111, 117, 110, 116, 121}),
-                "Health Vamp",
-                "Bounty Vamp"),
-                /*Target mode priority.*/decodeByteArray(new byte[]{84, 97, 114, 103, 101, 116, 32, 109, 111, 100, 101, 32, 112, 114, 105, 111, 114, 105, 116, 121, 46})));
-        settings.put(/*PARTICLES*/decodeByteArray(new byte[]{80, 65, 82, 84, 73, 67, 76, 69, 83}), new Setting<>(/*PARTICLES*/decodeByteArray(new byte[]{80, 65, 82, 84, 73, 67, 76, 69, 83}), false, /*Render enchant particles.*/decodeByteArray(new byte[]{82, 101, 110, 100, 101, 114, 32, 101, 110, 99, 104, 97, 110, 116, 32, 112, 97, 114, 116, 105, 99, 108, 101, 115, 46})));
-        settings.put(/*STEPCOMPAT*/decodeByteArray(new byte[]{83, 84, 69, 80, 67, 79, 77, 80, 65, 84}), new Setting<>(/*STEPCOMPAT*/decodeByteArray(new byte[]{83, 84, 69, 80, 67, 79, 77, 80, 65, 84}), true, /*Adds extra compatability when stepping up blocks with Criticals.*/decodeByteArray(new byte[]{65, 100, 100, 115, 32, 101, 120, 116, 114, 97, 32, 99, 111, 109, 112, 97, 116, 97, 98, 105, 108, 105, 116, 121, 32, 119, 104, 101, 110, 32, 115, 116, 101, 112, 112, 105, 110, 103, 32, 117, 112, 32, 98, 108, 111, 99, 107, 115, 32, 119, 105, 116, 104, 32, 67, 114, 105, 116, 105, 99, 97, 108, 115, 46})));
+        Setting[] filters = new Setting[]{
+                new Setting<>("PLAYERS", true),
+                new Setting<>("MOBS", false),
+                new Setting<>("PASSIVE", false),
+                new Setting<>("VILLAGERS", false),
+                new Setting<>("GOLEMS", false),
+                new Setting<>("INVISIBLES", false),
+                new Setting<>("TEAMS", false),
+                new Setting<>("ARMOR-ONLY", false),
+                new Setting<>("FRIENDS", false)};
+        settings.put("TARGETING", new Setting<>("TARGETING", new MultiBool("Target Filter", filters), "Filters certain entities/properties when acquiring targets."));
 
-        settings.put(SWITCH, new Setting<>(SWITCH, 300, /*Switch speed delay.*/decodeByteArray(new byte[]{83, 119, 105, 116, 99, 104, 32, 115, 112, 101, 101, 100, 32, 100, 101, 108, 97, 121, 46}), 50, 50, 1000));
-        Setting[] ents = new Setting[]{
-                new Setting<>(/*PLAYERS*/decodeByteArray(new byte[]{80, 76, 65, 89, 69, 82, 83}), true, /*Attack players.*/decodeByteArray(new byte[]{65, 116, 116, 97, 99, 107, 32, 112, 108, 97, 121, 101, 114, 115, 46})),
-                new Setting<>(/*MOBS*/decodeByteArray(new byte[]{77, 79, 66, 83}), false, /*Attack mobs.*/decodeByteArray(new byte[]{65, 116, 116, 97, 99, 107, 32, 109, 111, 98, 115, 46})),
-                new Setting<>(/*PASSIVE*/decodeByteArray(new byte[]{80, 65, 83, 83, 73, 86, 69}), false, /*Attack passive.*/decodeByteArray(new byte[]{65, 116, 116, 97, 99, 107, 32, 112, 97, 115, 115, 105, 118, 101, 46})),
-                new Setting<>(/*VILLAGERS*/decodeByteArray(new byte[]{86, 73, 76, 76, 65, 71, 69, 82, 83}), false, /*Attack villagers.*/decodeByteArray(new byte[]{65, 116, 116, 97, 99, 107, 32, 118, 105, 108, 108, 97, 103, 101, 114, 115, 46})),
-                new Setting<>(/*GOLEMS*/decodeByteArray(new byte[]{71, 79, 76, 69, 77, 83}), false, /*Attack villagers.*/""),
-                new Setting<>(/*INVISIBLES*/decodeByteArray(new byte[]{73, 78, 86, 73, 83, 73, 66, 76, 69, 83}), false, /*Attack invisible.*/decodeByteArray(new byte[]{65, 116, 116, 97, 99, 107, 32, 105, 110, 118, 105, 115, 105, 98, 108, 101, 46})),
-                new Setting<>(/*TEAMS*/decodeByteArray(new byte[]{84, 69, 65, 77, 83}), false, /*Check if player is not on your team.*/decodeByteArray(new byte[]{67, 104, 101, 99, 107, 32, 105, 102, 32, 112, 108, 97, 121, 101, 114, 32, 105, 115, 32, 110, 111, 116, 32, 111, 110, 32, 121, 111, 117, 114, 32, 116, 101, 97, 109, 46})),
-                new Setting<>(/*ARMOR*/decodeByteArray(new byte[]{65, 82, 77, 79, 82}), true, /*Check if player has armor equipped.*/decodeByteArray(new byte[]{67, 104, 101, 99, 107, 32, 105, 102, 32, 112, 108, 97, 121, 101, 114, 32, 104, 97, 115, 32, 97, 114, 109, 111, 114, 32, 101, 113, 117, 105, 112, 112, 101, 100, 46})),
-                new Setting<>("FRIENDS", false, "Attack friends.")};
-        settings.put(TARGETING, new Setting<>(TARGETING, new MultiBool(/*Target Filter*/decodeByteArray(new byte[]{84, 97, 114, 103, 101, 116, 32, 70, 105, 108, 116, 101, 114}), ents), /*Properties the aura will target.*/decodeByteArray(new byte[]{80, 114, 111, 112, 101, 114, 116, 105, 101, 115, 32, 116, 104, 101, 32, 97, 117, 114, 97, 32, 119, 105, 108, 108, 32, 116, 97, 114, 103, 101, 116, 46})));
-        settings.put(/*NOSWING*/decodeByteArray(new byte[]{78, 79, 83, 87, 73, 78, 71}), noswing);
-        settings.put(indicator.getName(), indicator);
-        addSetting(reduce);
-        addSetting(prediction);
-        addSetting(predictionTicks);
-        addSetting(predictionScale);
-        addSetting(maxTargets);
-        addSetting(antiLag);
-        addSetting(pitSpawn);
-        addSetting(antiCritFunky);
+        addSetting(new Setting<>("PRIORITY", priority, "Target mode priority."));
         addSetting(new Setting<>("ATTACK-MODE", attackMode, "Customizes the Killaura attack mode."));
 
-        randomSeed = randomNumber(0.0000005F, -0.0000005F);
+        //randomSeed = randomNumber(0.0000005F, -0.0000005F);
     }
 
-    private double randomNumber(double max, double min) {
-        return (Math.random() * (max - min)) + min;
-    }
+//    private double randomNumber(double max, double min) {
+//        return (Math.random() * (max - min)) + min;
+//    }
 
     private float randomNumber(float max, float min) {
         return min + (float) (Math.random() * (max - min));
     }
 
-    private double randomInt(int max, int min) {
-        return (Math.random() * (max - min)) + min;
+    private double randomInt(int min, int max) {
+        return min + (Math.random() * (max - min));
     }
 
     public List<EntityLivingBase> loaded = new CopyOnWriteArrayList<>();
@@ -206,7 +193,6 @@ public class Killaura extends Module {
         wait = -1;
         stepDelay = -2;
         setupTick = 0;
-
     }
 
     @Override
@@ -231,6 +217,7 @@ public class Killaura extends Module {
 
     @Override
     public void onToggle() {
+        swapped = -1;
         shouldToggle = false;
         critWaitTicks = 0;
         try {
@@ -249,7 +236,7 @@ public class Killaura extends Module {
 
     private int critWaitTicks;
 
-    private float randomSeed;
+    //private float randomSeed;
 
     @RegisterEvent(events = {EventMotionUpdate.class, EventPacket.class, EventStep.class, EventRender3D.class})
     public void onEvent(Event event) {
@@ -290,7 +277,7 @@ public class Killaura extends Module {
 //                    }
 //                }
 
-            if (packet instanceof S45PacketTitle && (boolean) settings.get(DEATH).getValue()) {
+            if (packet instanceof S45PacketTitle && deathCheck.getValue()) {
                 S45PacketTitle titlePacket = ((S45PacketTitle) packet);
                 if (titlePacket.getType().equals(S45PacketTitle.Type.TITLE)) {
                     String text = StringUtils.stripControlCodes(titlePacket.getMessage().getFormattedText());
@@ -319,7 +306,7 @@ public class Killaura extends Module {
             return;
         }
         if (event instanceof EventRender3D) {
-            if ((boolean) indicator.getValue()) {
+            if (indicator.getValue()) {
                 EventRender3D er = event.cast();
                 GL11.glPushMatrix();
                 RenderingUtil.pre3D();
@@ -330,7 +317,7 @@ public class Killaura extends Module {
                     while (loadedIter.hasNext()) {
                         GlStateManager.pushMatrix();
                         EntityLivingBase target = loadedIter.next();
-                        double[] p = getPrediction(target, predictionTicks.getValue().intValue(), predictionTicks.getValue().doubleValue());
+                        double[] p = getPrediction(target, predictionTicks.getValue().intValue(), predictionScale.getValue().doubleValue());
 
                         double x = (target.prevPosX + (target.posX - target.prevPosX) * er.renderPartialTicks) - RenderManager.renderPosX + p[0];
                         double y = (target.prevPosY + (target.posY - target.prevPosY) * er.renderPartialTicks) - RenderManager.renderPosY + p[1];
@@ -362,18 +349,18 @@ public class Killaura extends Module {
 
         setSuffix(maxTargets == 1 ? "Single" : "Switch");
         allowCrits = false;
-        int min = ((Number) settings.get(MIN).getValue()).intValue();
-        int max = ((Number) settings.get(MAX).getValue()).intValue();
+        int min = minAPS.getValue().intValue();
+        int max = maxAPS.getValue().intValue();
         if (min > max) {
-            settings.get(MIN).setValue(max);
+            minAPS.setValue(max);
         }
-        if (((Number) settings.get(/*BLOCK-RANGE*/decodeByteArray(new byte[]{66, 76, 79, 67, 75, 45, 82, 65, 78, 71, 69})).getValue()).floatValue() < ((Number) settings.get(RANGE).getValue()).floatValue()) {
-            settings.get(/*BLOCK-RANGE*/decodeByteArray(new byte[]{66, 76, 79, 67, 75, 45, 82, 65, 78, 71, 69})).setValue(settings.get(RANGE).getValue());
+        if ((blockRange.getValue()).floatValue() < this.range.getValue().floatValue()) {
+            blockRange.setValue(this.range.getValue());
         }
         if (nextRandom == -1)
             nextRandom = (int) Math.round((20 / randomInt(min, max)));
 
-        boolean block = (Boolean) settings.get(AUTOBLOCK).getValue();
+        boolean block = autoBlock.getValue();
         EventMotionUpdate em = event.cast();
         if (em.isPre()) {
 
@@ -402,7 +389,7 @@ public class Killaura extends Module {
                     mc.thePlayer.jump();
                 wantedToJump = false;
             }
-            if ((Boolean) settings.get(DEATH).getValue()) {
+            if (deathCheck.getValue()) {
                 if (!mc.thePlayer.isEntityAlive() && !disabled) {
                     target = null;
                     loaded.clear();
@@ -437,656 +424,624 @@ public class Killaura extends Module {
             }
         }
 
-        float range = ((Number) settings.get(RANGE).getValue()).floatValue();
+        float range = this.range.getValue().floatValue();
         boolean crits = (critModule.isEnabled() && critWaitTicks <= 0) &&
                 ((!Client.getModuleManager().isEnabled(Speed.class) || (mc.thePlayer.onGround && !PlayerUtil.isMoving())) && !Client.getModuleManager().isEnabled(Fly.class) && !Client.getModuleManager().isEnabled(LongJump.class)) &&
                 !(Client.getModuleManager().isEnabled(Jesus.class) && PlayerUtil.isOnLiquid());
         String attack = attackMode.getSelected();
-        if (true) {
-            boolean single = maxTargets == 1;
-            if (single) {
+        boolean single = maxTargets == 1;
+        if (single) {
+            index = 0;
+        }
+//        Bypass bypass = Client.getModuleManager().get(Bypass.class);
+//
+//        int bypassTicks = bypass.bruh - 10;
+//
+//        boolean allowInvalidAngles = bypass.allowBypassing() && (bypass.option.getSelected().equals("Watchdog Off") || (bypass.option.getSelected().equals("Dong") ?
+//                bypassTicks > 25 && bypassTicks <= (27 + bypass.randomDelay) : bypass.bruh > 10 && bypass.bruh % 100 > 10 && bypass.bruh % 100 < 99)) && HypixelUtil.isVerifiedHypixel();
+
+        if (em.isPre()) {
+            // We load the targets each tick
+            loaded = getTargets();
+            if (index >= loaded.size()) {
                 index = 0;
             }
-            Bypass bypass = Client.getModuleManager().get(Bypass.class);
 
-            int bypassTicks = bypass.bruh - 10;
+            if (!mc.thePlayer.onGround && !mc.thePlayer.isCollidedVertically) {
+                stepDelay = 1;
+            }
 
-            boolean allowInvalidAngles = bypass.allowBypassing() && (bypass.option.getSelected().equals("Watchdog Off") || (bypass.option.getSelected().equals("Dong") ?
-                    bypassTicks > 25 && bypassTicks <= (27 + bypass.randomDelay) : bypass.bruh > 10 && bypass.bruh % 100 > 10 && bypass.bruh % 100 < 99)) && HypixelUtil.isVerifiedHypixel();
+            if (stepDelay < 0) {
+                wantsToStep = false;
+            }
 
-            if (em.isPre()) {
-                // We load the targets each tick
-                loaded = getTargets();
-                if (index >= loaded.size()) {
-                    index = 0;
-                }
+            if (loaded.size() > 0) {
+                sortList();
+                for (EntityLivingBase e : loaded) {
+                    double xDelta = e.posX - e.lastTickPosX;
+                    double zDelta = e.posZ - e.lastTickPosZ;
 
-                if (!mc.thePlayer.onGround && !mc.thePlayer.isCollidedVertically) {
-                    stepDelay = 1;
-                }
-
-                if (stepDelay < 0) {
-                    wantsToStep = false;
-                }
-
-                if (loaded.size() > 0) {
-                    sortList();
-                    for (EntityLivingBase e : loaded) {
-                        double xDelta = e.posX - e.lastTickPosX;
-                        double zDelta = e.posZ - e.lastTickPosZ;
-
-                        if (deltaHashMap.containsKey(e)) {
-                            deltaHashMap.get(e).logDeltas(xDelta, zDelta, mc.thePlayer.ticksExisted);
-                        } else {
-                            deltaHashMap.put(e, new EntityDelta(xDelta, zDelta));
-                        }
+                    if (deltaHashMap.containsKey(e)) {
+                        deltaHashMap.get(e).logDeltas(xDelta, zDelta, mc.thePlayer.ticksExisted);
+                    } else {
+                        deltaHashMap.put(e, new EntityDelta(xDelta, zDelta));
                     }
+                }
 
-                    // Set the target each switch delay
-                    if (switchTimer.delay(((Number) settings.get(SWITCH).getValue()).intValue()) && !single) {
-                        EntityLivingBase lastTarget = target;
+                // Set the target each switch delay
+                if (switchTimer.delay((switchDelay.getValue()).intValue()) && !single) {
+                    EntityLivingBase lastTarget = target;
+                    incrementIndex();
+                    target = loaded.get(Math.min(loaded.size() - 1, index));
+
+                    if (lastTarget == target && loaded.size() > 1) { // We're attacking the same entity, switch to the next
                         incrementIndex();
                         target = loaded.get(Math.min(loaded.size() - 1, index));
-
-                        if (lastTarget == target && loaded.size() > 1) { // We're attacking the same entity, switch to the next
-                            incrementIndex();
-                            target = loaded.get(Math.min(loaded.size() - 1, index));
-                        }
-
-                        switchTimer.reset();
                     }
 
-                    if (target == null || single) {
-                        target = loaded.get(single ? 0 : Math.min(loaded.size() - 1, index));
-                    }
+                    switchTimer.reset();
+                }
 
-                    if (target != null) {
-                        if (!validEntity(target)) {
-                            loaded = getTargets();
-                            sortList();
-                            if (loaded.size() > 0) {
-                                target = loaded.get(0);
-                                switchTimer.reset();
-                            } else {
-                                if (!isBlocking)
-                                    blockTimer.reset();
-                                lastAngles.x = mc.thePlayer.rotationYaw;
-                                lastAngles.y = mc.thePlayer.rotationPitch;
-                                target = null;
-                                deltaHashMap.clear();
-                                wait = 0;
-                                setupTick = 0;
-                            }
+                if (target == null || single) {
+                    target = loaded.get(single ? 0 : Math.min(loaded.size() - 1, index));
+                }
+
+                if (target != null) {
+                    if (!validEntity(target)) {
+                        loaded = getTargets();
+                        sortList();
+                        if (loaded.size() > 0) {
+                            target = loaded.get(0);
+                            switchTimer.reset();
+                        } else {
+                            if (!isBlocking)
+                                blockTimer.reset();
+                            lastAngles.x = mc.thePlayer.rotationYaw;
+                            lastAngles.y = mc.thePlayer.rotationPitch;
+                            target = null;
+                            deltaHashMap.clear();
+                            wait = 0;
+                            setupTick = 0;
                         }
                     }
+                }
 
-                    if (target != null) {
-                        // If the target is invalid, choose another target
-                        if (!disable) {
-                            double[] p = getPrediction(target, predictionTicks.getValue().intValue(), predictionTicks.getValue().doubleValue());
-                            double xDiff = (target.posX + p[0]) - mc.thePlayer.posX;
-                            double yDiff = (target.posY + p[1]) - mc.thePlayer.posY - 0.5;
-                            double zDiff = (target.posZ + p[2]) - mc.thePlayer.posZ;
+                if (target != null) {
+                    // If the target is invalid, choose another target
+                    if (!disable) {
+                        double[] p = getPrediction(target, predictionTicks.getValue().intValue(), predictionScale.getValue().doubleValue());
+                        double xDiff = (target.posX + p[0]) - mc.thePlayer.posX;
+                        double yDiff = (target.posY + p[1]) - mc.thePlayer.posY - 0.5;
+                        double zDiff = (target.posZ + p[2]) - mc.thePlayer.posZ;
 
-                            double yDifference = Math.abs((target.posY + p[2]) - mc.thePlayer.posY);
+                        double yDifference = Math.abs((target.posY + p[2]) - mc.thePlayer.posY);
 
-                            double dist = MathHelper.sqrt_double(xDiff * xDiff + zDiff * zDiff);
+                        double dist = MathHelper.sqrt_double(xDiff * xDiff + zDiff * zDiff);
 
-                            double distance = MathUtils.roundToPlace(dist, 1);
+                        double distance = MathUtils.roundToPlace(dist, 1);
 
-                            boolean shouldReduce = reduce.getValue() && distance <= 3;
+                        boolean shouldReduce = reduce.getValue() && distance <= 3;
 
-                            float targetYaw = MathHelper.clamp_float(RotationUtils.getYawChangeGiven(target.posX, target.posZ, lastAngles.x), -180, 180);
-                            int maxAngleStep = ((Number) settings.get(ANGLESTEP).getValue()).intValue();
+                        float targetYaw = MathHelper.clamp_float(RotationUtils.getYawChangeGiven(target.posX, target.posZ, lastAngles.x), -180, 180);
+                        int maxAngleStep = angleStep.getValue().intValue();
 
-                            if (maxAngleStep > 5 && maxAngleStep < 175) {
-                                maxAngleStep += randomNumber(5, -5);
-                            }
+                        if (maxAngleStep > 5 && maxAngleStep < 175) {
+                            maxAngleStep += randomNumber(5, -5);
+                        }
 
-                            if (targetYaw > maxAngleStep) targetYaw = maxAngleStep;
-                            else if (targetYaw < -maxAngleStep) targetYaw = -maxAngleStep;
+                        if (targetYaw > maxAngleStep) targetYaw = maxAngleStep;
+                        else if (targetYaw < -maxAngleStep) targetYaw = -maxAngleStep;
 
-                            if (maxAngleStep > -1 && !scaffold.isEnabled())
-                                if (shouldReduce) {
-                                    float pitch = (float) -(Math.atan2(yDiff - (distance > 2.1 ? 1.25 : 1.5), dist) * 180.0D / 3.141592653589793D);
-                                    float newYaw = 0F;
+                        if (maxAngleStep > -1 && !scaffold.isEnabled())
+                            if (shouldReduce) {
+                                float pitch = (float) -(Math.atan2(yDiff - (distance > 2.1 ? 1.25 : 1.5), dist) * 180.0D / 3.141592653589793D);
+                                float newYaw = 0F;
 
-                                    if (distance <= (HypixelUtil.isInGame("DUEL") ? 1.12 : 0.75) && yDifference <= 1.5) {
-                                        em.setYaw(lastAngles.x);
-                                        em.setPitch(MathHelper.clamp_float(88.9F + (float) (0.5F * Math.random()), -89.5F, 89.5F));
-                                    } else {
-                                        em.setPitch(MathHelper.clamp_float(pitch / 1.1F, -89.5F, 89.5F));
-
-                                        if (lastAngles.y > 90 || lastAngles.y < -90) {
-                                            //em.setPitch(180 - em.getPitch());
-                                        }
-
-                                        Vec3 v = getDirection(lastAngles.x, em.getPitch());
-                                        double off = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), v,
-                                                target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height,
-                                                HypixelUtil.isInGame("DUEL") ? 1.2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1);
-
-                                        Vec3 backwardsBruh = getDirection(lastAngles.x, 180 - em.getPitch());
-                                        double backwardsOff = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), backwardsBruh,
-                                                target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height,
-                                                HypixelUtil.isInGame("DUEL") ? 1.2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1);
-
-                                        if (allowInvalidAngles && em.getPitch() >= 0 && off >= 0.1 && backwardsOff < 0.1) {
-                                            boolean isAttacking = mc.thePlayer.getDistanceToEntity(target) <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && delay.roundDelay(50 * nextRandom);
-                                            boolean canAttackRightNow = (attack.equals("Always")) ||
-                                                    (attack.equals("Precise") ? target.waitTicks <= 0 :
-                                                            target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
-
-                                            if (isAttacking && canAttackRightNow) {
-                                                em.setPitch(MathHelper.wrapAngleTo180_float(180 - em.getPitch()));
-                                            } else {
-                                                em.setPitch(em.getPitch() + 360);
-                                            }
-                                        } else {
-
-                                            float tempNewYaw = (float) MathUtils.getIncremental(lastAngles.x + (targetYaw / 1.1F), 20);
-
-                                            boolean willViolate = maxAngleStep > 0 && target.waitTicks <= 0 && Angle.INSTANCE.willViolateYaw(new Location(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, tempNewYaw, 0), target);
-
-                                            if ((angleTimer.roundDelay(1000) && off >= 0.11 && !willViolate) || (angleTimer.roundDelay(200) && !willViolate && off >= 0.2)) {
-                                                newYaw += targetYaw;
-
-                                                float normalDiff = Math.abs(newYaw);
-                                                float backwardsDiff = Math.abs(MathHelper.wrapAngleTo180_float(newYaw + 180));
-
-                                                Vec3 vecReverse = getDirection((float) MathUtils.getIncremental(lastAngles.x + MathHelper.wrapAngleTo180_float((newYaw + 180)), 20), 180 - em.getPitch());
-                                                double newOffReverse = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), vecReverse,
-                                                        target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height,
-                                                        HypixelUtil.isInGame("DUEL") ? 1.2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1);
-
-                                                if (allowInvalidAngles && em.getPitch() >= 0 && backwardsDiff < normalDiff && newOffReverse < 0.1 && normalDiff > 90) {
-                                                    angleTimer.reset();
-                                                    em.setYaw(lastAngles.x = ((float) MathUtils.getIncremental(lastAngles.x += MathHelper.wrapAngleTo180_float((newYaw + 180)), 20) + randomNumber(1, -1)));
-                                                    em.setPitch(180 - em.getPitch());
-                                                } else {
-                                                    angleTimer.reset();
-                                                    em.setYaw(lastAngles.x = ((float) MathUtils.getIncremental(lastAngles.x += (newYaw), 20) + randomNumber(1, -1)));
-                                                }
-                                            }
-                                        }
-
-                                        em.setYaw(lastAngles.x);
-
-                                    }
+                                if (distance <= (HypixelUtil.isInGame("DUEL") ? 1.12 : 0.75) && yDifference <= 1.5) {
+                                    em.setYaw(lastAngles.x);
+                                    em.setPitch(MathHelper.clamp_float(88.9F + (float) (0.5F * Math.random()), -89.5F, 89.5F));
                                 } else {
-                                    // Allow reduced to still have your heads backwards
-                                    if (reduce.getValue() && allowInvalidAngles) {
-                                        float pitch = (float) -(Math.atan2(yDiff, dist) * 180.0D / 3.141592653589793D);
-                                        em.setPitch(MathHelper.clamp_float(pitch / 1.1F, -89.5F, 89.5F));
+                                    em.setPitch(MathHelper.clamp_float(pitch / 1.1F, -89.5F, 89.5F));
 
-                                        float normalDiff = Math.abs(targetYaw);
-                                        float backwardsDiff = Math.abs(MathHelper.wrapAngleTo180_float(targetYaw + 180));
+//                                        if (lastAngles.y > 90 || lastAngles.y < -90) {
+//                                            //em.setPitch(180 - em.getPitch());
+//                                        }
 
-                                        Vec3 vecReverse = getDirection((float) MathUtils.getIncremental(lastAngles.x + MathHelper.wrapAngleTo180_float((targetYaw + 180)), 20), 180 - em.getPitch());
-                                        double newOffReverse = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), vecReverse,
-                                                target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height,
-                                                HypixelUtil.isInGame("DUEL") ? 1.2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1);
+                                    Vec3 v = getDirection(lastAngles.x, em.getPitch());
+                                    double off = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), v,
+                                            target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height,
+                                            HypixelUtil.isInGame("DUEL") ? 1.2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1);
 
-                                        if (pitch >= 0 && backwardsDiff < normalDiff && newOffReverse < 0.1 && normalDiff > 120) {
-                                            em.setYaw(lastAngles.x += MathHelper.wrapAngleTo180_float(targetYaw + 180) / 1.1F);
+//                                    Vec3 backwardsBruh = getDirection(lastAngles.x, 180 - em.getPitch());
+//                                    double backwardsOff = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), backwardsBruh,
+//                                            target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height,
+//                                            HypixelUtil.isInGame("DUEL") ? 1.2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1);
 
-                                            boolean isAttacking = mc.thePlayer.getDistanceToEntity(target) <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && delay.roundDelay(50 * nextRandom);
-                                            boolean canAttackRightNow = (attack.equals("Always")) ||
-                                                    (attack.equals("Precise") ? target.waitTicks <= 0 :
-                                                            target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
+//                                    if (allowInvalidAngles && em.getPitch() >= 0 && off >= 0.1 && backwardsOff < 0.1) {
+//                                        boolean isAttacking = mc.thePlayer.getDistanceToEntity(target) <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && delay.roundDelay(50 * nextRandom);
+//                                        boolean canAttackRightNow = (attack.equals("Always")) ||
+//                                                (attack.equals("Precise") ? target.waitTicks <= 0 :
+//                                                        target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
+//
+//                                        if (isAttacking && canAttackRightNow) {
+//                                            em.setPitch(MathHelper.wrapAngleTo180_float(180 - em.getPitch()));
+//                                        } else {
+//                                            em.setPitch(em.getPitch() + 360);
+//                                        }
+//                                    } else {
 
-                                            // Only headsnap when attacking to reduce others figuring this out
-                                            if (isAttacking && canAttackRightNow) {
-                                                em.setPitch(MathHelper.wrapAngleTo180_float(180 - em.getPitch()));
-                                            } else {
-                                                em.setPitch(em.getPitch() + 360);
-                                            }
-                                        } else {
-                                            angleTimer.reset();
-                                            em.setYaw((lastAngles.x += targetYaw / 1.1F) + (float) randomNumber(2, -2));
-                                        }
-                                    } else {
-                                        float pitch = (float) -(Math.atan2(yDiff, dist) * 180.0D / 3.141592653589793D);
+                                    float tempNewYaw = (float) MathUtils.getIncremental(lastAngles.x + (targetYaw / 1.1F), 20);
 
-                                        em.setYaw((lastAngles.x += targetYaw / 1.1F));
-                                        em.setPitch(MathHelper.clamp_float(pitch / 1.1F, -89.5F, 89.5F));
+                                    boolean willViolate = maxAngleStep > 0 && target.waitTicks <= 0 && Angle.INSTANCE.willViolateYaw(new Location(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, tempNewYaw, 0), target);
+
+                                    if ((angleTimer.roundDelay(1000) && off >= 0.11 && !willViolate) || (angleTimer.roundDelay(200) && !willViolate && off >= 0.2)) {
+                                        newYaw += targetYaw;
+
+//                                        float normalDiff = Math.abs(newYaw);
+//                                        float backwardsDiff = Math.abs(MathHelper.wrapAngleTo180_float(newYaw + 180));
+//
+//                                        Vec3 vecReverse = getDirection((float) MathUtils.getIncremental(lastAngles.x + MathHelper.wrapAngleTo180_float((newYaw + 180)), 20), 180 - em.getPitch());
+//                                        double newOffReverse = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), vecReverse,
+//                                                target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height,
+//                                                HypixelUtil.isInGame("DUEL") ? 1.2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1);
+
+//                                            if (allowInvalidAngles && em.getPitch() >= 0 && backwardsDiff < normalDiff && newOffReverse < 0.1 && normalDiff > 90) {
+//                                                angleTimer.reset();
+//                                                em.setYaw(lastAngles.x = ((float) MathUtils.getIncremental(lastAngles.x += MathHelper.wrapAngleTo180_float((newYaw + 180)), 20) + randomNumber(1, -1)));
+//                                                em.setPitch(180 - em.getPitch());
+//                                            } else {
+                                        angleTimer.reset();
+                                        em.setYaw(lastAngles.x = ((float) MathUtils.getIncremental(lastAngles.x += (newYaw), 20) + randomNumber(1, -1)));
+                                        //}
                                     }
+                                    //}
+
+                                    em.setYaw(lastAngles.x);
+
                                 }
+                            } else {
+                                // Allow reduced to still have your heads backwards
+//                                if (reduce.getValue() && allowInvalidAngles) {
+//                                    float pitch = (float) -(Math.atan2(yDiff, dist) * 180.0D / 3.141592653589793D);
+//                                    em.setPitch(MathHelper.clamp_float(pitch / 1.1F, -89.5F, 89.5F));
+//
+//                                    float normalDiff = Math.abs(targetYaw);
+//                                    float backwardsDiff = Math.abs(MathHelper.wrapAngleTo180_float(targetYaw + 180));
+//
+//                                    Vec3 vecReverse = getDirection((float) MathUtils.getIncremental(lastAngles.x + MathHelper.wrapAngleTo180_float((targetYaw + 180)), 20), 180 - em.getPitch());
+//                                    double newOffReverse = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), vecReverse,
+//                                            target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height,
+//                                            HypixelUtil.isInGame("DUEL") ? 1.2 : HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1);
+//
+//                                    if (pitch >= 0 && backwardsDiff < normalDiff && newOffReverse < 0.1 && normalDiff > 120) {
+//                                        em.setYaw(lastAngles.x += MathHelper.wrapAngleTo180_float(targetYaw + 180) / 1.1F);
+//
+//                                        boolean isAttacking = mc.thePlayer.getDistanceToEntity(target) <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && delay.roundDelay(50 * nextRandom);
+//                                        boolean canAttackRightNow = (attack.equals("Always")) ||
+//                                                (attack.equals("Precise") ? target.waitTicks <= 0 :
+//                                                        target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
+//
+//                                        // Only headsnap when attacking to reduce others figuring this out
+//                                        if (isAttacking && canAttackRightNow) {
+//                                            em.setPitch(MathHelper.wrapAngleTo180_float(180 - em.getPitch()));
+//                                        } else {
+//                                            em.setPitch(em.getPitch() + 360);
+//                                        }
+//                                    } else {
+//                                        angleTimer.reset();
+//                                        em.setYaw((lastAngles.x += targetYaw / 1.1F) + (float) randomNumber(2, -2));
+//                                    }
+//                                } else {
+                                float pitch = (float) -(Math.atan2(yDiff, dist) * 180.0D / 3.141592653589793D);
 
-                            lastAngles.y = em.getPitch();
-
-                            boolean setupCrits = critModule.isGround() || target.hurtTime <= 1 || (target.waitTicks <= 1);
-
-                            boolean dontCrit = antiCritFunky.getValue() && hasEnchant(target, "Crit", "Funk");
-
-                            if (target instanceof EntityPlayer && antiCritFunky.getValue() && hasEnchant(target, "Retro")) {
-                                int criticalHits = ((EntityPlayer) target).criticalHits;
-                                if ((criticalHits == 0 || criticalHits > 3) || target.waitTicks > 0) {
-                                    if (criticalHits == 0) {
-                                        ((EntityPlayer) target).criticalHits++;
-                                    }
-                                    crits = false;
-                                    dontCrit = true;
-                                }
+                                em.setYaw((lastAngles.x += targetYaw / 1.1F));
+                                em.setPitch(MathHelper.clamp_float(pitch / 1.1F, -89.5F, 89.5F));
+                                //}
                             }
 
-                            if (!dontCrit) {
-                                if (crits) {
-                                    if (critModule.isPacketOld()) {
-                                        if (mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically && isNextTickGround()) {
-                                            if (setupTick == 0 && setupCrits) {
-                                                stepDelay = 1;
+                        lastAngles.y = em.getPitch();
+
+                        boolean setupCrits = critModule.isGround() || target.hurtTime <= 1 || (target.waitTicks <= 1);
+
+                        boolean dontCrit = antiCritFunky.getValue() && hasEnchant(target, "Crit", "Funk");
+
+                        if (target instanceof EntityPlayer && antiCritFunky.getValue() && hasEnchant(target, "Retro")) {
+                            int criticalHits = ((EntityPlayer) target).criticalHits;
+                            if ((criticalHits == 0 || criticalHits > 3) || target.waitTicks > 0) {
+                                if (criticalHits == 0) {
+                                    ((EntityPlayer) target).criticalHits++;
+                                }
+                                crits = false;
+                                dontCrit = true;
+                            }
+                        }
+
+                        if (!dontCrit) {
+                            if (crits) {
+                                if (critModule.isPacketOld()) {
+                                    if (mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically && isNextTickGround()) {
+                                        if (setupTick == 0 && setupCrits) {
+                                            stepDelay = 1;
+                                            blockJump = true;
+                                            isCritSetup = false;
+                                            em.setY(em.getY() + 0.123259982345);
+                                            em.setGround(true);
+                                            em.setForcePos(true);
+                                            setupTick = 1;
+                                            //ChatUtil.printChat(target.waitTicks + " stage 1");
+                                        } else if (setupTick == 1 || setupTick == 4 || setupTick == 8) {
+                                            if ((em.getY() == mc.thePlayer.posY && em.isOnground())) {
                                                 blockJump = true;
-                                                isCritSetup = false;
-                                                em.setY(em.getY() + 0.123259982345);
-                                                em.setGround(true);
-                                                em.setForcePos(true);
-                                                setupTick = 1;
-                                                //ChatUtil.printChat(target.waitTicks + " stage 1");
-                                            } else if (setupTick == 1 || setupTick == 4 || setupTick == 8) {
-                                                if ((em.getY() == mc.thePlayer.posY && em.isOnground())) {
-                                                    blockJump = true;
-                                                    isCritSetup = true;
-                                                    em.setY(em.getY() + 0x1.cb5c6eba0ceabp-8);
-                                                    em.setGround(false);
-                                                    em.setForcePos(true);
-                                                    setupTick = 2;
-
-                                                    //ChatUtil.printChat(target.waitTicks + " stage 2");
-                                                }
-                                            } else if (setupTick == 2 || setupTick == 5 || setupTick == 9) {
-                                                if ((em.getY() == mc.thePlayer.posY && em.isOnground())) {
-                                                    isCritSetup = false;
-                                                    em.setForcePos(true);
-                                                    //ChatUtil.printChat("2");
-                                                    setupTick = 0;
-                                                }
-                                            }
-                                            if (setupTick == 6)
-                                                setupTick++;
-                                            if (setupTick == 10)
-                                                setupTick = 0;
-                                        } else {
-                                            setupTick = 0;
-                                        }
-                                    } else if (critModule.isGround()) {
-                                        boolean canAttackRightNow = (attack.equals("Always")) ||
-                                                (attack.equals("Precise") ? target.waitTicks <= 1 :
-                                                        target.waitTicks <= 1 || (target.hurtResistantTime <= 11 && target.hurtResistantTime >= 6) || target.hurtTime > 6);
-
-                                        if (isNextTickGround() && !Client.instance.isLagging()) {
-                                            if (setupCrits && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {
-                                                if (HypixelUtil.isVerifiedHypixel()) {
-                                                    if (canAttackRightNow && setupTick == 0) {
-                                                        stepDelay = 5;
-                                                        blockJump = true;
-                                                        em.setY(em.getY() + 0.125F);
-                                                        em.setGround(false);
-                                                        em.setForcePos(true);
-                                                        isCritSetup = false;
-                                                    } else if (setupTick >= 1) {
-                                                        if (setupTick > 2 || PlayerUtil.isMoving())
-                                                            isCritSetup = true;
-                                                        em.setY(em.getY() + 0.125F);
-                                                        switch (setupTick) {
-                                                            case 1: {
-                                                                blockJump = true;
-                                                                em.setY(em.getY() + 0.046599998474120774);
-                                                                break;
-                                                            }
-                                                            case 2: {
-                                                                blockJump = true;
-                                                                em.setY(em.getY() + 0.046599998474120774 - 0.07501);
-                                                                break;
-                                                            }
-                                                            case 3: {
-                                                                em.setY(em.getY() + (0.046599998474120774 - 0.07501 - 0.07501));
-                                                                break;
-                                                            }
-                                                        }
-                                                        em.setGround(false);
-                                                        em.setForcePos(true);
-
-                                                        //ChatUtil.printChat((em.getY() - mc.thePlayer.posY) + "");
-                                                    }
-                                                    setupTick++;
-                                                    if (setupTick >= 4) {
-                                                        setupTick = -1;
-                                                    }
-                                                }
-                                            } else {
-                                                setupTick = 0;
-                                            }
-                                        } else {
-                                            setupTick = 0;
-                                        }
-                                    } else if (critModule.isGroundOld()) {
-                                        boolean canAttackRightNow = (attack.equals("Always")) ||
-                                                (attack.equals("Precise") ? target.waitTicks <= 1 :
-                                                        target.waitTicks <= 1 || (target.hurtResistantTime <= 11 && target.hurtResistantTime >= 6) || target.hurtTime > 6);
-
-                                        if (isNextTickGround() && !Client.instance.isLagging()) {
-                                            if (setupCrits && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {
-                                                if (canAttackRightNow && setupTick == 0) {
-                                                    stepDelay = 2;
-                                                    blockJump = true;
-                                                    em.setY(em.getY() + 0.07234F + (0.0000023F) * Math.random());
-                                                    em.setGround(false);
-                                                    em.setForcePos(true);
-                                                    isCritSetup = false;
-                                                    setupTick = 1;
-                                                } else if (setupTick == 1) {
-                                                    isCritSetup = true;
-                                                    if (HypixelUtil.isInGame("HYPIXEL PIT"))
-                                                        em.setY(em.getY() + 0.0076092939542 - (0.0000000002475776F) * Math.random());
-                                                    em.setGround(false);
-                                                    em.setForcePos(true);
-                                                    setupTick = 0;
-                                                } else {
-                                                    setupTick = 0;
-                                                }
-                                            } else {
-                                                setupTick = 0;
-                                            }
-                                        } else {
-                                            setupTick = 0;
-                                        }
-                                    } else if (critModule.isPacket() && HypixelUtil.isVerifiedHypixel()) {
-                                        boolean isAttacking = mc.thePlayer.getDistanceToEntity(target) <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && delay.roundDelay(50 * nextRandom);
-                                        boolean canAttackRightNow = attack.equals("Always") || (attack.equals("Precise") ? target.waitTicks <= 0 : target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
-
-                                        if (isAttacking && canAttackRightNow && isNextTickGround())
-                                            if (mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {
-                                                stepDelay = 2;
-                                                blockJump = true;
-                                                em.setY(em.getY() + 0.125F);
+                                                isCritSetup = true;
+                                                em.setY(em.getY() + 0x1.cb5c6eba0ceabp-8);
                                                 em.setGround(false);
                                                 em.setForcePos(true);
-                                                isCritSetup = true;
+                                                setupTick = 2;
+
+                                                //ChatUtil.printChat(target.waitTicks + " stage 2");
                                             }
+                                        } else if (setupTick == 2 || setupTick == 5 || setupTick == 9) {
+                                            if ((em.getY() == mc.thePlayer.posY && em.isOnground())) {
+                                                isCritSetup = false;
+                                                em.setForcePos(true);
+                                                //ChatUtil.printChat("2");
+                                                setupTick = 0;
+                                            }
+                                        }
+                                        if (setupTick == 6)
+                                            setupTick++;
+                                        if (setupTick == 10)
+                                            setupTick = 0;
+                                    } else {
+                                        setupTick = 0;
                                     }
-                                } else {
-                                    setupTick = 0;
+                                } else if (critModule.isGround()) {
+                                    boolean canAttackRightNow = (attack.equals("Always")) ||
+                                            (attack.equals("Precise") ? target.waitTicks <= 1 :
+                                                    target.waitTicks <= 1 || (target.hurtResistantTime <= 11 && target.hurtResistantTime >= 6) || target.hurtTime > 6);
+
+                                    if (isNextTickGround() && !Client.instance.isLagging()) {
+                                        if (setupCrits && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {
+                                            boolean shouldCrit = target.waitTicks > 6 || target.waitTicks <= 1;
+                                            isCritSetup = true;
+                                            if (HypixelUtil.isVerifiedHypixel() && shouldCrit) {
+                                                if (canAttackRightNow && setupTick == 0) {
+                                                    stepDelay = 5;
+                                                    blockJump = true;
+                                                    em.setY(em.getY() + 0.125F);
+                                                    em.setGround(false);
+                                                    em.setForcePos(true);
+                                                } else if (setupTick >= 1) {
+                                                    if (setupTick > 2 || PlayerUtil.isMoving())
+                                                        isCritSetup = true;
+                                                    em.setY(em.getY() + 0.125F);
+                                                    switch (setupTick) {
+                                                        case 1: {
+                                                            blockJump = true;
+                                                            em.setY(em.getY() + 0.046599998474120774);
+                                                            break;
+                                                        }
+                                                        case 2: {
+                                                            blockJump = true;
+                                                            em.setY(em.getY() + 0.046599998474120774 - 0.07501);
+                                                            break;
+                                                        }
+                                                        case 3: {
+                                                            em.setY(em.getY() + (0.046599998474120774 - 0.07501 - 0.07501));
+                                                            break;
+                                                        }
+                                                    }
+                                                    em.setGround(false);
+                                                    em.setForcePos(true);
+
+                                                    //ChatUtil.printChat((em.getY() - mc.thePlayer.posY) + "");
+                                                }
+                                                setupTick++;
+                                                if (setupTick >= 4) {
+                                                    setupTick = -1;
+                                                }
+                                            }
+                                        } else {
+                                            setupTick = 0;
+                                        }
+                                    } else {
+                                        setupTick = 0;
+                                    }
+                                } else if (critModule.isGroundOld()) {
+                                    boolean canAttackRightNow = (attack.equals("Always")) ||
+                                            (attack.equals("Precise") ? target.waitTicks <= 1 :
+                                                    target.waitTicks <= 1 || (target.hurtResistantTime <= 11 && target.hurtResistantTime >= 6) || target.hurtTime > 6);
+
+                                    if (isNextTickGround() && !Client.instance.isLagging()) {
+                                        if (setupCrits && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {
+                                            if (canAttackRightNow && setupTick == 0) {
+                                                stepDelay = 2;
+                                                blockJump = true;
+                                                em.setY(em.getY() + 0.07234F + (0.0000023F) * Math.random());
+                                                em.setGround(false);
+                                                em.setForcePos(true);
+                                                isCritSetup = false;
+                                                setupTick = 1;
+                                            } else if (setupTick == 1) {
+                                                isCritSetup = true;
+                                                if (HypixelUtil.isInGame("HYPIXEL PIT"))
+                                                    em.setY(em.getY() + 0.0076092939542 - (0.0000000002475776F) * Math.random());
+                                                em.setGround(false);
+                                                em.setForcePos(true);
+                                                setupTick = 0;
+                                            } else {
+                                                setupTick = 0;
+                                            }
+                                        } else {
+                                            setupTick = 0;
+                                        }
+                                    } else {
+                                        setupTick = 0;
+                                    }
+                                } else if (critModule.isPacket() && HypixelUtil.isVerifiedHypixel()) {
+                                    boolean isAttacking = mc.thePlayer.getDistanceToEntity(target) <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && delay.roundDelay(50 * nextRandom);
+                                    boolean canAttackRightNow = attack.equals("Always") || (attack.equals("Precise") ? target.waitTicks <= 0 : target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
+
+                                    if (isAttacking && canAttackRightNow && isNextTickGround())
+                                        if (mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically) {
+                                            stepDelay = 2;
+                                            blockJump = true;
+                                            em.setY(em.getY() + 0.125F);
+                                            em.setGround(false);
+                                            em.setForcePos(true);
+                                            isCritSetup = true;
+                                        }
                                 }
                             } else {
                                 setupTick = 0;
-                                isCritSetup = true;
-                            }
-
-                            if ((allowInvalidAngles && antiCritFunky.getValue() && hasEnchant(target, "Crit", "Funky") && !em.isOnground() && !mc.thePlayer.onGround) || Bypass.shouldSabotage()) {
-                                boolean isAttacking = mc.thePlayer.getDistanceToEntity(target) <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && delay.roundDelay(50 * nextRandom);
-                                boolean canAttackRightNow = attack.equals("Always") || (attack.equals("Precise") ? target.waitTicks <= 0 : target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
-
-                                if (isAttacking && canAttackRightNow && (!mc.thePlayer.onGround && mc.thePlayer.motionY < 0)) {
-                                    isCritSetup = true;
-                                    bypass.bruh -= 1;
-                                    em.setGround(true);
-                                }
-                            }
-
-                            if (!block && !mc.thePlayer.isBlocking() && isBlocking) {
-                                isBlocking = false;
-                                NetUtil.sendPacket(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, C08PacketPlayerBlockPlacement.USE_ITEM_POS, EnumFacing.DOWN));
-                            }
-
-                            if ((block) && (mc.thePlayer.inventory.getCurrentItem() != null) && ((mc.thePlayer.inventory.getCurrentItem().getItem() instanceof ItemSword))) {
-                                mc.thePlayer.setItemInUse(mc.thePlayer.getCurrentEquippedItem(), 0x11938);
                             }
                         } else {
-                            if (AutoPot.haltTicks < 0) {
-                                lastAngles.x = em.getYaw();
-                                lastAngles.y = em.getPitch();
-                            }/* else {
-                                em.setYaw(lastAngles.x);
-                            }*/
+                            setupTick = 0;
+                            isCritSetup = true;
                         }
+
+                        if (Bypass.shouldSabotage()) {
+                            em.setGround(true);
+                        }
+
+                        if (!block && !mc.thePlayer.isBlocking() && isBlocking) {
+                            isBlocking = false;
+                            NetUtil.sendPacket(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, C08PacketPlayerBlockPlacement.USE_ITEM_POS, EnumFacing.DOWN));
+                        }
+
+                        if ((block) && (mc.thePlayer.inventory.getCurrentItem() != null) && ((mc.thePlayer.inventory.getCurrentItem().getItem() instanceof ItemSword))) {
+                            mc.thePlayer.setItemInUse(mc.thePlayer.getCurrentEquippedItem(), 0x11938);
+                        }
+                    } else {
+                        if (AutoPot.haltTicks < 0) {
+                            lastAngles.x = em.getYaw();
+                            lastAngles.y = em.getPitch();
+                        }/* else {
+                            em.setYaw(lastAngles.x);
+                        }*/
                     }
+                }
 
-                    int maxAngleStep = ((Number) settings.get(ANGLESTEP).getValue()).intValue();
+                int maxAngleStep = angleStep.getValue().intValue();
 
-                    if (maxAngleStep == -1) {
-                        lastAngles.x = mc.thePlayer.rotationYaw;
-                        lastAngles.y = mc.thePlayer.rotationPitch;
-                    }
-
-                } else {
-                    if (!isBlocking)
-                        blockTimer.reset();
+                if (maxAngleStep == -1) {
                     lastAngles.x = mc.thePlayer.rotationYaw;
                     lastAngles.y = mc.thePlayer.rotationPitch;
-                    deltaHashMap.clear();
-                    target = null;
-                    wait = 0;
-                    stepDelay = 0;
-                    setupTick = 0;
-                    wantsToStep = false;
                 }
 
-                boolean packetMode = Client.getModuleManager().isEnabled(NoSlowdown.class);
-                if (mc.thePlayer.isBlocking() && (isBlocking) && packetMode && PlayerUtil.isMoving() && mc.thePlayer.ticksExisted % 2 == 0 && !AutoSoup.isHealing) {
-                    isBlocking = false;
-                    NetUtil.sendPacket(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, C08PacketPlayerBlockPlacement.USE_ITEM_POS, EnumFacing.DOWN));
+            } else {
+                if (!isBlocking)
                     blockTimer.reset();
+                lastAngles.x = mc.thePlayer.rotationYaw;
+                lastAngles.y = mc.thePlayer.rotationPitch;
+                deltaHashMap.clear();
+                target = null;
+                wait = 0;
+                stepDelay = 0;
+                setupTick = 0;
+                wantsToStep = false;
+            }
+
+            boolean packetMode = Client.getModuleManager().isEnabled(NoSlowdown.class);
+            if (mc.thePlayer.isBlocking() && (isBlocking) && packetMode && PlayerUtil.isMoving() && mc.thePlayer.ticksExisted % 2 == 0 && !AutoSoup.isHealing) {
+                isBlocking = false;
+                NetUtil.sendPacket(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, C08PacketPlayerBlockPlacement.USE_ITEM_POS, EnumFacing.DOWN));
+                blockTimer.reset();
+            }
+
+        } else if (em.isPost() && (loaded.size() > 0) && (loaded.get(Math.min(loaded.size() - 1, index)) != null) && target != null && !disable) {
+
+            boolean alwaysCrit = (!Client.getModuleManager().isEnabled(LongJump.class) && !Client.getModuleManager().isEnabled(Fly.class) && (boolean) critModule.getSetting("ALWAYS-CRIT").getValue());
+
+            boolean canCrit = (mc.thePlayer.fallDistance > 0.0625F && !mc.thePlayer.onGround);
+
+            boolean isCriticalAttack = canCrit || isCritSetup;
+
+            boolean isOptimalAttack = attack.equals("Always") || (attack.equals("Precise") ? target.waitTicks <= 0 : (target.hurtTime <= 5));
+
+            boolean twoTickCritsGood = !mc.thePlayer.onGround || (!PlayerUtil.isOnLiquid() && (attack.equals("Always") || (attack.equals("Precise") ? target.waitTicks <= 1 :
+                    (target.waitTicks <= 1 || (target.hurtResistantTime <= 11 && target.hurtResistantTime >= 6) || target.hurtTime > 6))) && isCritSetup);
+
+            boolean threeTickCritsGood = !mc.thePlayer.onGround || (!PlayerUtil.isOnLiquid() && (isOptimalAttack || target.waitTicks <= 1) && isCritSetup);
+
+            boolean criticalsAreSet = !crits || ((critModule.isPacketOld() ? threeTickCritsGood : critModule.isGround() ? twoTickCritsGood : critModule.isPacket()));
+
+            boolean shouldAttack = alwaysCrit ? isCriticalAttack : criticalsAreSet;
+
+            boolean setupCrits = critModule.isGround() || critModule.isGroundOld() || (target.hurtTime <= 0 && target.waitTicks >= 6) || (target.waitTicks <= 0);
+
+            double[] p = getPrediction(target, predictionTicks.getValue().intValue(), predictionScale.getValue().doubleValue());
+
+            double distance = mc.thePlayer.getDistance(target.posX + p[0], target.posY + p[1], target.posZ + p[2]);
+
+            long attackDelay = 50 * nextRandom;
+
+            boolean isAttacking = distance <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && (mc.timer.timerSpeed <= 1 ? delay.roundDelay(attackDelay) : delay.delay(attackDelay));
+
+            boolean canAttackRightNow = attack.equals("Always") || (attack.equals("Precise") ? target.waitTicks <= 0 : target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
+
+            if (scaffold.isEnabled()) {
+                lastAngles.x = em.getYaw();
+                lastAngles.y = em.getPitch();
+            }
+
+            boolean dontCrit = antiCritFunky.getValue() && hasEnchant(target, "Crit", "Funk");
+            if (Client.getModuleManager().isEnabled(Speed.class) && dontCrit) {
+                if (!mc.thePlayer.onGround && mc.thePlayer.motionY < 0) {
+                    isAttacking = false;
                 }
+            }
 
-            } else if (em.isPost() && (loaded.size() > 0) && (loaded.get(Math.min(loaded.size() - 1, index)) != null) && target != null && !disable) {
+            if (mc.thePlayer.isBlocking() && isAttacking && shouldAttack && isBlocking && canAttackRightNow && !AutoSoup.isHealing) {
+                isBlocking = false;
+                NetUtil.sendPacket(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, C08PacketPlayerBlockPlacement.USE_ITEM_POS, EnumFacing.DOWN));
+                blockTimer.reset();
+            }
 
-                boolean alwaysCrit = (!Client.getModuleManager().isEnabled(LongJump.class) && !Client.getModuleManager().isEnabled(Fly.class) && (boolean) critModule.getSetting("ALWAYS-CRIT").getValue());
+            if (isAttacking && !isBlocking && (!antiLag.getValue() || !Client.instance.isLagging())) {
+                Vec3 v = getDirection(em.getYaw(), em.getPitch());
+                int maxAngleStep = angleStep.getValue().intValue();
 
-                boolean canCrit = (mc.thePlayer.fallDistance > 0.0625F && !mc.thePlayer.onGround);
+                double off = maxAngleStep <= 0 ? 0 : Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), v, target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height,
+                        HypixelUtil.isInGame("DUEL") ? 1.85 :
+                                HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1);
 
-                boolean isCriticalAttack = canCrit || isCritSetup;
+                if (angleStep.getValue().intValue() <= 0 || (off <= 0.11 || (off <= 1 && off >= 0.22 && MathUtils.getIncremental(angleTimer.getDifference(), 50) <= 100))) {
 
-                boolean isOptimalAttack = attack.equals("Always") || (attack.equals("Precise") ? target.waitTicks <= 0 : (target.hurtTime <= 5));
-
-                boolean twoTickCritsGood = !mc.thePlayer.onGround || (!PlayerUtil.isOnLiquid() && (attack.equals("Always") || (attack.equals("Precise") ? target.waitTicks <= 1 :
-                        (target.waitTicks <= 1 || (target.hurtResistantTime <= 11 && target.hurtResistantTime >= 6) || target.hurtTime > 6))) && isCritSetup);
-
-                boolean threeTickCritsGood = !mc.thePlayer.onGround || (!PlayerUtil.isOnLiquid() && (isOptimalAttack || target.waitTicks <= 1) && isCritSetup);
-
-                boolean criticalsAreSet = !crits || ((critModule.isPacketOld() ? threeTickCritsGood : critModule.isGround() ? twoTickCritsGood : critModule.isPacket()));
-
-                boolean shouldAttack = alwaysCrit ? isCriticalAttack : criticalsAreSet;
-
-                boolean setupCrits = critModule.isGround() || (target.hurtTime <= 0 && target.waitTicks >= 6) || (target.waitTicks <= 0);
-
-                double[] p = getPrediction(target, predictionTicks.getValue().intValue(), predictionTicks.getValue().doubleValue());
-
-                double distance = mc.thePlayer.getDistance(target.posX + p[0], target.posY + p[1], target.posZ + p[2]);
-
-                long attackDelay = 50 * nextRandom;
-
-                boolean isAttacking = distance <= (mc.thePlayer.canEntityBeSeen(target) ? range : Math.min(3, range)) && (mc.timer.timerSpeed <= 1 ? delay.roundDelay(attackDelay) : delay.delay(attackDelay));
-
-                boolean canAttackRightNow = attack.equals("Always") || (attack.equals("Precise") ? target.waitTicks <= 0 : target.waitTicks <= 0 || (target.hurtResistantTime <= 10 && target.hurtResistantTime >= 7) || target.hurtTime > 7);
-
-                if (scaffold.isEnabled()) {
-                    lastAngles.x = em.getYaw();
-                    lastAngles.y = em.getPitch();
-                }
-
-                boolean dontCrit = antiCritFunky.getValue() && hasEnchant(target, "Crit", "Funk");
-                if (Client.getModuleManager().isEnabled(Speed.class) && dontCrit && !allowInvalidAngles) {
-                    if (!mc.thePlayer.onGround && mc.thePlayer.motionY < 0) {
-                        isAttacking = false;
+                    if (crits && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically && (((critModule.isPacket() && setupCrits)) && isCritSetup) && !em.isOnground()) {
+                        if (HypixelUtil.isVerifiedHypixel() && mc.getCurrentServerData() != null && (mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net"))) {
+                            NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.046599998474120774, mc.thePlayer.posZ, false));
+                        } else {
+                            Criticals.doCrits();
+                        }
                     }
-                }
 
-                if (mc.thePlayer.isBlocking() && isAttacking && shouldAttack && isBlocking && canAttackRightNow && !AutoSoup.isHealing) {
-                    isBlocking = false;
-                    NetUtil.sendPacket(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
-                    blockTimer.reset();
-                }
-
-                if (isAttacking && !isBlocking && (!antiLag.getValue() || !Client.instance.isLagging())) {
-                    Vec3 v = getDirection(em.getYaw(), em.getPitch());
-                    int maxAngleStep = ((Number) settings.get(ANGLESTEP).getValue()).intValue();
-
-                    double off = maxAngleStep <= 0 ? 0 : Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), v, target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height,
-                            HypixelUtil.isInGame("DUEL") ? 1.85 :
-                                    HypixelUtil.isInGame("HYPIXEL PIT") ? 0.85 : 1);
-
-                    if (((Number) settings.get(ANGLESTEP).getValue()).intValue() <= 0 || (off <= 0.11 || (off <= 1 && off >= 0.22 && MathUtils.getIncremental(angleTimer.getDifference(), 50) <= 100))) {
-
-                        if (crits && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically && (((critModule.isPacket() && setupCrits)) && isCritSetup) && !em.isOnground()) {
-                            if (HypixelUtil.isVerifiedHypixel() && mc.getCurrentServerData() != null && (mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net"))) {
-                                NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY + 0.046599998474120774, mc.thePlayer.posZ, false));
+                    if (canAttackRightNow && shouldAttack) {
+                        if (!Client.instance.is1_9orGreater()) {
+                            if (!(boolean) noswing.getValue()) {
+                                mc.thePlayer.swingItem();
                             } else {
-                                Criticals.doCrits();
+                                mc.thePlayer.swingItemFake();
                             }
                         }
 
-                        if (canAttackRightNow && shouldAttack) {
-                            if (!Client.instance.is1_9orGreater()) {
-                                if (!(boolean) noswing.getValue()) {
-                                    mc.thePlayer.swingItem();
-                                } else {
-                                    mc.thePlayer.swingItemFake();
+                        boolean whitelisted = false;
+
+                        for (UUID whitelistedUUID : whitelistedUUIDs) {
+                            if (whitelistedUUID.equals(target.getUniqueID())) {
+                                whitelisted = true;
+                                break;
+                            }
+                        }
+
+
+                        if (!whitelisted) {
+                            // If the user is holding nothing or NOT a diamond shovel
+                            boolean shouldSilentSwap = autoShovel.getValue() && HypixelUtil.isInGame("PIT") && (mc.thePlayer.inventory.getCurrentItem() == null || mc.thePlayer.inventory.getCurrentItem().getItem() != Items.diamond_shovel);
+                            if (shouldSilentSwap && target.waitTicks <= 0) {
+                                int swapTo = InventoryUtil.findItemInInventory(Items.diamond_shovel);
+                                if (swapTo != -1) {
+                                    // Server should be checking currentItem int, some servers may be different and need to set the item next tick
+                                    swapped = swapTo;
+                                    mc.playerController.windowClick(mc.thePlayer.inventoryContainer.windowId, swapped, mc.thePlayer.inventory.currentItem, 2, mc.thePlayer);
+                                    mc.playerController.updateController();
                                 }
                             }
 
-                            boolean whitelisted = false;
+                            NetUtil.sendPacket(new C02PacketUseEntity(target, C02PacketUseEntity.Action.ATTACK));
 
-                            for (UUID whitelistedUUID : whitelistedUUIDs) {
-                                if (whitelistedUUID.equals(target.getUniqueID())) {
-                                    whitelisted = true;
-                                    break;
-                                }
+                            if (swapped != -1) {
+                                mc.playerController.windowClick(mc.thePlayer.inventoryContainer.windowId, swapped, mc.thePlayer.inventory.currentItem, 2, mc.thePlayer);
+                                mc.playerController.updateController();
+                                swapped = -1;
                             }
+                        } else {
+                            ChatUtil.printChat("No.");
+                        }
 
-                            if (!whitelisted) {
-                                NetUtil.sendPacket(new C02PacketUseEntity(target, C02PacketUseEntity.Action.ATTACK));
+                        if (Client.instance.is1_9orGreater()) {
+                            if (!(boolean) noswing.getValue()) {
+                                mc.thePlayer.swingItem();
                             } else {
-                                ChatUtil.printChat("No.");
+                                mc.thePlayer.swingItemFake();
                             }
+                        }
 
-                            if (Client.instance.is1_9orGreater()) {
-                                if (!(boolean) noswing.getValue()) {
-                                    mc.thePlayer.swingItem();
+                        if (target != null && target.waitTicks <= 0) {
+                            if (target instanceof EntityPlayer) {
+                                EntityPlayer player = (EntityPlayer) target;
+                                if ((!em.isOnground() && isCritSetup) || mc.thePlayer.fallDistance > 0) {
+                                    player.criticalHits++;
                                 } else {
-                                    mc.thePlayer.swingItemFake();
-                                }
-                            }
-
-                            if (target != null && target.waitTicks <= 0) {
-                                if (target instanceof EntityPlayer) {
-                                    EntityPlayer player = (EntityPlayer) target;
-                                    if ((!em.isOnground() && isCritSetup) || mc.thePlayer.fallDistance > 0) {
-                                        player.criticalHits++;
-                                    } else {
-                                        if (player.criticalHits > 1) {
-                                            if (antiCritFunky.getValue() && hasEnchant(target, "Retro")) {
-                                                player.criticalHits = 0;
-                                            }
+                                    if (player.criticalHits > 1) {
+                                        if (antiCritFunky.getValue() && hasEnchant(target, "Retro")) {
+                                            player.criticalHits = 0;
                                         }
                                     }
                                 }
-
-                                boolean b = Angle.INSTANCE.check(new Location(mc.thePlayer.posX, em.getY(), mc.thePlayer.posZ, em.getYaw(), 0), target);
-                                target.waitTicks = 10;
                             }
 
-                            delay.reset();
-                            nextRandom = (int) Math.round((20 / randomInt(min, max)));
-                            if (crits && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically && critModule.isPacket2() && isCritSetup) {
-                                NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, true));
-                            }
-                        } else {
-                            if (!attack.equals("Precise") && fakeSwingTimer.delay(nextRandom * 50)) {
-                                mc.thePlayer.swingItemFake();
-                                fakeSwingTimer.setDifference(nextRandom > 2 ? 100 : 0);
-                            }
+                            //boolean b = Angle.INSTANCE.check(new Location(mc.thePlayer.posX, em.getY(), mc.thePlayer.posZ, em.getYaw(), 0), target);
+                            target.waitTicks = 10;
                         }
 
-                        isCritSetup = false;
-
-                        if ((boolean) settings.get(/*PARTICLES*/decodeByteArray(new byte[]{80, 65, 82, 84, 73, 67, 76, 69, 83})).getValue()) {
-                            float sharpLevel = EnchantmentHelper.func_152377_a(mc.thePlayer.inventory.getCurrentItem(), target.getCreatureAttribute());
-                            if (sharpLevel > 0)
-                                mc.thePlayer.onEnchantmentCritical(target);
-                            if ((mc.thePlayer.onGround && Client.getModuleManager().isEnabled(Criticals.class)) || (!mc.thePlayer.onGround && mc.thePlayer.fallDistance > 0.66)) {
-                                mc.thePlayer.onCriticalHit(target);
-                            }
-                        }
-                    } /*else {
-                        float yawDiff = RotationUtils.getYawChangeGiven(target.posX + p[0], target.posZ + p[2], em.getYaw());
-                        double offOrig = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), v, target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height, 1.2);
-
-                        boolean willViolate = target.waitTicks <= 0 && Angle.INSTANCE.willViolateYaw(new Location(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, em.getYaw() + yawDiff, 0), target);
-
-                        ChatUtil.debug("\247a" + yawDiff + " \247b" + off + " \247c" + offOrig + " \247d" + willViolate);
-                        ChatUtil.debug("\247a" + mc.thePlayer.getDistance(target.posX + p[0], target.posY + p[1], target.posZ + p[2]) + " " + angleTimer.getDifference());
-                        ChatUtil.debug("----------------------------------");
-                    }*/
-                }/* else {
-                    if (isAttacking) {
-                        ChatUtil.printChat("Blocking? " + isBlocking + " " + mc.thePlayer.ticksExisted);
-                    }
-                    if (isCritSetup) {
-                        ChatUtil.printChat("Crit setup? " + isCritSetup + " " + isBlocking + " " + delay.roundDelay(50 * nextRandom) + " " + mc.thePlayer.ticksExisted);
-                    }
-                }*/
-
-                if (wait <= 0 && mc.thePlayer.isBlocking() && !isBlocking && !AutoSoup.isHealing) {
-                    isBlocking = true;
-                    NetUtil.sendPacket(new C08PacketPlayerBlockPlacement(mc.thePlayer.getCurrentEquippedItem()));
-                }
-
-            }
-            if (em.isPost()) {
-                wait--;
-
-                if (loaded.isEmpty() && target == null && (isBlocking) && (blockTimer.delay(50)) && block && !AutoSoup.isHealing) {
-                    // Unblock, set next random blockWait
-                    blockTimer.reset();
-                    isBlocking = false;
-                    NetUtil.sendPacket(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
-                }
-
-            }
-        } else if ("bruh".equals( /*switch*/decodeByteArray(new byte[]{115, 119, 105, 116, 99, 104}))) {
-            if (em.isPre()) {
-                tickEntities();
-                target = getOptimalTarget();
-                if (target != null) {
-                    float[] r = RotationUtils.getRotations(target);
-                    em.setYaw(r[0]);
-                    em.setPitch(r[1]);
-                    if (block && mc.thePlayer.inventory.getCurrentItem() != null && mc.thePlayer.inventory.getCurrentItem().getItem() instanceof ItemSword) {
-                        mc.thePlayer.setItemInUse(mc.thePlayer.inventory.getCurrentItem(), 0x11938);
-                    }
-                }
-            } else {
-                if (target != null) {
-                    if (mc.thePlayer.isBlocking() && target.waitTicks <= 1 && isBlocking && !AutoSoup.isHealing) {
-                        isBlocking = false;
-                        NetUtil.sendPacket(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
-                    }
-                    if (target.waitTicks <= 0 && !isBlocking && delay.delay(200)) {
-                        target.waitTicks = 10;
-
-                        this.attack(target, crits);
-
-                        float sharpLevel = EnchantmentHelper.func_152377_a(mc.thePlayer.inventory.getCurrentItem(), target.getCreatureAttribute());
-                        if (sharpLevel > 0.0F && (Boolean) settings.get(/*PARTICLES*/decodeByteArray(new byte[]{80, 65, 82, 84, 73, 67, 76, 69, 83})).getValue()) {
-                            mc.thePlayer.onEnchantmentCritical(target);
-                            if (crits || (!mc.thePlayer.onGround && mc.thePlayer.fallDistance > 0.66)) {
-                                mc.thePlayer.onCriticalHit(target);
-                            }
-                        }
-
-                        if (mc.thePlayer.isBlocking() && !isBlocking) {
-                            isBlocking = true;
-                            NetUtil.sendPacket(new C08PacketPlayerBlockPlacement(mc.thePlayer.inventory.getCurrentItem()));
-                        }
                         delay.reset();
+                        nextRandom = (int) Math.round((20 / randomInt(min, max)));
+                        if (crits && mc.thePlayer.onGround && mc.thePlayer.isCollidedVertically && critModule.isPacket2() && isCritSetup) {
+                            NetUtil.sendPacketNoEvents(new C03PacketPlayer.C04PacketPlayerPosition(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, true));
+                        }
+                    } else {
+                        if (!attack.equals("Precise") && fakeSwingTimer.delay(nextRandom * 50)) {
+                            mc.thePlayer.swingItemFake();
+                            fakeSwingTimer.setDifference(nextRandom > 2 ? 100 : 0);
+                        }
                     }
-                } else if (isBlocking && !AutoSoup.isHealing) {
-                    // Unblock
-                    isBlocking = false;
-                    NetUtil.sendPacket(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
+
+                    isCritSetup = false;
+
+                    if (particles.getValue()) {
+                        float sharpLevel = EnchantmentHelper.func_152377_a(mc.thePlayer.inventory.getCurrentItem(), target.getCreatureAttribute());
+                        if (sharpLevel > 0)
+                            mc.thePlayer.onEnchantmentCritical(target);
+                        if ((mc.thePlayer.onGround && Client.getModuleManager().isEnabled(Criticals.class)) || (!mc.thePlayer.onGround && mc.thePlayer.fallDistance > 0.66)) {
+                            mc.thePlayer.onCriticalHit(target);
+                        }
+                    }
+                } /*else {
+                    float yawDiff = RotationUtils.getYawChangeGiven(target.posX + p[0], target.posZ + p[2], em.getYaw());
+                    double offOrig = Direction.directionCheck(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.getEyeHeight(), v, target.posX + p[0], target.posY + p[1] + target.height / 2D, target.posZ + p[2], target.width, target.height, 1.2);
+
+                    boolean willViolate = target.waitTicks <= 0 && Angle.INSTANCE.willViolateYaw(new Location(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, em.getYaw() + yawDiff, 0), target);
+
+                    ChatUtil.debug("\247a" + yawDiff + " \247b" + off + " \247c" + offOrig + " \247d" + willViolate);
+                    ChatUtil.debug("\247a" + mc.thePlayer.getDistance(target.posX + p[0], target.posY + p[1], target.posZ + p[2]) + " " + angleTimer.getDifference());
+                    ChatUtil.debug("----------------------------------");
+                }*/
+            }/* else {
+                if (isAttacking) {
+                    ChatUtil.printChat("Blocking? " + isBlocking + " " + mc.thePlayer.ticksExisted);
                 }
+                if (isCritSetup) {
+                    ChatUtil.printChat("Crit setup? " + isCritSetup + " " + isBlocking + " " + delay.roundDelay(50 * nextRandom) + " " + mc.thePlayer.ticksExisted);
+                }
+            }*/
+
+            if (wait <= 0 && mc.thePlayer.isBlocking() && !isBlocking && !AutoSoup.isHealing) {
+                isBlocking = true;
+                NetUtil.sendPacket(new C08PacketPlayerBlockPlacement(mc.thePlayer.getCurrentEquippedItem()));
             }
+
+        }
+        if (em.isPost()) {
+            wait--;
+
+            if (loaded.isEmpty() && target == null && (isBlocking) && (blockTimer.delay(50)) && block && !AutoSoup.isHealing) {
+                // Unblock, set next random blockWait
+                blockTimer.reset();
+                isBlocking = false;
+                NetUtil.sendPacket(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.DOWN));
+            }
+
         }
     }
 
@@ -1096,7 +1051,7 @@ public class Killaura extends Module {
         }
 
         if (target instanceof EntityPlayer) {
-            if (target.getEquipmentInSlot(2) != null) {
+            if (HypixelUtil.isItemMystic(target.getEquipmentInSlot(2))) {
                 for (String pitEnchant : HypixelUtil.getPitEnchants(target.getEquipmentInSlot(2))) {
                     for (String enchant : enchants) {
                         if (pitEnchant.contains(enchant)) {
@@ -1167,7 +1122,7 @@ public class Killaura extends Module {
         return new double[]{finalX * scale, finalY * scale, finalZ * scale};
     }
 
-    private class EntityDelta {
+    private static class EntityDelta {
         private final ArrayBlockingQueue<double[]> deltas = new ArrayBlockingQueue<>(5);
         private int lastUpdatedTick;
 
@@ -1175,7 +1130,7 @@ public class Killaura extends Module {
             deltas.add(new double[]{initialDeltaX, initialDeltaY});
         }
 
-        private EntityDelta logDeltas(double deltaX, double deltaY, int currentTick) {
+        private void logDeltas(double deltaX, double deltaY, int currentTick) {
 
             double distance = MathHelper.sqrt_double(deltaX * deltaX + deltaY * deltaY);
 
@@ -1184,7 +1139,7 @@ public class Killaura extends Module {
                     deltas.remove();
                 }
                 deltas.add(new double[]{0, 0});
-                return this;
+                return;
             }
 
             if (currentTick - lastUpdatedTick > 5) {
@@ -1196,7 +1151,6 @@ public class Killaura extends Module {
 
             lastUpdatedTick = currentTick;
             deltas.add(new double[]{deltaX, deltaY});
-            return this;
         }
 
         public double[] getWeightedDeltas() {
@@ -1233,7 +1187,7 @@ public class Killaura extends Module {
     }
 
     public boolean isNextTickGround() {
-        boolean forceTrue = !((boolean) settings.get(/*STEPCOMPAT*/decodeByteArray(new byte[]{83, 84, 69, 80, 67, 79, 77, 80, 65, 84})).getValue()) || !PlayerUtil.isMoving();
+        boolean forceTrue = !(stepCompat.getValue()) || !PlayerUtil.isMoving();
         boolean nextTickGround = false;
 
         double motionX = mc.thePlayer.posX - mc.thePlayer.lastTickPosX;
@@ -1253,12 +1207,11 @@ public class Killaura extends Module {
                 break;
             }
         }
-        boolean isGround = forceTrue || nextTickGround;
-        return isGround;
+        return forceTrue || nextTickGround;
     }
 
     public boolean blockStep() {
-        return (boolean) settings.get(/*STEPCOMPAT*/decodeByteArray(new byte[]{83, 84, 69, 80, 67, 79, 77, 80, 65, 84})).getValue() && getCurrentTarget() != null && Client.getModuleManager().isEnabled(Criticals.class) && stepDelay < 0;
+        return stepCompat.getValue() && getCurrentTarget() != null && Client.getModuleManager().isEnabled(Criticals.class) && stepDelay < 0;
     }
 
     private void tickEntities() {
@@ -1292,7 +1245,7 @@ public class Killaura extends Module {
     }
 
     public void attack(Entity ent, boolean crits) {
-        if (!(boolean) noswing.getValue())
+        if (!noswing.getValue())
             mc.thePlayer.swingItem();
         else
             mc.thePlayer.swingItemFake();
@@ -1308,29 +1261,25 @@ public class Killaura extends Module {
         }
     }
 
-    private EntityLivingBase getOptimalTarget() {
-        return null;
-    }
-
     public boolean validEntity(EntityLivingBase entity) {
         if (entity == null)
             return false;
-        MultiBool multi = ((MultiBool) settings.get(TARGETING).getValue());
-        boolean players = (Boolean) multi.getSetting(/*PLAYERS*/decodeByteArray(new byte[]{80, 76, 65, 89, 69, 82, 83})).getValue();
-        boolean animals = (Boolean) multi.getSetting(/*PASSIVE*/decodeByteArray(new byte[]{80, 65, 83, 83, 73, 86, 69})).getValue();
-        boolean mobs = (Boolean) multi.getSetting(/*MOBS*/decodeByteArray(new byte[]{77, 79, 66, 83})).getValue();
-        boolean villager = (Boolean) multi.getSetting(/*VILLAGERS*/decodeByteArray(new byte[]{86, 73, 76, 76, 65, 71, 69, 82, 83})).getValue();
-        boolean golems = (Boolean) multi.getSetting(decodeByteArray(new byte[]{71, 79, 76, 69, 77, 83})).getValue();
+        MultiBool multi = ((MultiBool) settings.get("TARGETING").getValue());
+        boolean players = (Boolean) multi.getSetting("PLAYERS").getValue();
+        boolean animals = (Boolean) multi.getSetting("PASSIVE").getValue();
+        boolean mobs = (Boolean) multi.getSetting("MOBS").getValue();
+        boolean villager = (Boolean) multi.getSetting("VILLAGERS").getValue();
+        boolean golems = (Boolean) multi.getSetting("GOLEMS").getValue();
         boolean friends = (Boolean) multi.getSetting("FRIENDS").getValue();
-        boolean invis = (Boolean) multi.getSetting(/*INVISIBLES*/decodeByteArray(new byte[]{73, 78, 86, 73, 83, 73, 66, 76, 69, 83})).getValue();
-        boolean teams = (Boolean) multi.getSetting(/*TEAMS*/decodeByteArray(new byte[]{84, 69, 65, 77, 83})).getValue();
-        boolean armor = (Boolean) multi.getSetting(/*ARMOR*/decodeByteArray(new byte[]{65, 82, 77, 79, 82})).getValue();
+        boolean invis = (Boolean) multi.getSetting("INVISIBLES").getValue();
+        boolean teams = (Boolean) multi.getSetting("TEAMS").getValue();
+        boolean armor = (Boolean) multi.getSetting("ARMOR-ONLY").getValue();
 
-        float range = ((Number) settings.get(RANGE).getValue()).floatValue();
-        float focusRange = range >= ((Number) blockRange.getValue()).floatValue() ? (mc.thePlayer.canEntityBeSeen(entity) ? range : Math.min(3, range)) : ((Number) blockRange.getValue()).floatValue();
+        float range = this.range.getValue().floatValue();
+        float focusRange = range >= blockRange.getValue().floatValue() ? (mc.thePlayer.canEntityBeSeen(entity) ? range : Math.min(3, range)) : blockRange.getValue().floatValue();
         if ((mc.thePlayer.getHealth() > 0) && (entity.getHealth() > 0 && !entity.isDead && entity.deathTime <= 0) || Float.isNaN(entity.getHealth())) {
-            boolean raytrace = (!((Boolean) settings.get(RAYTRACE).getValue())) || (mc.thePlayer.canEntityBeSeen(entity));
-            if (mc.thePlayer.getDistanceToEntity(entity) <= focusRange && raytrace && entity.ticksExisted > ((Number) settings.get(TICK).getValue()).intValue()) {
+            boolean raytrace = (!this.raytrace.getValue()) || (mc.thePlayer.canEntityBeSeen(entity));
+            if (mc.thePlayer.getDistanceToEntity(entity) <= focusRange && raytrace && entity.ticksExisted > existed.getValue().intValue()) {
                 if (!isInFOV(entity))
                     return false;
                 if (entity instanceof EntityPlayer && players) {
@@ -1355,7 +1304,7 @@ public class Killaura extends Module {
     }
 
     private void sortList() {
-        String current = ((Options) settings.get(TARGETMODE).getValue()).getSelected();
+        String current = priority.getSelected();
         if (current.equalsIgnoreCase(/*Range*/ decodeByteArray(new byte[]{82, 97, 110, 103, 101}))) {
             loaded.sort(Comparator.comparingDouble(o -> o.getDistanceToEntity(mc.thePlayer)));
         } else if (current.equalsIgnoreCase(/*Health*/ decodeByteArray(new byte[]{72, 101, 97, 108, 116, 104}))) {
@@ -1382,7 +1331,7 @@ public class Killaura extends Module {
 
     private double getTargetWeightedBounty(EntityLivingBase entityLivingBase) {
         double weight = entityLivingBase.getHealth();
-        int maxAngleStep = ((Number) settings.get(ANGLESTEP).getValue()).intValue();
+        int maxAngleStep = angleStep.getValue().intValue();
 
         if (entityLivingBase instanceof EntityPlayer) {
             if (TargetESP.isPriority((EntityPlayer) entityLivingBase) && entityLivingBase.hurtTime < 6) {
@@ -1402,25 +1351,25 @@ public class Killaura extends Module {
 
                 float estimatedYawChange;
 
-                Bypass bypass = Client.getModuleManager().get(Bypass.class);
-                int bypassTicks = bypass.bruh - 10;
-                boolean allowInvalidAngles = bypass.allowBypassing() && (bypass.option.getSelected().equals("Watchdog Off") || (bypass.option.getSelected().equals("Dong") ?
-                        bypassTicks > 25 && bypassTicks <= (27 + bypass.randomDelay) : bypass.bruh > 10 && bypass.bruh % 100 > 10 && bypass.bruh % 100 < 99)) && HypixelUtil.isVerifiedHypixel();
+//                Bypass bypass = Client.getModuleManager().get(Bypass.class);
+//                int bypassTicks = bypass.bruh - 10;
+//                boolean allowInvalidAngles = bypass.allowBypassing() && (bypass.option.getSelected().equals("Watchdog Off") || (bypass.option.getSelected().equals("Dong") ?
+//                        bypassTicks > 25 && bypassTicks <= (27 + bypass.randomDelay) : bypass.bruh > 10 && bypass.bruh % 100 > 10 && bypass.bruh % 100 < 99)) && HypixelUtil.isVerifiedHypixel();
 
                 float forwardYawDiff = Math.abs(yawDiff);
-                if (forwardYawDiff > 90 && allowInvalidAngles) {
-                    boolean willViolate = entityLivingBase.waitTicks <= 0 && Angle.INSTANCE.willViolateYaw(new Location(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, lastAngles.x + MathHelper.clamp_float(yawDiff + 180, -180, 180), 0), entityLivingBase);
-                    if (willViolate) {
-                        weight += 5;
-                    }
-                    estimatedYawChange = Math.abs(MathHelper.clamp_float(yawDiff + 180, -180, 180));
-                } else {
-                    boolean willViolate = entityLivingBase.waitTicks <= 0 && Angle.INSTANCE.willViolateYaw(new Location(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, lastAngles.x + yawDiff, 0), entityLivingBase);
-                    if (willViolate) {
-                        weight += 5;
-                    }
-                    estimatedYawChange = forwardYawDiff;
+//                if (forwardYawDiff > 90 && allowInvalidAngles) {
+//                    boolean willViolate = entityLivingBase.waitTicks <= 0 && Angle.INSTANCE.willViolateYaw(new Location(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, lastAngles.x + MathHelper.clamp_float(yawDiff + 180, -180, 180), 0), entityLivingBase);
+//                    if (willViolate) {
+//                        weight += 5;
+//                    }
+//                    estimatedYawChange = Math.abs(MathHelper.clamp_float(yawDiff + 180, -180, 180));
+//                } else {
+                boolean willViolate = entityLivingBase.waitTicks <= 0 && Angle.INSTANCE.willViolateYaw(new Location(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, lastAngles.x + yawDiff, 0), entityLivingBase);
+                if (willViolate) {
+                    weight += 5;
                 }
+                estimatedYawChange = forwardYawDiff;
+//                }
 
                 estimatedYawChange = (float) MathUtils.getIncremental(estimatedYawChange, 20);
 
@@ -1438,7 +1387,7 @@ public class Killaura extends Module {
     // This is for Health Vampire mode
     private double getTargetWeighted(EntityLivingBase entityLivingBase) {
         double weight = entityLivingBase.getHealth();
-        int maxAngleStep = ((Number) settings.get(ANGLESTEP).getValue()).intValue();
+        int maxAngleStep = angleStep.getValue().intValue();
 
         if (mc.thePlayer.getHealth() <= 19.5) {
             weight += Math.max(entityLivingBase.waitTicks, 0);
@@ -1452,25 +1401,25 @@ public class Killaura extends Module {
 
                 float estimatedYawChange;
 
-                Bypass bypass = Client.getModuleManager().get(Bypass.class);
-                int bypassTicks = bypass.bruh - 10;
-                boolean allowInvalidAngles = bypass.allowBypassing() && (bypass.option.getSelected().equals("Watchdog Off") || (bypass.option.getSelected().equals("Dong") ?
-                        bypassTicks > 25 && bypassTicks <= (27 + bypass.randomDelay) : bypass.bruh > 10 && bypass.bruh % 100 > 10 && bypass.bruh % 100 < 99)) && HypixelUtil.isVerifiedHypixel();
+//                Bypass bypass = Client.getModuleManager().get(Bypass.class);
+//                int bypassTicks = bypass.bruh - 10;
+//                boolean allowInvalidAngles = bypass.allowBypassing() && (bypass.option.getSelected().equals("Watchdog Off") || (bypass.option.getSelected().equals("Dong") ?
+//                        bypassTicks > 25 && bypassTicks <= (27 + bypass.randomDelay) : bypass.bruh > 10 && bypass.bruh % 100 > 10 && bypass.bruh % 100 < 99)) && HypixelUtil.isVerifiedHypixel();
 
                 float forwardYawDiff = Math.abs(yawDiff);
-                if (forwardYawDiff > 90 && allowInvalidAngles) {
-                    boolean willViolate = entityLivingBase.waitTicks <= 0 && Angle.INSTANCE.willViolateYaw(new Location(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, lastAngles.x + MathHelper.clamp_float(yawDiff + 180, -180, 180), 0), entityLivingBase);
-                    if (willViolate) {
-                        weight += 5;
-                    }
-                    estimatedYawChange = Math.abs(MathHelper.clamp_float(yawDiff + 180, -180, 180));
-                } else {
-                    boolean willViolate = entityLivingBase.waitTicks <= 0 && Angle.INSTANCE.willViolateYaw(new Location(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, lastAngles.x + yawDiff, 0), entityLivingBase);
-                    if (willViolate) {
-                        weight += 5;
-                    }
-                    estimatedYawChange = forwardYawDiff;
+//                if (forwardYawDiff > 90 && allowInvalidAngles) {
+//                    boolean willViolate = entityLivingBase.waitTicks <= 0 && Angle.INSTANCE.willViolateYaw(new Location(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, lastAngles.x + MathHelper.clamp_float(yawDiff + 180, -180, 180), 0), entityLivingBase);
+//                    if (willViolate) {
+//                        weight += 5;
+//                    }
+//                    estimatedYawChange = Math.abs(MathHelper.clamp_float(yawDiff + 180, -180, 180));
+//                } else {
+                boolean willViolate = entityLivingBase.waitTicks <= 0 && Angle.INSTANCE.willViolateYaw(new Location(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, lastAngles.x + yawDiff, 0), entityLivingBase);
+                if (willViolate) {
+                    weight += 5;
                 }
+                estimatedYawChange = forwardYawDiff;
+                //}
 
                 estimatedYawChange = (float) MathUtils.getIncremental(estimatedYawChange, 20);
 
@@ -1488,7 +1437,7 @@ public class Killaura extends Module {
     private List<EntityLivingBase> getTargets() {
         List<EntityLivingBase> targets = new ArrayList<>();
         boolean priorityOnly = false;
-        boolean allowPriorityOnly = !((Options) settings.get(TARGETMODE).getValue()).getSelected().equals("Bounty Vamp");
+        boolean allowPriorityOnly = !priority.getSelected().equals("Bounty Vamp") || exclusiveMode.getValue();
         for (Object o : mc.theWorld.getLoadedEntityList()) {
             if (o instanceof EntityLivingBase) {
                 EntityLivingBase entity = (EntityLivingBase) o;
@@ -1510,7 +1459,7 @@ public class Killaura extends Module {
     }
 
     private boolean isInFOV(EntityLivingBase entity) {
-        int fov = ((Number) settings.get(FOVCHECK).getValue()).intValue();
+        int fov = this.fov.getValue().intValue();
         return Math.abs(RotationUtils.getYawChange(entity.posX, entity.posZ)) <= fov && Math.abs(RotationUtils.getPitchChange(entity, entity.posY)) <= fov;
     }
 

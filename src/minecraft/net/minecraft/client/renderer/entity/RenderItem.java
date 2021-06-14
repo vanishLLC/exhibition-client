@@ -48,12 +48,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.*;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumWorldBlockLayer;
-import net.minecraft.util.ReportedException;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Vec3i;
+import net.minecraft.util.*;
 import optifine.Config;
 import optifine.CustomColors;
 import optifine.CustomItems;
@@ -575,32 +570,22 @@ public class RenderItem implements IResourceManagerReloadListener
 
             if (flag)
             {
-                int i = (int)Math.round(13.0D - (double)stack.getItemDamage() * 13.0D / (double)stack.getMaxDamage());
-                int j = (int)Math.round(255.0D - (double)stack.getItemDamage() * 255.0D / (double)stack.getMaxDamage());
-
-                if (Reflector.ForgeItem_getDurabilityForDisplay.exists())
-                {
-                    double d0 = Reflector.callDouble(stack.getItem(), Reflector.ForgeItem_getDurabilityForDisplay, new Object[] {stack});
-                    i = (int)Math.round(13.0D - d0 * 13.0D);
-                    j = (int)Math.round(255.0D - d0 * 255.0D);
-                }
-
                 GlStateManager.disableLighting();
                 GlStateManager.disableDepth();
                 GlStateManager.disableTexture2D();
                 GlStateManager.disableAlpha();
                 GlStateManager.disableBlend();
                 Tessellator tessellator = Tessellator.getInstance();
-                WorldRenderer worldrenderer = tessellator.getWorldRenderer();
-                this.func_181565_a(worldrenderer, xPosition + 2, yPosition + 13, 13, 2, 0, 0, 0, 255);
-                this.func_181565_a(worldrenderer, xPosition + 2, yPosition + 13, 12, 1, (255 - j) / 4, 64, 0, 255);
-                this.func_181565_a(worldrenderer, xPosition + 2, yPosition + 13, i, 1, 255 - j, j, 0, 255);
+                WorldRenderer bufferbuilder = tessellator.getWorldRenderer();
+                float f = (float)stack.getItemDamage();
+                float f1 = (float)stack.getMaxDamage();
+                float f2 = Math.max(0.0F, (f1 - f) / f1);
+                int i = Math.round(13.0F - f * 13.0F / f1);
+                int j = MathHelper.hsvToRGB(f2 / 3.0F, 1.0F, 1.0F);
 
-                if (!Reflector.ForgeHooksClient.exists())
-                {
-                    GlStateManager.enableBlend();
-                }
-
+                this.func_181565_a(bufferbuilder, xPosition + 2, yPosition + 13, 13, 2, 0, 0, 0, 255);
+                this.func_181565_a(bufferbuilder, xPosition + 2, yPosition + 13, i, 1, j >> 16 & 255, j >> 8 & 255, j & 255, 255);
+                GlStateManager.enableBlend();
                 GlStateManager.enableAlpha();
                 GlStateManager.enableTexture2D();
                 GlStateManager.enableLighting();

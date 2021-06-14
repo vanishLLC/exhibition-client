@@ -3,6 +3,7 @@ package exhibition.util;
 import exhibition.module.impl.render.ESP2D;
 import exhibition.module.impl.render.Nametags;
 import exhibition.util.render.Colors;
+import exhibition.util.render.Depth;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
@@ -11,6 +12,7 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.StringUtils;
 import net.minecraft.util.Vec3;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.Display;
@@ -19,6 +21,7 @@ import org.lwjgl.util.glu.GLU;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.regex.Pattern;
 
 import static org.lwjgl.opengl.GL11.*;
 
@@ -176,10 +179,16 @@ public class RenderingUtil {
 
     public static void drawOutlinedString(String str, float x, float y, int color) {
         Minecraft mc = Minecraft.getMinecraft();
-        mc.fontRendererObj.drawString(str, x - 0.5f, y, Colors.getColor(5, (color >> 24 & 255)));
-        mc.fontRendererObj.drawString(str, x + 0.5f, y, Colors.getColor(5, (color >> 24 & 255)));
-        mc.fontRendererObj.drawString(str, x, y + 0.5f, Colors.getColor(5, (color >> 24 & 255)));
-        mc.fontRendererObj.drawString(str, x, y - 0.5f, Colors.getColor(5, (color >> 24 & 255)));
+        String colorRemoved = StringUtils.stripColorKeepControl(str);
+        Depth.pre();
+        Depth.mask();
+        mc.fontRendererObj.drawString(str, x, y, -1);
+        Depth.render(GL_LESS);
+        mc.fontRendererObj.drawString(colorRemoved, x - 0.5f, y, Colors.getColor(5, (color >> 24 & 255)));
+        mc.fontRendererObj.drawString(colorRemoved, x + 0.5f, y, Colors.getColor(5, (color >> 24 & 255)));
+        mc.fontRendererObj.drawString(colorRemoved, x, y + 0.5f, Colors.getColor(5, (color >> 24 & 255)));
+        mc.fontRendererObj.drawString(colorRemoved, x, y - 0.5f, Colors.getColor(5, (color >> 24 & 255)));
+        Depth.post();
         mc.fontRendererObj.drawString(str, x, y, color);
     }
 

@@ -42,6 +42,9 @@ public class WaypointManager {
     public void saveWaypoints() {
         List<String> fileContent = new ArrayList<>();
         for (Waypoint waypoint : getWaypoints()) {
+            if(waypoint.isTemp())
+                continue;
+
             String waypointName = waypoint.getName();
             String x = String.valueOf(waypoint.getVec3().xCoord);
             String y = String.valueOf(waypoint.getVec3().yCoord);
@@ -57,6 +60,13 @@ public class WaypointManager {
 
     public Waypoint createWaypoint(String name, Vec3 vec3, int color, String address) {
         Waypoint waypoint = new Waypoint(name, vec3, color, address);
+        waypoints.add(waypoint);
+        saveWaypoints();
+        return waypoint;
+    }
+
+    public Waypoint createTempWaypoint(String name, Vec3 vec3, int color, String address) {
+        Waypoint waypoint = new Waypoint(name, vec3, color, address, true);
         waypoints.add(waypoint);
         saveWaypoints();
         return waypoint;
