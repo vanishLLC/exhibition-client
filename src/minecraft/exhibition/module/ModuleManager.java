@@ -192,6 +192,9 @@ public class ModuleManager<E extends Module> extends AbstractManager<Module> {
                     add(new MCV(new ModuleData(Other, "MCV", "View others inventories with a middle click.")));
                     add(new BetterHotbar(new ModuleData(Visuals, "BetterHotbar", "Shows your armor/inventory right over your hotbar.")));
                     add(new MysticSwap(new ModuleData(Other, "MysticSwap", "Automatically swaps to certain gear against other players.")));
+                    add(new TPAura(new ModuleData(Combat, "Peh", ".")));
+
+                    //add(new MotionPrediction(new ModuleData(Movement, "Joe", "")));
 
                     if (Boolean.parseBoolean((String) (Class.forName("java.lang.System").getMethod("getProperty", String.class)).invoke(null, "NEoBuMASs"))) {
                         add(new Aimbot(new ModuleData(Minigames, "Aimbot", "Cops n Crims aimbot.")));

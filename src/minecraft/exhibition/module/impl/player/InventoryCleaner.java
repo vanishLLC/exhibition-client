@@ -97,14 +97,17 @@ public class InventoryCleaner extends Module {
             return;
 
         EventMotionUpdate em = (EventMotionUpdate) event;
-        if (em.isPre() && mc.thePlayer != null && (mc.currentScreen == null || mc.currentScreen instanceof GuiChat || mc.currentScreen instanceof GuiInventory) && random.nextInt(2) == 0) {
+        boolean inInventory = mc.currentScreen instanceof GuiInventory;
+        boolean canClean = ((openOnly.getValue() && (mc.currentScreen == null || mc.currentScreen instanceof GuiChat)) || inInventory);
+        if (em.isPre() && mc.thePlayer != null && canClean && random.nextInt(2) == 0) {
             for (int i = 9; i < 45; i++) {
                 if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
                     ItemStack is = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
                     if (isBad(is) && (is != mc.thePlayer.getCurrentEquippedItem())) {
                         if (!isCleaning) {
                             isCleaning = true;
-                            NetUtil.sendPacket(new C16PacketClientStatus(C16PacketClientStatus.EnumState.OPEN_INVENTORY_ACHIEVEMENT));
+                            if (!inInventory)
+                                NetUtil.sendPacket(new C16PacketClientStatus(C16PacketClientStatus.EnumState.OPEN_INVENTORY_ACHIEVEMENT));
                         }
                         mc.playerController.windowClick(mc.thePlayer.inventoryContainer.windowId, i, 1, 4, mc.thePlayer);
                         firstEnable = false;
@@ -113,10 +116,14 @@ public class InventoryCleaner extends Module {
                 }
                 if (i == 44 && (isCleaning || firstEnable)) {
                     isCleaning = false;
-                    NetUtil.sendPacket(new C0DPacketCloseWindow(mc.thePlayer.inventoryContainer.windowId));
+                    if (!inInventory) {
+                        NetUtil.sendPacket(new C0DPacketCloseWindow(mc.thePlayer.inventoryContainer.windowId));
+                    }
                     if (toggle.getValue()) toggle();
                 }
             }
+        } else if(!canClean) {
+            isCleaning = false;
         }
     }
 
@@ -259,7 +266,7 @@ public class InventoryCleaner extends Module {
                 }
             }
 
-            if(potCount > potCap.getValue().intValue()) {
+            if (potCount > potCap.getValue().intValue()) {
                 return true;
             }
         }
@@ -300,7 +307,7 @@ public class InventoryCleaner extends Module {
                 item.getItem().getUnlocalizedName().contains("piston") ||
                 (item.getItem().getUnlocalizedName().contains("potion") && isBadPotion(item)) ||
                 item.getItem() instanceof ItemBlock && getBlockCount() > ((Number) settings.get(BLOCKCAP).getValue()).intValue() || (
-                        item.getItem() instanceof ItemFood && food.getValue() && !(item.getItem() instanceof ItemAppleGold)) ||
+                item.getItem() instanceof ItemFood && food.getValue() && !(item.getItem() instanceof ItemAppleGold)) ||
                 ((item.getItem() instanceof ItemBow || item.getItem().getUnlocalizedName().contains("arrow")) && archery.getValue()));
     }
 

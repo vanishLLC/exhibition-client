@@ -11,13 +11,13 @@ public class LoginUtil {
 
     public static final File LOGIN = FileUtils.getConfigFile("Data");
 
-    public static int loginResponseHashCode = -1;
+    public static int lastResponseCode = -1;
 
     public static void saveLogin(String encryptedUsername, String encryptedPassword) {
         List<String> fileContent = new ArrayList<>();
         fileContent.add(encryptedUsername);
         fileContent.add(encryptedPassword);
-        fileContent.add(String.valueOf(LoginUtil.loginResponseHashCode));
+        fileContent.add(String.valueOf(LoginUtil.lastResponseCode));
         fileContent.add(Client.isBeta() ? getLastVersion() : Client.version);
         FileUtils.write(LOGIN, fileContent, true);
     }
@@ -26,8 +26,9 @@ public class LoginUtil {
         return FileUtils.read(LOGIN);
     }
 
-    public static int getLoginResponseHashCode() {
-        return getLoginInformation().isEmpty() || getLoginInformation().size() < 3 ? -1 : Integer.parseInt(getLoginInformation().get(2));
+    public static int getLastResponseCode() {
+        List<String> info = getLoginInformation();
+        return info.isEmpty() || info.size() < 3 ? -1 : Integer.parseInt(info.get(2));
     }
 
     public static String getUsername() {

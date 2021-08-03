@@ -36,7 +36,7 @@ public class InventoryWalk extends Module {
     @Override
     @RegisterEvent(events = {EventPacket.class, EventTick.class})
     public void onEvent(Event event) {
-        if(mc.thePlayer == null || mc.theWorld == null) {
+        if (mc.thePlayer == null || mc.theWorld == null) {
             return;
         }
 

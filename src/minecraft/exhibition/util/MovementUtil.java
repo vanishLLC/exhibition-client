@@ -1,38 +1,59 @@
 package exhibition.util;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
-import net.minecraft.world.World;
 
-public class MovementUtil {
+public class MovementUtil implements MinecraftUtil {
 
-    public void moveEntityWithHeading(EntityPlayer player, float strafe, float forward) {
-        World worldObj = Minecraft.getMinecraft().thePlayer.worldObj;
+    public static void simulateMovementTick(EntityPlayer fakePlayer) {
+        if (Math.abs(fakePlayer.motionX) < 0.005D) {
+            fakePlayer.motionX = 0.0D;
+        }
+
+        if (Math.abs(fakePlayer.motionY) < 0.005D) {
+            fakePlayer.motionY = 0.0D;
+        }
+
+        if (Math.abs(fakePlayer.motionZ) < 0.005D) {
+            fakePlayer.motionZ = 0.0D;
+        }
+
+        fakePlayer.moveStrafing *= 0.98F;
+        fakePlayer.moveForward *= 0.98F;
+
+        pushOutOfBlocks(fakePlayer, fakePlayer.posX - (double) fakePlayer.width * 0.35D, fakePlayer.getEntityBoundingBox().minY + 0.5D, fakePlayer.posZ + (double) fakePlayer.width * 0.35D);
+        pushOutOfBlocks(fakePlayer, fakePlayer.posX - (double) fakePlayer.width * 0.35D, fakePlayer.getEntityBoundingBox().minY + 0.5D, fakePlayer.posZ - (double) fakePlayer.width * 0.35D);
+        pushOutOfBlocks(fakePlayer, fakePlayer.posX + (double) fakePlayer.width * 0.35D, fakePlayer.getEntityBoundingBox().minY + 0.5D, fakePlayer.posZ - (double) fakePlayer.width * 0.35D);
+        pushOutOfBlocks(fakePlayer, fakePlayer.posX + (double) fakePlayer.width * 0.35D, fakePlayer.getEntityBoundingBox().minY + 0.5D, fakePlayer.posZ + (double) fakePlayer.width * 0.35D);
+
+        MovementUtil.moveEntityWithHeading(fakePlayer, fakePlayer.moveStrafing, fakePlayer.moveForward);
+    }
+
+    public static void moveEntityWithHeading(EntityPlayer player, float strafe, float forward) {
         if (!player.isInWater() || player.capabilities.isFlying) {
             if (!player.isInLava() || player.capabilities.isFlying) {
                 float f4 = 0.91F;
 
                 if (player.onGround) {
-                    f4 = worldObj.getBlockState(new BlockPos(MathHelper.floor_double(player.posX), MathHelper.floor_double(player.getEntityBoundingBox().minY) - 1, MathHelper.floor_double(player.posZ))).getBlock().slipperiness * 0.91F;
+                    f4 = mc.thePlayer.worldObj.getBlockState(new BlockPos(MathHelper.floor_double(player.posX), MathHelper.floor_double(player.getEntityBoundingBox().minY) - 1, MathHelper.floor_double(player.posZ))).getBlock().slipperiness * 0.91F;
                 }
 
                 float f = 0.16277136F / (f4 * f4 * f4);
                 float f5;
 
                 if (player.onGround) {
-                    f5 = player.getAIMoveSpeed() * f;
+                    f5 = mc.thePlayer.getAIMoveSpeed() * f;
                 } else {
-                    f5 = player.jumpMovementFactor;
+                    f5 = mc.thePlayer.jumpMovementFactor;
                 }
 
                 player.moveFlying(strafe, forward, f5);
                 f4 = 0.91F;
 
                 if (player.onGround) {
-                    f4 = worldObj.getBlockState(new BlockPos(MathHelper.floor_double(player.posX), MathHelper.floor_double(player.getEntityBoundingBox().minY) - 1, MathHelper.floor_double(player.posZ))).getBlock().slipperiness * 0.91F;
+                    f4 = mc.thePlayer.worldObj.getBlockState(new BlockPos(MathHelper.floor_double(player.posX), MathHelper.floor_double(player.getEntityBoundingBox().minY) - 1, MathHelper.floor_double(player.posZ))).getBlock().slipperiness * 0.91F;
                 }
 
                 if (player.isOnLadder()) {
@@ -45,7 +66,7 @@ public class MovementUtil {
                         player.motionY = -0.15D;
                     }
 
-                    boolean flag = player.isSneaking() && player instanceof EntityPlayer;
+                    boolean flag = player.isSneaking();
 
                     if (flag && player.motionY < 0.0D) {
                         player.motionY = 0.0D;
@@ -58,7 +79,7 @@ public class MovementUtil {
                     player.motionY = 0.2D;
                 }
 
-                if (worldObj.isRemote && (!worldObj.isBlockLoaded(new BlockPos((int) player.posX, 0, (int) player.posZ)) || !worldObj.getChunkFromBlockCoords(new BlockPos((int) player.posX, 0, (int) player.posZ)).isLoaded())) {
+                if (mc.thePlayer.worldObj.isRemote && (!mc.thePlayer.worldObj.isBlockLoaded(new BlockPos((int) player.posX, 0, (int) player.posZ)) || !mc.thePlayer.worldObj.getChunkFromBlockCoords(new BlockPos((int) player.posX, 0, (int) player.posZ)).isLoaded())) {
                     if (player.posY > 0.0D) {
                         player.motionY = -0.1D;
                     } else {
@@ -115,6 +136,65 @@ public class MovementUtil {
             }
         }
 
+    }
+
+    public static boolean pushOutOfBlocks(EntityPlayer player, double x, double y, double z) {
+        if (player.noClip) {
+            return false;
+        } else {
+            BlockPos blockpos = new BlockPos(x, y, z);
+            double d0 = x - (double) blockpos.getX();
+            double d1 = z - (double) blockpos.getZ();
+
+            if (!isOpenBlockSpace(blockpos)) {
+                int i = -1;
+                double d2 = 9999.0D;
+
+                if (isOpenBlockSpace(blockpos.west()) && d0 < d2) {
+                    d2 = d0;
+                    i = 0;
+                }
+
+                if (isOpenBlockSpace(blockpos.east()) && 1.0D - d0 < d2) {
+                    d2 = 1.0D - d0;
+                    i = 1;
+                }
+
+                if (isOpenBlockSpace(blockpos.north()) && d1 < d2) {
+                    d2 = d1;
+                    i = 4;
+                }
+
+                if (isOpenBlockSpace(blockpos.south()) && 1.0D - d1 < d2) {
+                    d2 = 1.0D - d1;
+                    i = 5;
+                }
+
+                float f = 0.1F;
+
+                if (i == 0) {
+                    player.motionX = (double) (-f);
+                }
+
+                if (i == 1) {
+                    player.motionX = (double) f;
+                }
+
+                if (i == 4) {
+                    player.motionZ = (double) (-f);
+                }
+
+                if (i == 5) {
+                    player.motionZ = (double) f;
+                }
+            }
+
+            return false;
+        }
+    }
+
+    private static boolean isOpenBlockSpace(BlockPos pos) {
+        return !mc.thePlayer.worldObj.getBlockState(pos).getBlock().isNormalCube() && !mc.thePlayer.worldObj.getBlockState(pos.up()).getBlock().isNormalCube();
     }
 
 }

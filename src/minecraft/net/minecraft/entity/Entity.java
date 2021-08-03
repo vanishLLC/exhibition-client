@@ -10,8 +10,6 @@ import exhibition.event.EventSystem;
 import exhibition.event.impl.EventStep;
 import exhibition.module.impl.combat.Killaura;
 import exhibition.module.impl.movement.AntiFall;
-import exhibition.module.impl.movement.Fly;
-import exhibition.module.impl.movement.FreecamTP;
 import exhibition.module.impl.player.AntiObby;
 import exhibition.module.impl.player.Scaffold;
 import exhibition.module.impl.render.Freecam;
@@ -616,11 +614,11 @@ public abstract class Entity implements ICommandSender
                 this.motionY = 0.0;
                 this.motionZ = 0.0;
             }
-            double var10 = x;
-            final double var11 = y;
-            double var12 = z;
+            double moveX = x;
+            final double moveY = y;
+            double moveZ = z;
             AntiFall antiFall = Client.getModuleManager().get(AntiFall.class);
-            final boolean var13 = onGround && (isSneaking() || antiFall.shouldSafeWalk() || (Client.getModuleManager().isEnabled(Scaffold.class) && this instanceof EntityPlayerSP && !Minecraft.getMinecraft().gameSettings.keyBindSneak.getIsKeyPressed()));
+            final boolean var13 = onGround && (isSneaking() || antiFall.shouldSafeWalk());
             if (var13) {
                 final double var14 = 0.05;
                 while (x != 0.0) {
@@ -634,7 +632,7 @@ public abstract class Entity implements ICommandSender
                     } else {
                         x += var14;
                     }
-                    var10 = x;
+                    moveX = x;
                 }
                 while (z != 0.0) {
                     if (!this.worldObj.getCollidingBoundingBoxes(this, this.getEntityBoundingBox().offset(0.0, -1.0, z)).isEmpty()) {
@@ -647,7 +645,7 @@ public abstract class Entity implements ICommandSender
                     } else {
                         z += var14;
                     }
-                    var12 = z;
+                    moveZ = z;
                 }
                 while (x != 0.0 && z != 0.0 && this.worldObj.getCollidingBoundingBoxes(this, this.getEntityBoundingBox().offset(x, -1.0, z)).isEmpty()) {
                     if (x < var14 && x >= -var14) {
@@ -657,7 +655,7 @@ public abstract class Entity implements ICommandSender
                     } else {
                         x += var14;
                     }
-                    var10 = x;
+                    moveX = x;
                     if (z < var14 && z >= -var14) {
                         z = 0.0;
                     } else if (z > 0.0) {
@@ -665,7 +663,7 @@ public abstract class Entity implements ICommandSender
                     } else {
                         z += var14;
                     }
-                    var12 = z;
+                    moveZ = z;
                 }
             }
             final List<AxisAlignedBB> var15 = this.worldObj.getCollidingBoundingBoxes(this, this.getEntityBoundingBox().addCoord(x, y, z));
@@ -674,7 +672,7 @@ public abstract class Entity implements ICommandSender
                 y = var18.calculateYOffset(this.getEntityBoundingBox(), y);
             }
             this.setEntityBoundingBox(this.getEntityBoundingBox().offset(0.0, y, 0.0));
-            final boolean var19 = this.onGround || (var11 != y && var11 < 0.0);
+            final boolean var19 = this.onGround || (moveY != y && moveY < 0.0);
             for (final AxisAlignedBB var21 : var15) {
                 x = var21.calculateXOffset(this.getEntityBoundingBox(), x);
             }
@@ -684,8 +682,8 @@ public abstract class Entity implements ICommandSender
             }
             this.setEntityBoundingBox(this.getEntityBoundingBox().offset(0.0, 0.0, z));
 
-            if (this.stepHeight > 0.0f && var19 && (var10 != x || var12 != z)) {
-                EventStep stepEvent = (EventStep) EventSystem.getInstance(EventStep.class);
+            if (this.stepHeight > 0.0f && var19 && (moveX != x || moveZ != z)) {
+                EventStep stepEvent = EventSystem.getInstance(EventStep.class);
                 if (this == Minecraft.getMinecraft().thePlayer)
                     stepEvent.fire(true, stepHeight);
                 if (!stepEvent.isCancelled()) {
@@ -696,20 +694,20 @@ public abstract class Entity implements ICommandSender
                     final AxisAlignedBB var25 = this.getEntityBoundingBox();
                     this.setEntityBoundingBox(var16);
                     y = this.stepHeight;
-                    final List<AxisAlignedBB> var26 = this.worldObj.getCollidingBoundingBoxes(this, this.getEntityBoundingBox().addCoord(var10, y, var12));
+                    final List<AxisAlignedBB> var26 = this.worldObj.getCollidingBoundingBoxes(this, this.getEntityBoundingBox().addCoord(moveX, y, moveZ));
                     AxisAlignedBB var27 = this.getEntityBoundingBox();
-                    final AxisAlignedBB var28 = var27.addCoord(var10, 0.0, var12);
+                    final AxisAlignedBB var28 = var27.addCoord(moveX, 0.0, moveZ);
                     double var29 = y;
                     for (final AxisAlignedBB var31 : var26) {
                         var29 = var31.calculateYOffset(var28, var29);
                     }
                     var27 = var27.offset(0.0, var29, 0.0);
-                    double var32 = var10;
+                    double var32 = moveX;
                     for (final AxisAlignedBB var34 : var26) {
                         var32 = var34.calculateXOffset(var27, var32);
                     }
                     var27 = var27.offset(var32, 0.0, 0.0);
-                    double var35 = var12;
+                    double var35 = moveZ;
                     for (final AxisAlignedBB var37 : var26) {
                         var35 = var37.calculateZOffset(var27, var35);
                     }
@@ -720,12 +718,12 @@ public abstract class Entity implements ICommandSender
                         var39 = var41.calculateYOffset(var38, var39);
                     }
                     var38 = var38.offset(0.0, var39, 0.0);
-                    double var42 = var10;
+                    double var42 = moveX;
                     for (final AxisAlignedBB var44 : var26) {
                         var42 = var44.calculateXOffset(var38, var42);
                     }
                     var38 = var38.offset(var42, 0.0, 0.0);
-                    double var45 = var12;
+                    double var45 = moveZ;
                     for (final AxisAlignedBB var47 : var26) {
                         var45 = var47.calculateZOffset(var38, var45);
                     }
@@ -752,27 +750,27 @@ public abstract class Entity implements ICommandSender
                         y = var23;
                         z = var24;
                         this.setEntityBoundingBox(var25);
-                        if (stepEvent.isActive() && stepEvent.getStepHeight() > 0.0 && var19 && (var10 != x || var12 != z)) {
+                        if (stepEvent.isActive() && stepEvent.getStepHeight() > 0.0 && var19 && (moveX != x || moveZ != z)) {
                             final double var52 = x;
                             final double var53 = y;
                             final double var54 = z;
                             final AxisAlignedBB var55 = this.getEntityBoundingBox();
                             this.setEntityBoundingBox(var16);
                             y = stepEvent.getStepHeight();
-                            final List<AxisAlignedBB> var56 = this.worldObj.getCollidingBoundingBoxes(this, this.getEntityBoundingBox().addCoord(var10, y, var12));
+                            final List<AxisAlignedBB> var56 = this.worldObj.getCollidingBoundingBoxes(this, this.getEntityBoundingBox().addCoord(moveX, y, moveZ));
                             AxisAlignedBB var57 = this.getEntityBoundingBox();
-                            final AxisAlignedBB var58 = var57.addCoord(var10, 0.0, var12);
+                            final AxisAlignedBB var58 = var57.addCoord(moveX, 0.0, moveZ);
                             double var59 = y;
                             for (final AxisAlignedBB var61 : var56) {
                                 var59 = var61.calculateYOffset(var58, var59);
                             }
                             var57 = var57.offset(0.0, var59, 0.0);
-                            double var62 = var10;
+                            double var62 = moveX;
                             for (final AxisAlignedBB var64 : var56) {
                                 var62 = var64.calculateXOffset(var57, var62);
                             }
                             var57 = var57.offset(var62, 0.0, 0.0);
-                            double var65 = var12;
+                            double var65 = moveZ;
                             for (final AxisAlignedBB var67 : var56) {
                                 var65 = var67.calculateZOffset(var57, var65);
                             }
@@ -783,12 +781,12 @@ public abstract class Entity implements ICommandSender
                                 var69 = var71.calculateYOffset(var68, var69);
                             }
                             var68 = var68.offset(0.0, var69, 0.0);
-                            double var72 = var10;
+                            double var72 = moveX;
                             for (final AxisAlignedBB var74 : var56) {
                                 var72 = var74.calculateXOffset(var68, var72);
                             }
                             var68 = var68.offset(var72, 0.0, 0.0);
-                            double var75 = var12;
+                            double var75 = moveZ;
                             for (final AxisAlignedBB var77 : var56) {
                                 var75 = var77.calculateZOffset(var68, var75);
                             }
@@ -842,9 +840,9 @@ public abstract class Entity implements ICommandSender
             this.worldObj.theProfiler.endSection();
             this.worldObj.theProfiler.startSection("rest");
             this.resetPositionToBB();
-            this.isCollidedHorizontally = (var10 != x || var12 != z);
-            this.isCollidedVertically = (var11 != y);
-            onGround = this.isCollidedVertically && var11 < 0.0;
+            this.isCollidedHorizontally = (moveX != x || moveZ != z);
+            this.isCollidedVertically = (moveY != y);
+            onGround = this.isCollidedVertically && moveY < 0.0;
             this.isCollided = (this.isCollidedHorizontally || this.isCollidedVertically);
             final int var82 = MathHelper.floor_double(this.posX);
             final int var83 = MathHelper.floor_double(this.posY - 0.20000000298023224);
@@ -859,13 +857,13 @@ public abstract class Entity implements ICommandSender
                 }
             }
             this.updateFallState(y, this.onGround, var86, var85);
-            if (var10 != x) {
+            if (moveX != x) {
                 this.motionX = 0.0;
             }
-            if (var12 != z) {
+            if (moveZ != z) {
                 this.motionZ = 0.0;
             }
-            if (var11 != y) {
+            if (moveY != y) {
                 var86.onLanded(this.worldObj, this);
             }
             if (this.canTriggerWalking() && (!var13 || Client.getModuleManager().isEnabled(Scaffold.class) || antiFall.shouldSafeWalk()) && this.ridingEntity == null) {
@@ -2235,7 +2233,7 @@ public abstract class Entity implements ICommandSender
     {
     }
 
-    protected boolean pushOutOfBlocks(double x, double y, double z)
+    public boolean pushOutOfBlocks(double x, double y, double z)
     {
         BlockPos blockpos = new BlockPos(x, y, z);
         double d0 = x - (double)blockpos.getX();

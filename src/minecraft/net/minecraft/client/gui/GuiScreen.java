@@ -18,6 +18,7 @@ import java.util.Set;
 
 import exhibition.Client;
 import exhibition.gui.click.ClickGui;
+import exhibition.gui.click.virtue.VirtueClickGui;
 import exhibition.management.keybinding.KeyHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.stream.GuiTwitchUserMode;
@@ -637,7 +638,7 @@ public abstract class GuiScreen extends Gui implements GuiYesNoCallback
             char c = Keyboard.getEventCharacter();
             int k = Keyboard.getEventKey();
 
-            if(Client.instance != null && Client.getClickGui() != null && !(mc.currentScreen instanceof GuiChat)) {
+            if(Client.instance != null && Client.getClickGui() != null && !(mc.currentScreen instanceof GuiChat || mc.currentScreen instanceof VirtueClickGui)) {
                 boolean inOtherScreen = mc.currentScreen != null && mc.currentScreen != Client.getClickGui();
                 if (inOtherScreen && (k == Keyboard.KEY_RSHIFT || k == Keyboard.KEY_INSERT || k == Keyboard.KEY_DELETE) && !Client.getClickGui().mainPanel.isOpen) {
                     Client.getClickGui().mainPanel.isOpen = true;

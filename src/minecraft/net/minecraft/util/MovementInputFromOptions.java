@@ -1,6 +1,7 @@
 package net.minecraft.util;
 
 import exhibition.Client;
+import exhibition.gui.click.ClickGui;
 import exhibition.gui.click.components.CategoryButton;
 import exhibition.gui.click.components.ConfigTextBox;
 import exhibition.gui.click.components.TextBox;
@@ -37,7 +38,10 @@ public class MovementInputFromOptions extends MovementInput
                     bad = true;
             }
         }
-        if (x.isEnabled() && !bad && !(Minecraft.getMinecraft().currentScreen instanceof GuiChat)) {
+
+        boolean shouldInvWalk = x.isEnabled() || Minecraft.getMinecraft().currentScreen instanceof ClickGui;
+
+        if (shouldInvWalk && !bad && !(Minecraft.getMinecraft().currentScreen instanceof GuiChat)) {
             this.moveStrafe = 0.0F;
             this.moveForward = 0.0F;
             if (Keyboard.isKeyDown(this.gameSettings.keyBindForward.getKeyCode())) {

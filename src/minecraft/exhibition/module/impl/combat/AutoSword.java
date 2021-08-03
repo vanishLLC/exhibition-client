@@ -8,14 +8,19 @@ import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
 import exhibition.module.impl.player.Scaffold;
+import exhibition.util.NetUtil;
 import exhibition.util.Timer;
+import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemAppleGold;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
+import net.minecraft.network.play.client.C0DPacketCloseWindow;
+import net.minecraft.network.play.client.C16PacketClientStatus;
 
 /**
  * Created by Arithmo on 6/22/2017 at 8:38 PM.
@@ -25,6 +30,7 @@ public class AutoSword extends Module {
     private Timer timer = new Timer();
     private String SWAP = "SWAP";
     private String GAPPLES = "GAPPLES";
+    private Setting<Boolean> openOnly = new Setting<>("INV-ONLY", true, "Only clean when inventory is open.");
     private Setting<Boolean> useSwap = new Setting<>("USE-SWAP", false, "Swaps to your sword even if you are using an item/eating.");
     private Setting<Boolean> replace = new Setting<>("REPLACE", true, "Replaces your sword slot with the best sword. Gapples too.");
 
@@ -40,7 +46,7 @@ public class AutoSword extends Module {
 
     @Override
     public Priority getPriority() {
-        return Priority.LOWEST;
+        return Priority.FIRST;
     }
 
     @Override
@@ -66,7 +72,9 @@ public class AutoSword extends Module {
         if (mc.currentScreen == null) {
             int slot = ((Number) settings.get("SLOT").getValue()).intValue() - 1;
 
-            if (replace.getValue()) {
+            boolean inInventory = mc.currentScreen instanceof GuiInventory;
+            boolean canClean = ((openOnly.getValue() && (mc.currentScreen == null || mc.currentScreen instanceof GuiChat)) || inInventory);
+            if (replace.getValue() && canClean) {
                 boolean foundSword = false;
                 for (int i = 9; i < 45; i++)
                     if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
@@ -77,6 +85,8 @@ public class AutoSword extends Module {
                             if (itemDamage > currentDamage && (i - 36 != slot)) {
                                 foundSword = true;
                                 if (timer.delay(300)) {
+                                    if (!inInventory)
+                                        NetUtil.sendPacket(new C16PacketClientStatus(C16PacketClientStatus.EnumState.OPEN_INVENTORY_ACHIEVEMENT));
                                     swap(i, slot);
                                     timer.reset();
                                     swapped = true;
@@ -97,6 +107,8 @@ public class AutoSword extends Module {
                             if (item instanceof ItemAppleGold && (!mc.thePlayer.inventoryContainer.getSlot(36 + gslot).getHasStack() || !(mc.thePlayer.inventoryContainer.getSlot(36 + gslot).getStack().getItem() instanceof ItemAppleGold))) {
                                 foundGapple = true;
                                 if (timer.delay(300)) {
+                                    if (!inInventory)
+                                        NetUtil.sendPacket(new C16PacketClientStatus(C16PacketClientStatus.EnumState.OPEN_INVENTORY_ACHIEVEMENT));
                                     swap(i, gslot);
                                     timer.reset();
                                     swapped = true;
@@ -109,6 +121,12 @@ public class AutoSword extends Module {
 
                 if (!foundSword && !foundGapple) {
                     timer.reset();
+                }
+
+                if(swapped) {
+                    if (!inInventory) {
+                        NetUtil.sendPacket(new C0DPacketCloseWindow(mc.thePlayer.inventoryContainer.windowId));
+                    }
                 }
             }
 

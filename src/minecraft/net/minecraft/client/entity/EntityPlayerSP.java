@@ -420,7 +420,7 @@ public class EntityPlayerSP extends AbstractClientPlayer {
         this.mc.ingameGUI.getChatGUI().printChatMessage(chatComponent);
     }
 
-    protected boolean pushOutOfBlocks(double x, double y, double z) {
+    public boolean pushOutOfBlocks(double x, double y, double z) {
         if (this.noClip) {
             return false;
         } else {

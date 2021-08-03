@@ -66,6 +66,7 @@ public class Console extends Component
                 Command command = CommandManager.commandMap.get(commandName);
                 if (command == null) {
                     ChatUtil.printChat(Command.chatPrefix + "Command \"" + commandName + "\" does not exist!");
+                    this.textField.setText("");
                     return false;
                 }
                 if (commandBits.length > 1) {

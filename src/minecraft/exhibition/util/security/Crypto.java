@@ -10,8 +10,6 @@ import java.security.Key;
 
 public class Crypto {
 
-	private static String AES = "AES/ECB/PKCS5Padding";
-
 	/**
 	 * Encrypts text with a given key.
 	 *
@@ -22,7 +20,7 @@ public class Crypto {
 	 */
 	public static String encrypt(Key key, String text) {
 		try {
-			Cipher cipher = Cipher.getInstance(AES);
+			Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
 			cipher.init(Cipher.ENCRYPT_MODE, key);
 			byte[] encrypted = cipher.doFinal(text.getBytes(StandardCharsets.UTF_8), 0, text.getBytes(StandardCharsets.UTF_8).length);
 			byte[] encryptedValue = Base64.encodeBase64(encrypted);
@@ -44,7 +42,7 @@ public class Crypto {
 	 */
 	public static String decrypt(Key key, String text) {
 		try {
-			Cipher cipher = Cipher.getInstance(AES);
+			Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
 			cipher.init(Cipher.DECRYPT_MODE, key);
 			byte[] decodedBytes = Base64.decodeBase64(text.getBytes(StandardCharsets.UTF_8));
 			byte[] original = cipher.doFinal(decodedBytes, 0, decodedBytes.length);
@@ -58,7 +56,7 @@ public class Crypto {
 		try {
 			return decrypt(CryptManager.getDecrypt(), str);
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		return null;
 	}
@@ -77,7 +75,7 @@ public class Crypto {
 		try {
 			return decrypt(CryptManager.getSecretNew(), str);
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		return null;
 	}

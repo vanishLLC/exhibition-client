@@ -30,6 +30,8 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -455,10 +457,10 @@ public class Scaffold extends Module {
                     Vec3 vec = getBlockLook(pos);
 
                     if (lastAngles.x == -1337) {
-                        float newAngle = RotationUtils.getNewAngle(mc.thePlayer.rotationYaw);
+                        //float newAngle = RotationUtils.getNewAngle(mc.thePlayer.rotationYaw);
                         lastAngles.x = mc.thePlayer.rotationYaw;
-                        em.setYaw(targetYaw = mc.thePlayer.rotationYaw + (newAngle > 0 ? 180 : -180));
-                        em.setPitch(lastAngles.y = 70F);
+                        em.setYaw(targetYaw = mc.thePlayer.rotationYaw);
+                        em.setPitch(lastAngles.y = mc.thePlayer.rotationPitch);
                     }
 
                     int var1 = getBlockSlot();
@@ -478,8 +480,8 @@ public class Scaffold extends Module {
 
                         lastAngles.x += MathHelper.clamp_float(MathHelper.wrapAngleTo180_float(targetYaw - lastAngles.x), -max, max);
 
-                        em.setYaw(lastAngles.x);
-                        em.setPitch(lastAngles.y);
+                        em.setYaw(mc.thePlayer.rotationYaw = lastAngles.x);
+                        em.setPitch(mc.thePlayer.rotationPitch = lastAngles.y);
                     }
 
                     /**

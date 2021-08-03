@@ -42,18 +42,23 @@ import java.util.stream.Collectors;
 
 public class TargetStrafe extends Module {
 
+    private Vec3 targetPos;
     private EntityLivingBase target;
     private Setting<Boolean> behind = new Setting<>("BEHIND", false, "Attempts to move behind the target if possible.");
-    private Setting teams = new Setting<>("TEAMS", false, "Ignores enemies on the same team.");
-    private Setting flip = new Setting<>("ANTI-STUCK", true, "Attempts to stop you from getting stuck.");
+    private Setting<Boolean> teams = new Setting<>("TEAMS", false, "Ignores enemies on the same team.");
+    private Setting<Boolean> flip = new Setting<>("ANTI-STUCK", true, "Attempts to stop you from getting stuck.");
+    private Setting<Boolean> antiVoid = new Setting<>("ANTI-VOID", false, "Attempts to stop you from jumping into the void. (Requires Anti-Stuck)");
 
     private Options targetMode = new Options("Target Mode", "Nearby", "Nearby", "Priority", "Aura Only");
     private Options pathMode = new Options("Path Mode", "Normal", "Normal", "Adaptive");
 
-    private Setting range = new Setting<>("RANGE", 5, "Range to select targets.", 0.1, 1, 10);
-    private Setting radius = new Setting<>("RADIUS", 2, "Radius of circle strafe.", 0.1, 0.1, 5);
+    private Setting<Number> range = new Setting<>("RANGE", 5, "Range to select targets.", 0.1, 1, 10);
+    private Setting<Number> radius = new Setting<>("RADIUS", 2, "Radius of circle strafe.", 0.1, 0.1, 5);
     private Setting<Number> steps = new Setting<>("STEPS", 60, "Like speed Steps but for target strafe.", 1, 15, 180);
     private Setting<Number> offset = new Setting<>("OFFSET", 0, "Angle offset for Behind", 5, -180, 180);
+
+    private Setting<Number> jitterMagnitude = new Setting<>("JITTER-DIST", 0, "The amount that TargetStrafe should Jitter.", 0.1, 0, 2);
+    private Setting<Number> jitterFrequency = new Setting<>("JITTER-FREQ", 0.5, "The frequency that Jitter goes in/out.", 0.1, 0, 2);
 
     private boolean reverse = false;
 
@@ -68,6 +73,7 @@ public class TargetStrafe extends Module {
         addSetting(steps);
         addSetting(range);
         addSetting(radius);
+        addSettings(jitterMagnitude, jitterFrequency);
         addSetting("PATHMODE", new Setting<>("PATHMODE", pathMode, "The path-finding mode for TargetStrafe."));
         addSetting("TARGETMODE", new Setting<>("TARGETMODE", targetMode, "The targeting mode for TargetStrafe. Aura Only is suggested against legits."));
     }
@@ -88,12 +94,25 @@ public class TargetStrafe extends Module {
 
     @RegisterEvent(events = {EventMotionUpdate.class, EventRender3D.class, EventMove.class})
     public void onEvent(Event event) {
-        double rad = ((Number) radius.getValue()).doubleValue();
-        double range = ((Number) this.range.getValue()).doubleValue();
+        double rad = this.radius.getValue().doubleValue();
+
+//        if (jitterMagnitude.getValue().doubleValue() > 0) {
+//            double add = jitterMagnitude.getValue().doubleValue();
+//
+//            double frequency = jitterFrequency.getValue().doubleValue();
+//
+//            double percent = ((1 + frequency) * (mc.thePlayer.ticksExisted)) / 5D;
+//
+//            double addRad = Math.sin(percent) * add;
+//
+//            rad += addRad;
+//        }
+
+        double range = this.range.getValue().doubleValue();
 
         boolean isStrafing = (Client.getModuleManager().isEnabled(Speed.class) || Client.getModuleManager().get(LongJump.class).allowTargetStrafe() || Client.getModuleManager().get(Fly.class).allowTargetStrafe());
 
-        if(event instanceof EventRender3D){
+        if (event instanceof EventRender3D) {
             EventRender3D er = event.cast();
             float pTicks = er.renderPartialTicks;
 
@@ -379,10 +398,36 @@ public class TargetStrafe extends Module {
             }
         }
 
-        if(event instanceof EventMove) {
-            if ((boolean) flip.getValue() && mc.thePlayer.isCollidedHorizontally && delay.delay(450)) {
-                reverse = !reverse;
-                delay.reset();
+        if (event instanceof EventMove) {
+            if (flip.getValue() && delay.delay(450)) {
+
+                boolean checkVoid = antiVoid.getValue();
+                boolean isVoid = false;
+
+                if (checkVoid) {
+                    isVoid = true;
+
+                    double[][] offsets = new double[][]{{0.4, 0.4}, {-0.4, 0.4}, {0.4, -0.4}, {-0.4, -0.4}};
+
+                    if (PlayerUtil.isMoving()) {
+                        for (double[] offset : offsets) {
+                            int posY = (int) mc.thePlayer.posY;
+                            for (int _y = posY; _y >= 0; _y--) {
+                                if (!(mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX + offset[0], _y, mc.thePlayer.posZ + offset[1])).getBlock() instanceof BlockAir)) {
+                                    isVoid = false;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+
+                boolean shouldFlip = mc.thePlayer.isCollidedHorizontally || isVoid;
+                if (shouldFlip) {
+                    reverse = !reverse;
+                    delay.reset();
+                }
             }
         }
         if (event instanceof EventMotionUpdate) {
@@ -408,15 +453,13 @@ public class TargetStrafe extends Module {
     }
 
     public float getEntityYawToPos(EntityLivingBase entity, double posX, double posZ) {
-        double deltaX = posX;
-        double deltaZ = posZ;
         double yawToEntity;
-        if ((deltaZ < 0.0D) && (deltaX < 0.0D)) {
-            yawToEntity = 90.0D + Math.toDegrees(Math.atan(deltaZ / deltaX));
-        } else if ((deltaZ < 0.0D) && (deltaX > 0.0D)) {
-            yawToEntity = -90.0D + Math.toDegrees(Math.atan(deltaZ / deltaX));
+        if ((posZ < 0.0D) && (posX < 0.0D)) {
+            yawToEntity = 90.0D + Math.toDegrees(Math.atan(posZ / posX));
+        } else if ((posZ < 0.0D) && (posX > 0.0D)) {
+            yawToEntity = -90.0D + Math.toDegrees(Math.atan(posZ / posX));
         } else {
-            yawToEntity = Math.toDegrees(-Math.atan(deltaX / deltaZ));
+            yawToEntity = Math.toDegrees(-Math.atan(posX / posZ));
         }
 
         float lastDelta = MathHelper.clamp_float((entity.rotationYaw - entity.prevRotationYaw) * 6F, -90, 90);
@@ -427,7 +470,20 @@ public class TargetStrafe extends Module {
     public float getTargetYaw(float speedYaw, double motionY) {
         float newYaw = speedYaw;
         if (target != null && isEnabled() && !Client.getModuleManager().isEnabled(Scaffold.class)) {
-            double rad = ((Number) radius.getValue()).doubleValue();
+            double rad = radius.getValue().doubleValue();
+
+            if (jitterMagnitude.getValue().doubleValue() > 0) {
+                double add = jitterMagnitude.getValue().doubleValue();
+
+                double frequency = jitterFrequency.getValue().doubleValue();
+
+                double percent = ((1 + frequency) * (mc.thePlayer.ticksExisted)) / 5D;
+
+                double addRad = Math.sin(percent) * add;
+
+                rad += addRad;
+            }
+
             double x = target.posX;
             double y = target.posY;
             double z = target.posZ;
@@ -448,7 +504,7 @@ public class TargetStrafe extends Module {
             for (int i = 0; i < (360 / factor); i++) {
                 int i1 = i * (reverse ? -1 : 1);
 
-                if(i > (behind.getValue() ? 10 : 2))
+                if (i > (behind.getValue() ? 10 : 2))
                     break;
 
                 double cos = Math.cos(((i1 * factor) + diff) * (Math.PI * 2 / 360));

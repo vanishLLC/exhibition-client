@@ -26,7 +26,8 @@ public class AutoArmor extends Module {
     private Timer timer = new Timer();
     private boolean isOpen;
 
-    private Setting attackCheck = new Setting<>("ATTACKING", true, "Does not remove armor when attacking players.");
+    private Setting<Boolean> openOnly = new Setting<>("INV-ONLY", true, "Only clean when inventory is open.");
+    private Setting<Boolean> attackCheck = new Setting<>("ATTACKING", true, "Does not remove armor when attacking players.");
 
     public AutoArmor(ModuleData data) {
         super(data);
@@ -64,7 +65,10 @@ public class AutoArmor extends Module {
 
         Killaura k = (Killaura) Client.getModuleManager().get(Killaura.class);
         boolean attacking = (boolean) attackCheck.getValue() && k.isEnabled() && Killaura.getTarget() != null;
-        if (mc.thePlayer != null && (mc.currentScreen == null || mc.currentScreen instanceof GuiChat || mc.currentScreen instanceof GuiInventory)) {
+        boolean inInventory = mc.currentScreen instanceof GuiInventory;
+        boolean canClean = ((openOnly.getValue() && (mc.currentScreen == null || mc.currentScreen instanceof GuiChat)) || inInventory);
+
+        if (mc.thePlayer != null && canClean) {
             int slotID = -1;
             double maxProt = -1.0D;
             int switchArmor = -1;
@@ -100,7 +104,7 @@ public class AutoArmor extends Module {
             if (slotID != -1) {
                 swapped = true;
                 if (timer.delay((long)(50 + (Math.random() * 200)))) {
-                    if (!isOpen && !(mc.currentScreen instanceof GuiInventory)) {
+                    if (!isOpen && !inInventory) {
                         NetUtil.sendPacket(new C16PacketClientStatus(C16PacketClientStatus.EnumState.OPEN_INVENTORY_ACHIEVEMENT));
                         isOpen = true;
                     }
@@ -113,7 +117,7 @@ public class AutoArmor extends Module {
                     }
                 }
             } else {
-                if (isOpen && !(mc.currentScreen instanceof GuiInventory)) {
+                if (isOpen && !inInventory) {
                     NetUtil.sendPacket(new C0DPacketCloseWindow(mc.thePlayer.inventoryContainer.windowId));
                     isOpen = false;
                 }

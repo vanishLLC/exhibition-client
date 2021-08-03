@@ -104,6 +104,7 @@ public class Freecam extends Module {
         this.freecamEntity.motionY = mc.thePlayer.onGround ? 0 : mc.thePlayer.motionY;
         this.freecamEntity.motionZ = mc.thePlayer.motionZ;
         this.freecamEntity.capabilities = mc.thePlayer.capabilities;
+        this.freecamEntity.noClip = false;
 
         ticks = mc.thePlayer.positionUpdateTicks;
         lastReportedYaw = mc.thePlayer.lastReportedYaw;

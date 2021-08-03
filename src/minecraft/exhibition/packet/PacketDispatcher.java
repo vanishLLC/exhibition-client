@@ -35,7 +35,7 @@ public class PacketDispatcher extends Thread {
                 Queue<Packet> queue = packetGroup.getPacketQueue();
                 while (queue.peek() != null && Minecraft.getMinecraft().thePlayer != null && isDispatching) {
                     NetUtil.sendPacket(queue.poll());
-                    delay(1 + (counter / 20D));
+                    delay(0.25);
                 }
                 isDispatching = false;
             }
@@ -69,6 +69,8 @@ public class PacketDispatcher extends Thread {
         synchronized (this) {
             if (isDispatching) {
                 isDispatching = false;
+            } else {
+                return;
             }
             Queue<Packet> queue = packetGroup.getPacketQueue();
             while (queue.peek() != null && Minecraft.getMinecraft().thePlayer != null) {

@@ -11,7 +11,6 @@ public class PacketGroup {
     private final Queue<Packet> packetQueue = new ConcurrentLinkedQueue<>();
 
     public PacketGroup() {
-
     }
 
     public PacketGroup(List<Packet> packetList) {

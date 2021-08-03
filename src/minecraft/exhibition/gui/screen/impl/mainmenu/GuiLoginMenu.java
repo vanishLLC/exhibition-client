@@ -33,7 +33,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.List;
-import java.util.Objects;
 
 import static exhibition.util.security.AuthenticationUtil.getHwid;
 
@@ -159,8 +158,6 @@ public class GuiLoginMenu extends PanoramaScreen {
             if (!okHand.isEmpty() && okHand.size() > 1) {
                 username.setText(getDecrypted(okHand.get(0)));
                 password.setText(getDecrypted(okHand.get(1)));
-                if (okHand.size() > 2)
-                    LoginUtil.loginResponseHashCode = Integer.parseInt(okHand.get(2));
             }
         } catch (Exception e) {
             e.printStackTrace();

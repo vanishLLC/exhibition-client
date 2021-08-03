@@ -168,9 +168,10 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet> {
                     if (formattedText.contains("Ground items will be removed in")) {
                         String message = formattedText.substring(formattedText.lastIndexOf("in "));
                         Notifications.getManager().post("Server Warning", "Clearlag " + message, 2500L, Notifications.Type.NOTIFY);
-                    }
-                    if (formattedText.contains("Protect your bed and destroy the enemy beds.")) {
+                    } else if (formattedText.contains("Protect your bed and destroy the enemy beds.")) {
                         Notifications.getManager().post("\247c\247lBedwars Warning (Wait {s} s)", "\247lFlying to other islands will result in a WD ban.", 15000L, Notifications.Type.WARNING);
+                    } else if(formattedText.contains("Use /report to continue helping out the server!")) {
+                        Notifications.getManager().post("Ban Warning", "A player was banned in your lobby.", 2500L, Notifications.Type.WARNING);
                     }
 //                        if(formattedText.contains("Gather resources and equipment on your island")) {
 //                            long length = 10000L;

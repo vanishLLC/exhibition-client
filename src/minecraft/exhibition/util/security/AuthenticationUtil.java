@@ -123,9 +123,10 @@ public class AuthenticationUtil {
 
                     String test = "";
                     loginInstance.setProgress(0.5);
-                    if (((JsonObject) JsonConnection.toJsonObject(connection)).has("response")) {
 
-                        LoginUtil.loginResponseHashCode = connection.getResponse().hashCode();
+                    int responseHashCode = connection.getResponse().hashCode();
+
+                    if (((JsonObject) JsonConnection.toJsonObject(connection)).has("response")) {
 
                         for (Map.Entry<String, JsonElement> stringJsonElementEntry : ((JsonObject) JsonConnection.toJsonObject(connection)).entrySet()) {
                             try {
@@ -188,7 +189,7 @@ public class AuthenticationUtil {
                                     int missingSigs = 0, unsignedClasses = 0;
 
                                     try {
-                                        if (Crypto.decryptPublicNew(encryptedUsername).equalsIgnoreCase(AESCipher.decrypt("Jkg5NZ4tVxs8CD0n", parsed[0]).getData())) {
+                                        if (Crypto.decryptPublicNew(encryptedUsername).trim().equalsIgnoreCase(AESCipher.decrypt("Jkg5NZ4tVxs8CD0n", parsed[0]).getData())) {
                                             loginInstance.setProgress(0.6);
                                             if (BCrypt.checkpw(((HardwareIdentification) hardwareIdentification).getHashedHardware(), parsed[1].replace("$2y$", "$2a$")).detected) {
                                                 loginInstance.setProgress(0.7);
@@ -215,7 +216,7 @@ public class AuthenticationUtil {
                                                         null, null, null, null, null, // Some kind of integrity checking later?
                                                         rebuilt};
                                                 loginInstance.setProgress(0.9);
-                                                if (LoginUtil.getLoginResponseHashCode() != LoginUtil.loginResponseHashCode) {
+                                                if (LoginUtil.getLastResponseCode() != responseHashCode) {
                                                     try {
                                                         authUser = AuthenticatedUser.create(objectArray);
                                                     } catch (Exception e) {
@@ -223,7 +224,7 @@ public class AuthenticationUtil {
                                                         Snitch.snitch(4, e.getMessage());
                                                     }
                                                 } else {
-                                                    Snitch.snitch(60, LoginUtil.getLoginResponseHashCode() + "", LoginUtil.loginResponseHashCode + "", AESCipher.decrypt("Jkg5NZ4tVxs8CD0n", parsed[0]).getData());
+                                                    Snitch.snitch(60, LoginUtil.getLastResponseCode() + "", responseHashCode + "", AESCipher.decrypt("Jkg5NZ4tVxs8CD0n", parsed[0]).getData());
                                                 }
                                             } else {
                                                 loginInstance.setInvalidHWID();

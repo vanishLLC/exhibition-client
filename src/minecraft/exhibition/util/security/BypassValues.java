@@ -34,10 +34,11 @@ public class BypassValues {
     }
 
     public static void novolineStrafeFix(EventMotionUpdate em, EntityPlayer thePlayer) {
-        boolean hitNextTick = thePlayer.worldObj.getCollidingBlockBoundingBoxes(thePlayer, thePlayer.boundingBox.expand(0.2,0,0.2).offset(0, -0.6, 0)).size() > 0;
+        boolean hitNextTick = thePlayer.worldObj.getCollidingBlockBoundingBoxes(thePlayer, thePlayer.boundingBox.expand(0.2, 0, 0.2).offset(0, -0.6, 0)).size() > 0;
         if (!Client.getModuleManager().isEnabled(Scaffold.class)) {
             double rounded = MathUtils.getIncremental(MathUtils.roundToPlace(em.getY(), 3) % 1.0, 0.001);
-            if (em.isOnground() && MathUtils.getIncremental(thePlayer.lastTickPosY - thePlayer.posY, 3) == 0.375) {
+
+            if (em.isOnground() && MathUtils.roundToPlace(thePlayer.lastTickPosY - thePlayer.posY, 3) == 0.375) {
                 //em.setY(em.getY() + 0.0009D);
                 em.setGround(false);
             } else {

@@ -685,9 +685,10 @@ public class Speed extends Module {
 //                        this.speed = list.get(2) - 0.0000125F;
                     }
 
-                    if (stage == 6) {
-                        mc.thePlayer.motionY = -0.1089496;
+                    if(stage == 7) {
+                        em.setY(mc.thePlayer.motionY = -0.18517061160392762);
                     }
+
 
                     speed = Math.max(speed, moveSpeed);
 
