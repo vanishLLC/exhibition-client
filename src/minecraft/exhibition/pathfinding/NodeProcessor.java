@@ -30,12 +30,6 @@ public class NodeProcessor {
 	private ArrayList<Node> getNeighbors(Node node) {
 		ArrayList<Node> neighbors = new ArrayList<Node>();
 		BlockPos nodeBlockPos = node.getBlockpos();
-		if(node.isVclipableDown()) {
-			neighbors.add(createNode(node.getVclipPosDown()));
-		}
-		if(node.isVclipableUp()) {
-			neighbors.add(createNode(node.getVclipPosUp()));
-		}
 		for(BlockPos pos : BlockPos.getAllInBox(nodeBlockPos.add(1, 1, 1), nodeBlockPos.add(-1, -1, -1))) {
 			if(pos.equals(nodeBlockPos)) {
 				continue;
@@ -98,7 +92,7 @@ public class NodeProcessor {
 		while(hashOpenNodes.values().size() > 0) {
 			Node currentNode = openNodes.get(0);
 			
-			if(count > 11000) {
+			if(count > 21000) {
 				path = null;
 //				Jigsaw.chatMessage("Neighbor: " + (totalTime / 1000000));
 //				Jigsaw.chatMessage("Whole: " + ((System.nanoTime() - now1) / 1000000));
@@ -128,18 +122,10 @@ public class NodeProcessor {
 //			long now = System.nanoTime();
 			
 			for(Node neighbor : getNeighbors(currentNode)) {
-				boolean vclipableDown = false;
-				boolean vclipableUp = false;
-				if((!neighbor.isWalkable() && !((vclipableDown = neighbor.isVclipableDown()) || (vclipableUp = neighbor.isVclipableUp()))) || isNodeClosed(neighbor)) {
+				if((!neighbor.isWalkable() && !((neighbor.isVclipableDown()) || (neighbor.isVclipableUp()))) || isNodeClosed(neighbor)) {
 					continue;
 				}
-				if(vclipableDown) {
-					neighbor = createNode(neighbor.getBlockpos().up());
-				}
-				if(vclipableUp) {
-					neighbor = createNode(neighbor.getBlockpos().down());
-				}
-				double newMovementCostToNeighbor = 
+				double newMovementCostToNeighbor =
 						currentNode.gCost + Node.distance(currentNode.getBlockpos(), endNode.getBlockpos());
 				boolean isOpen = isNodeOpen(neighbor);
 				if(newMovementCostToNeighbor < neighbor.gCost || !isOpen) {
@@ -188,8 +174,8 @@ public class NodeProcessor {
 		
 //		Node node = new Node(isWalkable(Utils.getBlock(pos.down())) && isPassable(Utils.getBlock(pos)) && isPassable(Utils.getBlock(pos.up())), pos).setId(pos.hashCode());
 		
-		node.setVclipableDown(isVclipableDown(node));
-		node.setVclipableUp(isVclipableUp(node));
+		node.setVclipableDown(false);
+		node.setVclipableUp(false);
 		return node;
 	}
 	

@@ -750,7 +750,7 @@ public abstract class Entity implements ICommandSender
                         y = var23;
                         z = var24;
                         this.setEntityBoundingBox(var25);
-                        if (stepEvent.isActive() && stepEvent.getStepHeight() > 0.0 && var19 && (moveX != x || moveZ != z)) {
+                        if (this instanceof EntityPlayerSP && stepEvent.isActive() && stepEvent.getStepHeight() > 0.0 && var19 && (moveX != x || moveZ != z)) {
                             final double var52 = x;
                             final double var53 = y;
                             final double var54 = z;

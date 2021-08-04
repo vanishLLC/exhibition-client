@@ -14,7 +14,6 @@ import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.module.data.settings.Setting;
 import exhibition.packet.PacketDispatcher;
-import exhibition.packet.PacketGroup;
 import exhibition.pathfinding.Node;
 import exhibition.pathfinding.TeleportResult;
 import exhibition.pathfinding.Utils;
@@ -31,11 +30,12 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C02PacketUseEntity;
 import net.minecraft.network.play.client.C02PacketUseEntity.Action;
 import net.minecraft.network.play.client.C03PacketPlayer;
-import net.minecraft.network.play.client.C0APacketAnimation;
 import net.minecraft.network.play.client.C0BPacketEntityAction;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.Vec3;
 import org.lwjgl.opengl.GL11;
+
+import static org.lwjgl.opengl.GL11.GL_LINE_STRIP;
 
 public class TPAura extends Module {
     Timer timer = new Timer();
@@ -123,32 +123,48 @@ public class TPAura extends Module {
 //            if (i >= ClientSettings.TpAuramaxTargets) {
 //                break;
 //            }
-            positions.clear();
-            positionsBack.clear();
-            triedPaths.clear();
+
 //				Jigsaw.chatMessage(en.posX);
 //				Jigsaw.chatMessage(en.posY);
 //				Jigsaw.chatMessage(en.posZ);
 //				System.out.println(en.posX + "," + en.posY + "," + en.posZ);
             TeleportResult result = Utils.pathFinderTeleportTo(new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), new Vec3(en.posX, en.posY, en.posZ));
 
-            triedPaths = result.triedPaths;
+            boolean weirdBruh = false;
 
-            if (!result.foundPath) {
-                continue;
+            if(!result.foundPath && positions.size() > 0) {
+                TeleportResult testResult = Utils.pathFinderTeleportTo(positions.get(positions.size() - 1), new Vec3(en.posX, en.posY, en.posZ));
+
+                if(testResult.foundPath) {
+                    positions.addAll(testResult.positions);
+                    result = testResult;
+                    result.positions = positions;
+                    weirdBruh = true;
+                }
+            }
+
+            if(!weirdBruh) {
+                positions.clear();
+                positionsBack.clear();
+                triedPaths.clear();
+                triedPaths = result.triedPaths;
+
+                if (!result.foundPath) {
+                    continue;
+                }
             }
 
 
             List<Packet> packetList = new ArrayList<>();
             for (Vec3 position : result.positions) {
-                //packetList.add(new C03PacketPlayer.C04PacketPlayerPosition(position.getX(), position.getY(), position.getZ(), false));
+                packetList.add(new C03PacketPlayer.C04PacketPlayerPosition(position.getX(), position.getY(), position.getZ(), false));
             }
 
             //mc.thePlayer.swingItemFake();
             //packetList.add(new C0APacketAnimation());
             //Criticals.disable = true;
             //Criticals.crit(lastPos.xCoord, lastPos.yCoord, lastPos.zCoord);
-            //packetList.add(new C02PacketUseEntity(en, Action.ATTACK));
+            packetList.add(new C02PacketUseEntity(en, Action.ATTACK));
             //Criticals.disable = false;
 
             positions = result.positions;
@@ -158,10 +174,14 @@ public class TPAura extends Module {
             positionsBack = resultBack.positionsBack;
 
             for (Vec3 position : resultBack.positions) {
-                //packetList.add(new C03PacketPlayer.C04PacketPlayerPosition(position.getX(), position.getY(), position.getZ(), false));
+                packetList.add(new C03PacketPlayer.C04PacketPlayerPosition(position.getX(), position.getY(), position.getZ(), false));
             }
 
-            PacketGroup packetGroup = new PacketGroup(packetList);
+            for (Packet packet : packetList) {
+                NetUtil.sendPacket(packet);
+            }
+
+            //PacketGroup packetGroup = new PacketGroup(packetList);
 
             //packetDispatcher.sendGroup(packetGroup);
 
@@ -281,27 +301,27 @@ public class TPAura extends Module {
         if (event instanceof EventMotionUpdate) {
             EventMotionUpdate em = event.cast();
 
-//            if (!isReady)
-//                if (em.isPre()) {
-//                    if (mc.thePlayer.isRiding()) {
-//                        NetUtil.sendPacket(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.START_SNEAKING));
-//                        isSneaking = true;
-//                        isReady = true;
-//                        timer.setDifference(-1000);
-//                    }
-//                    return;
-//                }
+            if (!isReady)
+                if (em.isPre()) {
+                    if (mc.thePlayer.isRiding()) {
+                        NetUtil.sendPacket(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.START_SNEAKING));
+                        isSneaking = true;
+                        isReady = true;
+                        timer.setDifference(-1000);
+                    }
+                    return;
+                }
 
             if (em.isPre()) {
-//                if(isSneaking) {
-//                    NetUtil.sendPacket(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.STOP_SNEAKING));
-//                    isSneaking = false;
-//                } else {
-//                    NetUtil.sendPacket(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.START_SNEAKING));
-//                    isSneaking = true;
-//                }
+                if(isSneaking) {
+                    NetUtil.sendPacket(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.STOP_SNEAKING));
+                    isSneaking = false;
+                } else {
+                    NetUtil.sendPacket(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.START_SNEAKING));
+                    isSneaking = true;
+                }
 
-                if (!timer.delay(500)) {
+                if (!timer.delay(2000)) {
                     return;
                 }
                 en = getClosestEntity(500);
@@ -309,6 +329,11 @@ public class TPAura extends Module {
                     return;
                 }
                 updateStages();
+                if(positions.size() != 0) {
+                    em.setCancelled(true);
+                    mc.thePlayer.posY += 0.5;
+                }
+                timer.reset();
             } else {
                 if (!attack) {
                     return;
@@ -332,6 +357,18 @@ public class TPAura extends Module {
                     RenderingUtil.post3D();
                     GlStateManager.popMatrix();
                 }
+                RenderingUtil.pre3D();
+                RenderingUtil.glColor(Colors.getColor(0,255,0,150));
+                GL11.glLineWidth(5);
+                GL11.glBegin(GL_LINE_STRIP);
+                for (Vec3 position : positions) {
+                    double x = (position.getX()) - RenderManager.renderPosX;
+                    double y = (position.getY()) - RenderManager.renderPosY;
+                    double z = (position.getZ()) - RenderManager.renderPosZ;
+                    GL11.glVertex3d(x, y, z);
+                }
+                GL11.glEnd();
+                RenderingUtil.post3D();
             }
         }
     }

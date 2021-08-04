@@ -40,11 +40,11 @@ public class Node {
 	public int id = 0;
 
 	public boolean isVclipableUp() {
-		return vclipableUp;
+		return false;
 	}
 	
 	public boolean isVclipableDown() {
-		return vclipableDown;
+		return false;
 	}
 	
 	public Node setId(int id) {

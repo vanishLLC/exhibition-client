@@ -7,12 +7,14 @@ import exhibition.Client;
 import exhibition.module.impl.combat.AntiBot;
 import exhibition.module.impl.movement.Blink;
 import exhibition.module.impl.render.Freecam;
+import exhibition.util.misc.ChatUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialTransparent;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityOtherPlayerMP;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
@@ -20,10 +22,10 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.C03PacketPlayer;
-import net.minecraft.network.play.client.C0BPacketEntityAction;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
@@ -59,33 +61,32 @@ public class Utils {
 //		System.out.println(to.toString());
         BlockPos targetBlockPos = new BlockPos(Utils.getBlockPos(to));
         BlockPos fromBlockPos = Utils.getBlockPos(from);
-        if(!NodeProcessor.isPassable(Utils.getBlock(fromBlockPos))) {
+        if (!NodeProcessor.isPassable(Utils.getBlock(fromBlockPos))) {
             float angle = (float) Math.toDegrees(Math.atan2(to.zCoord - from.getZ(), to.xCoord - from.getX()));
             angle += 180;
-            if(angle < 0){
+            if (angle < 0) {
                 angle += 360;
             }
-            System.out.println(angle);
             from = Utils.getVec3(fromBlockPos.offset(EnumFacing.fromAngle(Utils.normalizeAngle(angle))).add(0.5, 0, 0.5));
         }
 
         BlockPos finalBlockPos = targetBlockPos;
         boolean passable = true;
-        if(!NodeProcessor.isPassable(Utils.getBlock(targetBlockPos))) {
+        if (!NodeProcessor.isPassable(Utils.getBlock(targetBlockPos))) {
             finalBlockPos = targetBlockPos.up();
             boolean lastIsPassable;
-            if(!(lastIsPassable = NodeProcessor.isPassable(Utils.getBlock(targetBlockPos.up())))) {
+            if (!(lastIsPassable = NodeProcessor.isPassable(Utils.getBlock(targetBlockPos.up())))) {
                 finalBlockPos = targetBlockPos.up(2);
-                if(!lastIsPassable) {
+                if (!lastIsPassable) {
                     passable = false;
                 }
             }
         }
 
-        if(!passable) {
+        if (!passable) {
             float angle = (float) Math.toDegrees(Math.atan2(to.zCoord - finalBlockPos.getZ(), to.xCoord - finalBlockPos.getX()));
             angle += 180;
-            if(angle < 0){
+            if (angle < 0) {
                 angle += 360;
             }
             finalBlockPos = targetBlockPos.offset(EnumFacing.fromAngle(Utils.normalizeAngle(angle)));
@@ -93,42 +94,100 @@ public class Utils {
 
         NodeProcessor processor = new NodeProcessor();
 
-        processor.getPath(new BlockPos(from.xCoord, from.yCoord, from.zCoord), finalBlockPos);
+        processor.getPath(new BlockPos(from.xCoord, from.yCoord + 1.5, from.zCoord), finalBlockPos);
         triedPaths = processor.triedPaths;
-        if(processor.path == null) {
+        if (processor.path == null) {
             return new TeleportResult(positions, null, triedPaths, null, null, false);
         }
         Vec3 lastPos = null;
 
-        boolean possibleZigZag = false;
-        float firstAngle = Float.NaN;
+        // TODO: Move in long straight lines vs zigzag NEW pathfinding.
 
+        // Save the last position we were at
+        double lastSentX = from.xCoord;
+        double lastSentY = from.yCoord;
+        double lastSentZ = from.zCoord;
+
+        // The move distance for that move packet
         double movedDist = 0;
 
-        float lastAngle = Float.NaN;
+        double lastYMove = Double.NaN;
 
-        // TODO: Move in long straight lines vs zigzag NESW pathfinding.
-        for(Node node : processor.path) {
+        EntityPlayer fakePlayer = new EntityOtherPlayerMP(mc.theWorld, mc.thePlayer.getGameProfile());
+        fakePlayer.noClip = false;
+        fakePlayer.setPositionAndUpdate(lastSentX, lastSentY, lastSentZ);
+
+        int count = 0;
+        int size = processor.path.size();
+        for (Node node : processor.path) {
+            count++;
             BlockPos pos = node.getBlockpos();
             Vec3 currentPos = new Vec3(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
 
-            if(lastPos != null) {
-                float angle = (float) Math.toDegrees(Math.atan2(currentPos.zCoord - lastPos.getZ(), currentPos.xCoord - lastPos.getX()));
-
-                if(!Float.isNaN(lastAngle) && lastAngle == angle) {
+            if(mc.theWorld.getBlockState(node.getBlockpos().offset(EnumFacing.DOWN)).getBlock() == Blocks.slime_block) {
+                currentPos = currentPos.addVector(0,2,0);
+                if(lastPos != null) {
+                    float angle = (float) Math.toDegrees(Math.atan2(lastPos.xCoord - currentPos.getX(), lastPos.zCoord - currentPos.getZ()));
+                    angle += 180;
+                    double mx = Math.cos(Math.toRadians(angle + 90));
+                    double mz = Math.sin(Math.toRadians(angle + 90));
+                    currentPos = currentPos.addVector(mx,0,mz);
+                    positions.add(currentPos);
                     lastPos = currentPos;
-
-                    if(movedDist < 8) {
-                        movedDist += Math.atan2(currentPos.zCoord - lastPos.getZ(), currentPos.xCoord - lastPos.getX());
-                        lastAngle = angle;
-                        continue;
-                    }
+                    lastSentX = currentPos.getX();
+                    lastSentY = currentPos.getY();
+                    lastSentZ = currentPos.getZ();
+                    continue;
                 }
-                movedDist = 0;
-                lastAngle = angle;
             }
 
-            positions.add(lastPos = currentPos);
+            if (lastPos != null) {
+                double diffX = currentPos.getX() - lastSentX;
+                double diffY = currentPos.getY() - lastSentY;
+                double diffZ = currentPos.getZ() - lastSentZ;
+
+                fakePlayer.setPositionAndUpdate(lastSentX, lastSentY, lastSentZ);
+
+                double oldPosX = fakePlayer.posX, oldPosY = fakePlayer.posY, oldPosZ = fakePlayer.posZ;
+
+                fakePlayer.noClip = false;
+                fakePlayer.moveEntity(diffX, diffY, diffZ);
+
+                if(count == size) {
+                    positions.add(currentPos);
+                    continue;
+                }
+
+                if (movedDist <= 8 && fakePlayer.posX == currentPos.getX() && fakePlayer.posY == currentPos.getY() && fakePlayer.posZ == currentPos.getZ()) {
+                    movedDist = MathHelper.sqrt_double(diffX * diffX + diffY * diffY + diffZ * diffZ);
+                    lastPos = currentPos;
+                    fakePlayer.setPositionAndUpdate(lastSentX, lastSentY, lastSentZ);
+                } else {
+                    if(fakePlayer.posX != currentPos.getX() || fakePlayer.posY != currentPos.getY() || fakePlayer.posZ != currentPos.getZ()) {
+                        positions.add(lastPos);
+                        positions.add(currentPos);
+                    } else {
+                        positions.add(lastPos);
+                    }
+                    movedDist = 0;
+                    lastSentX = currentPos.getX();
+                    lastSentY = currentPos.getY();
+                    lastSentZ = currentPos.getZ();
+                    lastPos = currentPos;
+                }
+
+                //positions.add(currentPos);
+
+
+            } else {
+                positions.add(lastPos = currentPos);
+                movedDist = 0;
+                lastSentX = currentPos.getX();
+                lastSentY = currentPos.getY();
+                lastSentZ = currentPos.getZ();
+                fakePlayer.setPositionAndUpdate(lastSentX, lastSentY, lastSentZ);
+            }
+
         }
         return new TeleportResult(positions, null, triedPaths, processor.path, lastPos, true);
     }
@@ -344,8 +403,8 @@ public class Utils {
     }
 
     public static boolean isBlacklisted(Entity en) {
-        for(Entity i : blackList) {
-            if(i.isEntityEqual(en)) {
+        for (Entity i : blackList) {
+            if (i.isEntityEqual(en)) {
                 return true;
             }
         }
@@ -489,45 +548,45 @@ public class Utils {
             return false;
         }
         if (!(en instanceof EntityPlayer) && en instanceof EntityLiving) {
-            EntityLiving living = (EntityLiving)en;
+            EntityLiving living = (EntityLiving) en;
             boolean armor = false;
-            if(!armor && living.getCurrentArmor(0) != null && living.getCurrentArmor(0).getItem() != null) {
+            if (!armor && living.getCurrentArmor(0) != null && living.getCurrentArmor(0).getItem() != null) {
                 armor = true;
             }
-            if(!armor && living.getCurrentArmor(1) != null && living.getCurrentArmor(1).getItem() != null) {
+            if (!armor && living.getCurrentArmor(1) != null && living.getCurrentArmor(1).getItem() != null) {
                 armor = true;
             }
-            if(!armor && living.getCurrentArmor(2) != null && living.getCurrentArmor(2).getItem() != null) {
+            if (!armor && living.getCurrentArmor(2) != null && living.getCurrentArmor(2).getItem() != null) {
                 armor = true;
             }
-            if(!armor && living.getCurrentArmor(3) != null && living.getCurrentArmor(3).getItem() != null) {
+            if (!armor && living.getCurrentArmor(3) != null && living.getCurrentArmor(3).getItem() != null) {
                 armor = true;
             }
-            if(armor == false) {
+            if (armor == false) {
                 return false;
             }
         }
         if ((en instanceof EntityPlayer)) {
-            EntityPlayer living = (EntityPlayer)en;
+            EntityPlayer living = (EntityPlayer) en;
             boolean armor = false;
-            if(!armor && living.inventory.armorInventory[0] != null && living.inventory.armorInventory[0].getItem() != null) {
+            if (!armor && living.inventory.armorInventory[0] != null && living.inventory.armorInventory[0].getItem() != null) {
                 armor = true;
             }
-            if(!armor && living.inventory.armorInventory[1] != null && living.inventory.armorInventory[1].getItem() != null) {
+            if (!armor && living.inventory.armorInventory[1] != null && living.inventory.armorInventory[1].getItem() != null) {
                 armor = true;
             }
-            if(!armor && living.inventory.armorInventory[2] != null && living.inventory.armorInventory[2].getItem() != null) {
+            if (!armor && living.inventory.armorInventory[2] != null && living.inventory.armorInventory[2].getItem() != null) {
                 armor = true;
             }
-            if(!armor && living.inventory.armorInventory[3] != null && living.inventory.armorInventory[3].getItem() != null) {
+            if (!armor && living.inventory.armorInventory[3] != null && living.inventory.armorInventory[3].getItem() != null) {
                 armor = true;
             }
-            if(armor == false) {
+            if (armor == false) {
                 return false;
             }
         }
 
-        if(isBlacklisted(en)) {
+        if (isBlacklisted(en)) {
             return false;
         }
 
@@ -632,7 +691,6 @@ public class Utils {
     }
 
     /**
-     *
      * @param vec
      * @return index 0 = yaw | index 1 = pitch
      */
@@ -644,16 +702,14 @@ public class Utils {
         double dist = MathHelper.sqrt_double(diffX * diffX + diffZ * diffZ);
         float yaw = (float) (Math.atan2(diffZ, diffX) * 180.0D / Math.PI) - 90.0F;
         float pitch = (float) -(Math.atan2(diffY, dist) * 180.0D / Math.PI);
-        return new float[] {
+        return new float[]{
                 Minecraft.getMinecraft().thePlayer.rotationYaw
                         + MathHelper.wrapAngleTo180_float(yaw - Minecraft.getMinecraft().thePlayer.rotationYaw),
                 Minecraft.getMinecraft().thePlayer.rotationPitch
-                        + MathHelper.wrapAngleTo180_float(pitch - Minecraft.getMinecraft().thePlayer.rotationPitch) };
+                        + MathHelper.wrapAngleTo180_float(pitch - Minecraft.getMinecraft().thePlayer.rotationPitch)};
     }
 
     /**
-     *
-     *
      * @return index 0 = yaw | index 1 = pitch
      */
     public static float[] getFacePosRemote(Vec3 src, Vec3 dest) {
@@ -663,37 +719,33 @@ public class Utils {
         double dist = MathHelper.sqrt_double(diffX * diffX + diffZ * diffZ);
         float yaw = (float) (Math.atan2(diffZ, diffX) * 180.0D / Math.PI) - 90.0F;
         float pitch = (float) -(Math.atan2(diffY, dist) * 180.0D / Math.PI);
-        return new float[] {MathHelper.wrapAngleTo180_float(yaw),
-                MathHelper.wrapAngleTo180_float(pitch) };
+        return new float[]{MathHelper.wrapAngleTo180_float(yaw),
+                MathHelper.wrapAngleTo180_float(pitch)};
     }
 
     /**
-     *
      * @param en
      * @return index 0 = yaw | index 1 = pitch
      */
     public static float[] getFacePosEntity(Entity en) {
         if (en == null) {
-            return new float[] { Minecraft.getMinecraft().thePlayer.rotationYawHead,
-                    Minecraft.getMinecraft().thePlayer.rotationPitch };
+            return new float[]{Minecraft.getMinecraft().thePlayer.rotationYawHead,
+                    Minecraft.getMinecraft().thePlayer.rotationPitch};
         }
         return getFacePos(new Vec3(en.posX - 0.5, en.posY + (en.getEyeHeight() - en.height / 1.5), en.posZ - 0.5));
     }
 
     /**
-     *
      * @param en
      * @return index 0 = yaw | index 1 = pitch
      */
     public static float[] getFacePosEntityRemote(EntityLivingBase facing, Entity en) {
         if (en == null) {
-            return new float[] { facing.rotationYawHead, facing.rotationPitch };
+            return new float[]{facing.rotationYawHead, facing.rotationPitch};
         }
         return getFacePosRemote(new Vec3(facing.posX, facing.posY + en.getEyeHeight(), facing.posZ),
                 new Vec3(en.posX, en.posY + en.getEyeHeight(), en.posZ));
     }
-
-
 
 
     // public static int getDistanceFromMouse(Entity entity)
@@ -917,7 +969,7 @@ public class Utils {
     }
 
     public static void updateLastGroundLocation() {
-        if(mc.thePlayer.onGround) {
+        if (mc.thePlayer.onGround) {
             lastLoc = new Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ);
         }
     }
@@ -939,7 +991,7 @@ public class Utils {
 
         Iterable<BlockPos> collisionBlocks = BlockPos.getAllInBox(pos1, pos2);
         ArrayList<BlockPos> returnList = new ArrayList<BlockPos>();
-        for(BlockPos pos : collisionBlocks) {
+        for (BlockPos pos : collisionBlocks) {
             returnList.add(pos);
         }
         return returnList;
@@ -952,7 +1004,7 @@ public class Utils {
 
         Iterable<BlockPos> collisionBlocks = BlockPos.getAllInBox(pos1, pos2);
         ArrayList<BlockPos> returnList = new ArrayList<BlockPos>();
-        for(BlockPos pos : collisionBlocks) {
+        for (BlockPos pos : collisionBlocks) {
             returnList.add(pos);
         }
         return returnList;
@@ -962,9 +1014,9 @@ public class Utils {
         ArrayList<BlockPos> poses = getBlockPosesEntityIsStandingOn(en);
 
 
-        for(BlockPos pos : poses) {
+        for (BlockPos pos : poses) {
             Block block = Utils.getBlock(pos);
-            if(!(block.getMaterial() instanceof MaterialTransparent) && block.getMaterial() != Material.air
+            if (!(block.getMaterial() instanceof MaterialTransparent) && block.getMaterial() != Material.air
                     && !(block instanceof BlockLiquid)) {
                 return true;
             }
@@ -976,12 +1028,12 @@ public class Utils {
     public static boolean isPlayerOnLiqud() {
         ArrayList<BlockPos> poses = getBlockPosesPlayerIsStandingOn();
         boolean liquid = false;
-        for(BlockPos pos : poses) {
+        for (BlockPos pos : poses) {
             Block block = getBlock(pos);
-            if(block instanceof BlockLiquid) {
+            if (block instanceof BlockLiquid) {
                 liquid = true;
             }
-            if(!(block instanceof BlockLiquid) && !NodeProcessor.isPassable(block)) {
+            if (!(block instanceof BlockLiquid) && !NodeProcessor.isPassable(block)) {
                 return false;
             }
         }
