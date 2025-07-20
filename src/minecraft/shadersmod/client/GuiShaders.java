@@ -1,5 +1,6 @@
 package shadersmod.client;
 
+import io.github.pixee.security.SystemCommand;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -264,7 +265,7 @@ public class GuiShaders extends GuiScreen
 
                                 try
                                 {
-                                    Runtime.getRuntime().exec(s);
+                                    SystemCommand.runCommand(Runtime.getRuntime(), s);
                                     return;
                                 }
                                 catch (IOException ioexception)
@@ -276,7 +277,7 @@ public class GuiShaders extends GuiScreen
                             case 2:
                                 try
                                 {
-                                    Runtime.getRuntime().exec(new String[] {"/usr/bin/open", Shaders.shaderpacksdir.getAbsolutePath()});
+                                    SystemCommand.runCommand(Runtime.getRuntime(), new String[] {"/usr/bin/open", Shaders.shaderpacksdir.getAbsolutePath()});
                                     return;
                                 }
                                 catch (IOException ioexception1)

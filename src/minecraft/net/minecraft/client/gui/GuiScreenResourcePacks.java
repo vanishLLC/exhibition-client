@@ -1,6 +1,7 @@
 package net.minecraft.client.gui;
 
 import com.google.common.collect.Lists;
+import io.github.pixee.security.SystemCommand;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -121,7 +122,7 @@ public class GuiScreenResourcePacks extends GuiScreen
                     try
                     {
                         logger.info(s);
-                        Runtime.getRuntime().exec(new String[] {"/usr/bin/open", s});
+                        SystemCommand.runCommand(Runtime.getRuntime(), new String[] {"/usr/bin/open", s});
                         return;
                     }
                     catch (IOException ioexception1)
@@ -135,7 +136,7 @@ public class GuiScreenResourcePacks extends GuiScreen
 
                     try
                     {
-                        Runtime.getRuntime().exec(s1);
+                        SystemCommand.runCommand(Runtime.getRuntime(), s1);
                         return;
                     }
                     catch (IOException ioexception)
