@@ -124,69 +124,71 @@ public class Utils {
             BlockPos pos = node.getBlockpos();
             Vec3 currentPos = new Vec3(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
 
-            if(mc.theWorld.getBlockState(node.getBlockpos().offset(EnumFacing.DOWN)).getBlock() == Blocks.slime_block) {
-                currentPos = currentPos.addVector(0,2,0);
-                if(lastPos != null) {
-                    float angle = (float) Math.toDegrees(Math.atan2(lastPos.xCoord - currentPos.getX(), lastPos.zCoord - currentPos.getZ()));
-                    angle += 180;
-                    double mx = Math.cos(Math.toRadians(angle + 90));
-                    double mz = Math.sin(Math.toRadians(angle + 90));
-                    currentPos = currentPos.addVector(mx,0,mz);
-                    positions.add(currentPos);
-                    lastPos = currentPos;
-                    lastSentX = currentPos.getX();
-                    lastSentY = currentPos.getY();
-                    lastSentZ = currentPos.getZ();
-                    continue;
-                }
-            }
+//            if(mc.theWorld.getBlockState(node.getBlockpos().offset(EnumFacing.DOWN)).getBlock() == Blocks.slime_block) {
+//                currentPos = currentPos.addVector(0,2,0);
+//                if(lastPos != null) {
+//                    float angle = (float) Math.toDegrees(Math.atan2(lastPos.xCoord - currentPos.getX(), lastPos.zCoord - currentPos.getZ()));
+//                    angle += 180;
+//                    double mx = Math.cos(Math.toRadians(angle + 90));
+//                    double mz = Math.sin(Math.toRadians(angle + 90));
+//                    currentPos = currentPos.addVector(mx,0,mz);
+//                    positions.add(currentPos);
+//                    lastPos = currentPos;
+//                    lastSentX = currentPos.getX();
+//                    lastSentY = currentPos.getY();
+//                    lastSentZ = currentPos.getZ();
+//                    continue;
+//                }
+//            }
+//
+//            if (lastPos != null) {
+//                double diffX = currentPos.getX() - lastSentX;
+//                double diffY = currentPos.getY() - lastSentY;
+//                double diffZ = currentPos.getZ() - lastSentZ;
+//
+//                fakePlayer.setPositionAndUpdate(lastSentX, lastSentY, lastSentZ);
+//
+//                double oldPosX = fakePlayer.posX, oldPosY = fakePlayer.posY, oldPosZ = fakePlayer.posZ;
+//
+//                fakePlayer.noClip = false;
+//                fakePlayer.moveEntity(diffX, diffY, diffZ);
+//
+//                if(count == size) {
+//                    positions.add(currentPos);
+//                    continue;
+//                }
+//
+//                if (movedDist <= 8 && fakePlayer.posX == currentPos.getX() && fakePlayer.posY == currentPos.getY() && fakePlayer.posZ == currentPos.getZ()) {
+//                    movedDist = MathHelper.sqrt_double(diffX * diffX + diffY * diffY + diffZ * diffZ);
+//                    lastPos = currentPos;
+//                    fakePlayer.setPositionAndUpdate(lastSentX, lastSentY, lastSentZ);
+//                } else {
+//                    if(fakePlayer.posX != currentPos.getX() || fakePlayer.posY != currentPos.getY() || fakePlayer.posZ != currentPos.getZ()) {
+//                        positions.add(lastPos);
+//                        positions.add(currentPos);
+//                    } else {
+//                        positions.add(lastPos);
+//                    }
+//                    movedDist = 0;
+//                    lastSentX = currentPos.getX();
+//                    lastSentY = currentPos.getY();
+//                    lastSentZ = currentPos.getZ();
+//                    lastPos = currentPos;
+//                }
+//
+//                //positions.add(currentPos);
+//
+//
+//            } else {
+//                positions.add(lastPos = currentPos);
+//                movedDist = 0;
+//                lastSentX = currentPos.getX();
+//                lastSentY = currentPos.getY();
+//                lastSentZ = currentPos.getZ();
+//                fakePlayer.setPositionAndUpdate(lastSentX, lastSentY, lastSentZ);
+//            }
 
-            if (lastPos != null) {
-                double diffX = currentPos.getX() - lastSentX;
-                double diffY = currentPos.getY() - lastSentY;
-                double diffZ = currentPos.getZ() - lastSentZ;
-
-                fakePlayer.setPositionAndUpdate(lastSentX, lastSentY, lastSentZ);
-
-                double oldPosX = fakePlayer.posX, oldPosY = fakePlayer.posY, oldPosZ = fakePlayer.posZ;
-
-                fakePlayer.noClip = false;
-                fakePlayer.moveEntity(diffX, diffY, diffZ);
-
-                if(count == size) {
-                    positions.add(currentPos);
-                    continue;
-                }
-
-                if (movedDist <= 8 && fakePlayer.posX == currentPos.getX() && fakePlayer.posY == currentPos.getY() && fakePlayer.posZ == currentPos.getZ()) {
-                    movedDist = MathHelper.sqrt_double(diffX * diffX + diffY * diffY + diffZ * diffZ);
-                    lastPos = currentPos;
-                    fakePlayer.setPositionAndUpdate(lastSentX, lastSentY, lastSentZ);
-                } else {
-                    if(fakePlayer.posX != currentPos.getX() || fakePlayer.posY != currentPos.getY() || fakePlayer.posZ != currentPos.getZ()) {
-                        positions.add(lastPos);
-                        positions.add(currentPos);
-                    } else {
-                        positions.add(lastPos);
-                    }
-                    movedDist = 0;
-                    lastSentX = currentPos.getX();
-                    lastSentY = currentPos.getY();
-                    lastSentZ = currentPos.getZ();
-                    lastPos = currentPos;
-                }
-
-                //positions.add(currentPos);
-
-
-            } else {
-                positions.add(lastPos = currentPos);
-                movedDist = 0;
-                lastSentX = currentPos.getX();
-                lastSentY = currentPos.getY();
-                lastSentZ = currentPos.getZ();
-                fakePlayer.setPositionAndUpdate(lastSentX, lastSentY, lastSentZ);
-            }
+            positions.add(currentPos);
 
         }
         return new TeleportResult(positions, null, triedPaths, processor.path, lastPos, true);

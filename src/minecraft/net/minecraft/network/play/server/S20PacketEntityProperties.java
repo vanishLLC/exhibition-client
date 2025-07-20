@@ -26,7 +26,7 @@ public class S20PacketEntityProperties implements Packet<INetHandlerPlayClient>
 
         for (IAttributeInstance iattributeinstance : p_i45236_2_)
         {
-            this.field_149444_b.add(new S20PacketEntityProperties.Snapshot(iattributeinstance.getAttribute().getAttributeUnlocalizedName(), iattributeinstance.getBaseValue(), iattributeinstance.func_111122_c()));
+            this.field_149444_b.add(new S20PacketEntityProperties.Snapshot(iattributeinstance.getAttribute().getAttributeUnlocalizedName(), iattributeinstance.getBaseValue(), iattributeinstance.func_111122_c_getModifierListCopy()));
         }
     }
 

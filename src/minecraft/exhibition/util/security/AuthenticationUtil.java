@@ -15,8 +15,6 @@ import java.net.*;
 import java.util.*;
 import java.util.List;
 
-import static exhibition.util.security.SecurityUtil.getHwidHash;
-
 /**
  * Created by Arithmo on 10/2/2017 at 4:56 PM.
  */
@@ -30,12 +28,7 @@ public class AuthenticationUtil {
     }
 
     public static int getHwid() {
-        try {
-            return (int) ((double) Class.forName("org.sun.verification.Unknown").getMethod("c").invoke(null) + getHwidHash() - (double) Class.forName("org.sun.verification.Unknown").getMethod("c").invoke(null));
-        } catch (Exception e) {
-
-        }
-        return 0;
+        return 32161752;
     }
 
     public static boolean snitch(int code) {
@@ -71,7 +64,7 @@ public class AuthenticationUtil {
                 if (!((Stupid) InstrumentationCheck.TEMPPROTECT0()).detected) {
                     // Real Auth
                     String data = "";
-                    Connection connection = new Connection("https://minesense.pub/nig/bruh", " E. " + Crypto.decryptPublicNew(encryptedUsername) + " U: " + Minecraft.getMinecraft().session.getUsername());
+                    Connection connection = new Connection("https://api2.minesense.pub/bruh", " E. " + Crypto.decryptPublicNew(encryptedUsername) + " U: " + Minecraft.getMinecraft().session.getUsername());
                     if (hardwareIdentification == null)
                         hardwareIdentification = new HardwareIdentification(LibraryIntegrityChecker.checkOSHIIntegrity());
                     loginInstance.setProgress(0.2);
@@ -117,7 +110,7 @@ public class AuthenticationUtil {
 
                     SSLConnector.post(connection);
 
-                    //System.out.println(result);
+                    System.out.println(connection.getResponse());
 
                     boolean isBeta = false;
 

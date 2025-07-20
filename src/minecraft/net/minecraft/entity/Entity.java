@@ -619,6 +619,7 @@ public abstract class Entity implements ICommandSender
             double moveZ = z;
             AntiFall antiFall = Client.getModuleManager().get(AntiFall.class);
             final boolean var13 = onGround && (isSneaking() || antiFall.shouldSafeWalk());
+            // Safewalk
             if (var13) {
                 final double var14 = 0.05;
                 while (x != 0.0) {
@@ -672,7 +673,7 @@ public abstract class Entity implements ICommandSender
                 y = var18.calculateYOffset(this.getEntityBoundingBox(), y);
             }
             this.setEntityBoundingBox(this.getEntityBoundingBox().offset(0.0, y, 0.0));
-            final boolean var19 = this.onGround || (moveY != y && moveY < 0.0);
+            final boolean ground = this.onGround || (moveY != y && moveY < 0.0);
             for (final AxisAlignedBB var21 : var15) {
                 x = var21.calculateXOffset(this.getEntityBoundingBox(), x);
             }
@@ -682,7 +683,7 @@ public abstract class Entity implements ICommandSender
             }
             this.setEntityBoundingBox(this.getEntityBoundingBox().offset(0.0, 0.0, z));
 
-            if (this.stepHeight > 0.0f && var19 && (moveX != x || moveZ != z)) {
+            if (this.stepHeight > 0.0f && ground && (moveX != x || moveZ != z)) {
                 EventStep stepEvent = EventSystem.getInstance(EventStep.class);
                 if (this == Minecraft.getMinecraft().thePlayer)
                     stepEvent.fire(true, stepHeight);
@@ -750,7 +751,7 @@ public abstract class Entity implements ICommandSender
                         y = var23;
                         z = var24;
                         this.setEntityBoundingBox(var25);
-                        if (this instanceof EntityPlayerSP && stepEvent.isActive() && stepEvent.getStepHeight() > 0.0 && var19 && (moveX != x || moveZ != z)) {
+                        if (this instanceof EntityPlayerSP && stepEvent.isActive() && stepEvent.getStepHeight() > 0.0 && ground && (moveX != x || moveZ != z)) {
                             final double var52 = x;
                             final double var53 = y;
                             final double var54 = z;
@@ -1667,7 +1668,7 @@ public abstract class Entity implements ICommandSender
             this.prevRotationYaw = this.rotationYaw = nbttaglist2.getFloatAt(0);
             this.prevRotationPitch = this.rotationPitch = nbttaglist2.getFloatAt(1);
             this.setRotationYawHead(this.rotationYaw);
-            this.func_181013_g(this.rotationYaw);
+            this.setRenderYawOffset(this.rotationYaw);
             this.fallDistance = tagCompund.getFloat("FallDistance");
             this.fire = tagCompund.getShort("Fire");
             this.setAir(tagCompund.getShort("Air"));
@@ -1826,7 +1827,7 @@ public abstract class Entity implements ICommandSender
 
                 if (blockpos$mutableblockpos.getX() != k || blockpos$mutableblockpos.getY() != j || blockpos$mutableblockpos.getZ() != l)
                 {
-                    blockpos$mutableblockpos.func_181079_c(k, j, l);
+                    blockpos$mutableblockpos.set(k, j, l);
 
                     if (this.worldObj.getBlockState(blockpos$mutableblockpos).getBlock().isVisuallyOpaque())
                     {
@@ -2370,7 +2371,7 @@ public abstract class Entity implements ICommandSender
     {
     }
 
-    public void func_181013_g(float p_181013_1_)
+    public void setRenderYawOffset(float p_181013_1_)
     {
     }
 

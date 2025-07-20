@@ -26,13 +26,7 @@ public class HypixelUtil {
     public static boolean sabotage = false;
 
     public static boolean isVerifiedHypixel() {
-        Minecraft mc = Minecraft.getMinecraft();
-        if (!verifiedHypixel && !sabotage) {
-            if (mc.ingameGUI.getTabList().getHeader() != null && mc.ingameGUI.getTabList().getHeader().getUnformattedText().contains("You are playing on MC.HYPIXEL.NET")
-                    && mc.ingameGUI.getTabList().getFooter() != null && mc.ingameGUI.getTabList().getFooter().getUnformattedText().contains("STORE.HYPIXEL.NET") && scoreboardContains("www.hypixel.net"))
-                verifiedHypixel = true;
-        }
-        return verifiedHypixel && mc.getCurrentServerData() != null && (mc.getCurrentServerData().serverIP.toLowerCase().contains(".hypixel.net") || mc.getCurrentServerData().serverIP.toLowerCase().equals("hypixel.net"));
+        return true;
     }
 
     public static void setSabotage(boolean e) {

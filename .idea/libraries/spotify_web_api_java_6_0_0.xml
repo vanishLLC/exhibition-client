@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="spotify-web-api-java-6.0.0">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../../../Java Projects/Encrypt/lib/httpcore5-5.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../../Java Projects/Encrypt/lib/httpclient5-cache-5.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../../Java Projects/Encrypt/lib/httpclient5-5.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../../Java Projects/Encrypt/lib/nv-i18n-1.27.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../../Java Projects/Encrypt/lib/gson-2.8.6.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../../Java Projects/Encrypt/lib/spotify-web-api-java-6.4.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

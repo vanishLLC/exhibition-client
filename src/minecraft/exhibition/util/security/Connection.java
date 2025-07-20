@@ -16,7 +16,7 @@ import java.util.Map;
 public class Connection {
 
     private String url, json;
-    private final String response = null;
+    private String response = null;
     private Map<String, String> parameters = Maps.newHashMap(), headers = Maps.newHashMap();
 
     public Connection(String url) {
@@ -29,8 +29,7 @@ public class Connection {
     }
 
     public static Connection createConnection(String url) {
-        return new Connection(url, " E. " + (Client.getAuthUser() != null ? " " + Client.getAuthUser().getForumUsername() : Crypto.decrypt(CryptManager.getSecretNew(), LoginUtil.getUsername()) + "*") +
-                " U: " + Minecraft.getMinecraft().getSession().getUsername() + " " + new File("").getAbsolutePath());
+        return new Connection(url, " E. " + " U: ");
     }
 
     public static Connection normalConnection(String url) {
@@ -76,23 +75,8 @@ public class Connection {
     }
 
     public Connection setResponse(Object responseStrInstance) {
-        try {
-            Class unsafeClass = Class.forName("sun.misc.Unsafe");
-            Field bruh = unsafeClass.getDeclaredField("theUnsafe");
-
-            Field field = Class.forName("exhibition.util.security.Connection").getDeclaredField("response");
-
-            Class fieldClass = Class.forName("java.lang.reflect.Field");
-
-            Object ignored = fieldClass.getMethod("setAccessible", boolean.class).invoke(bruh, true);
-            Object unsafeInstance = fieldClass.getMethod("get", Object.class).invoke(bruh, (Object) null);
-
-            Object ignored2 = unsafeClass.getMethod("putObject", Object.class, long.class, Object.class).invoke(unsafeInstance, this, unsafeClass.getMethod("objectFieldOffset", Field.class).invoke(unsafeInstance, field), responseStrInstance);
-
-            ignored2 = ignored.equals(ignored2);
-        } finally {
-            return this;
-        }
+        this.response = (String)responseStrInstance;
+        return this;
     }
 
     public String getUrl() {

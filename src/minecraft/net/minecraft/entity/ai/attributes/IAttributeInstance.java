@@ -16,7 +16,7 @@ public interface IAttributeInstance
 
     Collection<AttributeModifier> getModifiersByOperation(int operation);
 
-    Collection<AttributeModifier> func_111122_c();
+    Collection<AttributeModifier> func_111122_c_getModifierListCopy();
 
     boolean hasModifier(AttributeModifier modifier);
 

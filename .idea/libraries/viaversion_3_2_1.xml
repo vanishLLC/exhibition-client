@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="viaversion-3.2.1">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/viaversion-3.2.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/ViaBackwards-3.2.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/snakeyaml-1.26.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/viarewind-all-1.5.3 (1).jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

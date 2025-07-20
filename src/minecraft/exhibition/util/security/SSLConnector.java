@@ -1,17 +1,16 @@
 package exhibition.util.security;
 
-import exhibition.Client;
-import exhibition.gui.generators.handlers.AltGenHandler;
-import exhibition.gui.generators.handlers.altening.stupidaltserviceshit.AltService;
-import exhibition.gui.generators.handlers.altening.stupidaltserviceshit.SSLVerification;
+import exhibition.util.security.mtls.CFKeyManagerFactory;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Map;
@@ -20,25 +19,29 @@ import java.util.Map;
  * Created by DoubleParallax on 12/18/2016.
  */
 public class SSLConnector {
-
     public static class Method {
+        public static Method GET = new Method("GET"), POST = new Method("POST");
 
         String name;
 
-        static Method GET = new Method("GET");
-        static Method POST = new Method("POST");
-
-        public Method(String name) {
+        Method(String name) {
             this.name = name;
         }
 
-        public String name() {
-            return this.name;
+        String name() {
+            return name;
         }
 
     }
+    private static X509Certificate convertToX509(byte[] certBytes) throws IOException, CertificateException {
+        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        ByteArrayInputStream inStream = new ByteArrayInputStream(certBytes);
+        X509Certificate cert = (X509Certificate) cf.generateCertificate(inStream);
+        inStream.close();
+        return cert;
+    }
 
-    private static void readStream(Object bruh, Object appender, Object shouldVerify, String urlLink) {
+    private static void readStream(Object bruh, Object appender, Object shouldVerify) {
         try {
             Class stringbuilderClass = Class.forName("java.lang.StringBuilder");
 
@@ -48,12 +51,10 @@ public class SSLConnector {
 
             if ((boolean) shouldVerify || httpsURLConnection.getMethod("getURL").invoke(bruh).toString().toLowerCase().contains("minesense.pub")) {
                 try {
-                    boolean disabled = Client.altService.getCurrentService() == AltService.EnumAltService.THEALTENING;
-
-                    for (Certificate certificate : ((HttpsURLConnection) bruh).getServerCertificates()) {
-                        X509Certificate x509Certificate = (X509Certificate) convertToX509(certificate.getEncoded());
+                    for (Certificate certificate : ((HttpsURLConnection)bruh).getServerCertificates()) {
+                        X509Certificate x509Certificate = convertToX509(certificate.getEncoded());
                         x509Certificate.checkValidity();
-                        if (x509Certificate.getSubjectDN().getName().split(", ")[1].substring(0, 13).toLowerCase().contains("cloudflare")) {
+                        if (x509Certificate.getSubjectDN().getName().contains("minesense.pub") || x509Certificate.getSubjectDN().getName().split(", ")[1].substring(0, 13).toLowerCase().contains("cloudflare")) {
                             InputStream stream = (int) httpsURLConnection.getMethod("getResponseCode").invoke(bruh) == 200 ? (InputStream) httpsURLConnection.getMethod("getInputStream").invoke(bruh) : (InputStream) httpsURLConnection.getMethod("getErrorStream").invoke(bruh);
                             if (stream == null) {
                                 throw new IOException();
@@ -66,21 +67,15 @@ public class SSLConnector {
                             }
 
                             buffer.close();
-                            if (disabled) {
-                                Client.sslVerification.verify();
-                            }
                             return;
                         }
-                    }
-                    if (disabled) {
-                        Client.sslVerification.verify();
                     }
                     return;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            } else if (httpsURLConnection.getMethod("getURL").invoke(bruh).toString().toLowerCase().contains(AltGenHandler.getBaseURL().replace(AuthenticationUtil.decodeByteArray(new byte[]{104, 116, 116, 112, 115, 58, 47, 47}), ""))) {
-                InputStream stream = (int) httpsURLConnection.getMethod("getResponseCode").invoke(bruh) == 200 ? (InputStream) httpsURLConnection.getMethod("getInputStream").invoke(bruh) : (InputStream) httpsURLConnection.getMethod("getErrorStream").invoke(bruh);
+            } else {
+                InputStream stream = (int)httpsURLConnection.getMethod("getResponseCode").invoke(bruh) == 200 ? (InputStream)httpsURLConnection.getMethod("getInputStream").invoke(bruh) : (InputStream)httpsURLConnection.getMethod("getErrorStream").invoke(bruh);
                 if (stream == null) {
                     throw new IOException();
                 }
@@ -92,30 +87,21 @@ public class SSLConnector {
                 buffer.close();
             }
         } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    public static void post(Connection connection) {
-        request(connection, Method.POST);
+    public static int LAST_RESPONSE_CODE = -1;
+
+    public static String get(Connection connection) {
+        return request(connection, Method.GET);
     }
 
-    public static void get(Connection connection) {
-        request(connection, Method.GET);
+    public static String post(Connection connection) {
+        return request(connection, Method.POST);
     }
 
-    public static String getFake(Connection connection) {
-        return "";
-    }
-
-    private static Object convertToX509(byte[] certBytes) throws Exception {
-        CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        ByteArrayInputStream inStream = new ByteArrayInputStream(certBytes);
-        X509Certificate cert = (X509Certificate) cf.generateCertificate(inStream);
-        inStream.close();
-        return cert;
-    }
-
-    private static void request(Connection connection, Method method) {
+    private static String request(Connection connection, Method method) {
         try {
 
             String payload = connection.getPayload();
@@ -227,11 +213,22 @@ public class SSLConnector {
 
             Object urlConnectionInstance;
 
-            Client.sslVerification.revertChanges();
-
             urlConnectionInstance = ((URL) url).openConnection();
 
             if (urlField.get(urlConnectionInstance) == url) {
+
+                // All Connections are to Auth so we must verify with mTLS
+                Object hostNameVerifierInstance = CFKeyManagerFactory.getVerifier();
+
+                httpsUrlConnectionClass.getMethod("setHostnameVerifier", HostnameVerifier.class).invoke(urlConnectionInstance, hostNameVerifierInstance);
+
+                Class sslContext = Class.forName("javax.net.ssl.SSLContext");
+
+                Object context = CFKeyManagerFactory.getContext(CFKeyManagerFactory.getKeyManager());
+
+                httpsUrlConnectionClass.getMethod("setSSLSocketFactory", SSLSocketFactory.class)
+                        .invoke(urlConnectionInstance,
+                                sslContext.getMethod("getSocketFactory").invoke(context));
 
                 httpsUrlConnectionClass.getMethod("setRequestMethod", String.class).invoke(urlConnectionInstance, method.name());
                 for (Map.Entry<String, String> header : connection.getHeaders().entrySet()) {
@@ -261,12 +258,13 @@ public class SSLConnector {
                             dataOutputStreamClass.getMethod("close").invoke(outputInstance);
 
                         } catch (Exception e) {
-                            return;
+                            e.printStackTrace();
+                            return null;
                         }
                     }
 
                     if (fullURLString.startsWith(protocolField.get(urlField.get(urlConnectionInstance)) + "://" + hostField.get(urlField.get(urlConnectionInstance)))) {
-                        httpsUrlConnectionClass.getMethod("getResponseCode").invoke(urlConnectionInstance);
+                        LAST_RESPONSE_CODE = (int) httpsUrlConnectionClass.getMethod("getResponseCode").invoke(urlConnectionInstance);
                     }
 
                     url = connection;
@@ -279,7 +277,7 @@ public class SSLConnector {
 
             StringBuilder response = new StringBuilder();
 
-            readStream(urlConnectionInstance, response, fullURLString.toLowerCase().contains("minesense.pub"), fullURLString);
+            readStream(urlConnectionInstance, response, fullURLString.toLowerCase().contains("minesense.pub"));
 
             Class unsafeClass = Class.forName("sun.misc.Unsafe");
             Field bruh = unsafeClass.getDeclaredField("theUnsafe");
@@ -293,15 +291,11 @@ public class SSLConnector {
 
             Object ignored2 = unsafeClass.getMethod("putObject", Object.class, long.class, Object.class).invoke(unsafeInstance, url, unsafeClass.getMethod("objectFieldOffset", Field.class).invoke(unsafeInstance, field), response.toString().trim());
 
-            url = ignored;
-
-            if(url != null) {
-                return;
-            }
-
-            ignored = ignored2;
+            return response.toString();
         } catch (Exception e) {
+            e.printStackTrace();
         }
+        return null;
     }
 
 }

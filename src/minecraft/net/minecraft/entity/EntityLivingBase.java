@@ -11,7 +11,6 @@ import java.util.Random;
 import java.util.UUID;
 
 import exhibition.Client;
-import exhibition.module.impl.movement.Fly;
 import exhibition.module.impl.movement.LongJump;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -964,7 +963,7 @@ public abstract class EntityLivingBase extends Entity
                             d1 = (Math.random() - Math.random()) * 0.01D;
                         }
 
-                        this.attackedAtYaw = (float)(MathHelper.func_181159_b(d0, d1) * 180.0D / Math.PI - (double)this.rotationYaw);
+                        this.attackedAtYaw = (float)(MathHelper.atan2(d0, d1) * 180.0D / Math.PI - (double)this.rotationYaw);
                         this.knockBack(entity, amount, d1, d0);
                     }
                     else
@@ -1606,25 +1605,33 @@ public abstract class EntityLivingBase extends Entity
             {
                 if (!this.isInLava() || this instanceof EntityPlayer && ((EntityPlayer)this).capabilities.isFlying)
                 {
+                    // Ground Friction
                     float f4 = 0.91F;
 
+                    // Friction on slippery blocks
                     if (this.onGround)
                     {
                         f4 = this.worldObj.getBlockState(new BlockPos(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.getEntityBoundingBox().minY) - 1, MathHelper.floor_double(this.posZ))).getBlock().slipperiness * 0.91F;
                     }
 
+                    // Slowdown/Slipperiness
                     float f = 0.16277136F / (f4 * f4 * f4);
+
+                    // Movement input friction
                     float f5;
 
                     if (this.onGround)
                     {
+                        // Use ground friction
                         f5 = this.getAIMoveSpeed() * f;
                     }
                     else
                     {
+                        // Use air friction
                         f5 = this.jumpMovementFactor;
                     }
 
+                    // Move player based on friction
                     this.moveFlying(strafe, forward, f5);
                     f4 = 0.91F;
 
@@ -1633,6 +1640,7 @@ public abstract class EntityLivingBase extends Entity
                         f4 = this.worldObj.getBlockState(new BlockPos(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.getEntityBoundingBox().minY) - 1, MathHelper.floor_double(this.posZ))).getBlock().slipperiness * 0.91F;
                     }
 
+                    // Handle ladder movement and falling
                     if (this.isOnLadder())
                     {
                         float f6 = 0.15F;
@@ -1653,13 +1661,16 @@ public abstract class EntityLivingBase extends Entity
                         }
                     }
 
+                    // Attempt to move entity
                     this.moveEntity(this.motionX, this.motionY, this.motionZ);
 
+                    // Handle moving into ladders
                     if (this.isCollidedHorizontally && this.isOnLadder())
                     {
                         this.motionY = 0.2D;
                     }
 
+                    // If player is in an unloaded chunk
                     if (this.worldObj.isRemote && (!this.worldObj.isBlockLoaded(new BlockPos((int)this.posX, 0, (int)this.posZ)) || !this.worldObj.getChunkFromBlockCoords(new BlockPos((int)this.posX, 0, (int)this.posZ)).isLoaded()))
                     {
                         if (this.posY > 0.0D)
@@ -1673,9 +1684,11 @@ public abstract class EntityLivingBase extends Entity
                     }
                     else
                     {
+                        // Normal Gravity
                         this.motionY -= 0.08D;
                     }
 
+                    // Post movement friction/slowdown
                     this.motionY *= 0.9800000190734863D;
                     this.motionX *= (double)f4;
                     this.motionZ *= (double)f4;
@@ -1845,7 +1858,7 @@ public abstract class EntityLivingBase extends Entity
         {
             f3 = 1.0F;
             f2 = (float)Math.sqrt((double)f) * 3.0F;
-            f1 = (float)MathHelper.func_181159_b(d1, d0) * 180.0F / (float)Math.PI - 90.0F;
+            f1 = (float)MathHelper.atan2(d1, d0) * 180.0F / (float)Math.PI - 90.0F;
         }
 
         if (this.swingProgress > 0.0F)
@@ -1860,7 +1873,7 @@ public abstract class EntityLivingBase extends Entity
 
         this.onGroundSpeedFactor += (f3 - this.onGroundSpeedFactor) * 0.3F;
         this.worldObj.theProfiler.startSection("headTurn");
-        f2 = this.func_110146_f(f1, f2);
+        f2 = this.updateDistance(f1, f2);
         this.worldObj.theProfiler.endSection();
         this.worldObj.theProfiler.startSection("rangeChecks");
 
@@ -1908,9 +1921,9 @@ public abstract class EntityLivingBase extends Entity
         this.movedDistance += f2;
     }
 
-    protected float func_110146_f(float p_110146_1_, float p_110146_2_)
+    protected float updateDistance(float rotationYaw, float distance)
     {
-        float f = MathHelper.wrapAngleTo180_float(p_110146_1_ - this.renderYawOffset);
+        float f = MathHelper.wrapAngleTo180_float(rotationYaw - this.renderYawOffset);
         this.renderYawOffset += f * 0.3F;
         float f1 = MathHelper.wrapAngleTo180_float(this.rotationYaw - this.renderYawOffset);
         boolean flag = f1 < -90.0F || f1 >= 90.0F;
@@ -1934,10 +1947,10 @@ public abstract class EntityLivingBase extends Entity
 
         if (flag)
         {
-            p_110146_2_ *= -1.0F;
+            distance *= -1.0F;
         }
 
-        return p_110146_2_;
+        return distance;
     }
 
     /**
@@ -1951,6 +1964,7 @@ public abstract class EntityLivingBase extends Entity
             --this.jumpTicks;
         }
 
+        // For non player entities
         if (this.newPosRotationIncrements > 0)
         {
             double d0 = this.posX + (this.newPosX - this.posX) / (double)this.newPosRotationIncrements;
@@ -2153,7 +2167,9 @@ public abstract class EntityLivingBase extends Entity
      */
     public boolean canEntityBeSeen(Entity entityIn)
     {
-        return this.worldObj.rayTraceBlocks(new Vec3(this.posX, this.posY + (double)this.getEyeHeight(), this.posZ), new Vec3(entityIn.posX, entityIn.posY + (double)entityIn.getEyeHeight(), entityIn.posZ)) == null;
+        return this.worldObj.rayTraceBlocks(
+                new Vec3(this.posX, this.posY + (double)this.getEyeHeight(), this.posZ),
+                new Vec3(entityIn.posX, entityIn.posY + (double)entityIn.getEyeHeight(), entityIn.posZ)) == null;
     }
 
     /**
@@ -2252,7 +2268,7 @@ public abstract class EntityLivingBase extends Entity
         this.rotationYawHead = rotation;
     }
 
-    public void func_181013_g(float p_181013_1_)
+    public void setRenderYawOffset(float p_181013_1_)
     {
         this.renderYawOffset = p_181013_1_;
     }

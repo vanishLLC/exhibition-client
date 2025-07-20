@@ -43,8 +43,8 @@ import net.minecraft.potion.Potion;
 import net.minecraft.util.*;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.vector.Vector2f;
 
-import javax.vecmath.Vector2f;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -480,8 +480,8 @@ public class Scaffold extends Module {
 
                         lastAngles.x += MathHelper.clamp_float(MathHelper.wrapAngleTo180_float(targetYaw - lastAngles.x), -max, max);
 
-                        em.setYaw(mc.thePlayer.rotationYaw = lastAngles.x);
-                        em.setPitch(mc.thePlayer.rotationPitch = lastAngles.y);
+                        em.setYaw(lastAngles.x);
+                        em.setPitch(lastAngles.y);
                     }
 
                     /**
@@ -577,7 +577,7 @@ public class Scaffold extends Module {
                                             if (!place(pos.add(-1, 0, -1)))
                                                 if (!place(pos.add(1, 0, -1)))
                                                     if (!place(pos.add(-1, 0, 1)))
-                                                        if (!place(pos.add(1, 0, 1))) ;
+                                                        if (!place(pos.add(1, 0, 1)));
                 }
             }
         }
@@ -615,9 +615,11 @@ public class Scaffold extends Module {
             EnumFacing side = face[i];
             BlockPos blockPos = pos.offset(side);
             EnumFacing otherSide = side.getOpposite();
+
             if (blockPos(blockPos).canCollideCheck(blockState(blockPos), false)) {
-                Vec3 bruh = getVector(new BlockData(blockPos, otherSide));
-                Vec3 vec = new Vec3(blockPos.getX(), blockPos.getY(), blockPos.getZ()).addVector(0.5, 0.5, 0.5).add(new Vec3(otherSide.getDirectionVec().getX() / 2F, otherSide.getDirectionVec().getY() / 2F, otherSide.getDirectionVec().getZ() / 2F));
+                //Vec3 bruh = getVector(new BlockData(blockPos, otherSide));
+                Vec3 vec = new Vec3(blockPos.getX(), blockPos.getY(), blockPos.getZ()).addVector(0.5, 0.5, 0.5)
+                        .add(new Vec3(otherSide.getDirectionVec().getX() / 2F, otherSide.getDirectionVec().getY() / 2F, otherSide.getDirectionVec().getZ() / 2F));
 
                 IBlockState var11 = mc.theWorld.getBlockState(blockPos);
                 boolean needToSneak = false;
@@ -635,6 +637,8 @@ public class Scaffold extends Module {
                     mc.thePlayer.setSprinting(false);
                 }
 
+                boolean placed = false;
+
                 if (mc.playerController.onPlayerRightClick(mc.thePlayer, mc.theWorld, mc.thePlayer.getCurrentEquippedItem(), blockPos, otherSide, vec)) {
                     if ((Boolean) settings.get(SWING).getValue()) {
                         NetUtil.sendPacket(new C0APacketAnimation());
@@ -649,13 +653,16 @@ public class Scaffold extends Module {
                         }
                     }
 
+                    placed = true;
                 }
 
                 if (needToSneak) {
                     NetUtil.sendPacketNoEvents(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.STOP_SNEAKING));
                     mc.thePlayer.movementInput.sneak = false;
                 }
-                return true;
+
+                if (placed)
+                    return true;
             }
         }
         return false;
@@ -779,11 +786,7 @@ public class Scaffold extends Module {
             if ((output = checkPos(pos.add(1, 0, 0))) == null)
                 if ((output = checkPos(pos.add(0, 0, 1))) == null)
                     if ((output = checkPos(pos.add(-1, 0, 0))) == null)
-                        if ((output = checkPos(pos.add(0, 0, -1))) == null)
-                            if ((output = checkPos(pos.add(1, 0, 1))) == null)
-                                if ((output = checkPos(pos.add(-1, 0, -1))) == null)
-                                    if ((output = checkPos(pos.add(1, 0, -1))) == null)
-                                        if ((output = checkPos(pos.add(-1, 0, 1))) == null) ;
+                        output = checkPos(pos.add(0, 0, -1));
         return output;
     }
 

@@ -189,7 +189,7 @@ public class SpotifyManager {
                     }
                 }
             } catch (Exception e) {
-
+                e.printStackTrace();
             }
             return;
         }
@@ -261,6 +261,8 @@ public class SpotifyManager {
                         Notifications.getManager().post("Now Playing", trackName + artist, 1250, Notifications.Type.SPOTIFY);
                     }
 
+            } else {
+//                System.out.println("NULL?");
             }
         } catch (IOException | SpotifyWebApiException | ParseException e) {
             System.out.println("Info Error: " + e.getMessage());

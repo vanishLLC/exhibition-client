@@ -186,7 +186,7 @@ public class GuiIngame extends Gui {
         }
 
         // Cache username due to JNI performance impact
-        if (username == null && !Client.getAuthUser().hashCheck())
+        if (username == null)
             username = Client.getAuthUser().getForumUsername();
 
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
@@ -219,7 +219,7 @@ public class GuiIngame extends Gui {
         DynamicTTFFont.DynamicTTForMC font = hud.getFont();
 
         if (build == null) {
-            build = "\2477" + (username.equals("Arithmo") ? "Developer Build" :
+            build = "\2477" + (username.equals("Arithmo") ? "Free Build" :
                     username.equals("Neohack") ? "Special ED Developer Build" :
                             (username.equals("eZeeWin") || username.equals("Incognito")) ? "Special ED Build" :
                                     username.equals("Koala") ? "Loser Build" :
@@ -228,9 +228,9 @@ public class GuiIngame extends Gui {
                                                             username.equals("Kaxon") ||
                                                             username.equals("Latch") ? "\247dFurfag Build" :
                                                             username.equals("Anthrecite") ||
-                                                                    username.equals("belle") ? "\247dE-Girl Build" :
+                                                                    username.equals("belle") ? "\247dTranny Build" :
                                                                     username.equals("Max") ? "Bum Build" :
-                                                                            Client.isBeta() ? "Beta Build" : "Release Build");
+                                                                            "Free Build");
         }
 
         String watermark = build + " \247l- \247f\247l" + Client.version + " \2477\247l- \247l" + (hud.showUID() ? "UID " + Client.getAuthUser().userID : username);

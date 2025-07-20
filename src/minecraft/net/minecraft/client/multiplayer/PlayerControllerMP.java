@@ -8,7 +8,6 @@ import exhibition.module.Module;
 import exhibition.module.impl.combat.Killaura;
 import exhibition.module.impl.other.AntiDesync;
 import exhibition.module.impl.render.Freecam;
-import exhibition.util.misc.ChatUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -717,7 +716,7 @@ public class PlayerControllerMP
         return this.currentGameType;
     }
 
-    public boolean func_181040_m()
+    public boolean isHittingBlock()
     {
         return this.isHittingBlock;
     }

@@ -659,7 +659,7 @@ public abstract class EntityPlayer extends EntityLivingBase
 
         this.inventory.decrementAnimations();
         this.prevCameraYaw = this.cameraYaw;
-        super.onLivingUpdate();
+        super.onLivingUpdate(); // Final rotation yaw
         IAttributeInstance iattributeinstance = this.getEntityAttribute(SharedMonsterAttributes.movementSpeed);
 
         if (!this.worldObj.isRemote)

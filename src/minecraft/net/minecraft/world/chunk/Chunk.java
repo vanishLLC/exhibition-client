@@ -1571,7 +1571,7 @@ public class Chunk
 
         for (int j = i + 16 - 1; j > this.worldObj.func_181545_F() || j > 0 && !flag1; --j)
         {
-            blockpos$mutableblockpos.func_181079_c(blockpos$mutableblockpos.getX(), j, blockpos$mutableblockpos.getZ());
+            blockpos$mutableblockpos.set(blockpos$mutableblockpos.getX(), j, blockpos$mutableblockpos.getZ());
             int k = this.getBlockLightOpacity(blockpos$mutableblockpos);
 
             if (k == 255 && blockpos$mutableblockpos.getY() < this.worldObj.func_181545_F())
@@ -1591,7 +1591,7 @@ public class Chunk
 
         for (int l = blockpos$mutableblockpos.getY(); l > 0; --l)
         {
-            blockpos$mutableblockpos.func_181079_c(blockpos$mutableblockpos.getX(), l, blockpos$mutableblockpos.getZ());
+            blockpos$mutableblockpos.set(blockpos$mutableblockpos.getX(), l, blockpos$mutableblockpos.getZ());
 
             if (this.getBlock(blockpos$mutableblockpos).getLightValue() > 0)
             {

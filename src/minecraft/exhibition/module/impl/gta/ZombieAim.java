@@ -75,7 +75,7 @@ public class ZombieAim extends Module {
     private final Setting<Boolean> showFOV = new Setting<>("SHOW FOV", true, "Renders your FOV on your screen.");
     private final Setting<Boolean> autoHeal = new Setting<>("AUTO-HEAL", true, "Auto uses Heal ability.");
     private final Setting<Boolean> autoRevive = new Setting<>("AUTO-REVIVE", true, "Auto sneaks near downed players.");
-    private final Setting<Boolean> autoAmmo = new Setting<>("AUTO-AMMO", false, "Automaticcally rebuys ammo for you.");
+    private final Setting<Boolean> autoAmmo = new Setting<>("AUTO-AMMO", false, "Automatically rebuys ammo for you.");
     private final Setting<Boolean> hud = new Setting<>("HUD", true, "Shows your health, ammo, and skill cool-down.");
 
     private final Setting<Number> predictionScale = new Setting<>("PRED SCALE", 1, "Amount of prediction to be applied.", 0.05, 0, 2);
@@ -132,6 +132,21 @@ public class ZombieAim extends Module {
         shootDelay = 0;
         deltaHashMap.clear();
         target = null;
+    }
+
+    public boolean entityContainsBruh(EntityLivingBase entity, String bruh) {
+        List<Entity> list = mc.theWorld.getEntitiesWithinAABBExcludingEntity(entity, entity.getEntityBoundingBox());
+        if (!list.isEmpty()) {
+            for (Entity temp : list) {
+                if (temp instanceof EntityArmorStand) {
+                    String unformatted = temp.getDisplayName().getUnformattedText();
+                    if (unformatted.contains(bruh)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     @RegisterEvent(events = {EventMotionUpdate.class, EventRender3D.class, EventRenderGui.class, EventNametagRender.class, EventPacket.class, EventRenderGuiLast.class})

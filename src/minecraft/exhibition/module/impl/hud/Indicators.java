@@ -22,6 +22,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
 import org.lwjgl.opengl.GL11;
+
 import java.util.*;
 
 public class Indicators extends Module {
@@ -84,7 +85,7 @@ public class Indicators extends Module {
             for (Entity ent : mc.theWorld.getLoadedEntityList()) {
                 boolean isVisible = mc.thePlayer.canEntityBeSeen(ent);
 
-                if (!(ent instanceof EntityPlayer) || ent instanceof EntityPlayerSP || ((boolean)VISCHECK.getValue() && !isVisible))
+                if (!(ent instanceof EntityPlayer) || ent instanceof EntityPlayerSP || ((boolean) VISCHECK.getValue() && !isVisible))
                     continue;
 
                 double[] renderPositions = entityConvertedPointsMap.getOrDefault(ent, defaultTo).array;
@@ -126,9 +127,8 @@ public class Indicators extends Module {
 
                         int color = isVisible ? ColorManager.getEnemyVisible().getColorHex() : ColorManager.getEnemyInvisible().getColorHex();
                         if (FriendManager.isFriend(ent.getName())) {
-                            color =  isVisible ? ColorManager.getFriendlyVisible().getColorHex() : ColorManager.getFriendlyInvisible().getColorHex();
+                            color = isVisible ? ColorManager.getFriendlyVisible().getColorHex() : ColorManager.getFriendlyInvisible().getColorHex();
                         }
-
 
 
                         int f = alpha;
@@ -140,9 +140,9 @@ public class Indicators extends Module {
                         GL11.glLineWidth(2.5F);
                         RenderingUtil.glColor(Colors.getColor(0, alpha));
                         GL11.glBegin(GL11.GL_LINE_LOOP);
-                        GL11.glVertex2f(-6.5F,-0.5F);
-                        GL11.glVertex2f(0,14.5F);
-                        GL11.glVertex2f(6.5F,-0.5F);
+                        GL11.glVertex2f(-6.5F, -0.5F);
+                        GL11.glVertex2f(0, 14.5F);
+                        GL11.glVertex2f(6.5F, -0.5F);
                         GL11.glEnd();
 
                         RenderingUtil.glColor(colorD);
@@ -151,22 +151,22 @@ public class Indicators extends Module {
                         Depth.pre();
                         Depth.mask();
                         GL11.glBegin(GL11.GL_POLYGON);
-                        GL11.glVertex2f(-6,0);
-                        GL11.glVertex2f(0,14);
-                        GL11.glVertex2f(6,0);
+                        GL11.glVertex2f(-6, 0);
+                        GL11.glVertex2f(0, 14);
+                        GL11.glVertex2f(6, 0);
                         GL11.glEnd();
                         Depth.render(GL11.GL_LESS);
                         GL11.glBegin(GL11.GL_LINE_LOOP);
-                        GL11.glVertex2f(-6,0);
-                        GL11.glVertex2f(0,14);
-                        GL11.glVertex2f(6,0);
+                        GL11.glVertex2f(-6, 0);
+                        GL11.glVertex2f(0, 14);
+                        GL11.glVertex2f(6, 0);
                         GL11.glEnd();
                         Depth.post();
 
                         GL11.glBegin(GL11.GL_POLYGON);
-                        GL11.glVertex2f(-6,0);
-                        GL11.glVertex2f(0,14);
-                        GL11.glVertex2f(6,0);
+                        GL11.glVertex2f(-6, 0);
+                        GL11.glVertex2f(0, 14);
+                        GL11.glVertex2f(6, 0);
                         GL11.glEnd();
                         RenderingUtil.disableGL2D();
                         GL11.glPopMatrix();
@@ -205,7 +205,7 @@ public class Indicators extends Module {
                         entityConvertedPointsMap.put(ent, bruh);
                     }
                     RenderingUtil.worldToScreenOptimized(x, y, z, bruh);
-                    if(bruh.array[0] == -1337 ) {
+                    if (bruh.array[0] == -1337) {
                         entityConvertedPointsMap.remove(ent);
                     }
                 }

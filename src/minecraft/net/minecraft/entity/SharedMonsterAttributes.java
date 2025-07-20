@@ -45,7 +45,7 @@ public class SharedMonsterAttributes
         IAttribute iattribute = p_111261_0_.getAttribute();
         nbttagcompound.setString("Name", iattribute.getAttributeUnlocalizedName());
         nbttagcompound.setDouble("Base", p_111261_0_.getBaseValue());
-        Collection<AttributeModifier> collection = p_111261_0_.func_111122_c();
+        Collection<AttributeModifier> collection = p_111261_0_.func_111122_c_getModifierListCopy();
 
         if (collection != null && !collection.isEmpty())
         {

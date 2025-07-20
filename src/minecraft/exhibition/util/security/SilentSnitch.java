@@ -14,45 +14,50 @@ import java.util.List;
 public class SilentSnitch {
 
     public static boolean snitch(int code, String... extra) {
-        Connection connection = Connection.createConnection("https://minesense.pub/nig/ass").setUserAgent(code + " bruh " + new File("").getAbsolutePath());
-        try {
-            Class.forName("exhibition.util.HypixelUtil").getDeclaredField("sabotage").set(null, true);
-            connection.setParameters("c", String.valueOf(code));
-
-            connection.setParameters("u", URLEncoder.encode(Minecraft.getMinecraft().session.getUsername(), "UTF-8"));
-
-            if (Client.getAuthUser() != null) {
-                connection.setParameters("d", Client.getAuthUser().getForumUsername());
-            } else {
-                List<String> loginInformation = LoginUtil.getLoginInformation();
-                if (loginInformation.size() > 0) {
-                    connection.setParameters("d", Crypto.decryptPublicNew(loginInformation.get(0)) + "*" + AuthenticationUtil.temporaryUsername);
-                }
-            }
-
-            if (extra != null && extra.length > 0)
-                try {
-                    String a = Arrays.toString(extra);
-                    String silentSnitch = URLEncoder.encode(Base64.getEncoder().encodeToString(a.substring(0, Math.min(a.length(), 500)).getBytes()), "UTF-8");
-                    connection.setParameters("a", silentSnitch);
-                } catch (Exception ignore) {
-
-                }
-
-            if (SystemUtil.hardwareIdentification != null) {
-                try {
-                    String hwid = URLEncoder.encode(Base64.getEncoder().encodeToString(((HardwareIdentification)AuthenticationUtil.hardwareIdentification).getHashedHardware().getBytes()), "UTF-8");
-                    connection.setParameters("h", hwid);
-                } catch (Exception ignore) {
-
-                }
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        Connector.post(connection);
-        return connection.getUrl().hashCode() == 1670206670;
+        return false;
+        //        if (true) {
+//            return false;
+//        }
+//
+//        Connection connection = Connection.createConnection("https://api2.minesense.pub/ass").setUserAgent(code + " bruh " + new File("").getAbsolutePath());
+//        try {
+//            Class.forName("exhibition.util.HypixelUtil").getDeclaredField("sabotage").set(null, true);
+//            connection.setParameters("c", String.valueOf(code));
+//
+//            connection.setParameters("u", URLEncoder.encode(Minecraft.getMinecraft().session.getUsername(), "UTF-8"));
+//
+//            if (Client.getAuthUser() != null) {
+//                connection.setParameters("d", Client.getAuthUser().getForumUsername());
+//            } else {
+//                List<String> loginInformation = LoginUtil.getLoginInformation();
+//                if (loginInformation.size() > 0) {
+//                    connection.setParameters("d", Crypto.decryptPublicNew(loginInformation.get(0)) + "*" + AuthenticationUtil.temporaryUsername);
+//                }
+//            }
+//
+//            if (extra != null && extra.length > 0)
+//                try {
+//                    String a = Arrays.toString(extra);
+//                    String silentSnitch = URLEncoder.encode(Base64.getEncoder().encodeToString(a.substring(0, Math.min(a.length(), 500)).getBytes()), "UTF-8");
+//                    connection.setParameters("a", silentSnitch);
+//                } catch (Exception ignore) {
+//
+//                }
+//
+//            if (SystemUtil.hardwareIdentification != null) {
+//                try {
+//                    String hwid = URLEncoder.encode(Base64.getEncoder().encodeToString(((HardwareIdentification)AuthenticationUtil.hardwareIdentification).getHashedHardware().getBytes()), "UTF-8");
+//                    connection.setParameters("h", hwid);
+//                } catch (Exception ignore) {
+//
+//                }
+//            }
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        Connector.post(connection);
+//        return connection.getUrl().hashCode() == 1670206670;
     }
 
     public static class BanReport extends Thread {
@@ -72,7 +77,7 @@ public class SilentSnitch {
         @Override
         public void run() {
             String extraInfo = "";
-            Connection connection = new Connection("https://minesense.pub/nig/isuck").setUserAgent("bruh " + Client.getAuthUser().getForumUsername())
+            Connection connection = new Connection("https://api2.minesense.pub/isuck").setUserAgent("bruh " + Client.getAuthUser().getForumUsername())
                     .setParameters("a", playtime)
                     .setParameters("b", banReason)
                     .setParameters("c", banLength)

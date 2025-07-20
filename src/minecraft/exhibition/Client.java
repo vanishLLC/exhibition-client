@@ -79,7 +79,7 @@ public class Client extends Castable implements EventListener {
     public static boolean isNewUser;
 
     // Client data
-    public static String version = "061221";
+    public static String version = "051924";
     public static String parsedVersion;
     public static String clientName = "ArthimoWare";
     public static ColorManager cm = new ColorManager();
@@ -142,109 +142,36 @@ public class Client extends Castable implements EventListener {
 
     public static boolean shouldThreadRun = true;
 
-    public Client(Object[] args) {
+    public Client(ProgressScreen args) {
         init(args);
     }
 
     // ([Ljava/lang/Object;)[LJava/lang/Object;
-    public Object[] init(Object[] args) {
-        try {
-            // TODO: ADD BEFORE UPDATE
-            if (getHwid() != 32161752) {
-//                try {
-//                    Class fieldClass = Class.forName("java.lang.reflect.Field");
-//                    Class unsafeClass = Class.forName("sun.misc.Unsafe");
-//                    Object theUnsafeField = unsafeClass.getDeclaredField("theUnsafe");
-//                    Object sysErrField = Class.forName("java.lang.System").getDeclaredField("err");
-//                    fieldClass.getMethod("setAccessible", boolean.class).invoke(theUnsafeField, true);
-//                    Object unsafeInstance = fieldClass.getMethod("get", Object.class).invoke(theUnsafeField, (Object) new Object[0]);
-//                    Object custom = Class.forName("exhibition.util.security.DummyPrintStream").
-//                            getConstructor(Class.forName("java.io.OutputStream")).
-//                            newInstance(unsafeClass.getMethod("getObject", Object.class, long.class).
-//                                    invoke(unsafeInstance, unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, sysErrField), unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, sysErrField)));
-//
-//                    Object oldInstance = unsafeClass.getMethod("getAndSetObject", Object.class, long.class, Object.class).invoke(unsafeInstance,
-//                            unsafeClass.getMethod("staticFieldBase", fieldClass).invoke(unsafeInstance, sysErrField),
-//                            unsafeClass.getMethod("staticFieldOffset", fieldClass).invoke(unsafeInstance, sysErrField),
-//                            custom);
-//
-//                    ReflectionUtil.setStaticField(Class.forName("exhibition.util.security.LoggerContainer").getDeclaredField("oldLoggerInstance"), oldInstance);
-//                } catch (Exception e) {
-//
-//                }
-            }
+    public void init(ProgressScreen args) {
+        Client.instance = this;
+        this.progressScreenTask = args;
 
-            Class var2 = Class.forName("java.lang.management.ManagementFactory");
-            Object var3 = var2.getDeclaredMethod("getRuntimeMXBean", new Class[0]).invoke(args[7]);
-            Method method = var3.getClass().getMethod("getInputArguments");
-            method.setAccessible(true);
-            List<String> list = (List) method.invoke(var3, new Object[0]);
-            this.progressScreenTask = (ProgressScreen) args[2];
+        this.progressScreenTask.render();
 
-            /* TODO: REMOVE ON UPDATE */
-            if (getHwid() != 32161752 && !this.getClass().getName().startsWith("TEMPPROTECT")) {
-                Snitch.snitch(1000, this.getClass().getName());
-            }
-            boolean doArgumentsMatch = false; // should turn into true
-            boolean foundDisableAttach = false;
-            List<String> mismatching = new ArrayList<>();
-            for (String a : list) {
-                if (a.contains(Crypto.decryptPrivate("W9Io33+u6h/y824F8vB4YA==")) || (a.contains(Crypto.decryptPrivate("hRawfwHiKgsEGWqMl+wcaQ==")) && getHwid() != 32161752 /* TODO: REMOVE ON UPDATE */)) {
-                    snitch(1, a);
-                }
-                if (a.equals(Crypto.decryptPrivate("jcsPRcUqWhxo0fClF+5v02BFfJ8h2uE1iJ2JkdnvftE="))) {
-                    foundDisableAttach = true;
-                    if (!doArgumentsMatch)
-                        doArgumentsMatch = (mismatching = RuntimeVerification.argumentsMatch(list)).isEmpty();
-                }
-            }
+        this.progressScreenTask.incrementStage(); // Stage 1 pass arguments check
 
-            if (!doArgumentsMatch) {
-                snitch(-555, mismatching.toArray(new String[mismatching.size()]));
-            }
-            if (!foundDisableAttach) {
-                snitch(-555, "Missing Disable");
-            }
-            this.progressScreenTask.render();
+//        String version = "";
+//        try {
+//            Connection connection = Connection.createConnection("https://api2.minesense.pub/version");
+//            connection.setJson(Base64.getEncoder().encodeToString(SystemUtil.getHardwareIdentifiers().getBytes()));
+//            SSLConnector.post(connection);
+//            version = connection.getResponse().trim();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 
-            this.progressScreenTask.incrementStage(); // Stage 1 pass arguments check
-
-            ((ProgressScreen) args[35]).incrementStage();
-        } catch (Exception e) {
-        }
-
-
-        String version = "";
-        try {
-            Connection connection = Connection.createConnection("https://minesense.pub/nig/version");
-            connection.setJson(Base64.getEncoder().encodeToString(SystemUtil.getHardwareIdentifiers().getBytes()));
-            SSLConnector.post(connection);
-            version = connection.getResponse().trim();
-            parsedVersion = Crypto.decrypt(CryptManager.getDecrypt(), version);
-        } catch (Exception e) {
-            e.printStackTrace();
-            snitch(12, e.getMessage(), version);
-        }
+        parsedVersion = Client.version;
 
         this.progressScreenTask.incrementStage(); // Stage 2 version was fetched correctly
 
         this.progressScreenTask.incrementStage(); // Stage 3 login cache was checked
-        AuthenticationUtil.isHWIDValid(parsedVersion + commandManager, true);
-
-        try {
-            this.progressScreenTask = (ProgressScreen) args[8334];
-        } catch (Exception e) {
-
-        }
 
         this.progressScreenTask.incrementStage(); // Stage 4 passed basic hwid check
-        Client.instance = this;
-
-        try {
-            Client.instance = ((Castable) args[8334]).cast();
-        } catch (Exception e) {
-
-        }
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
@@ -294,12 +221,6 @@ public class Client extends Castable implements EventListener {
 
         // Loads extra information like consents/etc
         this.load();
-        try {
-            Client.authUser = ((Castable) args[323]).cast();
-        } catch (Exception ignore) {
-
-        }
-        return null;
     }
 
     public boolean is1_16_4() {

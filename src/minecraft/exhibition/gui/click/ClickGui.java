@@ -133,7 +133,9 @@ public class ClickGui extends GuiScreen {
         double twoDscale = !GlobalValues.scaleFix.getValue() ? 1 : (scaledRes.getScaleFactor() / Math.pow(scaledRes.getScaleFactor(), 2.0D)) * 2;
         GlStateManager.scale(twoDscale, twoDscale, twoDscale);
 
+        mc.mcProfiler.startSection("mainPanel");
         mainPanel.draw((int) (mouseX / twoDscale), (int) (mouseY / twoDscale));
+        mc.mcProfiler.endSection();
 
         GlStateManager.scale(1 / twoDscale, 1 / twoDscale, 1 / twoDscale);
 

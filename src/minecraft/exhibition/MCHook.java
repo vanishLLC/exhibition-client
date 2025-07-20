@@ -18,7 +18,7 @@ public class MCHook extends Minecraft {
 		try {
 			ProgressScreen progressScreenTask = new ProgressScreen(texMan,this);
 			try {
-				Client.instance = new Client(new Object[]{Float.NaN, System.class, progressScreenTask, "gibberish", "retard", "im skidding", "wtf?", null, null});
+				Client.instance = new Client(progressScreenTask);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

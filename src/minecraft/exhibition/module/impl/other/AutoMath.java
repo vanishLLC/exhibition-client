@@ -21,8 +21,8 @@ import java.util.PriorityQueue;
 public class AutoMath extends Module {
 
     private final PriorityQueue<String> chatQueue = new PriorityQueue();
-    private final exhibition.util.Timer chatDelay = new exhibition.util.Timer();
-    private final exhibition.util.Timer messageDelay = new Timer();
+    private final Timer chatDelay = new Timer();
+    private final Timer messageDelay = new Timer();
 
     private final ScriptEngine engine;
 
@@ -52,10 +52,15 @@ public class AutoMath extends Module {
                 try {
                     String cleanedUnformatted = StringUtils.stripHypixelControlCodes(StringUtils.stripControlCodes(formatted));
                     String calculate = cleanedUnformatted.split("Solve: ")[1].replace("x", "*").replace("÷", "/");
-                    String result = String.valueOf(engine.eval(calculate.trim()));
-                    ChatUtil.printChat(Command.chatPrefix + "Solving \247e" + calculate.trim() + "\2477 = \247e" + result);
-                    chatQueue.add("/achat " + result);
-                    messageDelay.reset();
+
+                    if(!calculate.matches(".s*[A-Za-z].*")) {
+                        String result = String.valueOf(engine.eval(calculate.trim()));
+                        ChatUtil.printChat(Command.chatPrefix + "Solving \247e" + calculate.trim() + "\2477 = \247e" + result);
+                        chatQueue.add("/achat " + result);
+                        messageDelay.reset();
+                    } else {
+                        ChatUtil.printChat(Command.chatPrefix + "\247cCould not calculate!");
+                    }
                 } catch (Exception ignored) {
                     ChatUtil.printChat(Command.chatPrefix + "\247cfailed to solve. " + ignored.getMessage());
                 }

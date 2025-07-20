@@ -440,7 +440,7 @@ public class MathHelper
         return (p_181160_0_ - p_181160_2_) / (p_181160_4_ - p_181160_2_);
     }
 
-    public static double func_181159_b(double p_181159_0_, double p_181159_2_)
+    public static double atan2(double p_181159_0_, double p_181159_2_)
     {
         double d0 = p_181159_2_ * p_181159_2_ + p_181159_0_ * p_181159_0_;
 

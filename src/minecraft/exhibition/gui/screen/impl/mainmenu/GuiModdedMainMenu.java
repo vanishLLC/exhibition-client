@@ -68,11 +68,11 @@ public class GuiModdedMainMenu extends GuiMainMenu {
                         mc.getSoundHandler().playSound(GuiModdedMainMenu.menuSong);
                         first = true;
                     }
-                    Connection changeLog = new Connection("https://minesense.pub/nig/C");
+                    Connection changeLog = new Connection("https://api2.minesense.pub/C");
                     SSLConnector.get(changeLog);
                     changeLogList = changeLog.getResponse().split("\n");
 
-                    Connection announcementsConnection = new Connection("https://minesense.pub/nig/A");
+                    Connection announcementsConnection = new Connection("https://api2.minesense.pub/A");
                     SSLConnector.get(announcementsConnection);
                     announcements = announcementsConnection.getResponse().split("\n");
                 } catch (Exception ignored) {

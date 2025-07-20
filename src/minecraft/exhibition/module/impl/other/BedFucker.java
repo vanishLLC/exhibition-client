@@ -34,7 +34,7 @@ public class BedFucker extends Module {
 
     public BedFucker(ModuleData data) {
         super(data);
-        addSetting("ITEMS", new Setting("ITEMS", multiBool, "The blocks to interact/break."));
+        addSetting("ITEMS", new Setting<>("ITEMS", multiBool, "The blocks to interact/break."));
     }
 
     @Override

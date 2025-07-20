@@ -79,97 +79,48 @@ public class RenderingUtil {
         double[] bottomMostPoint = new double[3];
 
 
-
     }
 
+
     public static void boundingBox(double x, double y, double z, AxisAlignedBB boundingBox, ESP2D.Bruh bruh) {
-        double[] pos1 = worldToScreenOptimized(x + boundingBox.minX, y + boundingBox.minY, z + boundingBox.minZ, bruh);        //Converts each bounding box corner into a screen position
-        if (pos1 == null || (pos1[2] < 0.0D || pos1[2] > 1.0D)) {
-            bruh.array[0] = -1337;
-            bruh.array[1] = -1337;
-            bruh.array[2] = -1337;
-            bruh.array[3] = -1337;
-            return;
+        double[][] offsets = {{x + boundingBox.minX, y + boundingBox.minY, z + boundingBox.minZ},
+                {x + boundingBox.maxX, y + boundingBox.minY, z + boundingBox.minZ},
+                {x + boundingBox.maxX, y + boundingBox.minY, z + boundingBox.maxZ},
+                {x + boundingBox.minX, y + boundingBox.minY, z + boundingBox.maxZ},
+                {x + boundingBox.minX, y + boundingBox.maxY, z + boundingBox.minZ},
+                {x + boundingBox.maxX, y + boundingBox.maxY, z + boundingBox.minZ},
+                {x + boundingBox.maxX, y + boundingBox.maxY, z + boundingBox.maxZ},
+                {x + boundingBox.minX, y + boundingBox.maxY, z + boundingBox.maxZ}
+        };
+        double[][] positions = new double[8][2];
+
+        for (int i = 0; i < offsets.length; i++) {
+            double[] offset = offsets[i];
+            double[] pos = worldToScreenOptimized(offset[0], offset[1], offset[2], bruh);
+            if (pos == null || (pos[2] < 0.0D || pos[2] > 1.0D)) {
+                bruh.array[0] = -1337;
+                bruh.array[1] = -1337;
+                bruh.array[2] = -1337;
+                bruh.array[3] = -1337;
+                return;
+            }
+            positions[i][0] = pos[0];
+            positions[i][1] = pos[1];
         }
 
-        double[] pos2 = worldToScreenOptimized(x + boundingBox.maxX, y + boundingBox.minY, z + boundingBox.minZ, bruh);
-        if (pos2 == null || (pos2[2] < 0.0D || pos2[2] > 1.0D)) {
-            bruh.array[0] = -1337;
-            bruh.array[1] = -1337;
-            bruh.array[2] = -1337;
-            bruh.array[3] = -1337;
-            return;
+        double startX = positions[0][0];
+        double startY = positions[0][1];
+        double endX = positions[7][0];
+        double endY = positions[7][1];
+
+        for (double[] position : positions) {
+            startX = Math.min(position[0], startX);
+            endX = Math.max(position[0], endX);
+
+            startY = Math.min(position[1], startY);
+            endY = Math.max(position[1], endY);
         }
 
-        double[] pos3 = worldToScreenOptimized(x + boundingBox.maxX, y + boundingBox.minY, z + boundingBox.maxZ, bruh);
-        if (pos3 == null || (pos3[2] < 0.0D || pos3[2] > 1.0D)) {
-            bruh.array[0] = -1337;
-            bruh.array[1] = -1337;
-            bruh.array[2] = -1337;
-            bruh.array[3] = -1337;
-            return;
-        }
-
-        double[] pos4 = worldToScreenOptimized(x + boundingBox.minX, y + boundingBox.minY, z + boundingBox.maxZ, bruh);
-        if (pos4 == null || (pos4[2] < 0.0D || pos4[2] > 1.0D)) {
-            bruh.array[0] = -1337;
-            bruh.array[1] = -1337;
-            bruh.array[2] = -1337;
-            bruh.array[3] = -1337;
-            return;
-        }
-
-        double[] pos5 = worldToScreenOptimized(x + boundingBox.minX, y + boundingBox.maxY, z + boundingBox.minZ, bruh);
-        if (pos5 == null || (pos5[2] < 0.0D || pos5[2] > 1.0D)) {
-            bruh.array[0] = -1337;
-            bruh.array[1] = -1337;
-            bruh.array[2] = -1337;
-            bruh.array[3] = -1337;
-            return;
-        }
-
-        double[] pos6 = worldToScreenOptimized(x + boundingBox.maxX, y + boundingBox.maxY, z + boundingBox.minZ, bruh);
-        if (pos6 == null || (pos6[2] < 0.0D || pos6[2] > 1.0D)) {
-            bruh.array[0] = -1337;
-            bruh.array[1] = -1337;
-            bruh.array[2] = -1337;
-            bruh.array[3] = -1337;
-            return;
-        }
-
-        double[] pos7 = worldToScreenOptimized(x + boundingBox.maxX, y + boundingBox.maxY, z + boundingBox.maxZ, bruh);
-        if (pos7 == null || (pos7[2] < 0.0D || pos7[2] > 1.0D)) {
-            bruh.array[0] = -1337;
-            bruh.array[1] = -1337;
-            bruh.array[2] = -1337;
-            bruh.array[3] = -1337;
-            return;
-        }
-
-        double[] pos8 = worldToScreenOptimized(x + boundingBox.minX, y + boundingBox.maxY, z + boundingBox.maxZ, bruh);
-        if (pos8 == null || (pos8[2] < 0.0D || pos8[2] > 1.0D)) {
-            bruh.array[0] = -1337;
-            bruh.array[1] = -1337;
-            bruh.array[2] = -1337;
-            bruh.array[3] = -1337;
-            return;
-        }
-
-        double startX = pos1[0];                                                                                        //Initialize output coords
-        double startY = pos1[1];
-        double endX = pos8[0];
-        double endY = pos8[1];
-        double[] xValues = new double[]{pos1[0], pos2[0], pos3[0], pos4[0], pos5[0], pos6[0], pos7[0], pos8[0]};        //Store all coords
-        double[] yValues = new double[]{pos1[1], pos2[1], pos3[1], pos4[1], pos5[1], pos6[1], pos7[1], pos8[1]};
-
-        for (double bdubs : xValues) {                                                                                  //Find the best starting x pos
-            startX = Math.min(bdubs, startX);
-            endX = Math.max(bdubs, endX);
-        }
-        for (double bdubs : yValues) {                                                                                  //Find the best starting y pos
-            startY = Math.min(bdubs, startY);
-            endY = Math.max(bdubs, endY);
-        }
         //Return the start and end coords
         bruh.array[0] = startX;
         bruh.array[1] = startY;
@@ -514,7 +465,7 @@ public class RenderingUtil {
         GL11.glVertex3d(boundingBox.minX, boundingBox.maxY, boundingBox.maxZ);
         GL11.glEnd();
         GL11.glPopMatrix();
-        
+
         GlStateManager.depthMask(true);
     }
 
@@ -538,8 +489,6 @@ public class RenderingUtil {
     }
 
     public static void drawBoundingBox(final AxisAlignedBB axisalignedbb) {
-        final Tessellator tessellator = Tessellator.getInstance();
-        final WorldRenderer worldrender = Tessellator.getInstance().getWorldRenderer();
         GL11.glPushMatrix();
         GL11.glBegin(GL_QUADS);
         GL11.glVertex3d(axisalignedbb.minX, axisalignedbb.minY, axisalignedbb.minZ);

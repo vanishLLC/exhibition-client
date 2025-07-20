@@ -163,7 +163,7 @@ public class EntityWither extends EntityMob implements IBossDisplayData, IRanged
 
         if (this.motionX * this.motionX + this.motionZ * this.motionZ > 0.05000000074505806D)
         {
-            this.rotationYaw = (float)MathHelper.func_181159_b(this.motionZ, this.motionX) * (180F / (float)Math.PI) - 90.0F;
+            this.rotationYaw = (float)MathHelper.atan2(this.motionZ, this.motionX) * (180F / (float)Math.PI) - 90.0F;
         }
 
         super.onLivingUpdate();
@@ -193,8 +193,8 @@ public class EntityWither extends EntityMob implements IBossDisplayData, IRanged
                 double d7 = entity1.posY + (double)entity1.getEyeHeight() - d12;
                 double d8 = entity1.posZ - d13;
                 double d9 = (double)MathHelper.sqrt_double(d6 * d6 + d8 * d8);
-                float f = (float)(MathHelper.func_181159_b(d8, d6) * 180.0D / Math.PI) - 90.0F;
-                float f1 = (float)(-(MathHelper.func_181159_b(d7, d9) * 180.0D / Math.PI));
+                float f = (float)(MathHelper.atan2(d8, d6) * 180.0D / Math.PI) - 90.0F;
+                float f1 = (float)(-(MathHelper.atan2(d7, d9) * 180.0D / Math.PI));
                 this.field_82220_d[j] = this.func_82204_b(this.field_82220_d[j], f1, 40.0F);
                 this.field_82221_e[j] = this.func_82204_b(this.field_82221_e[j], f, 10.0F);
             }

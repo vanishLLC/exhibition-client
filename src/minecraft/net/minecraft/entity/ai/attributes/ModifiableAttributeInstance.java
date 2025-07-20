@@ -61,7 +61,7 @@ public class ModifiableAttributeInstance implements IAttributeInstance
         return (Collection)this.mapByOperation.get(Integer.valueOf(operation));
     }
 
-    public Collection<AttributeModifier> func_111122_c()
+    public Collection<AttributeModifier> func_111122_c_getModifierListCopy()
     {
         Set<AttributeModifier> set = Sets.<AttributeModifier>newHashSet();
 
@@ -141,7 +141,7 @@ public class ModifiableAttributeInstance implements IAttributeInstance
 
     public void removeAllModifiers()
     {
-        Collection<AttributeModifier> collection = this.func_111122_c();
+        Collection<AttributeModifier> collection = this.func_111122_c_getModifierListCopy();
 
         if (collection != null)
         {
@@ -167,19 +167,19 @@ public class ModifiableAttributeInstance implements IAttributeInstance
     {
         double d0 = this.getBaseValue();
 
-        for (AttributeModifier attributemodifier : this.func_180375_b(0))
+        for (AttributeModifier attributemodifier : this.func_180375_b_getModifiersByOperation(0))
         {
             d0 += attributemodifier.getAmount();
         }
 
         double d1 = d0;
 
-        for (AttributeModifier attributemodifier1 : this.func_180375_b(1))
+        for (AttributeModifier attributemodifier1 : this.func_180375_b_getModifiersByOperation(1))
         {
             d1 += d0 * attributemodifier1.getAmount();
         }
 
-        for (AttributeModifier attributemodifier2 : this.func_180375_b(2))
+        for (AttributeModifier attributemodifier2 : this.func_180375_b_getModifiersByOperation(2))
         {
             d1 *= 1.0D + attributemodifier2.getAmount();
         }
@@ -187,7 +187,7 @@ public class ModifiableAttributeInstance implements IAttributeInstance
         return this.genericAttribute.clampValue(d1);
     }
 
-    private Collection<AttributeModifier> func_180375_b(int p_180375_1_)
+    private Collection<AttributeModifier> func_180375_b_getModifiersByOperation(int p_180375_1_)
     {
         Set<AttributeModifier> set = Sets.newHashSet(this.getModifiersByOperation(p_180375_1_));
 

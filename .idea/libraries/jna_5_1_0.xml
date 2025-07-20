@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="jna-5.1.0">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/slf4j-simple-1.7.25.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/slf4j-api-1.7.25.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/com/github/oshi/oshi-core/5.7.0/oshi-core-5.7.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/newjna/jna-5.8.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/newjna/jna-platform-5.8.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

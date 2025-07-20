@@ -1,0 +1,61 @@
+<component name="libraryTable">
+  <library name="authlib-1.5.21">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/authlib-1.5.21.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/codecjorbis-20101023.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/codecwav-20101023.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/commons-codec-1.9.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/commons-compress-1.8.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/commons-io-2.4.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/commons-lang3-3.3.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/commons-logging-1.1.3.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/commons-logging-1.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/discord-rpc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/Encryption.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/fastutil-8.4.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/gson-2.2.4.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/guava-17.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/httpasyncclient-4.1.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/httpasyncclient-4.1.4.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/httpclient-4.5.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/httpcore-4.4.4.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/httpcore-nio-4.4.4.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/httpmime-4.5.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/icu4j-core-mojang-51.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/jinput-2.0.5.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/jinput-platform-2.0.5-natives-windows.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/jna-5.1.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/jna-platform-5.1.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/jopt-simple-4.6.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/json-20160212.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/json-simple-1.1.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/jutils-1.0.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/libraryjavasound-20101123.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/librarylwjglopenal-20100824.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/log4j-api-2.0-beta9.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/log4j-core-2.0-beta9.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/lwjgl-2.9.4-nightly-20150209.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/lwjgl-platform-2.9.4-nightly-20150209-natives-windows.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/lwjgl_util-2.9.4-nightly-20150209.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/netty-1.6.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/netty-all-4.0.23.Final.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/oshi-core-3.11.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/platform-3.4.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/realms-1.7.59.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/slf4j-api-1.7.25.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/slf4j-simple-1.7.25.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/snakeyaml-1.26.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/soundsystem-20120107.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/twitch-6.5.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/twitch-external-platform-4.5-natives-windows-64.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/twitch-platform-6.5-natives-windows-64.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/unirest-java-1.4.9.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/ViaBackwards-3.2.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/ViaFabric-0.2.16-SNAPSHOTbuild-588.1-mc-1.8.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/ViaRewind-1.5.3.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../jars/libraries/viaversion-3.2.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

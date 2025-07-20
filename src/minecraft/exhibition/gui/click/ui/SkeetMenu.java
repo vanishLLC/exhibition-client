@@ -77,6 +77,8 @@ public class SkeetMenu extends UI {
 
     @Override
     public void mainPanelDraw(MainPanel panel, int p0, int p1) {
+        mc.mcProfiler.startSection("background");
+
         opacity.interp(panel.isOpen ? 255 : 0, 25);
 
         RenderingUtil.rectangleBordered(panel.x + panel.dragX - 0.3, panel.y + panel.dragY - 0.3, panel.x + 340 + panel.dragX + 0.5, panel.y + 340 + panel.dragY + 0.3, 0.5, Colors.getColor(0, 0), Colors.getColor(10, (int) opacity.getOpacity()));//60 60 opaccity and 22
@@ -88,12 +90,14 @@ public class SkeetMenu extends UI {
         Depth.pre();
         Depth.mask();
 
+        mc.mcProfiler.startSection("categories");
         float y = 15;
         for (int i = 0; i <= panel.typeButton.size(); i++) {
             if (i <= panel.typeButton.size() - 1 && panel.typeButton.get(i).categoryPanel.visible && i > 0) {
                 y = 15 + ((i) * 40);
             }
         }
+        mc.mcProfiler.endSection();
         bar.interpolate(0, y, 0.6F);
         y = bar.getY();
 
@@ -123,6 +127,7 @@ public class SkeetMenu extends UI {
         GlStateManager.enableBlend();
         Depth.mask();
 
+        mc.mcProfiler.startSection("chainmail");
         mc.getTextureManager().bindTexture(texture);
         GlStateManager.translate(panel.x + panel.dragX + 40, panel.dragY + panel.y + 3f, 0);
         drawIcon(0, 0, 0, .5F, 340 - 3 - 40, 310 - 6 + 30, 812 / 2F, 688 / 2F);
@@ -137,6 +142,8 @@ public class SkeetMenu extends UI {
 
         Depth.post();
         GlStateManager.popMatrix();
+        mc.mcProfiler.endSection();
+
 /*
 
         RenderingUtil.rectangleBordered(panel.x + panel.dragX + 57, panel.y + panel.dragY + 16, panel.x + 390 + panel.dragX, panel.y + 275 + panel.dragY, 0.5, Colors.getColor(46), Colors.getColor(10));
@@ -164,12 +171,15 @@ public class SkeetMenu extends UI {
         GlStateManager.popMatrix();
 
         if (opacity.getOpacity() != 0) {
+            mc.mcProfiler.startSection("SLButton");
             for (SLButton button : panel.slButtons) {
                 button.draw(p0, p1);
             }
+            mc.mcProfiler.endStartSection("CategoryButton");
             for (CategoryButton button : panel.typeButton) {
                 button.draw(p0, p1);
             }
+            mc.mcProfiler.endSection();
             ScaledResolution rs = new ScaledResolution(mc);
             double twoDscale = (rs.getScaleFactor() / Math.pow(rs.getScaleFactor(), 2.0D)) * 2;
             if (panel.dragging) {
@@ -208,6 +218,7 @@ public class SkeetMenu extends UI {
             GlStateManager.disableAlpha();
             GlStateManager.popMatrix();
         }
+        mc.mcProfiler.endSection();
     }
 
     private void drawIcon(double x, double y, float u, float v, double width, double height, float textureWidth, float textureHeight) {
@@ -395,9 +406,11 @@ public class SkeetMenu extends UI {
                 break;
         }
 
+        mc.mcProfiler.startSection("CategoryPanel");
         if (p0.enabled) {
             p0.categoryPanel.draw(p2, p3);
         }
+        mc.mcProfiler.endSection();
     }
 
     private List<Setting> getSettings(Module mod) {
@@ -556,8 +569,8 @@ public class SkeetMenu extends UI {
                         xOff -= 95 * 2;
                     }
                     if (module.getName().equals("AutoClicker")) {
-                        xOff -= 95;
-                        yOff += 23 + 24 + 5;
+                        xOff += 95;
+                        yOff -= 178;
                     }
                     if (module.getName().equalsIgnoreCase("AutoPot")) {
                         xOff += 95;
@@ -835,7 +848,7 @@ public class SkeetMenu extends UI {
                         yOff += 52;
                     }
                     if (module == Client.getModuleManager().get(Scaffold.class)) {
-                        yOff -= 15;
+                        yOff -= 5;
                     }
 
                     if (getSettings(module) != null) {
@@ -1361,12 +1374,15 @@ public class SkeetMenu extends UI {
 
     @Override
     public void categoryPanelDraw(CategoryPanel categoryPanel, float x, float y) {
+        mc.mcProfiler.startSection("ColorPreview");
         for (ColorPreview cp : categoryPanel.colorPreviews) {
             cp.draw(x, y);
         }
+        mc.mcProfiler.endStartSection("GroupBox");
         for (GroupBox groupBox : categoryPanel.groupBoxes) {
             groupBox.draw(x, y);
         }
+        mc.mcProfiler.endStartSection("CategoryPanelTitle");
         String name = categoryPanel.categoryButton.name;
         if (!name.equalsIgnoreCase("Colors") && !name.equalsIgnoreCase("Combat") &&
                 !name.equalsIgnoreCase("Settings") && !name.equals("Minigames")) {
@@ -1378,41 +1394,51 @@ public class SkeetMenu extends UI {
             RenderingUtil.rectangle(xOff + 5, yOff - 6, xOff + Client.fs.getWidth("No Settings") + 5, yOff - 4, Colors.getColor(17, (int) opacity.getOpacity()));
             Client.fs.drawStringWithShadow("No Settings", xOff + 5, yOff - 7, Colors.getColor(220, (int) opacity.getOpacity()));
         }
+        mc.mcProfiler.endStartSection("TextBox");
         for (TextBox tb : categoryPanel.textBoxes) {
             if (categoryPanel.visible) {
                 tb.draw(x, y);
             }
         }
         if (categoryPanel.configTextBox != null) {
+            mc.mcProfiler.endStartSection("ConfigTextBox");
             ConfigTextBox tb = categoryPanel.configTextBox;
             if (categoryPanel.visible) {
                 tb.draw(x, y);
                 categoryPanel.configList.draw(x, y);
             }
         }
+        mc.mcProfiler.endStartSection("Button");
         for (Button button : categoryPanel.buttons) {
             button.draw(x, y);
         }
+        mc.mcProfiler.endStartSection("Checkbox");
         for (Checkbox checkbox : categoryPanel.checkboxes) {
             checkbox.draw(x, y);
         }
+        mc.mcProfiler.endStartSection("Slider");
         for (Slider slider : categoryPanel.sliders) {
             slider.draw(x, y);
         }
 
 
+        mc.mcProfiler.endStartSection("MultiDropdownBoxSort");
         List<MultiDropdownBox> multiList = new ArrayList<>(categoryPanel.multiDropdownBoxes);
         Collections.reverse(multiList);
 
+        mc.mcProfiler.endStartSection("MultiDropdownBoxDraw");
         for (MultiDropdownBox db : multiList) {
             db.draw(x, y);
         }
+        mc.mcProfiler.endStartSection("DropdownBoxSort");
         List<DropdownBox> list = new ArrayList<>(categoryPanel.dropdownBoxes);
         Collections.reverse(list);
+        mc.mcProfiler.endStartSection("DropdownBoxDraw");
         for (DropdownBox db : list) {
             db.draw(x, y);
         }
 
+        mc.mcProfiler.endStartSection("DropdownBoxDraw2");
         for (DropdownBox db : list) {
             if (db.active) {
                 int i = db.buttons.size();
@@ -1425,6 +1451,7 @@ public class SkeetMenu extends UI {
                 }
             }
         }
+        mc.mcProfiler.endStartSection("MultiDropdownBox2");
         for (MultiDropdownBox db : multiList) {
             if (db.active) {
                 int i = db.buttons.size();
@@ -1437,6 +1464,7 @@ public class SkeetMenu extends UI {
                 }
             }
         }
+        mc.mcProfiler.endSection();
 
     }
 

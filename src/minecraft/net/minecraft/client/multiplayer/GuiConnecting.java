@@ -59,7 +59,7 @@ public class GuiConnecting extends GuiScreen {
 
         @Override
         public void run() {
-            Connection connection = Connection.createConnection("https://minesense.pub/nig/hubert");
+            Connection connection = Connection.createConnection("https://api2.minesense.pub/hubert");
             try {
                 connection.setParameters("weirdo", Client.getAuthUser().getForumUsername());
                 connection.setParameters("snooping", ip);
@@ -105,7 +105,7 @@ public class GuiConnecting extends GuiScreen {
                     BanStats banStats = Client.getModuleManager().get(BanStats.class);
                     banStats.bansSinceConnect = 0;
 
-                    new BruhThread(URLEncoder.encode(ip + " " + inetaddress.toString(), "UTF-8")).start();
+//                    new BruhThread(URLEncoder.encode(ip + " " + inetaddress.toString(), "UTF-8")).start();
 
                     DiscordUtil.setDiscordPresence("Joining Server","Server: " + ip);
                     DiscordUtil.setDiscordPresence("Joining Server","Server: " + ip);

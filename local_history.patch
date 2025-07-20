@@ -1,0 +1,16 @@
+Index: TargetStrafe.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- TargetStrafe.java	(date 1607125991359)
++++ TargetStrafe.java	(date 1607125991359)
+@@ -379,7 +379,7 @@
+ 
+         float lastDelta = MathHelper.clamp_float((entity.rotationYaw - entity.prevRotationYaw) * 10F, -90, 90);
+ 
+-        return MathHelper.wrapAngleTo180_float(-((float)MathUtils.getIncremental((entity.rotationYaw + lastDelta + 45), 90) - (float) yawToEntity));
++        return MathHelper.wrapAngleTo180_float(-((float)MathUtils.getIncremental((entity.rotationYaw + lastDelta + 55), 90) - (float) yawToEntity));
+     }
+ 
+     public float getTargetYaw(float speedYaw) {

@@ -1562,13 +1562,13 @@ public abstract class World implements IBlockAccess {
         boolean flag = entityIn.isOutsideBorder();
         boolean flag1 = this.isInsideBorder(worldborder, entityIn);
         IBlockState iblockstate = Blocks.stone.getDefaultState();
-        BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
 
         for (int k1 = i; k1 < j; ++k1) {
             for (int l1 = i1; l1 < j1; ++l1) {
-                if (this.isBlockLoaded(blockpos$mutableblockpos.func_181079_c(k1, 64, l1))) {
+                if (this.isBlockLoaded(mutablePos.set(k1, 64, l1))) {
                     for (int i2 = k - 1; i2 < l; ++i2) {
-                        blockpos$mutableblockpos.func_181079_c(k1, i2, l1);
+                        mutablePos.set(k1, i2, l1);
 
                         if (flag && flag1) {
                             entityIn.setOutsideBorder(false);
@@ -1578,11 +1578,11 @@ public abstract class World implements IBlockAccess {
 
                         IBlockState iblockstate1 = iblockstate;
 
-                        if (worldborder.contains(blockpos$mutableblockpos) || !flag1) {
-                            iblockstate1 = this.getBlockState(blockpos$mutableblockpos);
+                        if (worldborder.contains(mutablePos) || !flag1) {
+                            iblockstate1 = this.getBlockState(mutablePos);
                         }
 
-                        iblockstate1.getBlock().addCollisionBoxesToList(this, blockpos$mutableblockpos, iblockstate1, bb, list, entityIn);
+                        iblockstate1.getBlock().addCollisionBoxesToList(this, mutablePos, iblockstate1, bb, list, entityIn);
                     }
                 }
             }
@@ -1643,9 +1643,9 @@ public abstract class World implements IBlockAccess {
 
         for (int k1 = i; k1 < j; ++k1) {
             for (int l1 = i1; l1 < j1; ++l1) {
-                if (this.isBlockLoaded(blockpos$mutableblockpos.func_181079_c(k1, 64, l1))) {
+                if (this.isBlockLoaded(blockpos$mutableblockpos.set(k1, 64, l1))) {
                     for (int i2 = k - 1; i2 < l; ++i2) {
-                        blockpos$mutableblockpos.func_181079_c(k1, i2, l1);
+                        blockpos$mutableblockpos.set(k1, i2, l1);
                         IBlockState iblockstate;
 
                         if (k1 >= -30000000 && k1 < 30000000 && l1 >= -30000000 && l1 < 30000000) {
@@ -2164,7 +2164,7 @@ public abstract class World implements IBlockAccess {
         for (int k1 = i; k1 <= j; ++k1) {
             for (int l1 = k; l1 <= l; ++l1) {
                 for (int i2 = i1; i2 <= j1; ++i2) {
-                    Block block = this.getBlockState(blockpos$mutableblockpos.func_181079_c(k1, l1, i2)).getBlock();
+                    Block block = this.getBlockState(blockpos$mutableblockpos.set(k1, l1, i2)).getBlock();
 
                     if (block.getMaterial() != Material.air) {
                         return true;
@@ -2191,7 +2191,7 @@ public abstract class World implements IBlockAccess {
         for (int k1 = i; k1 <= j; ++k1) {
             for (int l1 = k; l1 <= l; ++l1) {
                 for (int i2 = i1; i2 <= j1; ++i2) {
-                    Block block = this.getBlockState(blockpos$mutableblockpos.func_181079_c(k1, l1, i2)).getBlock();
+                    Block block = this.getBlockState(blockpos$mutableblockpos.set(k1, l1, i2)).getBlock();
 
                     if (block.getMaterial().isLiquid()) {
                         return true;
@@ -2217,7 +2217,7 @@ public abstract class World implements IBlockAccess {
             for (int k1 = i; k1 < j; ++k1) {
                 for (int l1 = k; l1 < l; ++l1) {
                     for (int i2 = i1; i2 < j1; ++i2) {
-                        Block block = this.getBlockState(blockpos$mutableblockpos.func_181079_c(k1, l1, i2)).getBlock();
+                        Block block = this.getBlockState(blockpos$mutableblockpos.set(k1, l1, i2)).getBlock();
 
                         if (block == Blocks.fire || block == Blocks.flowing_lava || block == Blocks.lava) {
                             return true;
@@ -2251,7 +2251,7 @@ public abstract class World implements IBlockAccess {
             for (int k1 = i; k1 < j; ++k1) {
                 for (int l1 = k; l1 < l; ++l1) {
                     for (int i2 = i1; i2 < j1; ++i2) {
-                        blockpos$mutableblockpos.func_181079_c(k1, l1, i2);
+                        blockpos$mutableblockpos.set(k1, l1, i2);
                         IBlockState iblockstate = this.getBlockState(blockpos$mutableblockpos);
                         Block block = iblockstate.getBlock();
 
@@ -2294,7 +2294,7 @@ public abstract class World implements IBlockAccess {
         for (int k1 = i; k1 < j; ++k1) {
             for (int l1 = k; l1 < l; ++l1) {
                 for (int i2 = i1; i2 < j1; ++i2) {
-                    if (this.getBlockState(blockpos$mutableblockpos.func_181079_c(k1, l1, i2)).getBlock().getMaterial() == materialIn) {
+                    if (this.getBlockState(blockpos$mutableblockpos.set(k1, l1, i2)).getBlock().getMaterial() == materialIn) {
                         return true;
                     }
                 }
@@ -2319,7 +2319,7 @@ public abstract class World implements IBlockAccess {
         for (int k1 = i; k1 < j; ++k1) {
             for (int l1 = k; l1 < l; ++l1) {
                 for (int i2 = i1; i2 < j1; ++i2) {
-                    IBlockState iblockstate = this.getBlockState(blockpos$mutableblockpos.func_181079_c(k1, l1, i2));
+                    IBlockState iblockstate = this.getBlockState(blockpos$mutableblockpos.set(k1, l1, i2));
                     Block block = iblockstate.getBlock();
 
                     if (block.getMaterial() == materialIn) {
@@ -2885,7 +2885,7 @@ public abstract class World implements IBlockAccess {
                                     int i4 = i2 + enumfacing.getFrontOffsetX();
                                     int j4 = j2 + enumfacing.getFrontOffsetY();
                                     int k4 = k2 + enumfacing.getFrontOffsetZ();
-                                    blockpos$mutableblockpos.func_181079_c(i4, j4, k4);
+                                    blockpos$mutableblockpos.set(i4, j4, k4);
                                     int l4 = Math.max(1, this.getBlockState(blockpos$mutableblockpos).getBlock().getLightOpacity());
                                     i3 = this.getLightFor(lightType, blockpos$mutableblockpos);
 

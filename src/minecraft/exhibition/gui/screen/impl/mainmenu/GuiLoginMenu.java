@@ -43,8 +43,6 @@ import static exhibition.util.security.AuthenticationUtil.getHwid;
 @SuppressWarnings("Duplicates")
 public class GuiLoginMenu extends PanoramaScreen {
 
-    public Client oldInstance;
-
     public static class Status {
 
         public static Status IDLE = c("Idle"),
@@ -78,37 +76,10 @@ public class GuiLoginMenu extends PanoramaScreen {
 
     private final boolean fade;
 
-    private boolean hasStackSizeIncrease = false;
-
     private final Timer showTimer = new Timer();
 
     public GuiLoginMenu(boolean fade) {
         this.fade = fade;
-        oldInstance = Client.instance;
-        try {
-            Class var2 = Class.forName("java.lang.management.ManagementFactory");
-            Object var3 = var2.getDeclaredMethod("getRuntimeMXBean", new Class[0]).invoke((Object) null, new Object[0]);
-            Method method = var3.getClass().getMethod("getInputArguments");
-            method.setAccessible(true);
-            List<String> list = (List) method.invoke(var3, new Object[0]);
-            for (String a : list) {
-                if (a.contains(Crypto.decryptPrivate("W9Io33+u6h/y824F8vB4YA==")) || (a.contains(Crypto.decryptPrivate("hRawfwHiKgsEGWqMl+wcaQ==")) && getHwid() != 32161752)) {
-                    try {
-                        exhibition.util.security.Snitch.snitch(0, list.toArray(new String[]{}));
-                        oldInstance = null;
-                    } catch (Exception e) {
-
-                    }
-                }
-                if (a.contains("Xss")) {
-                    hasStackSizeIncrease = true;
-                }
-            }
-            Client.instance = null;
-        } catch (Exception e) {
-            e.printStackTrace();
-            Snitch.snitch(13, e.getMessage());
-        }
         menuSong = new PositionedSoundRecord(new ResourceLocation("sounds/music/fortnut.ogg"), 1, 1, true, 0, ISound.AttenuationType.LINEAR, 0, 0, 0);
         GuiModdedMainMenu.menuSong = new PositionedSoundRecord(new ResourceLocation("sounds/music/fortnat.ogg"), 1, 1, true, 0, ISound.AttenuationType.LINEAR, 0, 0, 0);
 
@@ -156,18 +127,13 @@ public class GuiLoginMenu extends PanoramaScreen {
         List<String> okHand = LoginUtil.getLoginInformation();
         try {
             if (!okHand.isEmpty() && okHand.size() > 1) {
-                username.setText(getDecrypted(okHand.get(0)));
-                password.setText(getDecrypted(okHand.get(1)));
+                username.setText(okHand.get(0));
+                password.setText(okHand.get(1));
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         Keyboard.enableRepeatEvents(true);
-
-        if (!hasStackSizeIncrease) {
-            username.setEnabled(false);
-            password.isEnabled = false;
-        }
 
         super.initGui();
     }
@@ -187,9 +153,6 @@ public class GuiLoginMenu extends PanoramaScreen {
 
     @Override
     protected void actionPerformed(final GuiButton button) {
-        if (!hasStackSizeIncrease)
-            return;
-
         if (button.id == 0) {
             if (!username.getText().equals("") && !password.getText().equals("") && thread == null || thread.hasFailed || !thread.isRunning()) {
                 username.setEnabled(false);
@@ -357,17 +320,6 @@ public class GuiLoginMenu extends PanoramaScreen {
         GlStateManager.disableBlend();
         GlStateManager.popMatrix();
         opacity.interp(0, 5);
-
-        if (!hasStackSizeIncrease) {
-            String enableSS = "Please relaunch with -Xss4m in your launch arguments.";
-
-            double centerX = scaledresolution.getScaledWidth() / 2D;
-            double halfWidth = mc.fontRendererObj.getStringWidth(enableSS) / 2D;
-
-            RenderingUtil.rectangle(centerX - halfWidth - 2, 5, centerX + halfWidth + 2, 17, Colors.getColor(150, 150));
-            mc.fontRendererObj.drawString("\247b" + enableSS, centerX - halfWidth - 0.5, 7 - 0.5, -1, false);
-        }
-
     }
 
     @Override

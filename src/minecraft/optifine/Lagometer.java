@@ -210,7 +210,7 @@ public class Lagometer
         }
     }
 
-    private static long renderTime(int p_renderTime_0_, long p_renderTime_1_, int p_renderTime_3_, int p_renderTime_4_, int p_renderTime_5_, float p_renderTime_6_, WorldRenderer p_renderTime_7_)
+    private static long renderTime(int p_renderTime_0_, long p_renderTime_1_, int red, int green, int blue, float p_renderTime_6_, WorldRenderer p_renderTime_7_)
     {
         long i = p_renderTime_1_ / 200000L;
 
@@ -220,8 +220,8 @@ public class Lagometer
         }
         else
         {
-            p_renderTime_7_.pos((double)((float)p_renderTime_0_ + 0.5F), (double)(p_renderTime_6_ - (float)i + 0.5F), 0.0D).color(p_renderTime_3_, p_renderTime_4_, p_renderTime_5_, 255).endVertex();
-            p_renderTime_7_.pos((double)((float)p_renderTime_0_ + 0.5F), (double)(p_renderTime_6_ + 0.5F), 0.0D).color(p_renderTime_3_, p_renderTime_4_, p_renderTime_5_, 255).endVertex();
+            p_renderTime_7_.pos((double)((float)p_renderTime_0_ + 0.5F), (double)(p_renderTime_6_ - (float)i + 0.5F), 0.0D).color(red, green, blue, 255).endVertex();
+            p_renderTime_7_.pos((double)((float)p_renderTime_0_ + 0.5F), (double)(p_renderTime_6_ + 0.5F), 0.0D).color(red, green, blue, 255).endVertex();
             return i;
         }
     }

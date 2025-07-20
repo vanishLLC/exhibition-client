@@ -366,7 +366,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable
 
             if (d0 * d0 + d2 * d2 > 0.001D)
             {
-                this.rotationYaw = (float)(MathHelper.func_181159_b(d2, d0) * 180.0D / Math.PI);
+                this.rotationYaw = (float)(MathHelper.atan2(d2, d0) * 180.0D / Math.PI);
 
                 if (this.isInReverse)
                 {
