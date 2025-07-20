@@ -62,4 +62,32 @@ public class UselessBypassClass {
 //        return Double.NaN;
 //    }
 
+//    package org.sun.verification;
+//
+//    public class Unknown {
+//        public static void unknown() {
+//
+//        }
+//
+//        public static double c() {
+//            return 0.0672526895342345;
+//        }
+//
+//        public static double d(boolean randomShit) {
+//            return 0.06000000009827346;
+//        }
+//
+//        public static double d(int integer) {
+//            return (double)integer + 0.10000000000067123;
+//        }
+//
+//        public static double e(int integer) {
+//            return (double)integer + 0.40792374890273947;
+//        }
+//
+//        public static double e(boolean randomShit) {
+//            return randomShit ? 0.0 : 0.407058947395735;
+//        }
+//    }
+
 }
