@@ -1,5 +1,7 @@
 package net.minecraft.client.renderer;
 
+import io.github.pixee.security.HostValidator;
+import io.github.pixee.security.Urls;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -134,7 +136,7 @@ public class ThreadDownloadImageData extends SimpleTexture
                 {
                     try
                     {
-                        httpurlconnection = (HttpURLConnection)(new URL(ThreadDownloadImageData.this.imageUrl)).openConnection(Minecraft.getMinecraft().getProxy());
+                        httpurlconnection = (HttpURLConnection)(Urls.create(ThreadDownloadImageData.this.imageUrl, Urls.HTTP_PROTOCOLS, HostValidator.DENY_COMMON_INFRASTRUCTURE_TARGETS)).openConnection(Minecraft.getMinecraft().getProxy());
                         httpurlconnection.setDoInput(true);
                         httpurlconnection.setDoOutput(false);
                         httpurlconnection.connect();

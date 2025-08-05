@@ -6,6 +6,8 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import io.github.pixee.security.HostValidator;
+import io.github.pixee.security.Urls;
 import io.netty.util.internal.ThreadLocalRandom;
 import java.io.IOException;
 import java.io.InputStream;
@@ -484,7 +486,7 @@ public class SoundManager
 
         try
         {
-            return new URL((URL)null, s, urlstreamhandler);
+            return Urls.create((URL)null, s, urlstreamhandler, Urls.HTTP_PROTOCOLS, HostValidator.DENY_COMMON_INFRASTRUCTURE_TARGETS);
         }
         catch (MalformedURLException var4)
         {

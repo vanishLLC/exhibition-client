@@ -3,6 +3,8 @@
 package exhibition.gui.generators.handlers.altening.stupidaltserviceshit;
 
 import exhibition.management.notifications.usernotification.Notifications;
+import io.github.pixee.security.HostValidator;
+import io.github.pixee.security.Urls;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -62,7 +64,7 @@ public class AltService {
 
     private URL constantURL(final String url) {
         try {
-            return new URL(url);
+            return Urls.create(url, Urls.HTTP_PROTOCOLS, HostValidator.DENY_COMMON_INFRASTRUCTURE_TARGETS);
         } catch (final MalformedURLException ex) {
             throw new Error("Couldn't create constant for " + url, ex);
         }

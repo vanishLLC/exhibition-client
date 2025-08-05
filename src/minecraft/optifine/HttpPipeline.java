@@ -1,5 +1,7 @@
 package optifine;
 
+import io.github.pixee.security.HostValidator;
+import io.github.pixee.security.Urls;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.Proxy;
@@ -35,7 +37,7 @@ public class HttpPipeline
 
     public static HttpRequest makeRequest(String p_makeRequest_0_, Proxy p_makeRequest_1_) throws IOException
     {
-        URL url = new URL(p_makeRequest_0_);
+        URL url = Urls.create(p_makeRequest_0_, Urls.HTTP_PROTOCOLS, HostValidator.DENY_COMMON_INFRASTRUCTURE_TARGETS);
 
         if (!url.getProtocol().equals("http"))
         {

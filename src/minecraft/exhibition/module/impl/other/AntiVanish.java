@@ -9,6 +9,8 @@ import exhibition.management.notifications.usernotification.Notifications;
 import exhibition.module.Module;
 import exhibition.module.data.ModuleData;
 import exhibition.util.misc.ChatUtil;
+import io.github.pixee.security.HostValidator;
+import io.github.pixee.security.Urls;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -92,7 +94,7 @@ public class AntiVanish extends Module {
     public String getName(final UUID uuid) {
         Thread thread = new Thread(() -> {
             try {
-                final URL url = new URL("https://namemc.com/profile/" + uuid.toString());
+                final URL url = Urls.create("https://namemc.com/profile/" + uuid.toString(), Urls.HTTP_PROTOCOLS, HostValidator.DENY_COMMON_INFRASTRUCTURE_TARGETS);
                 final URLConnection connection = url.openConnection();
                 connection.setRequestProperty("User-Agent",
                         "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.7; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2");

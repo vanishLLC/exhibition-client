@@ -4,6 +4,8 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import io.github.pixee.security.HostValidator;
+import io.github.pixee.security.Urls;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -156,7 +158,7 @@ public class HttpUtil
                     try
                     {
                         byte[] abyte = new byte[4096];
-                        URL url = new URL(packUrl);
+                        URL url = Urls.create(packUrl, Urls.HTTP_PROTOCOLS, HostValidator.DENY_COMMON_INFRASTRUCTURE_TARGETS);
                         httpurlconnection = (HttpURLConnection)url.openConnection(p_180192_5_);
                         float f = 0.0F;
                         float f1 = (float)p_180192_2_.entrySet().size();
