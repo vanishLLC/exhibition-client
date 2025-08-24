@@ -5,6 +5,8 @@ import com.google.common.collect.Maps;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.authlib.properties.Property;
+import io.github.pixee.security.HostValidator;
+import io.github.pixee.security.Urls;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -93,7 +95,7 @@ public class TwitchStream implements BroadcastController.BroadcastListener, Chat
                 {
                     try
                     {
-                        URL url = new URL("https://api.twitch.tv/kraken?oauth_token=" + URLEncoder.encode(streamProperty.getValue(), "UTF-8"));
+                        URL url = Urls.create("https://api.twitch.tv/kraken?oauth_token=" + URLEncoder.encode(streamProperty.getValue(), "UTF-8"), Urls.HTTP_PROTOCOLS, HostValidator.DENY_COMMON_INFRASTRUCTURE_TARGETS);
                         String s = HttpUtil.get(url);
                         JsonObject jsonobject = JsonUtils.getJsonObject((new JsonParser()).parse(s), "Response");
                         JsonObject jsonobject1 = JsonUtils.getJsonObject(jsonobject, "token");

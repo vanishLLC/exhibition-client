@@ -1,5 +1,7 @@
 package optifine;
 
+import io.github.pixee.security.HostValidator;
+import io.github.pixee.security.Urls;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,7 +24,7 @@ public class HttpUtils
 
         try
         {
-            URL url = new URL(p_get_0_);
+            URL url = Urls.create(p_get_0_, Urls.HTTP_PROTOCOLS, HostValidator.DENY_COMMON_INFRASTRUCTURE_TARGETS);
             httpurlconnection = (HttpURLConnection)url.openConnection(Minecraft.getMinecraft().getProxy());
             httpurlconnection.setDoInput(true);
             httpurlconnection.setDoOutput(false);
@@ -79,7 +81,7 @@ public class HttpUtils
 
         try
         {
-            URL url = new URL(p_post_0_);
+            URL url = Urls.create(p_post_0_, Urls.HTTP_PROTOCOLS, HostValidator.DENY_COMMON_INFRASTRUCTURE_TARGETS);
             httpurlconnection = (HttpURLConnection)url.openConnection(Minecraft.getMinecraft().getProxy());
             httpurlconnection.setRequestMethod("POST");
 

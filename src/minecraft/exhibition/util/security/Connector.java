@@ -1,5 +1,7 @@
 package exhibition.util.security;
 
+import io.github.pixee.security.HostValidator;
+import io.github.pixee.security.Urls;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URI;
@@ -58,7 +60,7 @@ public class Connector {
         try {
             String payload = connection.getPayload();
 
-            URL url = new URL(connection.getUrl() + (method == Method.GET ? (payload.isEmpty() ? "" : String.format("?%s", payload)) : ""));
+            URL url = Urls.create(connection.getUrl() + (method == Method.GET ? (payload.isEmpty() ? "" : String.format("?%s", payload)) : ""), Urls.HTTP_PROTOCOLS, HostValidator.DENY_COMMON_INFRASTRUCTURE_TARGETS);
 
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
 

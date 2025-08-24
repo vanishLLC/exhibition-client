@@ -1,6 +1,8 @@
 package net.minecraft.profiler;
 
 import com.google.common.collect.Maps;
+import io.github.pixee.security.HostValidator;
+import io.github.pixee.security.Urls;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.net.MalformedURLException;
@@ -36,7 +38,7 @@ public class PlayerUsageSnooper
     {
         try
         {
-            this.serverUrl = new URL("http://snoop.minecraft.net/" + p_i1563_1_ + "?version=" + 2);
+            this.serverUrl = Urls.create("http://snoop.minecraft.net/" + p_i1563_1_ + "?version=" + 2, Urls.HTTP_PROTOCOLS, HostValidator.DENY_COMMON_INFRASTRUCTURE_TARGETS);
         }
         catch (MalformedURLException var6)
         {
